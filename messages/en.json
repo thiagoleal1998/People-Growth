@@ -1,0 +1,172 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "resume": "Resume",
+    "portfolio": "Portfolio",
+    "services": "Services",
+    "newsletter": "Mea Sententia",
+    "courses": "Courses",
+    "aiLab": "AI Lab",
+    "resources": "Resources",
+    "media": "In the Media",
+    "tools": "Tools",
+    "testimonials": "Testimonials",
+    "contact": "Contact",
+    "admin": "Admin"
+  },
+  "home": {
+    "heroTagline": "People & Growth",
+    "heroSubtitle": "Transforming businesses through Marketing, Growth, Data and Artificial Intelligence.",
+    "ctaPrimary": "Explore my journey",
+    "ctaSecondary": "Schedule a call",
+    "statsYears": "Years of experience",
+    "statsCerts": "Certifications",
+    "statsCompanies": "Companies served",
+    "statsArticles": "Published articles",
+    "statsStudents": "Trained students",
+    "latestArticles": "Latest articles",
+    "viewAll": "View all",
+    "servicesTitle": "How I can help",
+    "servicesSubtitle": "Strategy and execution for businesses that want to grow intelligently.",
+    "testimonialsTitle": "What people say about my work",
+    "contactTitle": "Let's talk?",
+    "contactSubtitle": "Schedule a free 30-minute session."
+  },
+  "about": {
+    "title": "About Thiago Leal",
+    "subtitle": "Marketing, Growth and Artificial Intelligence Strategist",
+    "philosophy": "My Philosophy",
+    "timelineTitle": "Journey",
+    "sustainableGrowth": "Sustainable growth",
+    "dataDecisions": "Data-driven decision making",
+    "peopleDifferential": "People as a competitive differentiator",
+    "strategicAI": "Strategic use of AI"
+  },
+  "resume": {
+    "title": "Executive Resume",
+    "education": "Education",
+    "certifications": "Certifications",
+    "experience": "Professional Experience",
+    "awards": "Awards",
+    "publications": "Publications",
+    "events": "Event Participation",
+    "courses": "Courses Taught",
+    "download": "Download PDF Resume"
+  },
+  "portfolio": {
+    "title": "Portfolio",
+    "subtitle": "Real cases, measurable results.",
+    "all": "All",
+    "marketing": "Marketing",
+    "growth": "Growth",
+    "data": "Data",
+    "ai": "AI",
+    "consulting": "Consulting",
+    "challenge": "Challenge",
+    "solution": "Solution",
+    "tools": "Tools used",
+    "results": "Results"
+  },
+  "services": {
+    "title": "Services",
+    "subtitle": "Strategic solutions for businesses that want to grow.",
+    "benefits": "Benefits",
+    "methodology": "Methodology",
+    "expectedResults": "Expected results",
+    "cta": "Request a proposal",
+    "strategicConsulting": "Strategic Consulting",
+    "digitalMarketing": "Digital Marketing",
+    "growth": "Growth",
+    "bi": "Business Intelligence",
+    "ai": "Artificial Intelligence",
+    "corporateTraining": "Corporate Training",
+    "mentoring": "Mentoring"
+  },
+  "newsletter": {
+    "title": "Mea Sententia",
+    "subtitle": "Perspectives on Marketing, Growth, Leadership and Artificial Intelligence.",
+    "subscribe": "Subscribe to newsletter",
+    "subscribePlaceholder": "Your best email",
+    "subscribeButton": "Subscribe",
+    "subscribeSuccess": "Subscription confirmed! Welcome.",
+    "readMore": "Read article",
+    "categories": "Categories",
+    "tags": "Tags",
+    "search": "Search articles...",
+    "noResults": "No articles found."
+  },
+  "courses": {
+    "title": "Courses",
+    "subtitle": "Practical knowledge for professionals and companies.",
+    "comingSoon": "Coming soon",
+    "notifyMe": "Notify me when it launches",
+    "notifyEmail": "Your email",
+    "notifyButton": "Notify me"
+  },
+  "aiLab": {
+    "title": "AI Laboratory",
+    "subtitle": "Exploring the future with Artificial Intelligence applied to business.",
+    "agents": "GPT Agents",
+    "automations": "Automations",
+    "useCases": "Use cases",
+    "neuroBotics": "Neuro Botics"
+  },
+  "resources": {
+    "title": "Resources",
+    "subtitle": "Free materials to accelerate your results.",
+    "ebooks": "E-books",
+    "templates": "Templates",
+    "guides": "Guides",
+    "checklists": "Checklists",
+    "prompts": "AI Prompts",
+    "download": "Download free",
+    "fillForm": "Fill in to receive",
+    "downloadSuccess": "Sent! Check your email."
+  },
+  "media": {
+    "title": "In the Media",
+    "subtitle": "Interviews, talks, podcasts and events.",
+    "interviews": "Interviews",
+    "events": "Events",
+    "podcasts": "Podcasts",
+    "articles": "External articles"
+  },
+  "tools": {
+    "title": "Tools I Recommend",
+    "subtitle": "Productivity, marketing and AI stack I use daily."
+  },
+  "testimonials": {
+    "title": "Testimonials",
+    "subtitle": "What clients, partners and colleagues say."
+  },
+  "contact": {
+    "title": "Let's talk?",
+    "subtitle": "Get in touch for consulting, training or partnerships.",
+    "name": "Full name",
+    "email": "Email",
+    "phone": "WhatsApp",
+    "service": "Subject / Service",
+    "message": "Message",
+    "send": "Send message",
+    "success": "Message sent! I'll get back to you soon.",
+    "scheduleTitle": "Or schedule directly",
+    "scheduleSubtitle": "Free 30-minute session."
+  },
+  "footer": {
+    "tagline": "Strong businesses are born from strong people.",
+    "rights": "All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Use"
+  },
+  "common": {
+    "loading": "Loading...",
+    "error": "Something went wrong. Please try again.",
+    "back": "Back",
+    "learnMore": "Learn more",
+    "seeAll": "See all",
+    "by": "by",
+    "in": "in",
+    "minutes": "min read"
+  }
+}

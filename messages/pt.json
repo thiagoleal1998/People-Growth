@@ -1,0 +1,172 @@
+{
+  "nav": {
+    "home": "Início",
+    "about": "Sobre",
+    "resume": "Currículo",
+    "portfolio": "Portfólio",
+    "services": "Serviços",
+    "newsletter": "Mea Sententia",
+    "courses": "Cursos",
+    "aiLab": "Laboratório IA",
+    "resources": "Recursos",
+    "media": "Na Mídia",
+    "tools": "Ferramentas",
+    "testimonials": "Depoimentos",
+    "contact": "Contato",
+    "admin": "Admin"
+  },
+  "home": {
+    "heroTagline": "People & Growth",
+    "heroSubtitle": "Transformando negócios através de Marketing, Growth, Dados e Inteligência Artificial.",
+    "ctaPrimary": "Conheça minha trajetória",
+    "ctaSecondary": "Agende uma conversa",
+    "statsYears": "Anos de experiência",
+    "statsCerts": "Certificações",
+    "statsCompanies": "Empresas atendidas",
+    "statsArticles": "Artigos publicados",
+    "statsStudents": "Alunos treinados",
+    "latestArticles": "Últimos artigos",
+    "viewAll": "Ver todos",
+    "servicesTitle": "Como posso ajudar",
+    "servicesSubtitle": "Estratégia e execução para negócios que querem crescer com inteligência.",
+    "testimonialsTitle": "O que dizem sobre o meu trabalho",
+    "contactTitle": "Vamos conversar?",
+    "contactSubtitle": "Agende uma sessão de 30 minutos sem compromisso."
+  },
+  "about": {
+    "title": "Sobre Thiago Leal",
+    "subtitle": "Estrategista em Marketing, Growth e Inteligência Artificial",
+    "philosophy": "Minha Filosofia",
+    "timelineTitle": "Trajetória",
+    "sustainableGrowth": "Crescimento sustentável",
+    "dataDecisions": "Tomada de decisão baseada em dados",
+    "peopleDifferential": "Pessoas como diferencial competitivo",
+    "strategicAI": "Uso estratégico da IA"
+  },
+  "resume": {
+    "title": "Currículo Executivo",
+    "education": "Formação",
+    "certifications": "Certificações",
+    "experience": "Experiência Profissional",
+    "awards": "Prêmios",
+    "publications": "Publicações",
+    "events": "Participações em Eventos",
+    "courses": "Cursos Ministrados",
+    "download": "Baixar currículo em PDF"
+  },
+  "portfolio": {
+    "title": "Portfólio",
+    "subtitle": "Cases reais, resultados mensuráveis.",
+    "all": "Todos",
+    "marketing": "Marketing",
+    "growth": "Growth",
+    "data": "Dados",
+    "ai": "IA",
+    "consulting": "Consultoria",
+    "challenge": "Desafio",
+    "solution": "Solução",
+    "tools": "Ferramentas utilizadas",
+    "results": "Resultados"
+  },
+  "services": {
+    "title": "Serviços",
+    "subtitle": "Soluções estratégicas para negócios que querem crescer.",
+    "benefits": "Benefícios",
+    "methodology": "Metodologia",
+    "expectedResults": "Resultados esperados",
+    "cta": "Solicitar proposta",
+    "strategicConsulting": "Consultoria Estratégica",
+    "digitalMarketing": "Marketing Digital",
+    "growth": "Growth",
+    "bi": "Business Intelligence",
+    "ai": "Inteligência Artificial",
+    "corporateTraining": "Treinamentos Corporativos",
+    "mentoring": "Mentorias"
+  },
+  "newsletter": {
+    "title": "Mea Sententia",
+    "subtitle": "Perspectivas sobre Marketing, Growth, Liderança e Inteligência Artificial.",
+    "subscribe": "Assinar newsletter",
+    "subscribePlaceholder": "Seu melhor e-mail",
+    "subscribeButton": "Assinar",
+    "subscribeSuccess": "Inscrição confirmada! Bem-vindo(a).",
+    "readMore": "Ler artigo",
+    "categories": "Categorias",
+    "tags": "Tags",
+    "search": "Buscar artigos...",
+    "noResults": "Nenhum artigo encontrado."
+  },
+  "courses": {
+    "title": "Cursos",
+    "subtitle": "Conhecimento prático para profissionais e empresas.",
+    "comingSoon": "Em breve",
+    "notifyMe": "Me avise quando lançar",
+    "notifyEmail": "Seu e-mail",
+    "notifyButton": "Quero ser avisado"
+  },
+  "aiLab": {
+    "title": "Laboratório de IA",
+    "subtitle": "Explorando o futuro com Inteligência Artificial aplicada a negócios.",
+    "agents": "Agentes GPT",
+    "automations": "Automações",
+    "useCases": "Casos de uso",
+    "neuroBotics": "Neuro Botics"
+  },
+  "resources": {
+    "title": "Recursos",
+    "subtitle": "Materiais gratuitos para acelerar seus resultados.",
+    "ebooks": "E-books",
+    "templates": "Templates",
+    "guides": "Guias",
+    "checklists": "Checklists",
+    "prompts": "Prompts de IA",
+    "download": "Baixar grátis",
+    "fillForm": "Preencha para receber",
+    "downloadSuccess": "Enviado! Confira seu e-mail."
+  },
+  "media": {
+    "title": "Na Mídia",
+    "subtitle": "Entrevistas, palestras, podcasts e eventos.",
+    "interviews": "Entrevistas",
+    "events": "Eventos",
+    "podcasts": "Podcasts",
+    "articles": "Artigos externos"
+  },
+  "tools": {
+    "title": "Ferramentas que Recomendo",
+    "subtitle": "Stack de produtividade, marketing e IA que uso no dia a dia."
+  },
+  "testimonials": {
+    "title": "Depoimentos",
+    "subtitle": "O que clientes, parceiros e colegas dizem."
+  },
+  "contact": {
+    "title": "Vamos conversar?",
+    "subtitle": "Entre em contato para consultorias, treinamentos ou parcerias.",
+    "name": "Nome completo",
+    "email": "E-mail",
+    "phone": "WhatsApp",
+    "service": "Assunto / Serviço",
+    "message": "Mensagem",
+    "send": "Enviar mensagem",
+    "success": "Mensagem enviada! Em breve entro em contato.",
+    "scheduleTitle": "Ou agende diretamente",
+    "scheduleSubtitle": "Sessão gratuita de 30 minutos."
+  },
+  "footer": {
+    "tagline": "Negócios fortes nascem de pessoas fortes.",
+    "rights": "Todos os direitos reservados.",
+    "privacy": "Política de Privacidade",
+    "terms": "Termos de Uso"
+  },
+  "common": {
+    "loading": "Carregando...",
+    "error": "Algo deu errado. Tente novamente.",
+    "back": "Voltar",
+    "learnMore": "Saiba mais",
+    "seeAll": "Ver todos",
+    "by": "por",
+    "in": "em",
+    "minutes": "min de leitura"
+  }
+}
