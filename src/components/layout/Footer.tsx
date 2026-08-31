@@ -1,5 +1,6 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import NextLink from "next/link";
 import { Linkedin, Mail, Instagram } from "lucide-react";
 
 export function Footer() {
@@ -155,6 +156,9 @@ export function Footer() {
             <Link href="/" style={{ fontSize: "0.8125rem" }}>
               {t("terms")}
             </Link>
+            <NextLink href="/admin" style={{ fontSize: "0.8125rem", color: "inherit" }}>
+              Admin
+            </NextLink>
           </div>
         </div>
       </div>
