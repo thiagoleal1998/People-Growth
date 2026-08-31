@@ -433,7 +433,7 @@ export default function ConteudoPage() {
               <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>✨</div>
               <div style={{ fontWeight: 700, fontSize: "1.125rem", color: "#0d1b2a", marginBottom: "0.5rem" }}>Pronto para criar</div>
               <div style={{ color: "#64748b", fontSize: "0.9rem", maxWidth: "320px", margin: "0 auto" }}>
-                Selecione as plataformas, descreva o tema e clique em "Gerar com IA" para criar conteúdo otimizado para cada rede.
+                Selecione as plataformas, descreva o tema e clique em &quot;Gerar com IA&quot; para criar conteúdo otimizado para cada rede.
               </div>
             </div>
           )}

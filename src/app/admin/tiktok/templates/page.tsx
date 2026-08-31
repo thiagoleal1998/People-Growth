@@ -158,7 +158,7 @@ export default function TemplatesPage() {
 
         {templates.length === 0 && (
           <div style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid rgba(0,0,0,0.06)", padding: "3rem", textAlign: "center", color: "#94a3b8" }}>
-            Nenhum template criado ainda. Clique em "Novo template" para começar.
+            Nenhum template criado ainda. Clique em &quot;Novo template&quot; para começar.
           </div>
         )}
       </div>
