@@ -156,6 +156,9 @@ export function Footer() {
             <Link href="/" style={{ fontSize: "0.8125rem" }}>
               {t("terms")}
             </Link>
+            <Link href="/cookies" style={{ fontSize: "0.8125rem" }}>
+              Cookies
+            </Link>
             <NextLink href="/admin" style={{ fontSize: "0.8125rem", color: "inherit" }}>
               Admin
             </NextLink>

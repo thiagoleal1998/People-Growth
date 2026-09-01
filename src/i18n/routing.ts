@@ -27,6 +27,7 @@ export const routing = defineRouting({
     "/ferramentas": { pt: "/ferramentas", en: "/tools" },
     "/depoimentos": { pt: "/depoimentos", en: "/testimonials" },
     "/contato": { pt: "/contato", en: "/contact" },
+    "/cookies": { pt: "/cookies", en: "/cookies" },
   },
 });
 
