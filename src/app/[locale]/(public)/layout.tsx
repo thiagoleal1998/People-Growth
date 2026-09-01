@@ -21,7 +21,7 @@ export default async function PublicLayout({
         <CategoryNav />
         {children}
       </main>
-      <Footer />
+      <Footer logoUrl={logoUrl} />
       <CookieBanner />
     </>
   );

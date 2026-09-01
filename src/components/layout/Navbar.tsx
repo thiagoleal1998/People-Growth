@@ -35,22 +35,23 @@ export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
       <nav className="container-xl" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "4rem" }}>
         {/* Logo */}
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-          {logoUrl && (
+          {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="" style={{ height: "2rem", width: "auto", borderRadius: "0.25rem" }} />
+            <img src={logoUrl} alt="People & Growth" style={{ height: "3rem", width: "auto" }} />
+          ) : (
+            <span
+              style={{
+                fontWeight: 800,
+                fontSize: "1.25rem",
+                background: "linear-gradient(135deg, #4361EE, #06D6A0)",
+                WebkitBackgroundClip: "text",
+                WebkitTextFillColor: "transparent",
+                letterSpacing: "-0.02em",
+              }}
+            >
+              People &amp; Growth
+            </span>
           )}
-          <span
-            style={{
-              fontWeight: 800,
-              fontSize: "1.25rem",
-              background: "linear-gradient(135deg, #4361EE, #06D6A0)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              letterSpacing: "-0.02em",
-            }}
-          >
-            People &amp; Growth
-          </span>
         </Link>
 
         {/* Desktop nav */}

@@ -3,7 +3,7 @@ import { Link } from "@/i18n/navigation";
 import NextLink from "next/link";
 import { Linkedin, Mail, Instagram } from "lucide-react";
 
-export function Footer() {
+export function Footer({ logoUrl }: { logoUrl?: string | null }) {
   const t = useTranslations("footer");
   const nav = useTranslations("nav");
   const year = new Date().getFullYear();
@@ -29,18 +29,23 @@ export function Footer() {
         >
           {/* Brand */}
           <div>
-            <div
-              style={{
-                fontWeight: 800,
-                fontSize: "1.25rem",
-                background: "linear-gradient(135deg, #4361EE, #06D6A0)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                marginBottom: "0.75rem",
-              }}
-            >
-              People &amp; Growth
-            </div>
+            {logoUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img src={logoUrl} alt="People & Growth" style={{ height: "3rem", width: "auto", marginBottom: "0.75rem" }} />
+            ) : (
+              <div
+                style={{
+                  fontWeight: 800,
+                  fontSize: "1.25rem",
+                  background: "linear-gradient(135deg, #4361EE, #06D6A0)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  marginBottom: "0.75rem",
+                }}
+              >
+                People &amp; Growth
+              </div>
+            )}
             <p style={{ fontSize: "0.875rem", lineHeight: 1.6 }}>{t("tagline")}</p>
             <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.25rem" }}>
               <a
