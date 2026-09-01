@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, Field, Input, SubmitButton } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
+import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { updateSiteConfig } from "./actions";
 
 const fields: { key: string; label: string; placeholder?: string }[] = [
@@ -47,11 +48,7 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
             />
           )}
           <input type="file" name="logo_file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" />
-          {logoError && (
-            <div style={{ color: "#dc2626", fontSize: "0.8125rem", marginTop: "0.5rem" }}>
-              Não foi possível enviar a imagem: {logoError}
-            </div>
-          )}
+          <ErrorBanner message={logoError} />
         </Field>
 
         {fields.map(({ key, label, placeholder }) => (
