@@ -49,7 +49,7 @@ export default async function ArtigosAdminPage() {
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
                       <Link href={`/admin/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
-                      <ConfirmDeleteButton confirmText={`Excluir o artigo "${a.title_pt}"?`} onDelete={() => deleteArticle(a.id)} />
+                      <ConfirmDeleteButton confirmText={`Excluir o artigo "${a.title_pt}"?`} onDelete={deleteArticle.bind(null, a.id)} />
                     </div>
                   </td>
                 </tr>

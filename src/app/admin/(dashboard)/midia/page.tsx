@@ -41,7 +41,7 @@ export default async function MidiaPage() {
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
                       <Link href={`/admin/midia/${s.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
-                      <ConfirmDeleteButton confirmText={`Excluir "${s.title}"?`} onDelete={() => deleteMediaItem(s.id)} />
+                      <ConfirmDeleteButton confirmText={`Excluir "${s.title}"?`} onDelete={deleteMediaItem.bind(null, s.id)} />
                     </div>
                   </td>
                 </tr>

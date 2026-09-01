@@ -42,7 +42,7 @@ export default async function ServicosPage() {
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
                       <Link href={`/admin/servicos/${s.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
-                      <ConfirmDeleteButton confirmText={`Excluir o serviço "${s.title_pt}"?`} onDelete={() => deleteService(s.id)} />
+                      <ConfirmDeleteButton confirmText={`Excluir o serviço "${s.title_pt}"?`} onDelete={deleteService.bind(null, s.id)} />
                     </div>
                   </td>
                 </tr>
