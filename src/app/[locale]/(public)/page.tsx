@@ -14,6 +14,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
+import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import type { Article, Author } from "@/types/database.types";
 
 const stats = [
@@ -88,8 +89,9 @@ export default async function HomePage() {
   const config = Object.fromEntries(
     ((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""])
   );
-  const featuredVideoUrl = config.featured_video_url;
-  const isLive = config.is_live === "true" && Boolean(config.live_stream_url);
+  const featuredVideoUrl = config.featured_video_url ? toYouTubeEmbedUrl(config.featured_video_url) : "";
+  const liveStreamUrl = config.live_stream_url ? toYouTubeEmbedUrl(config.live_stream_url) : "";
+  const isLive = config.is_live === "true" && Boolean(liveStreamUrl);
   const [featured, ...rest] = allArticles;
   const secondary = rest.slice(0, 3);
 
@@ -237,7 +239,7 @@ export default async function HomePage() {
                     </div>
                     <div style={{ position: "relative", paddingTop: "56.25%" }}>
                       <iframe
-                        src={config.live_stream_url}
+                        src={liveStreamUrl}
                         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
