@@ -2,8 +2,11 @@ import { createAdminClient } from "./server";
 
 const BUCKET = "site-assets";
 
-export async function uploadPublicImage(file: FormDataEntryValue | null, folder: string): Promise<string | null> {
-  if (!(file instanceof File) || file.size === 0) return null;
+export async function uploadPublicImage(
+  file: FormDataEntryValue | null,
+  folder: string
+): Promise<{ url: string | null; error: string | null }> {
+  if (!(file instanceof File) || file.size === 0) return { url: null, error: null };
 
   const admin = await createAdminClient();
   const ext = file.name.split(".").pop()?.toLowerCase() || "png";
@@ -17,9 +20,9 @@ export async function uploadPublicImage(file: FormDataEntryValue | null, folder:
 
   if (error) {
     console.error("Image upload failed:", error.message);
-    return null;
+    return { url: null, error: error.message };
   }
 
   const { data } = admin.storage.from(BUCKET).getPublicUrl(path);
-  return data.publicUrl;
+  return { url: data.publicUrl, error: null };
 }

@@ -17,8 +17,8 @@ const fields: { key: string; label: string; placeholder?: string }[] = [
 
 type SiteConfigRow = { key: string; value: string | null };
 
-export default async function ConfiguracoesPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
-  const { saved } = await searchParams;
+export default async function ConfiguracoesPage({ searchParams }: { searchParams: Promise<{ saved?: string; logoError?: string }> }) {
+  const { saved, logoError } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = (await (supabase as any).from("site_config").select("*")) as { data: SiteConfigRow[] | null };
@@ -47,6 +47,11 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
             />
           )}
           <input type="file" name="logo_file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" />
+          {logoError && (
+            <div style={{ color: "#dc2626", fontSize: "0.8125rem", marginTop: "0.5rem" }}>
+              Não foi possível enviar a imagem: {logoError}
+            </div>
+          )}
         </Field>
 
         {fields.map(({ key, label, placeholder }) => (

@@ -11,7 +11,7 @@ export async function updateSiteConfig(formData: FormData) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const logoUrl = await uploadPublicImage(formData.get("logo_file"), "logos");
+  const { url: logoUrl, error: logoError } = await uploadPublicImage(formData.get("logo_file"), "logos");
   if (logoUrl) {
     await client.from("site_config").upsert({ key: "logo_url", value: logoUrl });
   }
@@ -28,5 +28,5 @@ export async function updateSiteConfig(formData: FormData) {
 
   revalidatePath("/admin/configuracoes");
   revalidatePath("/[locale]", "layout");
-  redirect("/admin/configuracoes?saved=1");
+  redirect(`/admin/configuracoes?saved=1${logoError ? `&logoError=${encodeURIComponent(logoError)}` : ""}`);
 }
