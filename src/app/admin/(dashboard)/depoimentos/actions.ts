@@ -32,7 +32,7 @@ export async function upsertTestimonial(id: string | null, formData: FormData) {
   }
 
   revalidatePath("/admin/depoimentos");
-  redirect("/admin/depoimentos");
+  redirect("/admin/depoimentos?saved=1");
 }
 
 export async function deleteTestimonial(id: string) {

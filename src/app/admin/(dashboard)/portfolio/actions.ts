@@ -42,7 +42,7 @@ export async function upsertPortfolioCase(id: string | null, formData: FormData)
   }
 
   revalidatePath("/admin/portfolio");
-  redirect("/admin/portfolio");
+  redirect("/admin/portfolio?saved=1");
 }
 
 export async function deletePortfolioCase(id: string) {

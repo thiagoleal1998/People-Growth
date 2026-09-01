@@ -2,10 +2,12 @@ import Link from "next/link";
 import { Plus, Edit } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
+import { SavedToast } from "@/components/admin/SavedToast";
 import { deleteTestimonial } from "./actions";
 import type { Testimonial } from "@/types/database.types";
 
-export default async function DepoimentosPage() {
+export default async function DepoimentosPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+  const { saved } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("testimonials").select("*").order("order");
@@ -13,6 +15,7 @@ export default async function DepoimentosPage() {
 
   return (
     <div>
+      <SavedToast show={saved === "1"} />
       <PageHeader
         title="Depoimentos"
         subtitle={`${items.length} depoimento${items.length === 1 ? "" : "s"}`}

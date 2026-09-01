@@ -37,7 +37,7 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
 
   revalidatePath("/admin/autores");
   revalidatePath("/[locale]/mea-sententia", "page");
-  redirect("/admin/autores");
+  redirect("/admin/autores?saved=1");
 }
 
 export async function deleteAuthor(id: string) {

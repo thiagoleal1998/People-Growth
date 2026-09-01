@@ -2,10 +2,12 @@ import Link from "next/link";
 import { Plus, Edit } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
+import { SavedToast } from "@/components/admin/SavedToast";
 import { deletePortfolioCase } from "./actions";
 import type { PortfolioCase } from "@/types/database.types";
 
-export default async function PortfolioPage() {
+export default async function PortfolioPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+  const { saved } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("portfolio_cases").select("*").order("order");
@@ -13,6 +15,7 @@ export default async function PortfolioPage() {
 
   return (
     <div>
+      <SavedToast show={saved === "1"} />
       <PageHeader
         title="Portfólio"
         subtitle={`${items.length} case${items.length === 1 ? "" : "s"}`}

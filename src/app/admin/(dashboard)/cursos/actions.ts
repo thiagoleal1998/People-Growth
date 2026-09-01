@@ -35,7 +35,7 @@ export async function upsertCourse(id: string | null, formData: FormData) {
   }
 
   revalidatePath("/admin/cursos");
-  redirect("/admin/cursos");
+  redirect("/admin/cursos?saved=1");
 }
 
 export async function deleteCourse(id: string) {

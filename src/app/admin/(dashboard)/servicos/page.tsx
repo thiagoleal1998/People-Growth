@@ -1,11 +1,13 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
+import { SavedToast } from "@/components/admin/SavedToast";
 import { Plus, Edit } from "lucide-react";
 import Link from "next/link";
 import { deleteService } from "./actions";
 import type { Service } from "@/types/database.types";
 
-export default async function ServicosPage() {
+export default async function ServicosPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+  const { saved } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("services").select("*").order("order");
@@ -13,6 +15,7 @@ export default async function ServicosPage() {
 
   return (
     <div>
+      <SavedToast show={saved === "1"} />
       <PageHeader
         title="Serviços"
         subtitle={`${services.length} serviço${services.length === 1 ? "" : "s"}`}

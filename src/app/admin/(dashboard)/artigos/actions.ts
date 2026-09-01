@@ -50,7 +50,7 @@ export async function upsertArticle(id: string | null, formData: FormData) {
 
   revalidatePath("/admin/artigos");
   revalidatePath("/[locale]", "page");
-  redirect("/admin/artigos");
+  redirect("/admin/artigos?saved=1");
 }
 
 export async function deleteArticle(id: string) {

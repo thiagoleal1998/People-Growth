@@ -27,7 +27,7 @@ export async function upsertMediaItem(id: string | null, formData: FormData) {
   }
 
   revalidatePath("/admin/midia");
-  redirect("/admin/midia");
+  redirect("/admin/midia?saved=1");
 }
 
 export async function deleteMediaItem(id: string) {

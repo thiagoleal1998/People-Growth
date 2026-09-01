@@ -44,7 +44,7 @@ export async function upsertService(id: string | null, formData: FormData) {
 
   revalidatePath("/admin/servicos");
   revalidatePath("/[locale]/servicos", "page");
-  redirect("/admin/servicos");
+  redirect("/admin/servicos?saved=1");
 }
 
 export async function deleteService(id: string) {

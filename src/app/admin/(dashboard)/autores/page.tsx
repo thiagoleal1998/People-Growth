@@ -2,10 +2,12 @@ import Link from "next/link";
 import { Plus, Edit } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
+import { SavedToast } from "@/components/admin/SavedToast";
 import { deleteAuthor } from "./actions";
 import type { Author } from "@/types/database.types";
 
-export default async function AutoresPage() {
+export default async function AutoresPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+  const { saved } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("authors").select("*").order("order");
@@ -13,6 +15,7 @@ export default async function AutoresPage() {
 
   return (
     <div>
+      <SavedToast show={saved === "1"} />
       <PageHeader
         title="Autores"
         subtitle={`${items.length} autor${items.length === 1 ? "" : "es"}`}

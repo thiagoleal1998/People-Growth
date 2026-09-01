@@ -2,13 +2,15 @@ import Link from "next/link";
 import { Plus, Edit } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
+import { SavedToast } from "@/components/admin/SavedToast";
 import { deleteCourse } from "./actions";
 import type { Course } from "@/types/database.types";
 
 const statusLabel: Record<Course["status"], string> = { coming_soon: "Em breve", active: "Ativo", draft: "Rascunho" };
 const statusTone: Record<Course["status"], "success" | "warning" | "neutral"> = { coming_soon: "warning", active: "success", draft: "neutral" };
 
-export default async function CursosPage() {
+export default async function CursosPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+  const { saved } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("courses").select("*").order("order");
@@ -16,6 +18,7 @@ export default async function CursosPage() {
 
   return (
     <div>
+      <SavedToast show={saved === "1"} />
       <PageHeader
         title="Cursos"
         subtitle={`${items.length} curso${items.length === 1 ? "" : "s"}`}

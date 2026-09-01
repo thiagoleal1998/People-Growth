@@ -2,10 +2,12 @@ import Link from "next/link";
 import { Plus, Edit, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
+import { SavedToast } from "@/components/admin/SavedToast";
 import { deleteResource } from "./actions";
 import type { Resource } from "@/types/database.types";
 
-export default async function RecursosPage() {
+export default async function RecursosPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+  const { saved } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("resources").select("*").order("created_at", { ascending: false });
@@ -13,6 +15,7 @@ export default async function RecursosPage() {
 
   return (
     <div>
+      <SavedToast show={saved === "1"} />
       <PageHeader
         title="Recursos"
         subtitle={`${items.length} recurso${items.length === 1 ? "" : "s"}`}

@@ -29,7 +29,7 @@ export async function upsertResource(id: string | null, formData: FormData) {
   }
 
   revalidatePath("/admin/recursos");
-  redirect("/admin/recursos");
+  redirect("/admin/recursos?saved=1");
 }
 
 export async function deleteResource(id: string) {

@@ -20,7 +20,7 @@ export async function CategoryNav() {
     <nav style={{ backgroundColor: "#f8fafc", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
       <div
         className="container-xl"
-        style={{ display: "flex", gap: "1.75rem", overflowX: "auto", padding: "0.75rem 0" }}
+        style={{ display: "flex", justifyContent: "center", gap: "1.75rem", overflowX: "auto", padding: "0.75rem 0" }}
       >
         {sorted.map((category) => (
           <Link
@@ -40,6 +40,21 @@ export async function CategoryNav() {
             {category.name_pt}
           </Link>
         ))}
+        <Link
+          href="/mea-sententia"
+          style={{
+            flexShrink: 0,
+            fontSize: "0.8125rem",
+            fontWeight: 700,
+            letterSpacing: "0.03em",
+            textTransform: "uppercase",
+            color: "#4361EE",
+            textDecoration: "none",
+            whiteSpace: "nowrap",
+          }}
+        >
+          Colunistas
+        </Link>
       </div>
     </nav>
   );

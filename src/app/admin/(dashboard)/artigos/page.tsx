@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Plus, Edit } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
+import { SavedToast } from "@/components/admin/SavedToast";
 import { deleteArticle } from "./actions";
 import type { Article } from "@/types/database.types";
 
@@ -9,7 +10,8 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR");
 }
 
-export default async function ArtigosAdminPage() {
+export default async function ArtigosAdminPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+  const { saved } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("articles").select("*").order("created_at", { ascending: false });
@@ -17,6 +19,7 @@ export default async function ArtigosAdminPage() {
 
   return (
     <div>
+      <SavedToast show={saved === "1"} />
       <PageHeader
         title="Artigos"
         subtitle={`${articles.length} artigo${articles.length === 1 ? "" : "s"}`}

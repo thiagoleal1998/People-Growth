@@ -97,7 +97,7 @@ export default async function MeaSententiePage() {
         <section style={{ backgroundColor: "white", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
           <div
             className="container-xl"
-            style={{ display: "flex", gap: "2rem", padding: "1.5rem 0", flexWrap: "wrap", overflowX: "auto" }}
+            style={{ display: "flex", justifyContent: "center", gap: "2rem", padding: "1.5rem 0", flexWrap: "wrap", overflowX: "auto" }}
           >
             {authors.map((author) => (
               <Link

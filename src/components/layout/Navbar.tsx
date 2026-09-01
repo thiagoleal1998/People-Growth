@@ -14,7 +14,7 @@ const navLinks = [
   { key: "contact", href: "/contato" as const },
 ];
 
-export function Navbar() {
+export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
@@ -34,7 +34,11 @@ export function Navbar() {
     >
       <nav className="container-xl" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "4rem" }}>
         {/* Logo */}
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+          {logoUrl && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="" style={{ height: "2rem", width: "auto", borderRadius: "0.25rem" }} />
+          )}
           <span
             style={{
               fontWeight: 800,

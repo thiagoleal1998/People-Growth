@@ -2,7 +2,8 @@
 
 import Link from "next/link";
 import { useTransition } from "react";
-import { Trash2 } from "lucide-react";
+import { useFormStatus } from "react-dom";
+import { Trash2, Loader2 } from "lucide-react";
 import type { ReactNode } from "react";
 
 export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
@@ -98,13 +99,29 @@ export function FormShell({ title, backHref, children }: { title: string; backHr
   );
 }
 
-export function SubmitButton({ children }: { children: ReactNode }) {
+export function SubmitButton({ children, pendingText = "Salvando..." }: { children: ReactNode; pendingText?: string }) {
+  const { pending } = useFormStatus();
   return (
     <button
       type="submit"
-      style={{ backgroundColor: "#4361EE", color: "white", padding: "0.75rem 1.5rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.9rem", border: "none", cursor: "pointer" }}
+      disabled={pending}
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "0.5rem",
+        backgroundColor: "#4361EE",
+        color: "white",
+        padding: "0.75rem 1.5rem",
+        borderRadius: "0.625rem",
+        fontWeight: 700,
+        fontSize: "0.9rem",
+        border: "none",
+        cursor: pending ? "default" : "pointer",
+        opacity: pending ? 0.7 : 1,
+      }}
     >
-      {children}
+      {pending && <Loader2 size={16} className="admin-spin" />}
+      {pending ? pendingText : children}
     </button>
   );
 }

@@ -2,10 +2,12 @@ import Link from "next/link";
 import { Plus, Edit } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
+import { SavedToast } from "@/components/admin/SavedToast";
 import { deleteMediaItem } from "./actions";
 import type { MediaItem } from "@/types/database.types";
 
-export default async function MidiaPage() {
+export default async function MidiaPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
+  const { saved } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("media_items").select("*").order("order");
@@ -13,6 +15,7 @@ export default async function MidiaPage() {
 
   return (
     <div>
+      <SavedToast show={saved === "1"} />
       <PageHeader
         title="Na Mídia"
         subtitle={`${items.length} menç${items.length === 1 ? "ão" : "ões"}`}
