@@ -18,6 +18,7 @@ type ArticleRow = {
   cover_image: string | null;
   category_id: string | null;
   status: "draft" | "published";
+  format: "noticia" | "opiniao";
   published_at: string | null;
   author_id: string | null;
   views: number;

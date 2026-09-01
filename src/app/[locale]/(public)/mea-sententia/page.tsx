@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { Search, ChevronRight } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { FormatTag } from "@/components/FormatTag";
 import { createClient } from "@/lib/supabase/server";
 import type { Article, Category, Tag, Author } from "@/types/database.types";
 
@@ -68,7 +69,7 @@ export default async function MeaSententiePage() {
               letterSpacing: "0.05em",
             }}
           >
-            NEWSLETTER
+            CONTEÚDO
           </div>
           <h1
             style={{
@@ -76,10 +77,9 @@ export default async function MeaSententiePage() {
               fontWeight: 800,
               lineHeight: 1.1,
               marginBottom: "1rem",
-              fontStyle: "italic",
             }}
           >
-            Mea Sententia
+            Notícias e opinião
           </h1>
           <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.125rem", lineHeight: 1.7, marginBottom: "2.5rem" }}>
             {t("subtitle")}
@@ -184,6 +184,9 @@ export default async function MeaSententiePage() {
                           })()}
                         </div>
                         <div style={{ padding: "2rem" }}>
+                          <div style={{ marginBottom: "0.75rem" }}>
+                            <FormatTag format={featured.format} />
+                          </div>
                           <h3 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0d1b2a", lineHeight: 1.3, marginBottom: "0.875rem" }}>
                             {featured.title_pt}
                           </h3>
@@ -264,6 +267,9 @@ export default async function MeaSententiePage() {
                                 )}
                               </div>
                               <div style={{ flex: 1 }}>
+                                <div style={{ marginBottom: "0.375rem" }}>
+                                  <FormatTag format={article.format} />
+                                </div>
                                 <h3 style={{ fontWeight: 700, fontSize: "1rem", color: "#0d1b2a", lineHeight: 1.4, marginBottom: "0.375rem" }}>
                                   {article.title_pt}
                                 </h3>
@@ -397,7 +403,7 @@ export default async function MeaSententiePage() {
                     ✍️ Assine a Mea Sententia
                   </h3>
                   <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: "1rem" }}>
-                    Perspectivas sobre Marketing, Growth e IA direto no seu e-mail.
+                    Opinião sobre negócios, sociedade e os temas que impactam pessoas — direto no seu e-mail.
                   </p>
                   <NewsletterForm compact />
                 </div>

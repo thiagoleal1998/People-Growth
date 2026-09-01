@@ -6,11 +6,15 @@ import { createClient } from "@/lib/supabase/server";
 export async function updateSiteConfig(formData: FormData) {
   const supabase = await createClient();
 
-  const entries = Array.from(formData.entries()).filter(([key]) => key !== "");
+  const entries = Array.from(formData.entries()).filter(([key]) => key !== "" && key !== "is_live");
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+
+  await client.from("site_config").upsert({ key: "is_live", value: formData.get("is_live") === "on" ? "true" : "false" });
 
   for (const [key, value] of entries) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    await (supabase as any).from("site_config").upsert({ key, value: String(value) });
+    await client.from("site_config").upsert({ key, value: String(value) });
   }
 
   revalidatePath("/admin/configuracoes");

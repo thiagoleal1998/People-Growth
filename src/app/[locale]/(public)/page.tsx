@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { FormatTag } from "@/components/FormatTag";
 import type { Article, Author } from "@/types/database.types";
 
 const stats = [
@@ -87,6 +88,7 @@ export default async function HomePage() {
     ((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""])
   );
   const featuredVideoUrl = config.featured_video_url;
+  const isLive = config.is_live === "true" && Boolean(config.live_stream_url);
   const [featured, ...rest] = allArticles;
   const secondary = rest.slice(0, 3);
 
@@ -125,7 +127,7 @@ export default async function HomePage() {
         <section style={{ backgroundColor: "white", paddingTop: "2.5rem", paddingBottom: "2.5rem" }}>
           <div className="container-xl">
             <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4361EE", letterSpacing: "0.08em", marginBottom: "1rem" }}>
-              MEA SENTENTIA
+              CONTEÚDO
             </div>
 
             <div className="home-lead-grid" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "2.5rem", alignItems: "start" }}>
@@ -135,6 +137,9 @@ export default async function HomePage() {
                   href={{ pathname: "/mea-sententia/[slug]", params: { slug: featured.slug } }}
                   style={{ display: "block", textDecoration: "none" }}
                 >
+                  <div style={{ marginBottom: "0.625rem" }}>
+                    <FormatTag format={featured.format} />
+                  </div>
                   <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "#0d1b2a", lineHeight: 1.15, marginBottom: "0.75rem" }}>
                     {featured.title_pt}
                   </h1>
@@ -173,10 +178,13 @@ export default async function HomePage() {
                           style={{
                             height: "130px",
                             borderRadius: "0.625rem",
-                            marginBottom: "0.75rem",
+                            marginBottom: "0.625rem",
                             background: article.cover_image ? `url(${article.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                           }}
                         />
+                        <div style={{ marginBottom: "0.375rem" }}>
+                          <FormatTag format={article.format} />
+                        </div>
                         <h4 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "#0d1b2a", lineHeight: 1.4 }}>
                           {article.title_pt}
                         </h4>
@@ -188,6 +196,23 @@ export default async function HomePage() {
 
               {/* Sidebar */}
               <aside>
+                {isLive && (
+                  <div style={{ borderRadius: "0.75rem", overflow: "hidden", border: "1px solid rgba(0,0,0,0.08)", marginBottom: "1.25rem" }}>
+                    <div style={{ backgroundColor: "#dc2626", color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <span className="live-dot" style={{ width: "0.5rem", height: "0.5rem", borderRadius: "50%", backgroundColor: "white", flexShrink: 0 }} />
+                      AO VIVO
+                    </div>
+                    <div style={{ position: "relative", paddingTop: "56.25%" }}>
+                      <iframe
+                        src={config.live_stream_url}
+                        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  </div>
+                )}
+
                 <div style={{ borderRadius: "0.75rem", overflow: "hidden", border: "1px solid rgba(0,0,0,0.08)" }}>
                   <div style={{ backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>
                     VÍDEO EM DESTAQUE
@@ -227,6 +252,11 @@ export default async function HomePage() {
           <style>{`
             @media (max-width: 900px) {
               .home-lead-grid { grid-template-columns: 1fr !important; }
+            }
+            .live-dot { animation: live-pulse 1.4s ease-in-out infinite; }
+            @keyframes live-pulse {
+              0%, 100% { opacity: 1; }
+              50% { opacity: 0.25; }
             }
           `}</style>
         </section>
@@ -308,7 +338,7 @@ export default async function HomePage() {
           >
             <Sparkles size={14} color="#06D6A0" />
             <span style={{ fontSize: "0.8125rem", color: "#06D6A0", fontWeight: 600 }}>
-              Estratégia · Growth · IA · Inovação
+              Negócios · Pessoas · Sociedade · IA
             </span>
           </div>
 
@@ -640,7 +670,7 @@ export default async function HomePage() {
                 fontSize: "0.9375rem",
               }}
             >
-              Ler Mea Sententia
+              Explorar conteúdo
             </Link>
           </div>
         </div>

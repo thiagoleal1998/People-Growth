@@ -14,6 +14,7 @@ export async function upsertArticle(id: string | null, formData: FormData) {
   const status = (String(formData.get("status") ?? "draft")) as Article["status"];
   const categoryId = String(formData.get("category_id") ?? "");
   const authorId = String(formData.get("author_id") ?? "");
+  const format = (String(formData.get("format") ?? "noticia")) as Article["format"];
 
   const payload: Omit<Article, "id" | "created_at" | "updated_at" | "views"> = {
     title_pt,
@@ -25,6 +26,7 @@ export async function upsertArticle(id: string | null, formData: FormData) {
     excerpt_en: String(formData.get("excerpt_en") ?? "") || null,
     cover_image: String(formData.get("cover_image") ?? "") || null,
     category_id: categoryId || null,
+    format,
     status,
     published_at: status === "published" ? new Date().toISOString() : null,
     author_id: authorId || null,

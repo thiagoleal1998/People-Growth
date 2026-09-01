@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Linkedin, Instagram, Mail, ChevronRight } from "lucide-react";
+import { FormatTag } from "@/components/FormatTag";
 import { createClient } from "@/lib/supabase/server";
 import type { Article, Author, Category } from "@/types/database.types";
 
@@ -36,7 +37,7 @@ export async function generateMetadata({
   const result = await getAuthorData(slug);
   if (!result) return { title: "Autor não encontrado" };
   return {
-    title: `${result.author.name} — Mea Sententia`,
+    title: `${result.author.name} — Conteúdo`,
     description: result.author.role_pt ?? undefined,
   };
 }
@@ -77,7 +78,7 @@ export default async function AuthorPage({
               fontWeight: 500,
             }}
           >
-            <ArrowLeft size={16} /> Mea Sententia
+            <ArrowLeft size={16} /> Conteúdo
           </Link>
 
           <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", flexWrap: "wrap" }}>
@@ -183,6 +184,9 @@ export default async function AuthorPage({
                         )}
                       </div>
                       <div style={{ flex: 1 }}>
+                        <div style={{ marginBottom: "0.375rem" }}>
+                          <FormatTag format={article.format} />
+                        </div>
                         <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "#0d1b2a", lineHeight: 1.4, marginBottom: "0.375rem" }}>
                           {article.title_pt}
                         </h3>

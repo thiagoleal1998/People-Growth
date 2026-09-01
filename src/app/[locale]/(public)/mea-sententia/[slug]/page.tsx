@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
+import { FormatTag } from "@/components/FormatTag";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
 import type { Article, Category, Author } from "@/types/database.types";
@@ -87,25 +88,27 @@ export default async function ArticlePage({
               fontWeight: 500,
             }}
           >
-            <ArrowLeft size={16} /> Mea Sententia
+            <ArrowLeft size={16} /> Conteúdo
           </Link>
 
-          {category && (
-            <span
-              style={{
-                display: "inline-block",
-                backgroundColor: `${category.color ?? "#4361EE"}25`,
-                color: category.color ?? "#4361EE",
-                padding: "0.25rem 0.875rem",
-                borderRadius: "9999px",
-                fontSize: "0.8125rem",
-                fontWeight: 700,
-                marginBottom: "1.25rem",
-              }}
-            >
-              {category.name_pt}
-            </span>
-          )}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
+            <FormatTag format={article.format} />
+            {category && (
+              <span
+                style={{
+                  display: "inline-block",
+                  backgroundColor: `${category.color ?? "#4361EE"}25`,
+                  color: category.color ?? "#4361EE",
+                  padding: "0.25rem 0.875rem",
+                  borderRadius: "9999px",
+                  fontSize: "0.8125rem",
+                  fontWeight: 700,
+                }}
+              >
+                {category.name_pt}
+              </span>
+            )}
+          </div>
 
           <h1
             style={{

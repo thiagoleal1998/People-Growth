@@ -97,7 +97,7 @@ export default async function SobrePage() {
                 WebkitTextFillColor: "transparent",
               }}
             >
-              para negócios que crescem.
+              para negócios e a sociedade ao redor.
             </span>
           </h1>
           <p
@@ -108,7 +108,7 @@ export default async function SobrePage() {
               marginBottom: "2rem",
             }}
           >
-            Sou Thiago Leal — especialista em Marketing Digital, Growth e Inteligência Artificial com mais de 7 anos de experiência transformando negócios através de estratégia, dados e inovação.
+            Sou Thiago Leal — especialista em Marketing Digital, Growth e Inteligência Artificial com mais de 7 anos de experiência transformando negócios através de estratégia, dados e inovação. Hoje também dedico parte do meu tempo a discutir, pela People &amp; Growth, os temas sociais, econômicos e ambientais que moldam pessoas e empresas.
           </p>
           <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
             <Link
@@ -191,7 +191,7 @@ export default async function SobrePage() {
                 Ao longo de mais de 7 anos, ajudei empresas de diferentes segmentos a estruturarem seu marketing, acelerarem o crescimento e tomarem decisões mais inteligentes com dados e IA.
               </p>
               <p>
-                Hoje, além da consultoria e dos projetos na Neuro Botics, produzo conteúdo pela newsletter <strong>Mea Sententia</strong>, ministro treinamentos corporativos e me posiciono como referência em estratégia, crescimento e inovação.
+                Hoje, além da consultoria e dos projetos na Neuro Botics, a <strong>People &amp; Growth</strong> também é um espaço de conteúdo: notícias e a coluna de opinião <strong>Mea Sententia</strong>, com lives aos sábados e vídeos ao longo da semana sobre temas que vão de negócios a política, economia e meio ambiente — no regional, no Brasil e no mundo. Divido esse olhar com colunistas convidados, como Gustavo Monken e Raúl Salustiano.
               </p>
             </div>
 
@@ -357,7 +357,7 @@ export default async function SobrePage() {
             {[
               {
                 name: "People & Growth",
-                description: "Plataforma de autoridade em Marketing, Growth, Dados e IA. Consultoria, conteúdo e treinamentos.",
+                description: "Consultoria, treinamentos e conteúdo sobre negócios, pessoas e os temas sociais, políticos e ambientais que os impactam.",
                 icon: "🚀",
                 color: "#4361EE",
               },
@@ -369,7 +369,7 @@ export default async function SobrePage() {
               },
               {
                 name: "Mea Sententia",
-                description: "Newsletter sobre Marketing, Growth, Liderança e IA com perspectivas estratégicas e práticas.",
+                description: "Coluna de opinião com perspectivas sobre negócios, sociedade e os temas que moldam o momento atual.",
                 icon: "✍️",
                 color: "#FFB703",
               },

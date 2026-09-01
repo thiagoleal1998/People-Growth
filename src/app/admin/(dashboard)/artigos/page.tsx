@@ -19,7 +19,7 @@ export default async function ArtigosAdminPage() {
     <div>
       <PageHeader
         title="Artigos"
-        subtitle={`Mea Sententia — ${articles.length} artigo${articles.length === 1 ? "" : "s"}`}
+        subtitle={`${articles.length} artigo${articles.length === 1 ? "" : "s"}`}
         action={<PrimaryLinkButton href="/admin/artigos/novo"><Plus size={16} /> Novo artigo</PrimaryLinkButton>}
       />
 
@@ -30,7 +30,7 @@ export default async function ArtigosAdminPage() {
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "#f8fafc" }}>
-                {["Título", "Status", "Visualizações", "Data", ""].map((h) => (
+                {["Título", "Formato", "Status", "Visualizações", "Data", ""].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
                 ))}
               </tr>
@@ -40,6 +40,9 @@ export default async function ArtigosAdminPage() {
                 <tr key={a.id} style={{ borderTop: "1px solid #f1f5f9" }}>
                   <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "#0d1b2a", fontSize: "0.875rem", maxWidth: "320px" }}>
                     <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{a.title_pt}</div>
+                  </td>
+                  <td style={{ padding: "0.875rem 1.25rem" }}>
+                    <Badge tone={a.format === "opiniao" ? "warning" : "neutral"}>{a.format === "opiniao" ? "Mea Sententia" : "Notícia"}</Badge>
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <Badge tone={a.status === "published" ? "success" : "neutral"}>{a.status === "published" ? "Publicado" : "Rascunho"}</Badge>

@@ -5,7 +5,7 @@
     "resume": "Resume",
     "portfolio": "Portfolio",
     "services": "Services",
-    "newsletter": "Mea Sententia",
+    "newsletter": "Content",
     "courses": "Courses",
     "aiLab": "AI Lab",
     "resources": "Resources",
@@ -17,7 +17,7 @@
   },
   "home": {
     "heroTagline": "People & Growth",
-    "heroSubtitle": "Transforming businesses through Marketing, Growth, Data and Artificial Intelligence.",
+    "heroSubtitle": "Strategy, data and AI for businesses that want to grow — and a close look at the social, economic and environmental issues shaping people and companies, in Brazil and around the world.",
     "ctaPrimary": "Explore my journey",
     "ctaSecondary": "Schedule a call",
     "statsYears": "Years of experience",
@@ -35,7 +35,7 @@
   },
   "about": {
     "title": "About Thiago Leal",
-    "subtitle": "Marketing, Growth and Artificial Intelligence Strategist",
+    "subtitle": "Marketing, Growth and AI strategist — and a voice on the social, economic and environmental issues shaping people and businesses",
     "philosophy": "My Philosophy",
     "timelineTitle": "Journey",
     "sustainableGrowth": "Sustainable growth",
@@ -84,8 +84,8 @@
     "mentoring": "Mentoring"
   },
   "newsletter": {
-    "title": "Mea Sententia",
-    "subtitle": "Perspectives on Marketing, Growth, Leadership and Artificial Intelligence.",
+    "title": "Content",
+    "subtitle": "News and opinion on business, technology, and the social, political and environmental issues shaping people and companies — in Brazil and around the world.",
     "subscribe": "Subscribe to newsletter",
     "subscribePlaceholder": "Your best email",
     "subscribeButton": "Subscribe",

@@ -19,6 +19,12 @@ export function ArticleForm({ item, categories, authors }: { item?: Article; cat
         <Field label="Slug" hint="Deixe em branco para gerar automaticamente">
           <Input name="slug" defaultValue={item?.slug ?? ""} />
         </Field>
+        <Field label="Tipo de conteúdo" hint="Notícia: reportagem/atualidade. Opinião: aparece com a tag Mea Sententia.">
+          <Select name="format" defaultValue={item?.format ?? "noticia"}>
+            <option value="noticia">Notícia</option>
+            <option value="opiniao">Opinião (Mea Sententia)</option>
+          </Select>
+        </Field>
         <Field label="Categoria">
           <Select name="category_id" defaultValue={item?.category_id ?? ""}>
             <option value="">Sem categoria</option>

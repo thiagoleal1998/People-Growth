@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
+import { FormatTag } from "@/components/FormatTag";
 import { createClient } from "@/lib/supabase/server";
 import type { Article, Category } from "@/types/database.types";
 
@@ -30,7 +31,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const result = await getCategoryData(slug);
   if (!result) return { title: "Categoria não encontrada" };
   return {
-    title: `${result.category.name_pt} — Mea Sententia`,
+    title: `${result.category.name_pt} — Conteúdo`,
   };
 }
 
@@ -47,7 +48,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
       <section style={{ background: "linear-gradient(135deg, #0d1b2a 0%, #1a1f3e 100%)", paddingTop: "6rem", paddingBottom: "3.5rem", color: "white" }}>
         <div className="container-xl" style={{ maxWidth: "720px" }}>
           <Link href="/mea-sententia" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
-            <ArrowLeft size={16} /> Mea Sententia
+            <ArrowLeft size={16} /> Conteúdo
           </Link>
           <span
             style={{
@@ -92,6 +93,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                       }}
                     />
                     <div style={{ flex: 1 }}>
+                      <div style={{ marginBottom: "0.375rem" }}>
+                        <FormatTag format={article.format} />
+                      </div>
                       <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "#0d1b2a", lineHeight: 1.4, marginBottom: "0.375rem" }}>
                         {article.title_pt}
                       </h3>

@@ -5,7 +5,7 @@
     "resume": "Currículo",
     "portfolio": "Portfólio",
     "services": "Serviços",
-    "newsletter": "Mea Sententia",
+    "newsletter": "Conteúdo",
     "courses": "Cursos",
     "aiLab": "Laboratório IA",
     "resources": "Recursos",
@@ -17,7 +17,7 @@
   },
   "home": {
     "heroTagline": "People & Growth",
-    "heroSubtitle": "Transformando negócios através de Marketing, Growth, Dados e Inteligência Artificial.",
+    "heroSubtitle": "Estratégia, dados e IA para negócios que querem crescer — e um olhar atento às questões sociais, econômicas e ambientais que moldam pessoas e empresas, no Brasil e no mundo.",
     "ctaPrimary": "Conheça minha trajetória",
     "ctaSecondary": "Agende uma conversa",
     "statsYears": "Anos de experiência",
@@ -35,7 +35,7 @@
   },
   "about": {
     "title": "Sobre Thiago Leal",
-    "subtitle": "Estrategista em Marketing, Growth e Inteligência Artificial",
+    "subtitle": "Estrategista em Marketing, Growth e IA — e uma voz sobre os temas sociais, econômicos e ambientais que impactam pessoas e negócios",
     "philosophy": "Minha Filosofia",
     "timelineTitle": "Trajetória",
     "sustainableGrowth": "Crescimento sustentável",
@@ -84,8 +84,8 @@
     "mentoring": "Mentorias"
   },
   "newsletter": {
-    "title": "Mea Sententia",
-    "subtitle": "Perspectivas sobre Marketing, Growth, Liderança e Inteligência Artificial.",
+    "title": "Conteúdo",
+    "subtitle": "Notícias e opinião sobre negócios, tecnologia e as questões sociais, políticas e ambientais que impactam pessoas e empresas — no Brasil e no mundo.",
     "subscribe": "Assinar newsletter",
     "subscribePlaceholder": "Seu melhor e-mail",
     "subscribeButton": "Assinar",
