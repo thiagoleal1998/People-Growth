@@ -423,7 +423,7 @@ export default async function HomePage() {
                       ? { pathname: "/mea-sententia/[slug]", params: { slug: latest.slug } }
                       : { pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }
                   }
-                  style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none", width: "220px" }}
+                  style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none", width: "260px" }}
                 >
                   <div
                     style={{
@@ -439,10 +439,10 @@ export default async function HomePage() {
                     <div
                       style={{
                         color: "#1e293b",
-                        fontSize: "0.8125rem",
+                        fontSize: "0.75rem",
                         lineHeight: 1.35,
                         display: "-webkit-box",
-                        WebkitLineClamp: 2,
+                        WebkitLineClamp: 3,
                         WebkitBoxOrient: "vertical",
                         overflow: "hidden",
                       }}

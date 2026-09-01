@@ -5,7 +5,7 @@ import { FormShell, Field, Input, Textarea, Select, SubmitButton } from "@/compo
 import { upsertAuthor } from "./actions";
 import type { Author } from "@/types/database.types";
 
-const TAGLINE_MAX = 100;
+const TAGLINE_MAX = 80;
 
 function TaglineField({ name, label, defaultValue }: { name: string; label: string; defaultValue: string }) {
   const [value, setValue] = useState(defaultValue);
