@@ -135,19 +135,33 @@ export default async function HomePage() {
               <div>
                 <Link
                   href={{ pathname: "/mea-sententia/[slug]", params: { slug: featured.slug } }}
-                  style={{ display: "block", textDecoration: "none" }}
+                  style={{ display: "flex", textDecoration: "none", gap: "1.5rem", alignItems: "flex-start" }}
+                  className="home-featured-link"
                 >
-                  <div style={{ marginBottom: "0.625rem" }}>
-                    <FormatTag format={featured.format} />
-                  </div>
-                  <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "#0d1b2a", lineHeight: 1.15, marginBottom: "0.75rem" }}>
-                    {featured.title_pt}
-                  </h1>
-                  {featured.excerpt_pt && (
-                    <p style={{ color: "#64748b", fontSize: "1.0625rem", lineHeight: 1.6 }}>
-                      {featured.excerpt_pt}
-                    </p>
+                  {featured.cover_image && (
+                    <div
+                      style={{
+                        width: "220px",
+                        height: "180px",
+                        flexShrink: 0,
+                        borderRadius: "0.5rem",
+                        background: `url(${featured.cover_image}) center/cover`,
+                      }}
+                    />
                   )}
+                  <div>
+                    <div style={{ marginBottom: "0.625rem" }}>
+                      <FormatTag format={featured.format} />
+                    </div>
+                    <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "#0d1b2a", lineHeight: 1.15, marginBottom: "0.75rem" }}>
+                      {featured.title_pt}
+                    </h1>
+                    {featured.excerpt_pt && (
+                      <p style={{ color: "#64748b", fontSize: "1.0625rem", lineHeight: 1.6 }}>
+                        {featured.excerpt_pt}
+                      </p>
+                    )}
+                  </div>
                 </Link>
 
                 {secondary.length > 0 && (
@@ -252,6 +266,10 @@ export default async function HomePage() {
           <style>{`
             @media (max-width: 900px) {
               .home-lead-grid { grid-template-columns: 1fr !important; }
+            }
+            @media (max-width: 560px) {
+              .home-featured-link { flex-direction: column; }
+              .home-featured-link > div:first-child { width: 100% !important; height: 200px !important; }
             }
             .live-dot { animation: live-pulse 1.4s ease-in-out infinite; }
             @keyframes live-pulse {
