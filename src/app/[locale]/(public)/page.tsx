@@ -225,12 +225,10 @@ export default async function HomePage() {
                   <h4 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "#0d1b2a", marginBottom: "0.375rem" }}>
                     ✍️ Receba a Mea Sententia por e-mail
                   </h4>
-                  <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.5, marginBottom: "1rem", maxWidth: "460px" }}>
+                  <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.5, marginBottom: "1rem" }}>
                     Perspectivas sobre negócios, sociedade e os temas que impactam pessoas — direto na sua caixa de entrada.
                   </p>
-                  <div style={{ maxWidth: "460px" }}>
-                    <NewsletterForm compact light />
-                  </div>
+                  <NewsletterForm light />
                 </div>
 
                 {/* More news, alternating formats */}
