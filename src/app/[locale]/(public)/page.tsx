@@ -100,20 +100,36 @@ export default async function HomePage() {
 
             <Link
               href={{ pathname: "/mea-sententia/[slug]", params: { slug: featured.slug } }}
-              style={{ display: "block", textDecoration: "none", marginBottom: "2rem" }}
+              style={{ display: "block", textDecoration: "none", maxWidth: "760px" }}
             >
-              <h1 style={{ fontWeight: 800, fontSize: "clamp(1.5rem, 3.5vw, 2.25rem)", color: "#0d1b2a", lineHeight: 1.2, marginBottom: "0.75rem" }}>
+              <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "#0d1b2a", lineHeight: 1.15, marginBottom: "0.75rem" }}>
                 {featured.title_pt}
               </h1>
               {featured.excerpt_pt && (
-                <p style={{ color: "#64748b", fontSize: "1.0625rem", lineHeight: 1.6, maxWidth: "760px" }}>
+                <p style={{ color: "#64748b", fontSize: "1.0625rem", lineHeight: 1.6 }}>
                   {featured.excerpt_pt}
                 </p>
               )}
             </Link>
 
             {secondary.length > 0 && (
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem" }}>
+              <ul style={{ listStyle: "none", maxWidth: "760px", margin: "1.25rem 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                {secondary.map((article) => (
+                  <li key={article.id}>
+                    <Link
+                      href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+                      style={{ display: "flex", alignItems: "baseline", gap: "0.625rem", textDecoration: "none", color: "#334155", fontSize: "0.9375rem", fontWeight: 500 }}
+                    >
+                      <span style={{ width: "0.4375rem", height: "0.4375rem", backgroundColor: "#4361EE", flexShrink: 0 }} />
+                      {article.title_pt}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            {secondary.length > 0 && (
+              <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", marginTop: "1.75rem", paddingTop: "1.75rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem" }}>
                 {secondary.map((article) => (
                   <Link
                     key={article.id}
