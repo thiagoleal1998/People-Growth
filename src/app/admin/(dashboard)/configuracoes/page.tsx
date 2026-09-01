@@ -9,6 +9,7 @@ const fields: { key: string; label: string; placeholder?: string }[] = [
   { key: "instagram", label: "Instagram (URL)" },
   { key: "calendly_url", label: "Link de agendamento (Calendly)" },
   { key: "hero_photo", label: "Foto de destaque (URL da imagem)" },
+  { key: "featured_video_url", label: "Vídeo em destaque (URL de embed do YouTube)", placeholder: "https://www.youtube.com/embed/..." },
   { key: "site_url", label: "URL do site" },
 ];
 

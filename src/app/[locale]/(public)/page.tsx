@@ -8,8 +8,10 @@ import {
   Users,
   Target,
   Sparkles,
+  Zap,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { NewsletterForm } from "@/components/NewsletterForm";
 import type { Article, Author } from "@/types/database.types";
 
 const stats = [
@@ -73,13 +75,18 @@ export default async function HomePage() {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data: articlesData }, { data: authorsData }] = await Promise.all([
+  const [{ data: articlesData }, { data: authorsData }, { data: configData }] = await Promise.all([
     client.from("articles").select("*").eq("status", "published").order("published_at", { ascending: false }),
     client.from("authors").select("*").eq("status", "active").order("order"),
+    client.from("site_config").select("*"),
   ]);
 
   const allArticles = (articlesData ?? []) as Article[];
   const authors = (authorsData ?? []) as Author[];
+  const config = Object.fromEntries(
+    ((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""])
+  );
+  const featuredVideoUrl = config.featured_video_url;
   const [featured, ...rest] = allArticles;
   const secondary = rest.slice(0, 3);
 
@@ -90,6 +97,29 @@ export default async function HomePage() {
 
   return (
     <>
+      {/* Self-promo banner (in place of an ad slot) */}
+      <Link
+        href="/contato"
+        style={{
+          display: "block",
+          backgroundColor: "#0d1b2a",
+          textDecoration: "none",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <div
+          className="container-xl"
+          style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.625rem", padding: "0.75rem 0", flexWrap: "wrap", textAlign: "center" }}
+        >
+          <span style={{ color: "white", fontSize: "0.875rem", fontWeight: 600 }}>
+            🚀 Pronto para acelerar o crescimento do seu negócio com estratégia, dados e IA?
+          </span>
+          <span style={{ color: "#06D6A0", fontSize: "0.875rem", fontWeight: 700 }}>
+            Agende uma conversa gratuita →
+          </span>
+        </div>
+      </Link>
+
       {/* News lead — UOL-style front page block */}
       {featured && (
         <section style={{ backgroundColor: "white", paddingTop: "2.5rem", paddingBottom: "2.5rem" }}>
@@ -98,60 +128,107 @@ export default async function HomePage() {
               MEA SENTENTIA
             </div>
 
-            <Link
-              href={{ pathname: "/mea-sententia/[slug]", params: { slug: featured.slug } }}
-              style={{ display: "block", textDecoration: "none", maxWidth: "760px" }}
-            >
-              <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "#0d1b2a", lineHeight: 1.15, marginBottom: "0.75rem" }}>
-                {featured.title_pt}
-              </h1>
-              {featured.excerpt_pt && (
-                <p style={{ color: "#64748b", fontSize: "1.0625rem", lineHeight: 1.6 }}>
-                  {featured.excerpt_pt}
-                </p>
-              )}
-            </Link>
+            <div className="home-lead-grid" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "2.5rem", alignItems: "start" }}>
+              {/* Main column */}
+              <div>
+                <Link
+                  href={{ pathname: "/mea-sententia/[slug]", params: { slug: featured.slug } }}
+                  style={{ display: "block", textDecoration: "none" }}
+                >
+                  <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "#0d1b2a", lineHeight: 1.15, marginBottom: "0.75rem" }}>
+                    {featured.title_pt}
+                  </h1>
+                  {featured.excerpt_pt && (
+                    <p style={{ color: "#64748b", fontSize: "1.0625rem", lineHeight: 1.6 }}>
+                      {featured.excerpt_pt}
+                    </p>
+                  )}
+                </Link>
 
-            {secondary.length > 0 && (
-              <ul style={{ listStyle: "none", maxWidth: "760px", margin: "1.25rem 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-                {secondary.map((article) => (
-                  <li key={article.id}>
-                    <Link
-                      href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
-                      style={{ display: "flex", alignItems: "baseline", gap: "0.625rem", textDecoration: "none", color: "#334155", fontSize: "0.9375rem", fontWeight: 500 }}
-                    >
-                      <span style={{ width: "0.4375rem", height: "0.4375rem", backgroundColor: "#4361EE", flexShrink: 0 }} />
-                      {article.title_pt}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
-            )}
+                {secondary.length > 0 && (
+                  <ul style={{ listStyle: "none", margin: "1.25rem 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                    {secondary.map((article) => (
+                      <li key={article.id}>
+                        <Link
+                          href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+                          style={{ display: "flex", alignItems: "baseline", gap: "0.625rem", textDecoration: "none", color: "#334155", fontSize: "0.9375rem", fontWeight: 500 }}
+                        >
+                          <span style={{ width: "0.4375rem", height: "0.4375rem", backgroundColor: "#4361EE", flexShrink: 0 }} />
+                          {article.title_pt}
+                        </Link>
+                      </li>
+                    ))}
+                  </ul>
+                )}
 
-            {secondary.length > 0 && (
-              <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", marginTop: "1.75rem", paddingTop: "1.75rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem" }}>
-                {secondary.map((article) => (
-                  <Link
-                    key={article.id}
-                    href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
-                    style={{ display: "block", textDecoration: "none" }}
-                  >
-                    <div
-                      style={{
-                        height: "130px",
-                        borderRadius: "0.625rem",
-                        marginBottom: "0.75rem",
-                        background: article.cover_image ? `url(${article.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
-                      }}
-                    />
-                    <h4 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "#0d1b2a", lineHeight: 1.4 }}>
-                      {article.title_pt}
-                    </h4>
-                  </Link>
-                ))}
+                {secondary.length > 0 && (
+                  <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", marginTop: "1.75rem", paddingTop: "1.75rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem" }}>
+                    {secondary.map((article) => (
+                      <Link
+                        key={article.id}
+                        href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+                        style={{ display: "block", textDecoration: "none" }}
+                      >
+                        <div
+                          style={{
+                            height: "130px",
+                            borderRadius: "0.625rem",
+                            marginBottom: "0.75rem",
+                            background: article.cover_image ? `url(${article.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                          }}
+                        />
+                        <h4 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "#0d1b2a", lineHeight: 1.4 }}>
+                          {article.title_pt}
+                        </h4>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
-            )}
+
+              {/* Sidebar */}
+              <aside>
+                <div style={{ borderRadius: "0.75rem", overflow: "hidden", border: "1px solid rgba(0,0,0,0.08)" }}>
+                  <div style={{ backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>
+                    VÍDEO EM DESTAQUE
+                  </div>
+                  {featuredVideoUrl ? (
+                    <div style={{ position: "relative", paddingTop: "56.25%" }}>
+                      <iframe
+                        src={featuredVideoUrl}
+                        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  ) : (
+                    <div style={{ aspectRatio: "16/9", backgroundColor: "#f0f4f8", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "0.875rem", fontWeight: 600 }}>
+                      Em breve
+                    </div>
+                  )}
+                </div>
+
+                <div style={{ marginTop: "1.25rem", borderRadius: "0.75rem", overflow: "hidden", background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)", padding: "1.5rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#FFB703", fontWeight: 800, fontSize: "0.8125rem", marginBottom: "0.75rem" }}>
+                    <Zap size={14} /> FLASH
+                  </div>
+                  <h4 style={{ color: "white", fontWeight: 800, fontSize: "1rem", marginBottom: "0.5rem" }}>
+                    Receba a Mea Sententia por e-mail
+                  </h4>
+                  <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8125rem", lineHeight: 1.5, marginBottom: "1rem" }}>
+                    Perspectivas sobre Marketing, Growth e IA direto na sua caixa de entrada.
+                  </p>
+                  <NewsletterForm compact />
+                </div>
+              </aside>
+            </div>
           </div>
+
+          <style>{`
+            @media (max-width: 900px) {
+              .home-lead-grid { grid-template-columns: 1fr !important; }
+            }
+          `}</style>
         </section>
       )}
 
