@@ -16,16 +16,10 @@ import {
   MessageSquare,
   LogOut,
   Wrench,
-  Heart,
-  Sparkles,
-  Share2,
 } from "lucide-react";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/conteudo", label: "Estúdio IA", icon: Sparkles },
-  { href: "/admin/integracoes", label: "Integrações", icon: Share2 },
-  { href: "/admin/tiktok", label: "TikTok", icon: Heart },
   { href: "/admin/artigos", label: "Artigos", icon: FileText },
   { href: "/admin/portfolio", label: "Portfólio", icon: Briefcase },
   { href: "/admin/servicos", label: "Serviços", icon: Wrench },

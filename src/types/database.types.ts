@@ -176,19 +176,19 @@ type SiteConfigRow = { key: string; value: string | null; updated_at: string };
 export type Database = {
   public: {
     Tables: {
-      articles: { Row: ArticleRow; Insert: Omit<ArticleRow, "id" | "created_at" | "updated_at" | "views">; Update: Partial<Omit<ArticleRow, "id" | "created_at" | "updated_at">> };
-      categories: { Row: CategoryRow; Insert: Omit<CategoryRow, "id" | "created_at">; Update: Partial<Omit<CategoryRow, "id" | "created_at">> };
-      tags: { Row: TagRow; Insert: Omit<TagRow, "id" | "created_at">; Update: Partial<Omit<TagRow, "id" | "created_at">> };
-      article_tags: { Row: ArticleTagRow; Insert: ArticleTagRow; Update: Partial<ArticleTagRow> };
-      portfolio_cases: { Row: PortfolioCaseRow; Insert: Omit<PortfolioCaseRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<PortfolioCaseRow, "id" | "created_at" | "updated_at">> };
-      services: { Row: ServiceRow; Insert: Omit<ServiceRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<ServiceRow, "id" | "created_at" | "updated_at">> };
-      testimonials: { Row: TestimonialRow; Insert: Omit<TestimonialRow, "id" | "created_at">; Update: Partial<Omit<TestimonialRow, "id" | "created_at">> };
-      leads: { Row: LeadRow; Insert: Omit<LeadRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<LeadRow, "id" | "created_at" | "updated_at">> };
-      newsletter_subs: { Row: NewsletterSubRow; Insert: Omit<NewsletterSubRow, "id" | "subscribed_at">; Update: Partial<Omit<NewsletterSubRow, "id" | "subscribed_at">> };
-      courses: { Row: CourseRow; Insert: Omit<CourseRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<CourseRow, "id" | "created_at" | "updated_at">> };
-      resources: { Row: ResourceRow; Insert: Omit<ResourceRow, "id" | "created_at" | "updated_at" | "download_count">; Update: Partial<Omit<ResourceRow, "id" | "created_at" | "updated_at">> };
-      media_items: { Row: MediaItemRow; Insert: Omit<MediaItemRow, "id" | "created_at">; Update: Partial<Omit<MediaItemRow, "id" | "created_at">> };
-      site_config: { Row: SiteConfigRow; Insert: Omit<SiteConfigRow, "updated_at">; Update: Partial<Omit<SiteConfigRow, "updated_at">> };
+      articles: { Row: ArticleRow; Insert: Omit<ArticleRow, "id" | "created_at" | "updated_at" | "views">; Update: Partial<Omit<ArticleRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      categories: { Row: CategoryRow; Insert: Omit<CategoryRow, "id" | "created_at">; Update: Partial<Omit<CategoryRow, "id" | "created_at">>; Relationships: [] };
+      tags: { Row: TagRow; Insert: Omit<TagRow, "id" | "created_at">; Update: Partial<Omit<TagRow, "id" | "created_at">>; Relationships: [] };
+      article_tags: { Row: ArticleTagRow; Insert: ArticleTagRow; Update: Partial<ArticleTagRow>; Relationships: [] };
+      portfolio_cases: { Row: PortfolioCaseRow; Insert: Omit<PortfolioCaseRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<PortfolioCaseRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      services: { Row: ServiceRow; Insert: Omit<ServiceRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<ServiceRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      testimonials: { Row: TestimonialRow; Insert: Omit<TestimonialRow, "id" | "created_at">; Update: Partial<Omit<TestimonialRow, "id" | "created_at">>; Relationships: [] };
+      leads: { Row: LeadRow; Insert: Omit<LeadRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<LeadRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      newsletter_subs: { Row: NewsletterSubRow; Insert: Omit<NewsletterSubRow, "id" | "subscribed_at">; Update: Partial<Omit<NewsletterSubRow, "id" | "subscribed_at">>; Relationships: [] };
+      courses: { Row: CourseRow; Insert: Omit<CourseRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<CourseRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      resources: { Row: ResourceRow; Insert: Omit<ResourceRow, "id" | "created_at" | "updated_at" | "download_count">; Update: Partial<Omit<ResourceRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      media_items: { Row: MediaItemRow; Insert: Omit<MediaItemRow, "id" | "created_at">; Update: Partial<Omit<MediaItemRow, "id" | "created_at">>; Relationships: [] };
+      site_config: { Row: SiteConfigRow; Insert: Omit<SiteConfigRow, "updated_at">; Update: Partial<Omit<SiteConfigRow, "updated_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
