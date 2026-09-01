@@ -2,9 +2,9 @@
 
 import { FormShell, Field, Input, Textarea, Select, SubmitButton } from "@/components/admin/ui";
 import { upsertArticle } from "./actions";
-import type { Article, Category } from "@/types/database.types";
+import type { Article, Category, Author } from "@/types/database.types";
 
-export function ArticleForm({ item, categories }: { item?: Article; categories: Category[] }) {
+export function ArticleForm({ item, categories, authors }: { item?: Article; categories: Category[]; authors: Author[] }) {
   const action = upsertArticle.bind(null, item?.id ?? null);
 
   return (
@@ -24,6 +24,14 @@ export function ArticleForm({ item, categories }: { item?: Article; categories: 
             <option value="">Sem categoria</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.name_pt}</option>
+            ))}
+          </Select>
+        </Field>
+        <Field label="Autor">
+          <Select name="author_id" defaultValue={item?.author_id ?? ""}>
+            <option value="">Sem autor definido</option>
+            {authors.map((a) => (
+              <option key={a.id} value={a.id}>{a.name}</option>
             ))}
           </Select>
         </Field>

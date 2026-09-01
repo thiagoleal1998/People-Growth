@@ -13,6 +13,7 @@ export async function upsertArticle(id: string | null, formData: FormData) {
   const slugInput = String(formData.get("slug") ?? "").trim();
   const status = (String(formData.get("status") ?? "draft")) as Article["status"];
   const categoryId = String(formData.get("category_id") ?? "");
+  const authorId = String(formData.get("author_id") ?? "");
 
   const payload: Omit<Article, "id" | "created_at" | "updated_at" | "views"> = {
     title_pt,
@@ -26,7 +27,7 @@ export async function upsertArticle(id: string | null, formData: FormData) {
     category_id: categoryId || null,
     status,
     published_at: status === "published" ? new Date().toISOString() : null,
-    author_id: null,
+    author_id: authorId || null,
     read_time: null,
     seo_title_pt: String(formData.get("seo_title_pt") ?? "") || null,
     seo_title_en: String(formData.get("seo_title_en") ?? "") || null,

@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { Search, ChevronRight, Linkedin, Instagram, Mail } from "lucide-react";
+import { Search, ChevronRight } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { createClient } from "@/lib/supabase/server";
-import type { Article, Category, Tag } from "@/types/database.types";
+import type { Article, Category, Tag, Author } from "@/types/database.types";
 
 export const revalidate = 300;
 
@@ -21,25 +21,23 @@ export async function generateMetadata({
   };
 }
 
-type SiteConfigRow = { key: string; value: string | null };
-
 export default async function MeaSententiePage() {
   const t = await getTranslations("newsletter");
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const [articlesRes, categoriesRes, tagsRes, configRes] = await Promise.all([
+  const [articlesRes, categoriesRes, tagsRes, authorsRes] = await Promise.all([
     client.from("articles").select("*").eq("status", "published").order("published_at", { ascending: false }),
     client.from("categories").select("*"),
     client.from("tags").select("*"),
-    client.from("site_config").select("*"),
+    client.from("authors").select("*").eq("status", "active").order("order"),
   ]);
 
   const articles = (articlesRes.data ?? []) as Article[];
   const categories = (categoriesRes.data ?? []) as Category[];
   const tags = (tagsRes.data ?? []) as Tag[];
-  const config = Object.fromEntries(((configRes.data ?? []) as SiteConfigRow[]).map((c) => [c.key, c.value ?? ""]));
+  const authors = (authorsRes.data ?? []) as Author[];
 
   const categoryById = new Map(categories.map((c) => [c.id, c]));
   const [featured, ...rest] = articles;
@@ -94,44 +92,37 @@ export default async function MeaSententiePage() {
         </div>
       </section>
 
-      {/* Author strip */}
-      <section style={{ backgroundColor: "white", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
-        <div
-          className="container-xl"
-          style={{ display: "flex", alignItems: "center", gap: "1.25rem", padding: "1.5rem 0", flexWrap: "wrap" }}
-        >
+      {/* Columnists strip */}
+      {authors.length > 0 && (
+        <section style={{ backgroundColor: "white", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
           <div
-            style={{
-              width: "3.5rem",
-              height: "3.5rem",
-              borderRadius: "50%",
-              flexShrink: 0,
-              background: config.hero_photo ? `url(${config.hero_photo}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
-            }}
-          />
-          <div style={{ flex: 1, minWidth: "200px" }}>
-            <div style={{ fontWeight: 800, fontSize: "1.0625rem", color: "#0d1b2a" }}>Thiago Leal</div>
-            <div style={{ color: "#64748b", fontSize: "0.875rem" }}>Fundador da People &amp; Growth · Estratégia, Growth e IA</div>
+            className="container-xl"
+            style={{ display: "flex", gap: "2rem", padding: "1.5rem 0", flexWrap: "wrap", overflowX: "auto" }}
+          >
+            {authors.map((author) => (
+              <Link
+                key={author.id}
+                href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
+                style={{ display: "flex", alignItems: "center", gap: "0.75rem", textDecoration: "none", minWidth: "200px" }}
+              >
+                <div
+                  style={{
+                    width: "2.75rem",
+                    height: "2.75rem",
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                  }}
+                />
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: "0.9375rem", color: "#4361EE" }}>{author.name}</div>
+                  {author.role_pt && <div style={{ color: "#64748b", fontSize: "0.8125rem" }}>{author.role_pt}</div>}
+                </div>
+              </Link>
+            ))}
           </div>
-          <div style={{ display: "flex", gap: "0.75rem" }}>
-            {config.linkedin && (
-              <a href={config.linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={{ color: "#64748b" }}>
-                <Linkedin size={18} />
-              </a>
-            )}
-            {config.instagram && (
-              <a href={config.instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "#64748b" }}>
-                <Instagram size={18} />
-              </a>
-            )}
-            {config.contact_email && (
-              <a href={`mailto:${config.contact_email}`} aria-label="E-mail" style={{ color: "#64748b" }}>
-                <Mail size={18} />
-              </a>
-            )}
-          </div>
-        </div>
-      </section>
+        </section>
+      )}
 
       <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
         <div className="container-xl">

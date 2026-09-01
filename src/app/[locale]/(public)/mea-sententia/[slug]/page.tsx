@@ -5,7 +5,7 @@ import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
-import type { Article, Category } from "@/types/database.types";
+import type { Article, Category, Author } from "@/types/database.types";
 
 export const revalidate = 300;
 
@@ -20,9 +20,15 @@ async function getArticle(slug: string) {
     ? (await client.from("categories").select("*").eq("id", article.category_id).single()).data
     : null;
 
-  const config = (await client.from("site_config").select("*")).data as { key: string; value: string | null }[] | null;
+  const author = article.author_id
+    ? (await client.from("authors").select("*").eq("id", article.author_id).single()).data
+    : null;
 
-  return { article: article as Article, category: category as Category | null, config: Object.fromEntries((config ?? []).map((c) => [c.key, c.value ?? ""])) };
+  return {
+    article: article as Article,
+    category: category as Category | null,
+    author: author as Author | null,
+  };
 }
 
 export async function generateMetadata({
@@ -49,7 +55,7 @@ export default async function ArticlePage({
 
   if (!result) notFound();
 
-  const { article, category, config } = result;
+  const { article, category, author } = result;
 
   // Fire-and-forget view counter; never block or fail the page render on it.
   createAdminClient()
@@ -123,7 +129,7 @@ export default async function ArticlePage({
                 <Clock size={14} /> {article.read_time} min de leitura
               </span>
             )}
-            <span>Por Thiago Leal</span>
+            {author && <span>Por {author.name}</span>}
           </div>
         </div>
       </section>
@@ -152,38 +158,46 @@ export default async function ArticlePage({
             />
 
             {/* Author */}
-            <div
-              style={{
-                marginTop: "2.5rem",
-                padding: "1.75rem",
-                backgroundColor: "#f0f4f8",
-                borderRadius: "1rem",
-                display: "flex",
-                gap: "1.25rem",
-                alignItems: "flex-start",
-              }}
-            >
-              <div
+            {author && (
+              <Link
+                href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
                 style={{
-                  width: "4rem",
-                  height: "4rem",
-                  borderRadius: "50%",
-                  flexShrink: 0,
-                  background: config.hero_photo ? `url(${config.hero_photo}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                  marginTop: "2.5rem",
+                  padding: "1.75rem",
+                  backgroundColor: "#f0f4f8",
+                  borderRadius: "1rem",
+                  display: "flex",
+                  gap: "1.25rem",
+                  alignItems: "flex-start",
+                  textDecoration: "none",
                 }}
-              />
-              <div>
-                <div style={{ fontWeight: 800, color: "#0d1b2a", fontSize: "1rem", marginBottom: "0.25rem" }}>
-                  Thiago Leal
+              >
+                <div
+                  style={{
+                    width: "4rem",
+                    height: "4rem",
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                  }}
+                />
+                <div>
+                  <div style={{ fontWeight: 800, color: "#0d1b2a", fontSize: "1rem", marginBottom: "0.25rem" }}>
+                    {author.name}
+                  </div>
+                  {author.role_pt && (
+                    <div style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.875rem", marginBottom: "0.5rem" }}>
+                      {author.role_pt}
+                    </div>
+                  )}
+                  {author.bio_pt && (
+                    <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.6 }}>
+                      {author.bio_pt}
+                    </p>
+                  )}
                 </div>
-                <div style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.875rem", marginBottom: "0.5rem" }}>
-                  Fundador da People & Growth · Especialista em Marketing, Growth e IA
-                </div>
-                <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.6 }}>
-                  Consultor estratégico com mais de 7 anos de experiência em Marketing Digital, Growth e Inteligência Artificial.
-                </p>
-              </div>
-            </div>
+              </Link>
+            )}
           </article>
 
           {/* Sidebar */}

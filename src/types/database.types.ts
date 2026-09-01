@@ -173,6 +173,24 @@ type MediaItemRow = {
 
 type SiteConfigRow = { key: string; value: string | null; updated_at: string };
 
+type AuthorRow = {
+  id: string;
+  name: string;
+  slug: string;
+  role_pt: string | null;
+  role_en: string | null;
+  bio_pt: string | null;
+  bio_en: string | null;
+  photo_url: string | null;
+  email: string | null;
+  linkedin_url: string | null;
+  instagram_url: string | null;
+  status: "active" | "inactive";
+  order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -189,6 +207,7 @@ export type Database = {
       resources: { Row: ResourceRow; Insert: Omit<ResourceRow, "id" | "created_at" | "updated_at" | "download_count">; Update: Partial<Omit<ResourceRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       media_items: { Row: MediaItemRow; Insert: Omit<MediaItemRow, "id" | "created_at">; Update: Partial<Omit<MediaItemRow, "id" | "created_at">>; Relationships: [] };
       site_config: { Row: SiteConfigRow; Insert: Omit<SiteConfigRow, "updated_at">; Update: Partial<Omit<SiteConfigRow, "updated_at">>; Relationships: [] };
+      authors: { Row: AuthorRow; Insert: Omit<AuthorRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AuthorRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -207,3 +226,4 @@ export type NewsletterSub = NewsletterSubRow;
 export type Course = CourseRow;
 export type Resource = ResourceRow;
 export type MediaItem = MediaItemRow;
+export type Author = AuthorRow;

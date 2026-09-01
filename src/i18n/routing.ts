@@ -16,6 +16,10 @@ export const routing = defineRouting({
       pt: "/mea-sententia/[slug]",
       en: "/mea-sententia/[slug]",
     },
+    "/mea-sententia/autor/[slug]": {
+      pt: "/mea-sententia/autor/[slug]",
+      en: "/mea-sententia/autor/[slug]",
+    },
     "/cursos": { pt: "/cursos", en: "/courses" },
     "/laboratorio-ia": { pt: "/laboratorio-ia", en: "/ai-lab" },
     "/recursos": { pt: "/recursos", en: "/resources" },
