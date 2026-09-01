@@ -1,4 +1,4 @@
-import { useTranslations } from "next-intl";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import {
   ArrowRight,
@@ -10,6 +10,8 @@ import {
   Sparkles,
   ChevronRight,
 } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import type { Article } from "@/types/database.types";
 
 const stats = [
   { labelKey: "statsYears", value: "7+" },
@@ -64,35 +66,25 @@ const services = [
   },
 ];
 
-const recentArticles = [
-  {
-    title: "Como usar IA para acelerar sua estratégia de Growth",
-    excerpt: "Descubra como ferramentas de IA estão transformando a forma como empresas escalam seus resultados.",
-    category: "IA",
-    date: "Jun 2025",
-    slug: "ia-estrategia-growth",
-    readTime: 8,
-  },
-  {
-    title: "OKRs na prática: como definir metas que realmente funcionam",
-    excerpt: "Um guia completo para implementar OKRs em empresas de qualquer tamanho com resultados mensuráveis.",
-    category: "Estratégia",
-    date: "Mai 2025",
-    slug: "okrs-na-pratica",
-    readTime: 6,
-  },
-  {
-    title: "Neuromarketing: como o cérebro decide e o que isso muda no Marketing",
-    excerpt: "A neurociência por trás das decisões de compra e como aplicar esses princípios nas suas campanhas.",
-    category: "Marketing",
-    date: "Abr 2025",
-    slug: "neuromarketing-decisoes",
-    readTime: 10,
-  },
-];
+export const revalidate = 300;
 
-export default function HomePage() {
-  const t = useTranslations("home");
+function formatArticleDate(iso: string) {
+  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+}
+
+export default async function HomePage() {
+  const t = await getTranslations("home");
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any)
+    .from("articles")
+    .select("*")
+    .eq("status", "published")
+    .order("published_at", { ascending: false })
+    .limit(4);
+  const recentArticles = (data ?? []) as Article[];
+  const [featured, ...secondary] = recentArticles;
 
   return (
     <>
@@ -318,87 +310,94 @@ export default function HomePage() {
       </section>
 
       {/* Latest articles */}
-      <section className="section-padding" style={{ backgroundColor: "white" }}>
-        <div className="container-xl">
-          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "3rem", flexWrap: "wrap", gap: "1rem" }}>
-            <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "#0d1b2a" }}>
-              {t("latestArticles")}
-            </h2>
-            <Link
-              href="/mea-sententia"
-              style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#4361EE", fontWeight: 600, fontSize: "0.9375rem" }}
-            >
-              {t("viewAll")} <ChevronRight size={16} />
-            </Link>
-          </div>
+      {featured && (
+        <section className="section-padding" style={{ backgroundColor: "white" }}>
+          <div className="container-xl">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2.5rem", flexWrap: "wrap", gap: "1rem" }}>
+              <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "#0d1b2a" }}>
+                {t("latestArticles")}
+              </h2>
+              <Link
+                href="/mea-sententia"
+                style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#4361EE", fontWeight: 600, fontSize: "0.9375rem" }}
+              >
+                {t("viewAll")} <ChevronRight size={16} />
+              </Link>
+            </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.75rem" }}>
-            {recentArticles.map((article) => (
-              <article
-                key={article.slug}
+            {/* Featured article */}
+            <Link
+              href={{ pathname: "/mea-sententia/[slug]", params: { slug: featured.slug } }}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "1.1fr 1fr",
+                gap: "2.5rem",
+                alignItems: "center",
+                marginBottom: "3rem",
+                paddingBottom: "3rem",
+                borderBottom: "1px solid rgba(0,0,0,0.08)",
+              }}
+              className="home-featured-article"
+            >
+              <div>
+                <h3 style={{ fontWeight: 800, fontSize: "clamp(1.375rem, 3vw, 1.875rem)", color: "#0d1b2a", lineHeight: 1.25, marginBottom: "0.875rem" }}>
+                  {featured.title_pt}
+                </h3>
+                {featured.excerpt_pt && (
+                  <p style={{ color: "#64748b", fontSize: "1rem", lineHeight: 1.65, marginBottom: "1.25rem" }}>
+                    {featured.excerpt_pt}
+                  </p>
+                )}
+                <span style={{ fontSize: "0.8125rem", color: "#94a3b8" }}>
+                  {featured.published_at && formatArticleDate(featured.published_at)}
+                  {featured.read_time ? ` · ${featured.read_time} min` : ""}
+                </span>
+              </div>
+              <div
                 style={{
+                  height: "260px",
                   borderRadius: "1rem",
                   overflow: "hidden",
-                  border: "1px solid rgba(0,0,0,0.07)",
-                  transition: "all 0.2s",
+                  background: featured.cover_image ? `url(${featured.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                 }}
-              >
-                {/* Cover placeholder */}
-                <div
-                  style={{
-                    height: "200px",
-                    background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <span
-                    style={{
-                      backgroundColor: "rgba(67,97,238,0.2)",
-                      color: "#4361EE",
-                      padding: "0.375rem 0.875rem",
-                      borderRadius: "9999px",
-                      fontSize: "0.8125rem",
-                      fontWeight: 600,
-                    }}
-                  >
-                    {article.category}
-                  </span>
-                </div>
+              />
+            </Link>
 
-                <div style={{ padding: "1.5rem" }}>
-                  <h3
-                    style={{
-                      fontWeight: 700,
-                      fontSize: "1.0625rem",
-                      color: "#0d1b2a",
-                      lineHeight: 1.4,
-                      marginBottom: "0.625rem",
-                    }}
+            {secondary.length > 0 && (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.75rem" }}>
+                {secondary.map((article) => (
+                  <Link
+                    key={article.id}
+                    href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+                    style={{ display: "block", textDecoration: "none" }}
                   >
-                    {article.title}
-                  </h3>
-                  <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: "1.25rem" }}>
-                    {article.excerpt}
-                  </p>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <div
+                      style={{
+                        height: "160px",
+                        borderRadius: "0.75rem",
+                        marginBottom: "1rem",
+                        background: article.cover_image ? `url(${article.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                      }}
+                    />
+                    <h4 style={{ fontWeight: 700, fontSize: "1rem", color: "#0d1b2a", lineHeight: 1.4, marginBottom: "0.5rem" }}>
+                      {article.title_pt}
+                    </h4>
                     <span style={{ fontSize: "0.8125rem", color: "#94a3b8" }}>
-                      {article.date} · {article.readTime} min
+                      {article.published_at && formatArticleDate(article.published_at)}
                     </span>
-                    <Link
-                      href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
-                      style={{ fontSize: "0.875rem", color: "#4361EE", fontWeight: 600 }}
-                    >
-                      Ler →
-                    </Link>
-                  </div>
-                </div>
-              </article>
-            ))}
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
-        </div>
-      </section>
+
+          <style>{`
+            @media (max-width: 768px) {
+              .home-featured-article { grid-template-columns: 1fr !important; }
+            }
+          `}</style>
+        </section>
+      )}
 
       {/* About teaser */}
       <section

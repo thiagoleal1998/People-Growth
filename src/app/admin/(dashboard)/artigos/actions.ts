@@ -46,6 +46,7 @@ export async function upsertArticle(id: string | null, formData: FormData) {
   }
 
   revalidatePath("/admin/artigos");
+  revalidatePath("/[locale]", "page");
   redirect("/admin/artigos");
 }
 
@@ -53,4 +54,5 @@ export async function deleteArticle(id: string) {
   const supabase = await createClient();
   await supabase.from("articles").delete().eq("id", id);
   revalidatePath("/admin/artigos");
+  revalidatePath("/[locale]", "page");
 }
