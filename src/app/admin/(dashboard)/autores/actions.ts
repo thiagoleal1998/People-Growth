@@ -17,6 +17,8 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
     slug: slugInput || slugify(name, { lower: true, strict: true }),
     role_pt: String(formData.get("role_pt") ?? "") || null,
     role_en: String(formData.get("role_en") ?? "") || null,
+    tagline_pt: String(formData.get("tagline_pt") ?? "").slice(0, 100) || null,
+    tagline_en: String(formData.get("tagline_en") ?? "").slice(0, 100) || null,
     bio_pt: String(formData.get("bio_pt") ?? "") || null,
     bio_en: String(formData.get("bio_en") ?? "") || null,
     photo_url: String(formData.get("photo_url") ?? "") || null,
@@ -37,6 +39,7 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
 
   revalidatePath("/admin/autores");
   revalidatePath("/[locale]/mea-sententia", "page");
+  revalidatePath("/[locale]", "page");
   redirect("/admin/autores?saved=1");
 }
 

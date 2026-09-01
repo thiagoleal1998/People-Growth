@@ -180,6 +180,8 @@ type AuthorRow = {
   slug: string;
   role_pt: string | null;
   role_en: string | null;
+  tagline_pt: string | null;
+  tagline_en: string | null;
   bio_pt: string | null;
   bio_en: string | null;
   photo_url: string | null;

@@ -300,7 +300,7 @@ export default async function HomePage() {
                         overflow: "hidden",
                       }}
                     >
-                      {latest ? latest.title_pt : author.role_pt}
+                      {author.tagline_pt?.trim() || (latest ? latest.title_pt : author.role_pt)}
                     </div>
                   </div>
                 </Link>

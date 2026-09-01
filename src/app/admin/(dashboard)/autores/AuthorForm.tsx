@@ -1,8 +1,32 @@
 "use client";
 
+import { useState } from "react";
 import { FormShell, Field, Input, Textarea, Select, SubmitButton } from "@/components/admin/ui";
 import { upsertAuthor } from "./actions";
 import type { Author } from "@/types/database.types";
+
+const TAGLINE_MAX = 100;
+
+function TaglineField({ name, label, defaultValue }: { name: string; label: string; defaultValue: string }) {
+  const [value, setValue] = useState(defaultValue);
+  const remaining = TAGLINE_MAX - value.length;
+
+  return (
+    <Field
+      label={label}
+      hint={`Aparece na tira de colunistas, no lugar do cargo. ${remaining} caractere${remaining === 1 ? "" : "s"} restante${remaining === 1 ? "" : "s"}.`}
+    >
+      <Textarea
+        name={name}
+        rows={2}
+        maxLength={TAGLINE_MAX}
+        value={value}
+        onChange={(e) => setValue(e.target.value)}
+        style={{ borderColor: remaining < 0 ? "#ef4444" : undefined }}
+      />
+    </Field>
+  );
+}
 
 export function AuthorForm({ item }: { item?: Author }) {
   const action = upsertAuthor.bind(null, item?.id ?? null);
@@ -16,10 +40,12 @@ export function AuthorForm({ item }: { item?: Author }) {
         <Field label="Slug" hint="Usado na URL da página do autor — deixe em branco para gerar automaticamente">
           <Input name="slug" defaultValue={item?.slug ?? ""} />
         </Field>
-        <Field label="Cargo/tagline (PT)" hint='Ex: "Especialista em Growth e Dados"'>
+        <TaglineField name="tagline_pt" label="Frase de destaque (PT)" defaultValue={item?.tagline_pt ?? ""} />
+        <TaglineField name="tagline_en" label="Frase de destaque (EN)" defaultValue={item?.tagline_en ?? ""} />
+        <Field label="Cargo (PT)" hint='Usado como reserva quando não há frase de destaque nem artigo publicado. Ex: "Especialista em Growth e Dados"'>
           <Input name="role_pt" defaultValue={item?.role_pt ?? ""} />
         </Field>
-        <Field label="Cargo/tagline (EN)">
+        <Field label="Cargo (EN)">
           <Input name="role_en" defaultValue={item?.role_en ?? ""} />
         </Field>
         <Field label="Bio (PT)">
