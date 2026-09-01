@@ -10,7 +10,6 @@ const fields: { key: string; label: string; placeholder?: string }[] = [
   { key: "instagram", label: "Instagram (URL)" },
   { key: "calendly_url", label: "Link de agendamento (Calendly)" },
   { key: "hero_photo", label: "Foto de destaque (URL da imagem)" },
-  { key: "logo_url", label: "Logo do cabeçalho (URL da imagem)", placeholder: "Aparece ao lado do nome People & Growth no topo do site" },
   { key: "featured_video_url", label: "Vídeo em destaque (URL de embed do YouTube)", placeholder: "https://www.youtube.com/embed/..." },
   { key: "live_stream_url", label: "Live (URL de embed do YouTube)", placeholder: "https://www.youtube.com/embed/live_stream?channel=..." },
   { key: "site_url", label: "URL do site" },
@@ -36,6 +35,18 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
             <input type="checkbox" name="is_live" defaultChecked={values.is_live === "true"} />
             Sim, mostrar a caixa AO VIVO na home
           </label>
+        </Field>
+
+        <Field label="Logo do cabeçalho" hint="Aparece ao lado do nome People & Growth no topo do site. PNG, JPG, WEBP, SVG ou GIF, até 5MB.">
+          {values.logo_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={values.logo_url}
+              alt="Logo atual"
+              style={{ height: "2.5rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.25rem" }}
+            />
+          )}
+          <input type="file" name="logo_file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" />
         </Field>
 
         {fields.map(({ key, label, placeholder }) => (
