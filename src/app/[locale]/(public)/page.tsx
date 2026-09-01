@@ -133,7 +133,7 @@ export default async function HomePage() {
               CONTEÚDO
             </div>
 
-            <div className="home-lead-grid" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "1.5rem", alignItems: "start" }}>
+            <div className="home-lead-grid" style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: "1.5rem", alignItems: "start" }}>
               {/* Main column */}
               <div>
                 <Link
