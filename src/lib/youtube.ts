@@ -36,3 +36,21 @@ export function toYouTubeEmbedUrl(url: string): string {
 
   return videoId ? `https://www.youtube.com/embed/${videoId}` : trimmed;
 }
+
+/**
+ * Adds autoplay params to an embed URL. Browsers only allow autoplay when
+ * the video starts muted — the viewer can unmute from the player's own
+ * controls, same as UOL's "ao vivo" box.
+ */
+export function withAutoplay(embedUrl: string): string {
+  if (!embedUrl) return embedUrl;
+  try {
+    const url = new URL(embedUrl);
+    url.searchParams.set("autoplay", "1");
+    url.searchParams.set("mute", "1");
+    url.searchParams.set("playsinline", "1");
+    return url.toString();
+  } catch {
+    return embedUrl;
+  }
+}

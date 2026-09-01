@@ -14,7 +14,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
-import { toYouTubeEmbedUrl } from "@/lib/youtube";
+import { toYouTubeEmbedUrl, withAutoplay } from "@/lib/youtube";
 import type { Article, Author } from "@/types/database.types";
 
 const stats = [
@@ -239,7 +239,7 @@ export default async function HomePage() {
                     </div>
                     <div style={{ position: "relative", paddingTop: "56.25%" }}>
                       <iframe
-                        src={liveStreamUrl}
+                        src={withAutoplay(liveStreamUrl)}
                         style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
