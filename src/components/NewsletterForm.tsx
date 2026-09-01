@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
-export function NewsletterForm({ compact = false }: { compact?: boolean }) {
+export function NewsletterForm({ compact = false, light = false }: { compact?: boolean; light?: boolean }) {
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
@@ -69,9 +69,9 @@ export function NewsletterForm({ compact = false }: { compact?: boolean }) {
             minWidth: 0,
             padding: compact ? "0.625rem 0.875rem" : "0.875rem 1.25rem",
             borderRadius: "0.625rem",
-            border: "1px solid rgba(255,255,255,0.15)",
-            backgroundColor: compact ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.12)",
-            color: "white",
+            border: light ? "1px solid #cbd5e1" : "1px solid rgba(255,255,255,0.15)",
+            backgroundColor: light ? "white" : compact ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.12)",
+            color: light ? "#0d1b2a" : "white",
             fontSize: "0.9rem",
             outline: "none",
           }}

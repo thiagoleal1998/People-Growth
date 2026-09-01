@@ -91,6 +91,7 @@ export default async function HomePage() {
   );
   const featuredVideoUrl = config.featured_video_url ? toYouTubeEmbedUrl(config.featured_video_url) : "";
   const liveStreamUrl = config.live_stream_url ? toYouTubeEmbedUrl(config.live_stream_url) : "";
+  const shortsVideoUrl = config.shorts_video_url ? toYouTubeEmbedUrl(config.shorts_video_url) : "";
   const isLive = config.is_live === "true" && Boolean(liveStreamUrl);
   const [featured, ...rest] = allArticles;
   const secondary = rest.slice(0, 3);
@@ -275,19 +276,63 @@ export default async function HomePage() {
                   )}
                 </div>
 
-                <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)", padding: "1.25rem" }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#FFB703", fontWeight: 800, fontSize: "0.8125rem", marginBottom: "0.75rem" }}>
-                    <Zap size={14} /> FLASH
+                <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid rgba(0,0,0,0.08)", backgroundColor: "#0d1b2a" }}>
+                  <div style={{ color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                    <Zap size={14} color="#FFB703" /> SHORTS
                   </div>
-                  <h4 style={{ color: "white", fontWeight: 800, fontSize: "1rem", marginBottom: "0.5rem" }}>
-                    Receba a Mea Sententia por e-mail
-                  </h4>
-                  <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.8125rem", lineHeight: 1.5, marginBottom: "1rem" }}>
-                    Perspectivas sobre Marketing, Growth e IA direto na sua caixa de entrada.
-                  </p>
-                  <NewsletterForm compact />
+                  <div style={{ display: "flex", justifyContent: "center", padding: "0 0 1rem" }}>
+                    <div style={{ position: "relative", width: "210px", aspectRatio: "9/16", borderRadius: "0.5rem", overflow: "hidden" }}>
+                      {shortsVideoUrl ? (
+                        <iframe
+                          src={shortsVideoUrl}
+                          style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <div
+                          style={{
+                            position: "absolute",
+                            inset: 0,
+                            backgroundColor: "rgba(255,255,255,0.06)",
+                            display: "flex",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            color: "rgba(255,255,255,0.4)",
+                            fontSize: "0.8125rem",
+                            fontWeight: 600,
+                            textAlign: "center",
+                            padding: "1rem",
+                          }}
+                        >
+                          Em breve
+                        </div>
+                      )}
+                    </div>
+                  </div>
                 </div>
               </aside>
+            </div>
+
+            {/* Newsletter signup */}
+            <div
+              style={{
+                marginTop: "2rem",
+                padding: "1.5rem",
+                borderRadius: "0.75rem",
+                border: "1px solid rgba(67,97,238,0.2)",
+                backgroundColor: "rgba(67,97,238,0.04)",
+              }}
+            >
+              <h4 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "#0d1b2a", marginBottom: "0.375rem" }}>
+                ✍️ Receba a Mea Sententia por e-mail
+              </h4>
+              <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.5, marginBottom: "1rem", maxWidth: "460px" }}>
+                Perspectivas sobre negócios, sociedade e os temas que impactam pessoas — direto na sua caixa de entrada.
+              </p>
+              <div style={{ maxWidth: "460px" }}>
+                <NewsletterForm compact light />
+              </div>
             </div>
           </div>
 

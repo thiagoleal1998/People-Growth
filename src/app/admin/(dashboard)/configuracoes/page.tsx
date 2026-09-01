@@ -14,6 +14,7 @@ const fields: { key: string; label: string; placeholder?: string }[] = [
   { key: "featured_video_url", label: "Vídeo em destaque (URL de embed do YouTube)", placeholder: "https://www.youtube.com/embed/..." },
   { key: "live_stream_url", label: "Live (URL de embed do YouTube)", placeholder: "https://www.youtube.com/embed/live_stream?channel=..." },
   { key: "live_caption_pt", label: "Legenda da live", placeholder: "Ex: Thiago Leal comenta os principais temas da semana" },
+  { key: "shorts_video_url", label: "Vídeo vertical (Shorts, URL de embed do YouTube)", placeholder: "https://www.youtube.com/shorts/..." },
   { key: "site_url", label: "URL do site" },
 ];
 
