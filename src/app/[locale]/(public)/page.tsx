@@ -127,18 +127,18 @@ export default async function HomePage() {
 
       {/* News lead — UOL-style front page block */}
       {featured && (
-        <section style={{ backgroundColor: "white", paddingTop: "2.5rem", paddingBottom: "2.5rem" }}>
+        <section style={{ backgroundColor: "white", paddingTop: "1.5rem", paddingBottom: "1.5rem" }}>
           <div className="container-xl">
-            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4361EE", letterSpacing: "0.08em", marginBottom: "1rem" }}>
+            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4361EE", letterSpacing: "0.08em", marginBottom: "0.75rem" }}>
               CONTEÚDO
             </div>
 
-            <div className="home-lead-grid" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "1.75rem", alignItems: "start" }}>
+            <div className="home-lead-grid" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "1.5rem", alignItems: "start" }}>
               {/* Main column */}
               <div>
                 <Link
                   href={{ pathname: "/mea-sententia/[slug]", params: { slug: featured.slug } }}
-                  style={{ display: "flex", textDecoration: "none", gap: "1.125rem", alignItems: "flex-start" }}
+                  style={{ display: "flex", textDecoration: "none", gap: "1rem", alignItems: "flex-start" }}
                   className="home-featured-link"
                 >
                   {featured.cover_image && (
@@ -153,14 +153,14 @@ export default async function HomePage() {
                     />
                   )}
                   <div>
-                    <div style={{ marginBottom: "0.625rem" }}>
+                    <div style={{ marginBottom: "0.5rem" }}>
                       <FormatTag format={featured.format} />
                     </div>
-                    <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "#0d1b2a", lineHeight: 1.15, marginBottom: "0.75rem" }}>
+                    <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "#0d1b2a", lineHeight: 1.1, marginBottom: "0.5rem" }}>
                       {featured.title_pt}
                     </h1>
                     {featured.excerpt_pt && (
-                      <p style={{ color: "#64748b", fontSize: "1.0625rem", lineHeight: 1.6 }}>
+                      <p style={{ color: "#64748b", fontSize: "1.0625rem", lineHeight: 1.5 }}>
                         {featured.excerpt_pt}
                       </p>
                     )}
@@ -168,7 +168,7 @@ export default async function HomePage() {
                 </Link>
 
                 {secondary.length > 0 && (
-                  <ul style={{ listStyle: "none", margin: "1.25rem 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+                  <ul style={{ listStyle: "none", margin: "0.875rem 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "0.4375rem" }}>
                     {secondary.map((article) => (
                       <li key={article.id}>
                         <Link
@@ -184,7 +184,7 @@ export default async function HomePage() {
                 )}
 
                 {secondary.length > 0 && (
-                  <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", marginTop: "1.75rem", paddingTop: "1.75rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem" }}>
+                  <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", marginTop: "1.125rem", paddingTop: "1.125rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.125rem" }}>
                     {secondary.map((article) => (
                       <Link
                         key={article.id}
@@ -193,9 +193,9 @@ export default async function HomePage() {
                       >
                         <div
                           style={{
-                            height: "130px",
-                            borderRadius: "0.625rem",
-                            marginBottom: "0.625rem",
+                            height: "110px",
+                            borderRadius: "0.5rem",
+                            marginBottom: "0.5rem",
                             background: article.cover_image ? `url(${article.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                           }}
                         />
@@ -214,7 +214,7 @@ export default async function HomePage() {
               {/* Sidebar */}
               <aside>
                 {isLive && (
-                  <div style={{ borderRadius: "0.5rem", overflow: "hidden", border: "2px solid #dc2626", marginBottom: "1.25rem" }}>
+                  <div style={{ borderRadius: "0.5rem", overflow: "hidden", border: "2px solid #dc2626", marginBottom: "0.875rem" }}>
                     <div style={{ backgroundColor: "#dc2626", color: "white", padding: "0.5rem 0.75rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontWeight: 800, fontSize: "0.75rem", letterSpacing: "0.03em" }}>
                         <Radio size={14} /> TRANSMISSÃO
@@ -275,7 +275,7 @@ export default async function HomePage() {
                   )}
                 </div>
 
-                <div style={{ marginTop: "1.25rem", borderRadius: "0.75rem", overflow: "hidden", background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)", padding: "1.5rem" }}>
+                <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)", padding: "1.25rem" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#FFB703", fontWeight: 800, fontSize: "0.8125rem", marginBottom: "0.75rem" }}>
                     <Zap size={14} /> FLASH
                   </div>
