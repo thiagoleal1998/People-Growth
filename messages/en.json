@@ -27,9 +27,9 @@
     "statsStudents": "Trained students",
     "latestArticles": "Latest articles",
     "viewAll": "View all",
-    "servicesTitle": "How I can help",
+    "servicesTitle": "How we can help",
     "servicesSubtitle": "Strategy and execution for businesses that want to grow intelligently.",
-    "testimonialsTitle": "What people say about my work",
+    "testimonialsTitle": "What people say about our work",
     "contactTitle": "Let's talk?",
     "contactSubtitle": "Schedule a free 30-minute session."
   },
@@ -134,7 +134,7 @@
   },
   "tools": {
     "title": "Tools I Recommend",
-    "subtitle": "Productivity, marketing and AI stack I use daily."
+    "subtitle": "Productivity, marketing and AI stack we use daily."
   },
   "testimonials": {
     "title": "Testimonials",
@@ -149,7 +149,7 @@
     "service": "Subject / Service",
     "message": "Message",
     "send": "Send message",
-    "success": "Message sent! I'll get back to you soon.",
+    "success": "Message sent! We'll get back to you soon.",
     "scheduleTitle": "Or schedule directly",
     "scheduleSubtitle": "Free 30-minute session."
   },

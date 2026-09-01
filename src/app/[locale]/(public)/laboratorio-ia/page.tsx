@@ -68,7 +68,7 @@ export default async function LaboratorioIAPage() {
             Neuro Botics
           </h2>
           <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.0625rem", lineHeight: 1.7, marginBottom: "2rem" }}>
-            A Neuro Botics é minha empresa especializada em soluções de IA para negócios. Desenvolvemos agentes, automações e integrações que aumentam a produtividade e criam vantagens competitivas reais.
+            A Neuro Botics é a empresa de tecnologia do ecossistema People &amp; Growth, especializada em soluções de IA para negócios. Desenvolvemos agentes, automações e integrações que aumentam a produtividade e criam vantagens competitivas reais.
           </p>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/contato" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#4361EE", color: "white", padding: "0.875rem 1.75rem", borderRadius: "0.75rem", fontWeight: 700, boxShadow: "0 4px 24px -4px rgba(67,97,238,0.5)" }}>

@@ -233,7 +233,7 @@ export default async function ArticlePage({
                 Precisa de consultoria?
               </h3>
               <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: "1rem" }}>
-                Ajudo empresas a crescerem com Marketing, Growth e IA.
+                Ajudamos empresas a crescerem com Marketing, Growth e IA.
               </p>
               <Link
                 href="/contato"

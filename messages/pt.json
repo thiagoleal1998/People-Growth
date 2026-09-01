@@ -27,9 +27,9 @@
     "statsStudents": "Alunos treinados",
     "latestArticles": "Últimos artigos",
     "viewAll": "Ver todos",
-    "servicesTitle": "Como posso ajudar",
+    "servicesTitle": "Como podemos ajudar",
     "servicesSubtitle": "Estratégia e execução para negócios que querem crescer com inteligência.",
-    "testimonialsTitle": "O que dizem sobre o meu trabalho",
+    "testimonialsTitle": "O que dizem sobre o nosso trabalho",
     "contactTitle": "Vamos conversar?",
     "contactSubtitle": "Agende uma sessão de 30 minutos sem compromisso."
   },
@@ -134,7 +134,7 @@
   },
   "tools": {
     "title": "Ferramentas que Recomendo",
-    "subtitle": "Stack de produtividade, marketing e IA que uso no dia a dia."
+    "subtitle": "Stack de produtividade, marketing e IA que usamos no dia a dia."
   },
   "testimonials": {
     "title": "Depoimentos",
@@ -149,7 +149,7 @@
     "service": "Assunto / Serviço",
     "message": "Mensagem",
     "send": "Enviar mensagem",
-    "success": "Mensagem enviada! Em breve entro em contato.",
+    "success": "Mensagem enviada! Em breve entraremos em contato.",
     "scheduleTitle": "Ou agende diretamente",
     "scheduleSubtitle": "Sessão gratuita de 30 minutos."
   },

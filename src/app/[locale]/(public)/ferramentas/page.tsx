@@ -25,7 +25,7 @@ const tools = [
     { name: "Semrush", description: "Ferramenta de SEO, análise de concorrência e palavras-chave.", url: "#", icon: "🔎", badge: null },
   ]},
   { category: "Produtividade", items: [
-    { name: "Notion", description: "Wiki, projetos e documentação. O hub central do meu trabalho.", url: "#", icon: "📝", badge: "Essencial" },
+    { name: "Notion", description: "Wiki, projetos e documentação. O hub central do nosso trabalho.", url: "#", icon: "📝", badge: "Essencial" },
     { name: "Linear", description: "Gestão de tarefas rápida e eficiente para times de tecnologia.", url: "#", icon: "✅", badge: null },
     { name: "Loom", description: "Vídeos rápidos para comunicação assíncrona e treinamentos.", url: "#", icon: "🎥", badge: null },
   ]},
