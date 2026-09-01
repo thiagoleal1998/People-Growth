@@ -1,6 +1,17 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Mic, Video, BookOpen, Calendar } from "lucide-react";
+import { Mic, Video, BookOpen, Calendar, Headphones, type LucideIcon } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import type { MediaItem } from "@/types/database.types";
+
+export const revalidate = 300;
+
+const typeMeta: Record<MediaItem["type"], { icon: LucideIcon; color: string }> = {
+  interview: { icon: Mic, color: "#4361EE" },
+  event: { icon: Video, color: "#06D6A0" },
+  article: { icon: BookOpen, color: "#FFB703" },
+  podcast: { icon: Headphones, color: "#4361EE" },
+};
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -8,17 +19,12 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   return { title: t("title"), description: t("subtitle") };
 }
 
-const items = [
-  { type: "interview", icon: Mic, title: "Entrevista: IA e o futuro do Marketing Digital", outlet: "Podcast Marketing Play", date: "Mar 2025", color: "#4361EE" },
-  { type: "event", icon: Video, title: "Palestra: Growth na Era da IA", outlet: "Summit Marketing Brasil", date: "Fev 2025", color: "#06D6A0" },
-  { type: "article", icon: BookOpen, title: "Artigo: Como usar dados para tomar melhores decisões", outlet: "Resultados Digitais Blog", date: "Jan 2025", color: "#FFB703" },
-  { type: "interview", icon: Mic, title: "Podcast: Construindo autoridade no LinkedIn", outlet: "Negócios Digitais Cast", date: "Dez 2024", color: "#4361EE" },
-  { type: "event", icon: Video, title: "Workshop: OKRs que Funcionam", outlet: "HR Tech Conference 2024", date: "Nov 2024", color: "#06D6A0" },
-  { type: "article", icon: BookOpen, title: "Coluna: Neuromarketing e decisões de compra", outlet: "E-commerce Brasil", date: "Out 2024", color: "#FFB703" },
-];
-
 export default async function NaMidiaPage() {
   const t = await getTranslations("media");
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any).from("media_items").select("*").order("order");
+  const items = (data ?? []) as MediaItem[];
 
   return (
     <>
@@ -31,22 +37,52 @@ export default async function NaMidiaPage() {
 
       <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
         <div className="container-xl">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
-            {items.map(({ icon: Icon, title, outlet, date, color }) => (
-              <div key={title} style={{ backgroundColor: "white", borderRadius: "1rem", padding: "1.75rem", border: "1px solid rgba(0,0,0,0.06)", display: "flex", gap: "1.25rem" }}>
-                <div style={{ width: "3rem", height: "3rem", borderRadius: "0.875rem", backgroundColor: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Icon size={20} color={color} />
-                </div>
-                <div>
-                  <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "#0d1b2a", lineHeight: 1.4, marginBottom: "0.375rem" }}>{title}</h3>
-                  <div style={{ color: "#64748b", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.25rem" }}>{outlet}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#94a3b8", fontSize: "0.75rem" }}>
-                    <Calendar size={12} /> {date}
+          {items.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#94a3b8" }}>
+              Nenhuma menção cadastrada no momento.
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
+              {items.map((item) => {
+                const meta = typeMeta[item.type];
+                const Icon = meta.icon;
+                const card = (
+                  <div style={{ backgroundColor: "white", borderRadius: "1rem", padding: "1.75rem", border: "1px solid rgba(0,0,0,0.06)", display: "flex", gap: "1.25rem" }}>
+                    <div
+                      style={{
+                        width: "3rem",
+                        height: "3rem",
+                        borderRadius: "0.875rem",
+                        flexShrink: 0,
+                        background: item.thumbnail ? `url(${item.thumbnail}) center/cover` : `${meta.color}15`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {!item.thumbnail && <Icon size={20} color={meta.color} />}
+                    </div>
+                    <div>
+                      <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "#0d1b2a", lineHeight: 1.4, marginBottom: "0.375rem" }}>{item.title}</h3>
+                      {item.outlet && <div style={{ color: "#64748b", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.25rem" }}>{item.outlet}</div>}
+                      {item.date && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#94a3b8", fontSize: "0.75rem" }}>
+                          <Calendar size={12} /> {new Date(item.date).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}
+                        </div>
+                      )}
+                    </div>
                   </div>
-                </div>
-              </div>
-            ))}
-          </div>
+                );
+                return item.url ? (
+                  <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
+                    {card}
+                  </a>
+                ) : (
+                  <div key={item.id}>{card}</div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
     </>

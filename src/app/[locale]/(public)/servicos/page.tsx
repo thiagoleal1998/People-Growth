@@ -1,7 +1,20 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { Target, TrendingUp, Rocket, BarChart3, Brain, Users, Sparkles, ArrowRight, CheckCircle2 } from "lucide-react";
+import {
+  Target, TrendingUp, Rocket, BarChart3, Brain, Users, Sparkles, ArrowRight, CheckCircle2, Wrench,
+  type LucideIcon,
+} from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import type { Service } from "@/types/database.types";
+
+export const revalidate = 300;
+
+const iconMap: Record<string, LucideIcon> = {
+  Target, TrendingUp, Rocket, BarChart3, Brain, Users, Sparkles,
+};
+
+const palette = ["#4361EE", "#06D6A0", "#FFB703"];
 
 export async function generateMetadata({
   params,
@@ -16,81 +29,12 @@ export async function generateMetadata({
   };
 }
 
-const services = [
-  {
-    slug: "consultoria-estrategica",
-    icon: Target,
-    title: "Consultoria Estratégica",
-    description: "Diagnóstico completo do negócio, análise de mercado e desenvolvimento de plano estratégico personalizado com foco em crescimento sustentável.",
-    methodology: ["Diagnóstico de negócio", "Análise de mercado e concorrência", "Definição de posicionamento", "Plano estratégico 90 dias", "Acompanhamento de resultados"],
-    benefits: ["Clareza sobre onde e como crescer", "Decisões embasadas em dados", "Plano de ação executável", "Indicadores de sucesso definidos"],
-    color: "#4361EE",
-    tag: "Mais procurado",
-  },
-  {
-    slug: "marketing-digital",
-    icon: TrendingUp,
-    title: "Marketing Digital",
-    description: "Estratégias integradas de marketing digital — do posicionamento de marca à geração de demanda, com gestão de campanhas de performance.",
-    methodology: ["Auditoria de presença digital", "Estratégia de conteúdo", "Gestão de campanhas (Google, Meta)", "Email marketing e automação", "Relatórios de performance"],
-    benefits: ["Mais visibilidade e autoridade", "Geração de leads qualificados", "ROI mensurável por canal", "Marca fortalecida e consistente"],
-    color: "#4361EE",
-    tag: null,
-  },
-  {
-    slug: "growth",
-    icon: Rocket,
-    title: "Growth Hacking",
-    description: "Estratégias de crescimento acelerado com foco em aquisição, ativação e retenção de clientes através de experimentação rápida e dados.",
-    methodology: ["Mapeamento do funil de crescimento", "Identificação de gargalos", "Ciclo de experimentos (A/B tests)", "Análise de cohort", "Playbooks de crescimento"],
-    benefits: ["Crescimento mais rápido e previsível", "CAC reduzido", "LTV maximizado", "Cultura de experimentação"],
-    color: "#06D6A0",
-    tag: null,
-  },
-  {
-    slug: "business-intelligence",
-    icon: BarChart3,
-    title: "Business Intelligence",
-    description: "Implementação de dashboards, KPIs e cultura data-driven com Power BI, Looker Studio e ferramentas avançadas de analytics.",
-    methodology: ["Mapeamento de indicadores", "Arquitetura de dados", "Desenvolvimento de dashboards", "Treinamento do time", "Governança de dados"],
-    benefits: ["Visibilidade total do negócio", "Relatórios automatizados", "Decisões mais rápidas e precisas", "Redução de planilhas manuais"],
-    color: "#FFB703",
-    tag: null,
-  },
-  {
-    slug: "inteligencia-artificial",
-    icon: Brain,
-    title: "Inteligência Artificial",
-    description: "Implementação de soluções de IA para automação de processos, criação de agentes GPT e integração de inteligência artificial no fluxo de trabalho.",
-    methodology: ["Mapeamento de processos elegíveis", "Criação de agentes GPT", "Automações com n8n/Make", "Integração com CRM e marketing", "Treinamento da equipe"],
-    benefits: ["Produtividade amplificada", "Processos automatizados", "IA integrada ao negócio", "Vantagem competitiva real"],
-    color: "#4361EE",
-    tag: "Novo",
-  },
-  {
-    slug: "treinamentos",
-    icon: Users,
-    title: "Treinamentos Corporativos",
-    description: "Capacitação personalizada em Marketing, IA, OKR, KPI, 5W2H e Neuromarketing para times e líderes empresariais.",
-    methodology: ["Diagnóstico de necessidades", "Trilha de aprendizagem customizada", "Aulas práticas e casos reais", "Material didático incluso", "Acompanhamento pós-treinamento"],
-    benefits: ["Time mais capacitado", "Aplicação imediata do aprendizado", "Cultura de desenvolvimento contínuo", "Certificado de conclusão"],
-    color: "#06D6A0",
-    tag: null,
-  },
-  {
-    slug: "mentoria",
-    icon: Sparkles,
-    title: "Mentoria",
-    description: "Acompanhamento individual para profissionais que querem se posicionar como referência em Marketing, Growth e IA.",
-    methodology: ["Sessão de diagnóstico", "Plano de desenvolvimento personalizado", "Sessões semanais 1:1", "Acesso a materiais exclusivos", "Comunidade de mentorados"],
-    benefits: ["Clareza sobre sua trajetória", "Aceleração profissional", "Network qualificado", "Posicionamento de autoridade"],
-    color: "#FFB703",
-    tag: null,
-  },
-];
-
 export default async function ServicosPage() {
   const t = await getTranslations("services");
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any).from("services").select("*").eq("status", "active").order("order");
+  const services = (data ?? []) as Service[];
 
   return (
     <>
@@ -135,98 +79,92 @@ export default async function ServicosPage() {
       {/* Services grid */}
       <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
         <div className="container-xl">
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "2rem" }}>
-            {services.map(({ slug, icon: Icon, title, description, methodology, benefits, color, tag }) => (
-              <div
-                key={slug}
-                style={{
-                  backgroundColor: "white",
-                  borderRadius: "1.25rem",
-                  padding: "2rem",
-                  border: "1px solid rgba(0,0,0,0.06)",
-                  boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
-                  display: "flex",
-                  flexDirection: "column",
-                  position: "relative",
-                  overflow: "hidden",
-                }}
-              >
-                {tag && (
+          {services.length === 0 ? (
+            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#94a3b8" }}>
+              Nenhum serviço cadastrado no momento.
+            </div>
+          ) : (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "2rem" }}>
+              {services.map((service, i) => {
+                const Icon = (service.icon && iconMap[service.icon]) || Wrench;
+                const color = palette[i % palette.length];
+                const benefits = (service.benefits ?? []).slice(0, 3);
+                return (
                   <div
+                    key={service.id}
                     style={{
-                      position: "absolute",
-                      top: "1rem",
-                      right: "1rem",
-                      backgroundColor: color === "#06D6A0" ? "rgba(6,214,160,0.12)" : "rgba(67,97,238,0.12)",
-                      color: color === "#06D6A0" ? "#04a87d" : "#4361EE",
-                      padding: "0.2rem 0.625rem",
-                      borderRadius: "9999px",
-                      fontSize: "0.75rem",
-                      fontWeight: 700,
+                      backgroundColor: "white",
+                      borderRadius: "1.25rem",
+                      padding: "2rem",
+                      border: "1px solid rgba(0,0,0,0.06)",
+                      boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
+                      display: "flex",
+                      flexDirection: "column",
+                      position: "relative",
+                      overflow: "hidden",
                     }}
                   >
-                    {tag}
+                    <div
+                      style={{
+                        width: "3.25rem",
+                        height: "3.25rem",
+                        borderRadius: "0.875rem",
+                        backgroundColor: `${color}15`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        marginBottom: "1.25rem",
+                      }}
+                    >
+                      <Icon size={22} color={color} />
+                    </div>
+
+                    <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.625rem" }}>
+                      {service.title_pt}
+                    </h2>
+                    <p style={{ color: "#64748b", fontSize: "0.9rem", lineHeight: 1.7, marginBottom: "1.5rem", flex: 1 }}>
+                      {service.description_pt}
+                    </p>
+
+                    {benefits.length > 0 && (
+                      <div style={{ marginBottom: "1.5rem" }}>
+                        <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.625rem" }}>
+                          Benefícios
+                        </p>
+                        <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.375rem" }}>
+                          {benefits.map((benefit) => (
+                            <li key={benefit} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "#374151" }}>
+                              <CheckCircle2 size={14} color={color} />
+                              {benefit}
+                            </li>
+                          ))}
+                        </ul>
+                      </div>
+                    )}
+
+                    <Link
+                      href={{ pathname: "/servicos/[slug]", params: { slug: service.slug } }}
+                      style={{
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        gap: "0.5rem",
+                        backgroundColor: color,
+                        color: color === "#FFB703" ? "#0d1b2a" : "white",
+                        padding: "0.875rem",
+                        borderRadius: "0.75rem",
+                        fontWeight: 700,
+                        fontSize: "0.9rem",
+                        textDecoration: "none",
+                      }}
+                    >
+                      Solicitar proposta <ArrowRight size={16} />
+                    </Link>
                   </div>
-                )}
-
-                <div
-                  style={{
-                    width: "3.25rem",
-                    height: "3.25rem",
-                    borderRadius: "0.875rem",
-                    backgroundColor: `${color}15`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    marginBottom: "1.25rem",
-                  }}
-                >
-                  <Icon size={22} color={color} />
-                </div>
-
-                <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.625rem" }}>
-                  {title}
-                </h2>
-                <p style={{ color: "#64748b", fontSize: "0.9rem", lineHeight: 1.7, marginBottom: "1.5rem", flex: 1 }}>
-                  {description}
-                </p>
-
-                {/* Benefits */}
-                <div style={{ marginBottom: "1.5rem" }}>
-                  <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.625rem" }}>
-                    Benefícios
-                  </p>
-                  <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.375rem" }}>
-                    {benefits.slice(0, 3).map((benefit) => (
-                      <li key={benefit} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "#374151" }}>
-                        <CheckCircle2 size={14} color={color} />
-                        {benefit}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <Link
-                  href={{ pathname: "/servicos/[slug]", params: { slug } }}
-                  style={{
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    gap: "0.5rem",
-                    backgroundColor: color,
-                    color: color === "#FFB703" ? "#0d1b2a" : "white",
-                    padding: "0.875rem",
-                    borderRadius: "0.75rem",
-                    fontWeight: 700,
-                    fontSize: "0.9rem",
-                    textDecoration: "none",
-                  }}
-                >
-                  Solicitar proposta <ArrowRight size={16} />
-                </Link>
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </section>
 
