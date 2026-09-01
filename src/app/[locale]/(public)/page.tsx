@@ -95,6 +95,7 @@ export default async function HomePage() {
   const isLive = config.is_live === "true" && Boolean(liveStreamUrl);
   const [featured, ...rest] = allArticles;
   const secondary = rest.slice(0, 3);
+  const moreNews = rest.slice(3);
 
   const latestByAuthor = new Map<string, Article>();
   for (const a of allArticles) {
@@ -231,6 +232,65 @@ export default async function HomePage() {
                     <NewsletterForm compact light />
                   </div>
                 </div>
+
+                {/* More news, alternating formats */}
+                {moreNews.length > 0 && (
+                  <div style={{ marginTop: "0.5rem" }}>
+                    <h2 style={{ fontSize: "0.75rem", fontWeight: 700, color: "#64748b", marginTop: "1.5rem", marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                      Mais notícias
+                    </h2>
+                    {moreNews.map((article, i) => (
+                      <Link
+                        key={article.id}
+                        href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+                        style={{
+                          display: "flex",
+                          gap: "1rem",
+                          alignItems: "flex-start",
+                          textDecoration: "none",
+                          padding: "1rem 0",
+                          borderTop: "1px solid rgba(0,0,0,0.08)",
+                        }}
+                      >
+                        {i % 2 === 0 && article.cover_image && (
+                          <div
+                            style={{
+                              width: "110px",
+                              height: "80px",
+                              flexShrink: 0,
+                              borderRadius: "0.375rem",
+                              background: `url(${article.cover_image}) center/cover`,
+                            }}
+                          />
+                        )}
+                        <div style={{ flex: 1 }}>
+                          <div style={{ marginBottom: "0.375rem" }}>
+                            <FormatTag format={article.format} />
+                          </div>
+                          <h4
+                            style={{
+                              fontWeight: 700,
+                              fontSize: i % 2 === 0 ? "1rem" : "0.9375rem",
+                              color: "#0d1b2a",
+                              lineHeight: 1.35,
+                              marginBottom: "0.25rem",
+                            }}
+                          >
+                            {article.title_pt}
+                          </h4>
+                          {i % 2 === 0 && article.excerpt_pt && (
+                            <p style={{ color: "#64748b", fontSize: "0.8125rem", lineHeight: 1.5, marginBottom: "0.25rem" }}>
+                              {article.excerpt_pt}
+                            </p>
+                          )}
+                          <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+                            {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
+                          </span>
+                        </div>
+                      </Link>
+                    ))}
+                  </div>
+                )}
               </div>
 
               {/* Sidebar */}
