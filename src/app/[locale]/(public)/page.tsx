@@ -611,8 +611,16 @@ export default async function HomePage() {
 
           {/* Founders */}
           {authors.length > 0 && (
-            <div style={{ marginTop: "3rem", paddingTop: "3rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-              <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
+            <div
+              style={{
+                marginTop: "3rem",
+                backgroundColor: "rgba(6,214,160,0.08)",
+                border: "1px solid rgba(6,214,160,0.2)",
+                borderRadius: "1.25rem",
+                padding: "2rem",
+              }}
+            >
+              <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#06D6A0", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
                 Quem está por trás da People &amp; Growth
               </div>
               <div style={{ display: "flex", flexWrap: "wrap", gap: "2rem" }}>

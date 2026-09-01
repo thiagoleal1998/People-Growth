@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { ArrowRight, Award, Lightbulb } from "lucide-react";
+import { ArrowRight, Lightbulb } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { Author } from "@/types/database.types";
+import { FounderCard } from "./FounderCard";
 
 export async function generateMetadata({
   params,
@@ -17,12 +18,6 @@ export async function generateMetadata({
     description: t("subtitle"),
   };
 }
-
-const timeline = [
-  { year: "2022", label: "Criação da People & Growth", description: "Fundação da marca com o propósito de transformar negócios através de pessoas, marketing e dados.", type: "milestone" },
-  { year: "2024", label: "Fundação da Neuro Botics", description: "Empresa especializada em soluções de IA e automação para negócios, criada por Thiago Leal.", type: "milestone" },
-  { year: "2025", label: "Expansão do time e da cobertura editorial", description: "Gustavo Monken e Raul Salustiano se juntam ao projeto, ampliando o olhar da People & Growth para negócios, sociedade, política, economia e meio ambiente.", type: "milestone" },
-];
 
 const philosophy = [
   {
@@ -165,135 +160,15 @@ export default async function SobrePage() {
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "2rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.5rem" }}>
             {authors.map((author) => (
-              <div
-                key={author.id}
-                style={{
-                  backgroundColor: "#f0f4f8",
-                  borderRadius: "1.25rem",
-                  padding: "2rem",
-                  border: "1px solid rgba(0,0,0,0.05)",
-                }}
-              >
-                <div
-                  style={{
-                    width: "6rem",
-                    height: "6rem",
-                    borderRadius: "50%",
-                    marginBottom: "1.25rem",
-                    background: author.photo_url
-                      ? `url(${author.photo_url}) center/cover`
-                      : "linear-gradient(135deg, #4361EE, #06D6A0)",
-                  }}
-                />
-                <h3 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.25rem" }}>
-                  {author.name}
-                </h3>
-                {author.role_pt && (
-                  <div style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.875rem", marginBottom: "1rem" }}>
-                    {author.role_pt}
-                  </div>
-                )}
-                {author.bio_pt && (
-                  <p style={{ color: "#475569", fontSize: "0.9375rem", lineHeight: 1.7, whiteSpace: "pre-line" }}>
-                    {author.bio_pt}
-                  </p>
-                )}
-              </div>
+              <FounderCard key={author.id} author={author} />
             ))}
           </div>
 
           <p style={{ color: "#475569", fontSize: "1.0625rem", lineHeight: 1.75, maxWidth: "760px", margin: "3rem auto 0", textAlign: "center" }}>
             Juntos, unem consultoria de negócios, tecnologia e um espaço de conteúdo — notícias e a coluna de opinião <strong>Mea Sententia</strong> — com lives aos sábados e vídeos ao longo da semana sobre temas que vão de negócios a política, economia e meio ambiente, no regional, no Brasil e no mundo.
           </p>
-        </div>
-      </section>
-
-      {/* Timeline */}
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
-        <div className="container-xl">
-          <h2
-            style={{
-              fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
-              fontWeight: 800,
-              color: "#0d1b2a",
-              marginBottom: "3rem",
-              textAlign: "center",
-            }}
-          >
-            Nossa trajetória
-          </h2>
-
-          <div style={{ position: "relative", maxWidth: "720px", margin: "0 auto" }}>
-            {/* Line */}
-            <div
-              style={{
-                position: "absolute",
-                left: "1.25rem",
-                top: 0,
-                bottom: 0,
-                width: "2px",
-                backgroundColor: "#e2e8f0",
-              }}
-            />
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-              {timeline.map(({ year, label, description }, i) => (
-                <div
-                  key={i}
-                  style={{
-                    display: "flex",
-                    gap: "2rem",
-                    paddingBottom: "2rem",
-                    position: "relative",
-                  }}
-                >
-                  {/* Dot */}
-                  <div
-                    style={{
-                      width: "2.5rem",
-                      height: "2.5rem",
-                      borderRadius: "50%",
-                      backgroundColor: "#4361EE",
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      flexShrink: 0,
-                      zIndex: 1,
-                      border: "3px solid white",
-                      boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-                    }}
-                  >
-                    <Award size={12} color="white" />
-                  </div>
-
-                  <div style={{ paddingTop: "0.4rem" }}>
-                    <div
-                      style={{
-                        display: "inline-block",
-                        backgroundColor: "rgba(67,97,238,0.1)",
-                        color: "#4361EE",
-                        padding: "0.125rem 0.625rem",
-                        borderRadius: "9999px",
-                        fontSize: "0.75rem",
-                        fontWeight: 700,
-                        marginBottom: "0.375rem",
-                      }}
-                    >
-                      {year}
-                    </div>
-                    <h3 style={{ fontWeight: 700, fontSize: "1rem", color: "#0d1b2a", marginBottom: "0.25rem" }}>
-                      {label}
-                    </h3>
-                    <p style={{ fontSize: "0.875rem", color: "#64748b", lineHeight: 1.6 }}>
-                      {description}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
         </div>
       </section>
 
