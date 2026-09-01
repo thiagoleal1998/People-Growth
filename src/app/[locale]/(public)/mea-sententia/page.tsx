@@ -44,6 +44,11 @@ export default async function MeaSententiePage() {
   const [featured, ...rest] = articles;
   const mostRead = [...articles].sort((a, b) => b.views - a.views).slice(0, 4);
 
+  const latestByAuthor = new Map<string, Article>();
+  for (const a of articles) {
+    if (a.author_id && !latestByAuthor.has(a.author_id)) latestByAuthor.set(a.author_id, a);
+  }
+
   return (
     <>
       {/* Hero */}
@@ -94,32 +99,51 @@ export default async function MeaSententiePage() {
 
       {/* Columnists strip */}
       {authors.length > 0 && (
-        <section style={{ backgroundColor: "white", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        <section style={{ backgroundColor: "white", borderTop: "2px solid #4361EE", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
           <div
             className="container-xl"
             style={{ display: "flex", justifyContent: "center", gap: "2rem", padding: "1.5rem 0", flexWrap: "wrap", overflowX: "auto" }}
           >
-            {authors.map((author) => (
-              <Link
-                key={author.id}
-                href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
-                style={{ display: "flex", alignItems: "center", gap: "0.75rem", textDecoration: "none", minWidth: "200px" }}
-              >
-                <div
-                  style={{
-                    width: "2.75rem",
-                    height: "2.75rem",
-                    borderRadius: "50%",
-                    flexShrink: 0,
-                    background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
-                  }}
-                />
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: "0.9375rem", color: "#4361EE" }}>{author.name}</div>
-                  {author.role_pt && <div style={{ color: "#64748b", fontSize: "0.8125rem" }}>{author.role_pt}</div>}
-                </div>
-              </Link>
-            ))}
+            {authors.map((author) => {
+              const latest = latestByAuthor.get(author.id);
+              return (
+                <Link
+                  key={author.id}
+                  href={
+                    latest
+                      ? { pathname: "/mea-sententia/[slug]", params: { slug: latest.slug } }
+                      : { pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }
+                  }
+                  style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none", width: "220px" }}
+                >
+                  <div
+                    style={{
+                      width: "3.5rem",
+                      height: "3.5rem",
+                      borderRadius: "0.375rem",
+                      flexShrink: 0,
+                      background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                    }}
+                  />
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: "0.875rem", color: "#4361EE", marginBottom: "0.25rem" }}>{author.name}</div>
+                    <div
+                      style={{
+                        color: "#1e293b",
+                        fontSize: "0.8125rem",
+                        lineHeight: 1.35,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
+                      {latest ? latest.title_pt : author.role_pt}
+                    </div>
+                  </div>
+                </Link>
+              );
+            })}
           </div>
         </section>
       )}

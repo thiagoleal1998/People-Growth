@@ -264,7 +264,7 @@ export default async function HomePage() {
 
       {/* Columnists strip */}
       {authors.length > 0 && (
-        <section style={{ backgroundColor: "white", borderTop: "1px solid rgba(0,0,0,0.06)", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        <section style={{ backgroundColor: "white", borderTop: "2px solid #4361EE", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
           <div className="container-xl" style={{ display: "flex", justifyContent: "center", gap: "2rem", padding: "1.25rem 0", flexWrap: "wrap", overflowX: "auto" }}>
             {authors.map((author) => {
               const latest = latestByAuthor.get(author.id);
@@ -276,20 +276,30 @@ export default async function HomePage() {
                       ? { pathname: "/mea-sententia/[slug]", params: { slug: latest.slug } }
                       : { pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }
                   }
-                  style={{ display: "flex", alignItems: "center", gap: "0.625rem", textDecoration: "none", minWidth: "220px" }}
+                  style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none", width: "220px" }}
                 >
                   <div
                     style={{
-                      width: "2.25rem",
-                      height: "2.25rem",
-                      borderRadius: "50%",
+                      width: "3.5rem",
+                      height: "3.5rem",
+                      borderRadius: "0.375rem",
                       flexShrink: 0,
                       background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
                     }}
                   />
                   <div>
-                    <div style={{ fontWeight: 800, fontSize: "0.8125rem", color: "#4361EE" }}>{author.name}</div>
-                    <div style={{ color: "#475569", fontSize: "0.8125rem", lineHeight: 1.3 }}>
+                    <div style={{ fontWeight: 800, fontSize: "0.8125rem", color: "#4361EE", marginBottom: "0.25rem" }}>{author.name}</div>
+                    <div
+                      style={{
+                        color: "#1e293b",
+                        fontSize: "0.8125rem",
+                        lineHeight: 1.35,
+                        display: "-webkit-box",
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: "vertical",
+                        overflow: "hidden",
+                      }}
+                    >
                       {latest ? latest.title_pt : author.role_pt}
                     </div>
                   </div>
