@@ -9,6 +9,7 @@ import {
   Target,
   Sparkles,
   Zap,
+  Radio,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { NewsletterForm } from "@/components/NewsletterForm";
@@ -130,21 +131,21 @@ export default async function HomePage() {
               CONTEÚDO
             </div>
 
-            <div className="home-lead-grid" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "2.5rem", alignItems: "start" }}>
+            <div className="home-lead-grid" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "1.75rem", alignItems: "start" }}>
               {/* Main column */}
               <div>
                 <Link
                   href={{ pathname: "/mea-sententia/[slug]", params: { slug: featured.slug } }}
-                  style={{ display: "flex", textDecoration: "none", gap: "1.5rem", alignItems: "flex-start" }}
+                  style={{ display: "flex", textDecoration: "none", gap: "1.125rem", alignItems: "flex-start" }}
                   className="home-featured-link"
                 >
                   {featured.cover_image && (
                     <div
                       style={{
-                        width: "220px",
-                        height: "180px",
+                        width: "200px",
+                        height: "160px",
                         flexShrink: 0,
-                        borderRadius: "0.5rem",
+                        borderRadius: "0.375rem",
                         background: `url(${featured.cover_image}) center/cover`,
                       }}
                     />
@@ -211,10 +212,28 @@ export default async function HomePage() {
               {/* Sidebar */}
               <aside>
                 {isLive && (
-                  <div style={{ borderRadius: "0.75rem", overflow: "hidden", border: "1px solid rgba(0,0,0,0.08)", marginBottom: "1.25rem" }}>
-                    <div style={{ backgroundColor: "#dc2626", color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                      <span className="live-dot" style={{ width: "0.5rem", height: "0.5rem", borderRadius: "50%", backgroundColor: "white", flexShrink: 0 }} />
-                      AO VIVO
+                  <div style={{ borderRadius: "0.5rem", overflow: "hidden", border: "2px solid #dc2626", marginBottom: "1.25rem" }}>
+                    <div style={{ backgroundColor: "#dc2626", color: "white", padding: "0.5rem 0.75rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontWeight: 800, fontSize: "0.75rem", letterSpacing: "0.03em" }}>
+                        <Radio size={14} /> TRANSMISSÃO
+                      </span>
+                      <span
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.3125rem",
+                          backgroundColor: "white",
+                          color: "#dc2626",
+                          padding: "0.1875rem 0.5rem",
+                          borderRadius: "9999px",
+                          fontWeight: 800,
+                          fontSize: "0.6875rem",
+                          letterSpacing: "0.03em",
+                        }}
+                      >
+                        <span className="live-dot" style={{ width: "0.4375rem", height: "0.4375rem", borderRadius: "50%", backgroundColor: "#dc2626", flexShrink: 0 }} />
+                        AO VIVO
+                      </span>
                     </div>
                     <div style={{ position: "relative", paddingTop: "56.25%" }}>
                       <iframe
@@ -224,6 +243,13 @@ export default async function HomePage() {
                         allowFullScreen
                       />
                     </div>
+                    {config.live_caption_pt && (
+                      <div style={{ padding: "0.75rem 0.875rem", borderTop: "2px solid #dc2626" }}>
+                        <p style={{ color: "#0d1b2a", fontWeight: 700, fontSize: "0.875rem", lineHeight: 1.4 }}>
+                          {config.live_caption_pt}
+                        </p>
+                      </div>
+                    )}
                   </div>
                 )}
 
