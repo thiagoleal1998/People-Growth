@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { ArrowRight, GraduationCap, Briefcase, Award, Lightbulb } from "lucide-react";
+import { ArrowRight, Award, Lightbulb } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
+import type { Author } from "@/types/database.types";
 
 export async function generateMetadata({
   params,
@@ -17,15 +19,9 @@ export async function generateMetadata({
 }
 
 const timeline = [
-  { year: "2016", label: "Início em Marketing Digital", description: "Primeiros projetos com tráfego pago e estratégias de conteúdo.", type: "education" },
-  { year: "2018", label: "Pós-graduação em Gestão de Pessoas e Negócios", description: "Formação com foco na integração entre gestão de pessoas e resultados de negócio.", type: "education" },
-  { year: "2019", label: "MBA Marketing Digital", description: "Aprofundamento em estratégias digitais, SEO, performance e brand building.", type: "education" },
-  { year: "2020", label: "MBA Estratégia Data Driven", description: "Especialização em tomada de decisão orientada por dados e métricas.", type: "education" },
-  { year: "2021", label: "MBA Big Data", description: "Estudo avançado de ciência de dados, BI e analytics aplicados a negócios.", type: "education" },
   { year: "2022", label: "Criação da People & Growth", description: "Fundação da marca com o propósito de transformar negócios através de pessoas, marketing e dados.", type: "milestone" },
-  { year: "2023", label: "Mestrado em Marketing Digital e Big Data", description: "Formação acadêmica avançada unindo marketing digital e ciência de dados.", type: "education" },
-  { year: "2024", label: "Fundação da Neuro Botics", description: "Empresa especializada em soluções de IA e automação para negócios.", type: "milestone" },
-  { year: "2025", label: "Referência em Estratégia e Inovação", description: "Consolidação como especialista em Marketing, Growth, IA e Estratégia com atuação nacional.", type: "milestone" },
+  { year: "2024", label: "Fundação da Neuro Botics", description: "Empresa especializada em soluções de IA e automação para negócios, criada por Thiago Leal.", type: "milestone" },
+  { year: "2025", label: "Expansão do time e da cobertura editorial", description: "Gustavo Monken e Raul Salustiano se juntam ao projeto, ampliando o olhar da People & Growth para negócios, sociedade, política, economia e meio ambiente.", type: "milestone" },
 ];
 
 const philosophy = [
@@ -53,6 +49,16 @@ const philosophy = [
 
 export default async function SobrePage() {
   const t = await getTranslations("about");
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { data: authorsData } = await client
+    .from("authors")
+    .select("*")
+    .eq("status", "active")
+    .order("order");
+  const authors = (authorsData ?? []) as Author[];
 
   return (
     <>
@@ -108,7 +114,7 @@ export default async function SobrePage() {
               marginBottom: "2rem",
             }}
           >
-            Sou Thiago Leal — especialista em Marketing Digital, Growth e Inteligência Artificial com mais de 7 anos de experiência transformando negócios através de estratégia, dados e inovação. Hoje também dedico parte do meu tempo a discutir, pela People &amp; Growth, os temas sociais, econômicos e ambientais que moldam pessoas e empresas.
+            A People &amp; Growth é formada por Thiago Leal, Gustavo Monken e Raul Salustiano — especialistas em Marketing, Growth, dados e Inteligência Artificial que, juntos, também dedicam parte do seu tempo a discutir os temas sociais, econômicos e ambientais que moldam pessoas e empresas.
           </p>
           <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
             <Link
@@ -147,72 +153,60 @@ export default async function SobrePage() {
         </div>
       </section>
 
-      {/* Bio */}
+      {/* Founders */}
       <section className="section-padding" style={{ backgroundColor: "white" }}>
-        <div
-          className="container-xl"
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
-            gap: "4rem",
-            alignItems: "center",
-          }}
-        >
-          {/* Photo placeholder */}
-          <div
-            style={{
-              aspectRatio: "4/5",
-              borderRadius: "1.5rem",
-              background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
-              display: "flex",
-              flexDirection: "column",
-              alignItems: "center",
-              justifyContent: "center",
-              maxWidth: "380px",
-              gap: "0.5rem",
-            }}
-          >
-            <div style={{ fontSize: "4rem" }}>👤</div>
-            <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.875rem" }}>Foto profissional</span>
-          </div>
-
-          <div>
-            <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1.25rem" }}>
-              Olá, sou Thiago Leal.
+        <div className="container-xl">
+          <div style={{ textAlign: "center", maxWidth: "720px", margin: "0 auto 3rem" }}>
+            <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.75rem" }}>
+              Quem faz a People &amp; Growth
             </h2>
-            <div style={{ display: "flex", flexDirection: "column", gap: "1rem", color: "#475569", lineHeight: 1.75 }}>
-              <p>
-                Fundador da <strong>People & Growth</strong> e da <strong>Neuro Botics</strong>, atuo como consultor estratégico, especialista em Growth e Marketing Digital, e pesquisador de aplicações de IA para negócios.
-              </p>
-              <p>
-                Minha trajetória une marketing, gestão de pessoas, dados e inteligência artificial em uma visão integrada de como empresas crescem. Acredito que negócios fortes nascem de pessoas fortes — e que dados são o elo entre estratégia e execução.
-              </p>
-              <p>
-                Ao longo de mais de 7 anos, ajudei empresas de diferentes segmentos a estruturarem seu marketing, acelerarem o crescimento e tomarem decisões mais inteligentes com dados e IA.
-              </p>
-              <p>
-                Hoje, além da consultoria e dos projetos na Neuro Botics, a <strong>People &amp; Growth</strong> também é um espaço de conteúdo: notícias e a coluna de opinião <strong>Mea Sententia</strong>, com lives aos sábados e vídeos ao longo da semana sobre temas que vão de negócios a política, economia e meio ambiente — no regional, no Brasil e no mundo. Divido esse olhar com colunistas convidados, como Gustavo Monken e Raúl Salustiano.
-              </p>
-            </div>
-
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "1.75rem" }}>
-              {["Marketing Digital", "Growth", "IA", "Business Intelligence", "Consultoria", "Treinamentos", "Neuromarketing"].map((tag) => (
-                <span
-                  key={tag}
-                  style={{
-                    backgroundColor: "#f0f4f8",
-                    color: "#475569",
-                    padding: "0.375rem 0.875rem",
-                    borderRadius: "9999px",
-                    fontSize: "0.8125rem",
-                    fontWeight: 600,
-                  }}
-                >
-                  {tag}
-                </span>
-              ))}
-            </div>
+            <p style={{ color: "#64748b", fontSize: "1.0625rem", lineHeight: 1.7 }}>
+              Três olhares, uma mesma convicção: negócios fortes nascem de pessoas fortes — e de um olhar atento ao que acontece ao redor delas.
+            </p>
           </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "2rem" }}>
+            {authors.map((author) => (
+              <div
+                key={author.id}
+                style={{
+                  backgroundColor: "#f0f4f8",
+                  borderRadius: "1.25rem",
+                  padding: "2rem",
+                  border: "1px solid rgba(0,0,0,0.05)",
+                }}
+              >
+                <div
+                  style={{
+                    width: "6rem",
+                    height: "6rem",
+                    borderRadius: "50%",
+                    marginBottom: "1.25rem",
+                    background: author.photo_url
+                      ? `url(${author.photo_url}) center/cover`
+                      : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                  }}
+                />
+                <h3 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.25rem" }}>
+                  {author.name}
+                </h3>
+                {author.role_pt && (
+                  <div style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.875rem", marginBottom: "1rem" }}>
+                    {author.role_pt}
+                  </div>
+                )}
+                {author.bio_pt && (
+                  <p style={{ color: "#475569", fontSize: "0.9375rem", lineHeight: 1.7, whiteSpace: "pre-line" }}>
+                    {author.bio_pt}
+                  </p>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <p style={{ color: "#475569", fontSize: "1.0625rem", lineHeight: 1.75, maxWidth: "760px", margin: "3rem auto 0", textAlign: "center" }}>
+            Juntos, unem consultoria de negócios, tecnologia e um espaço de conteúdo — notícias e a coluna de opinião <strong>Mea Sententia</strong> — com lives aos sábados e vídeos ao longo da semana sobre temas que vão de negócios a política, economia e meio ambiente, no regional, no Brasil e no mundo.
+          </p>
         </div>
       </section>
 
@@ -228,7 +222,7 @@ export default async function SobrePage() {
               textAlign: "center",
             }}
           >
-            {t("timelineTitle")}
+            Nossa trajetória
           </h2>
 
           <div style={{ position: "relative", maxWidth: "720px", margin: "0 auto" }}>
@@ -245,7 +239,7 @@ export default async function SobrePage() {
             />
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0" }}>
-              {timeline.map(({ year, label, description, type }, i) => (
+              {timeline.map(({ year, label, description }, i) => (
                 <div
                   key={i}
                   style={{
@@ -261,7 +255,7 @@ export default async function SobrePage() {
                       width: "2.5rem",
                       height: "2.5rem",
                       borderRadius: "50%",
-                      backgroundColor: type === "milestone" ? "#4361EE" : "#06D6A0",
+                      backgroundColor: "#4361EE",
                       display: "flex",
                       alignItems: "center",
                       justifyContent: "center",
@@ -271,19 +265,15 @@ export default async function SobrePage() {
                       boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
                     }}
                   >
-                    {type === "milestone" ? (
-                      <Award size={12} color="white" />
-                    ) : (
-                      <GraduationCap size={12} color="white" />
-                    )}
+                    <Award size={12} color="white" />
                   </div>
 
                   <div style={{ paddingTop: "0.4rem" }}>
                     <div
                       style={{
                         display: "inline-block",
-                        backgroundColor: type === "milestone" ? "rgba(67,97,238,0.1)" : "rgba(6,214,160,0.1)",
-                        color: type === "milestone" ? "#4361EE" : "#04a87d",
+                        backgroundColor: "rgba(67,97,238,0.1)",
+                        color: "#4361EE",
                         padding: "0.125rem 0.625rem",
                         borderRadius: "9999px",
                         fontSize: "0.75rem",
@@ -420,7 +410,7 @@ export default async function SobrePage() {
             Vamos criar algo juntos?
           </h2>
           <p style={{ color: "#64748b", fontSize: "1.0625rem", marginBottom: "2rem" }}>
-            Agende uma conversa e descubra como posso ajudar sua empresa a crescer.
+            Agende uma conversa e descubra como podemos ajudar sua empresa a crescer.
           </p>
           <Link
             href="/contato"

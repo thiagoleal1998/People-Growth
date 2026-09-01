@@ -608,6 +608,38 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
+
+          {/* Founders */}
+          {authors.length > 0 && (
+            <div style={{ marginTop: "3rem", paddingTop: "3rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
+                Quem está por trás da People &amp; Growth
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "2rem" }}>
+                {authors.map((author) => (
+                  <div key={author.id} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start", maxWidth: "280px" }}>
+                    <div
+                      style={{
+                        width: "3.25rem",
+                        height: "3.25rem",
+                        borderRadius: "50%",
+                        flexShrink: 0,
+                        background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                      }}
+                    />
+                    <div>
+                      <div style={{ color: "white", fontWeight: 800, fontSize: "0.9375rem" }}>{author.name}</div>
+                      {author.role_pt && (
+                        <div style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8125rem", lineHeight: 1.4, marginTop: "0.125rem" }}>
+                          {author.role_pt}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 
@@ -708,7 +740,7 @@ export default async function HomePage() {
                 marginBottom: "1.5rem",
               }}
             >
-              Thiago Leal
+              Quem somos
             </div>
             <h2
               style={{
@@ -718,12 +750,12 @@ export default async function HomePage() {
                 marginBottom: "1.25rem",
               }}
             >
-              Estrategista em Marketing,
+              Estratégia, dados e um olhar
               <br />
-              <span style={{ color: "#06D6A0" }}>Growth e IA.</span>
+              <span style={{ color: "#06D6A0" }}>atento ao que move o mundo.</span>
             </h2>
             <p style={{ color: "rgba(255,255,255,0.7)", lineHeight: 1.7, marginBottom: "2rem", fontSize: "1.0625rem" }}>
-              Mais de 7 anos ajudando empresas a crescerem com estratégia, dados e inteligência artificial. Criador da People & Growth e da Neuro Botics.
+              Fundada por Thiago Leal, Gustavo Monken e Raul Salustiano, a People & Growth une estratégia de negócios, dados e inteligência artificial a uma cobertura independente dos temas sociais, políticos, econômicos e ambientais que impactam pessoas e empresas.
             </p>
             <Link
               href="/sobre"
@@ -739,7 +771,7 @@ export default async function HomePage() {
                 fontSize: "0.9375rem",
               }}
             >
-              Conhecer minha trajetória <ArrowRight size={18} />
+              Conhecer o time <ArrowRight size={18} />
             </Link>
           </div>
 
