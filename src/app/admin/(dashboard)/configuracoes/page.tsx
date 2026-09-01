@@ -20,8 +20,8 @@ const fields: { key: string; label: string; placeholder?: string }[] = [
 
 type SiteConfigRow = { key: string; value: string | null };
 
-export default async function ConfiguracoesPage({ searchParams }: { searchParams: Promise<{ saved?: string; logoError?: string }> }) {
-  const { saved, logoError } = await searchParams;
+export default async function ConfiguracoesPage({ searchParams }: { searchParams: Promise<{ saved?: string; logoError?: string; faviconError?: string }> }) {
+  const { saved, logoError, faviconError } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = (await (supabase as any).from("site_config").select("*")) as { data: SiteConfigRow[] | null };
@@ -51,6 +51,19 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
           )}
           <input type="file" name="logo_file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" />
           <ErrorBanner message={logoError} />
+        </Field>
+
+        <Field label="Favicon" hint="Ícone que aparece na aba do navegador. Ideal: PNG ou SVG quadrado, fundo transparente.">
+          {values.favicon_url && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={values.favicon_url}
+              alt="Favicon atual"
+              style={{ height: "2rem", width: "2rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.25rem" }}
+            />
+          )}
+          <input type="file" name="favicon_file" accept="image/png,image/x-icon,image/svg+xml" />
+          <ErrorBanner message={faviconError} />
         </Field>
 
         {fields.map(({ key, label, placeholder }) => (

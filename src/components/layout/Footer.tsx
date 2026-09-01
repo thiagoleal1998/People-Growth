@@ -152,14 +152,17 @@ export function Footer({ logoUrl }: { logoUrl?: string | null }) {
           }}
         >
           <p style={{ fontSize: "0.8125rem" }}>
-            © {year} Thiago Leal · People &amp; Growth. {t("rights")}
+            © {year} People &amp; Growth. {t("rights")}
           </p>
-          <div style={{ display: "flex", gap: "1.25rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
             <Link href="/" style={{ fontSize: "0.8125rem" }}>
               {t("privacy")}
             </Link>
             <Link href="/" style={{ fontSize: "0.8125rem" }}>
               {t("terms")}
+            </Link>
+            <Link href="/direitos-autorais" style={{ fontSize: "0.8125rem" }}>
+              Aviso de Direitos Autorais
             </Link>
             <Link href="/cookies" style={{ fontSize: "0.8125rem" }}>
               Cookies
@@ -167,6 +170,22 @@ export function Footer({ logoUrl }: { logoUrl?: string | null }) {
             <NextLink href="/admin" style={{ fontSize: "0.8125rem", color: "inherit" }}>
               Admin
             </NextLink>
+            <a
+              href="mailto:contato.neurobotics@gmail.com?subject=Erro%20no%20site%20People%20%26%20Growth"
+              style={{
+                fontSize: "0.75rem",
+                fontWeight: 700,
+                color: "white",
+                backgroundColor: "#dc2626",
+                padding: "0.375rem 0.75rem",
+                borderRadius: "0.375rem",
+                textDecoration: "none",
+                textTransform: "uppercase",
+                letterSpacing: "0.03em",
+              }}
+            >
+              Comunicar erro
+            </a>
           </div>
         </div>
       </div>

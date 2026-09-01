@@ -179,7 +179,7 @@ export default async function ContatoPage() {
                 Enviar mensagem
               </h2>
               <p style={{ color: "#64748b", fontSize: "0.9rem", marginBottom: "1.75rem" }}>
-                Respondo em até 24 horas úteis.
+                Respondemos em até 24 horas úteis.
               </p>
               <ContactForm />
             </div>

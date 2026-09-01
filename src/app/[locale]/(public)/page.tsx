@@ -10,12 +10,14 @@ import {
   Sparkles,
   Zap,
   Radio,
+  Star,
+  Quote,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { toYouTubeEmbedUrl, withAutoplay } from "@/lib/youtube";
-import type { Article, Author } from "@/types/database.types";
+import type { Article, Author, Testimonial } from "@/types/database.types";
 
 const stats = [
   { labelKey: "statsYears", value: "7+" },
@@ -78,14 +80,16 @@ export default async function HomePage() {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data: articlesData }, { data: authorsData }, { data: configData }] = await Promise.all([
+  const [{ data: articlesData }, { data: authorsData }, { data: configData }, { data: testimonialsData }] = await Promise.all([
     client.from("articles").select("*").eq("status", "published").order("published_at", { ascending: false }),
     client.from("authors").select("*").eq("status", "active").order("order"),
     client.from("site_config").select("*"),
+    client.from("testimonials").select("*").eq("status", "active").order("order"),
   ]);
 
   const allArticles = (articlesData ?? []) as Article[];
   const authors = (authorsData ?? []) as Author[];
+  const testimonials = (testimonialsData ?? []) as Testimonial[];
   const config = Object.fromEntries(
     ((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""])
   );
@@ -717,6 +721,86 @@ export default async function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Testimonials */}
+      {testimonials.length > 0 && (
+        <section className="section-padding" style={{ backgroundColor: "white" }}>
+          <div className="container-xl">
+            <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
+              <h2
+                style={{
+                  fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
+                  fontWeight: 800,
+                  color: "#0d1b2a",
+                  marginBottom: "0.75rem",
+                }}
+              >
+                {t("testimonialsTitle")}
+              </h2>
+            </div>
+
+            <div
+              style={{
+                display: "grid",
+                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+                gap: "1.5rem",
+              }}
+            >
+              {testimonials.slice(0, 6).map((item) => (
+                <div
+                  key={item.id}
+                  style={{
+                    backgroundColor: "#f0f4f8",
+                    borderRadius: "1.25rem",
+                    padding: "1.75rem",
+                    border: "1px solid rgba(0,0,0,0.05)",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
+                >
+                  <Quote size={22} color="#4361EE" style={{ marginBottom: "0.75rem", opacity: 0.5 }} />
+                  {item.rating && (
+                    <div style={{ display: "flex", gap: "0.125rem", marginBottom: "0.75rem" }}>
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <Star
+                          key={i}
+                          size={14}
+                          color="#FFB703"
+                          fill={i < item.rating! ? "#FFB703" : "none"}
+                        />
+                      ))}
+                    </div>
+                  )}
+                  <p style={{ color: "#334155", fontSize: "0.9375rem", lineHeight: 1.7, marginBottom: "1.25rem", flex: 1 }}>
+                    &ldquo;{item.text_pt}&rdquo;
+                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div
+                      style={{
+                        width: "2.75rem",
+                        height: "2.75rem",
+                        borderRadius: "50%",
+                        flexShrink: 0,
+                        background: item.avatar_url
+                          ? `url(${item.avatar_url}) center/cover`
+                          : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                      }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 700, fontSize: "0.9375rem", color: "#0d1b2a" }}>{item.name}</div>
+                      {(item.role || item.company) && (
+                        <div style={{ fontSize: "0.8125rem", color: "#64748b" }}>
+                          {[item.role, item.company].filter(Boolean).join(" · ")}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* About teaser */}
       <section

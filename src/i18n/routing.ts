@@ -32,6 +32,7 @@ export const routing = defineRouting({
     "/depoimentos": { pt: "/depoimentos", en: "/testimonials" },
     "/contato": { pt: "/contato", en: "/contact" },
     "/cookies": { pt: "/cookies", en: "/cookies" },
+    "/direitos-autorais": { pt: "/direitos-autorais", en: "/copyright-notice" },
   },
 });
 

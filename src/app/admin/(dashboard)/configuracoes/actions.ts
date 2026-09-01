@@ -16,8 +16,13 @@ export async function updateSiteConfig(formData: FormData) {
     await client.from("site_config").upsert({ key: "logo_url", value: logoUrl });
   }
 
+  const { url: faviconUrl, error: faviconError } = await uploadPublicImage(formData.get("favicon_file"), "favicons");
+  if (faviconUrl) {
+    await client.from("site_config").upsert({ key: "favicon_url", value: faviconUrl });
+  }
+
   const entries = Array.from(formData.entries()).filter(
-    ([key]) => key !== "" && key !== "is_live" && key !== "logo_file"
+    ([key]) => key !== "" && key !== "is_live" && key !== "logo_file" && key !== "favicon_file"
   );
 
   await client.from("site_config").upsert({ key: "is_live", value: formData.get("is_live") === "on" ? "true" : "false" });
@@ -28,5 +33,9 @@ export async function updateSiteConfig(formData: FormData) {
 
   revalidatePath("/admin/configuracoes");
   revalidatePath("/[locale]", "layout");
-  redirect(`/admin/configuracoes?saved=1${logoError ? `&logoError=${encodeURIComponent(logoError)}` : ""}`);
+  const errorParams = [
+    logoError ? `logoError=${encodeURIComponent(logoError)}` : "",
+    faviconError ? `faviconError=${encodeURIComponent(faviconError)}` : "",
+  ].filter(Boolean).join("&");
+  redirect(`/admin/configuracoes?saved=1${errorParams ? `&${errorParams}` : ""}`);
 }

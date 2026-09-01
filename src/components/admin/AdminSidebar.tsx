@@ -17,6 +17,7 @@ import {
   LogOut,
   Wrench,
   UserCircle,
+  Search,
 } from "lucide-react";
 
 const links = [
@@ -31,6 +32,7 @@ const links = [
   { href: "/admin/cursos", label: "Cursos", icon: BookOpen },
   { href: "/admin/recursos", label: "Recursos", icon: Download },
   { href: "/admin/midia", label: "Na Mídia", icon: Monitor },
+  { href: "/admin/seo", label: "SEO, GEO & AEO", icon: Search },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 
