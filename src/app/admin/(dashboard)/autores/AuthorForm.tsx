@@ -54,6 +54,15 @@ export function AuthorForm({ item }: { item?: Author }) {
         <Field label="Bio (EN)">
           <Textarea name="bio_en" rows={4} defaultValue={item?.bio_en ?? ""} />
         </Field>
+        <Field
+          label="Trajetória / Marcos (PT)"
+          hint='Aparece na página "Sobre" da pessoa. Um marco por linha, no formato "Ano | Descrição". Ex: 2022 | Fundou a People & Growth'
+        >
+          <Textarea name="milestones_pt" rows={4} defaultValue={item?.milestones_pt ?? ""} placeholder={"2022 | Fundou a People & Growth\n2024 | Fundou a Neuro Botics"} />
+        </Field>
+        <Field label="Trajetória / Marcos (EN)" hint='Mesmo formato: "Year | Description".'>
+          <Textarea name="milestones_en" rows={4} defaultValue={item?.milestones_en ?? ""} />
+        </Field>
         <Field label="Foto (URL)">
           <Input name="photo_url" defaultValue={item?.photo_url ?? ""} />
         </Field>

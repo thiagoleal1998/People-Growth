@@ -21,6 +21,8 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
     tagline_en: String(formData.get("tagline_en") ?? "").slice(0, 80) || null,
     bio_pt: String(formData.get("bio_pt") ?? "") || null,
     bio_en: String(formData.get("bio_en") ?? "") || null,
+    milestones_pt: String(formData.get("milestones_pt") ?? "") || null,
+    milestones_en: String(formData.get("milestones_en") ?? "") || null,
     photo_url: String(formData.get("photo_url") ?? "") || null,
     email: String(formData.get("email") ?? "") || null,
     linkedin_url: String(formData.get("linkedin_url") ?? "") || null,
@@ -39,6 +41,8 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
 
   revalidatePath("/admin/autores");
   revalidatePath("/[locale]/mea-sententia", "page");
+  revalidatePath("/[locale]/sobre", "page");
+  revalidatePath("/[locale]/sobre/[slug]", "page");
   revalidatePath("/[locale]", "page");
   redirect("/admin/autores?saved=1");
 }

@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { ArrowLeft, ArrowRight, Award, Linkedin, Instagram, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { Author } from "@/types/database.types";
-import { founderMilestones, bioParagraphs } from "../founderData";
+import { parseMilestones, bioParagraphs } from "../founderData";
 
 export const revalidate = 300;
 
@@ -49,7 +49,7 @@ export default async function FounderPage({
   if (!result) notFound();
 
   const { author, articleCount } = result;
-  const milestones = founderMilestones[author.name];
+  const milestones = parseMilestones(author.milestones_pt);
   const paragraphs = bioParagraphs(author.bio_pt);
 
   return (
@@ -125,84 +125,109 @@ export default async function FounderPage({
       </section>
 
       <section className="section-padding" style={{ backgroundColor: "white" }}>
-        <div className="container-xl" style={{ maxWidth: "720px" }}>
-          {milestones && (
-            <div style={{ marginBottom: "2.5rem" }}>
+        <div
+          className="container-xl"
+          style={{
+            maxWidth: "920px",
+            display: "grid",
+            gridTemplateColumns: milestones.length > 0 ? "2fr 1fr" : "1fr",
+            gap: "3rem",
+            alignItems: "start",
+          }}
+        >
+          <div>
+            {paragraphs.length > 0 && (
+              <div style={{ marginBottom: "2.5rem" }}>
+                <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1rem" }}>
+                  Sobre {author.name.split(" ")[0]}
+                </h2>
+                <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                  {paragraphs.map((p, i) => (
+                    <p key={i} style={{ color: "#475569", fontSize: "1rem", lineHeight: 1.75 }}>
+                      {p}
+                    </p>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {articleCount > 0 && (
+              <Link
+                href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  backgroundColor: "#f0f4f8",
+                  color: "#0d1b2a",
+                  padding: "0.875rem 1.5rem",
+                  borderRadius: "0.75rem",
+                  fontWeight: 700,
+                  fontSize: "0.9375rem",
+                }}
+              >
+                Ver artigos de {author.name.split(" ")[0]} <ArrowRight size={18} />
+              </Link>
+            )}
+          </div>
+
+          {milestones.length > 0 && (
+            <div>
               <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1.25rem" }}>
                 Trajetória
               </h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                {milestones.map((m) => (
-                  <div key={m.year} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
-                    <div
-                      style={{
-                        width: "2.25rem",
-                        height: "2.25rem",
-                        borderRadius: "50%",
-                        backgroundColor: "#4361EE",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        flexShrink: 0,
-                      }}
-                    >
-                      <Award size={12} color="white" />
-                    </div>
-                    <div>
+              <div style={{ position: "relative" }}>
+                <div
+                  style={{
+                    position: "absolute",
+                    left: "1.125rem",
+                    top: "0.25rem",
+                    bottom: "0.25rem",
+                    width: "2px",
+                    backgroundColor: "#e2e8f0",
+                  }}
+                />
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+                  {milestones.map((m, i) => (
+                    <div key={i} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start", position: "relative" }}>
                       <div
                         style={{
-                          display: "inline-block",
-                          backgroundColor: "rgba(67,97,238,0.1)",
-                          color: "#4361EE",
-                          padding: "0.125rem 0.625rem",
-                          borderRadius: "9999px",
-                          fontSize: "0.75rem",
-                          fontWeight: 700,
-                          marginBottom: "0.25rem",
+                          width: "2.25rem",
+                          height: "2.25rem",
+                          borderRadius: "50%",
+                          backgroundColor: "#4361EE",
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          flexShrink: 0,
+                          zIndex: 1,
+                          border: "3px solid white",
                         }}
                       >
-                        {m.year}
+                        <Award size={12} color="white" />
                       </div>
-                      <div style={{ color: "#334155", fontSize: "0.9375rem", fontWeight: 600 }}>{m.label}</div>
+                      <div>
+                        <div
+                          style={{
+                            display: "inline-block",
+                            backgroundColor: "rgba(67,97,238,0.1)",
+                            color: "#4361EE",
+                            padding: "0.125rem 0.625rem",
+                            borderRadius: "9999px",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            marginBottom: "0.25rem",
+                          }}
+                        >
+                          {m.year}
+                        </div>
+                        <div style={{ color: "#334155", fontSize: "0.875rem", fontWeight: 600, lineHeight: 1.4 }}>{m.label}</div>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          )}
-
-          {paragraphs.length > 0 && (
-            <div style={{ marginBottom: "2.5rem" }}>
-              <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1rem" }}>
-                Sobre {author.name.split(" ")[0]}
-              </h2>
-              <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                {paragraphs.map((p, i) => (
-                  <p key={i} style={{ color: "#475569", fontSize: "1rem", lineHeight: 1.75 }}>
-                    {p}
-                  </p>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {articleCount > 0 && (
-            <Link
-              href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                backgroundColor: "#f0f4f8",
-                color: "#0d1b2a",
-                padding: "0.875rem 1.5rem",
-                borderRadius: "0.75rem",
-                fontWeight: 700,
-                fontSize: "0.9375rem",
-              }}
-            >
-              Ver artigos de {author.name.split(" ")[0]} <ArrowRight size={18} />
-            </Link>
           )}
         </div>
       </section>

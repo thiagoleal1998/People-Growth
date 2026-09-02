@@ -1,11 +1,14 @@
 export type Milestone = { year: string; label: string };
 
-export const founderMilestones: Record<string, Milestone[]> = {
-  "Thiago Leal": [
-    { year: "2022", label: "Fundou a People & Growth" },
-    { year: "2024", label: "Fundou a Neuro Botics" },
-  ],
-};
+export function parseMilestones(text: string | null): Milestone[] {
+  return (text ?? "")
+    .split("\n")
+    .map((line) => {
+      const [year, ...rest] = line.split("|");
+      return { year: (year ?? "").trim(), label: rest.join("|").trim() };
+    })
+    .filter((m) => m.year && m.label);
+}
 
 export function bioParagraphs(text: string | null) {
   return (text ?? "")

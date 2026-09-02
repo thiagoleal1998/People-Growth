@@ -193,6 +193,8 @@ type AuthorRow = {
   tagline_en: string | null;
   bio_pt: string | null;
   bio_en: string | null;
+  milestones_pt: string | null;
+  milestones_en: string | null;
   photo_url: string | null;
   email: string | null;
   linkedin_url: string | null;
