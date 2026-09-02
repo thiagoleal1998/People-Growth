@@ -12,6 +12,7 @@ const navLinks = [
   { key: "newsletter", href: "/mea-sententia" as const },
   { key: "portfolio", href: "/portfolio" as const },
   { key: "resources", href: "/recursos" as const },
+  { key: "media", href: "/na-midia" as const },
   { key: "contact", href: "/contato" as const },
 ];
 

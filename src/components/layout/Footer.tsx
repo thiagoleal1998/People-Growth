@@ -88,6 +88,7 @@ export function Footer({ logoUrl }: { logoUrl?: string | null }) {
                 { key: "services", href: "/servicos" as const },
                 { key: "portfolio", href: "/portfolio" as const },
                 { key: "newsletter", href: "/mea-sententia" as const },
+                { key: "media", href: "/na-midia" as const },
                 { key: "contact", href: "/contato" as const },
               ].map(({ key, href }) => (
                 <li key={key}>

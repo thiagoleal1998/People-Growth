@@ -12,12 +12,25 @@ import {
   Radio,
   Star,
   Quote,
+  Mic,
+  Video,
+  BookOpen,
+  Headphones,
+  Calendar,
+  type LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { toYouTubeEmbedUrl, withAutoplay } from "@/lib/youtube";
-import type { Article, Author, Testimonial } from "@/types/database.types";
+import type { Article, Author, Testimonial, MediaItem } from "@/types/database.types";
+
+const mediaTypeMeta: Record<MediaItem["type"], { icon: LucideIcon; color: string }> = {
+  interview: { icon: Mic, color: "#4361EE" },
+  event: { icon: Video, color: "#06D6A0" },
+  article: { icon: BookOpen, color: "#FFB703" },
+  podcast: { icon: Headphones, color: "#4361EE" },
+};
 
 const stats = [
   { labelKey: "statsYears", value: "7+" },
@@ -80,16 +93,18 @@ export default async function HomePage() {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data: articlesData }, { data: authorsData }, { data: configData }, { data: testimonialsData }] = await Promise.all([
+  const [{ data: articlesData }, { data: authorsData }, { data: configData }, { data: testimonialsData }, { data: mediaData }] = await Promise.all([
     client.from("articles").select("*").eq("status", "published").order("published_at", { ascending: false }),
     client.from("authors").select("*").eq("status", "active").order("order"),
     client.from("site_config").select("*"),
     client.from("testimonials").select("*").eq("status", "active").order("order"),
+    client.from("media_items").select("*").order("order").limit(4),
   ]);
 
   const allArticles = (articlesData ?? []) as Article[];
   const authors = (authorsData ?? []) as Author[];
   const testimonials = (testimonialsData ?? []) as Testimonial[];
+  const mediaItems = (mediaData ?? []) as MediaItem[];
   const config = Object.fromEntries(
     ((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""])
   );
@@ -719,9 +734,74 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Na Mídia */}
+      {mediaItems.length > 0 && (
+        <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
+          <div className="container-xl">
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "1.5rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>
+              <div>
+                <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4361EE", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>
+                  NA MÍDIA
+                </div>
+                <h2 style={{ fontSize: "clamp(1.5rem, 3.5vw, 2rem)", fontWeight: 800, color: "var(--site-text)" }}>
+                  Onde já falamos sobre People &amp; Growth
+                </h2>
+              </div>
+              <Link
+                href="/na-midia"
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "#4361EE", fontWeight: 700, fontSize: "0.9375rem", textDecoration: "none", whiteSpace: "nowrap" }}
+              >
+                Ver todas as menções <ArrowRight size={16} />
+              </Link>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem" }}>
+              {mediaItems.map((item) => {
+                const meta = mediaTypeMeta[item.type];
+                const Icon = meta.icon;
+                const card = (
+                  <div className="hover-card" style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--site-border)", display: "flex", gap: "1rem", height: "100%" }}>
+                    <div
+                      style={{
+                        width: "2.75rem",
+                        height: "2.75rem",
+                        borderRadius: "0.75rem",
+                        flexShrink: 0,
+                        background: item.thumbnail ? `url(${item.thumbnail}) center/cover` : `${meta.color}15`,
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                      }}
+                    >
+                      {!item.thumbnail && <Icon size={18} color={meta.color} />}
+                    </div>
+                    <div>
+                      <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.375rem" }}>{item.title}</h3>
+                      {item.outlet && <div style={{ color: "var(--site-muted)", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.25rem" }}>{item.outlet}</div>}
+                      {item.date && (
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--site-faint)", fontSize: "0.75rem" }}>
+                          <Calendar size={12} /> {new Date(item.date).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+                return item.url ? (
+                  <a key={item.id} href={item.url} target="_blank" rel="noopener noreferrer" style={{ textDecoration: "none" }}>
+                    {card}
+                  </a>
+                ) : (
+                  <div key={item.id}>{card}</div>
+                );
+              })}
+            </div>
+          </div>
+        </section>
+      )}
+
       {/* Testimonials */}
       {testimonials.length > 0 && (
-        <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
+        <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
           <div className="container-xl">
             <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
               <h2
