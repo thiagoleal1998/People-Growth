@@ -1,28 +1,44 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
+import { AlertTriangle } from "lucide-react";
 import { Field, Input, Select, SubmitButton } from "@/components/admin/ui";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { AD_SLOT_DEFS } from "./ad-slots";
 import { upsertAd } from "./actions";
 import type { Ad, Article } from "@/types/database.types";
 
+type OtherAd = Pick<Ad, "id" | "title" | "slot_key" | "target_mode">;
+
 export function AdForm({
   item,
   articles,
   targetedArticleIds,
+  otherAds,
+  targetsByAd,
   imageError,
 }: {
   item?: Ad;
   articles: Pick<Article, "id" | "title_pt">[];
   targetedArticleIds: string[];
+  otherAds: OtherAd[];
+  targetsByAd: Record<string, string[]>;
   imageError?: string;
 }) {
   const action = upsertAd.bind(null, item?.id ?? null);
   const [slotKey, setSlotKey] = useState(item?.slot_key ?? "home-top");
   const [targetMode, setTargetMode] = useState<"all" | "specific">(item?.target_mode ?? "all");
+  const [selectedArticleIds, setSelectedArticleIds] = useState<string[]>(targetedArticleIds);
+  const [active, setActive] = useState(item?.active ?? false);
   const showTargeting = slotKey !== "home-top";
+
+  const collisions = useMemo(() => {
+    if (!active) return [];
+    const sameSlot = otherAds.filter((a) => a.slot_key === slotKey && a.target_mode === targetMode);
+    if (targetMode === "all") return sameSlot;
+    return sameSlot.filter((a) => (targetsByAd[a.id] ?? []).some((id) => selectedArticleIds.includes(id)));
+  }, [active, otherAds, slotKey, targetMode, selectedArticleIds, targetsByAd]);
 
   return (
     <div style={{ maxWidth: "640px" }}>
@@ -51,7 +67,7 @@ export function AdForm({
 
           <Field label="Estamos exibindo este anúncio?">
             <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
-              <input type="checkbox" name="active" defaultChecked={item?.active ?? false} />
+              <input type="checkbox" name="active" checked={active} onChange={(e) => setActive(e.target.checked)} />
               Sim, mostrar no site
             </label>
           </Field>
@@ -94,7 +110,8 @@ export function AdForm({
                 <select
                   name="article_ids"
                   multiple
-                  defaultValue={targetedArticleIds}
+                  value={selectedArticleIds}
+                  onChange={(e) => setSelectedArticleIds(Array.from(e.target.selectedOptions, (o) => o.value))}
                   size={8}
                   style={{ width: "100%", padding: "0.5rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.85rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" }}
                 >
@@ -109,6 +126,31 @@ export function AdForm({
                 </p>
               )}
             </Field>
+          )}
+
+          {collisions.length > 0 && (
+            <div
+              style={{
+                display: "flex",
+                gap: "0.625rem",
+                backgroundColor: "rgba(255,183,3,0.1)",
+                border: "1px solid rgba(255,183,3,0.35)",
+                borderRadius: "0.625rem",
+                padding: "0.875rem 1rem",
+                marginBottom: "1.125rem",
+              }}
+            >
+              <AlertTriangle size={17} color="#cc9200" style={{ flexShrink: 0, marginTop: "0.125rem" }} />
+              <div>
+                <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#7a5c00", marginBottom: "0.25rem" }}>
+                  Esse espaço já tem outro anúncio ativo no mesmo lugar
+                </p>
+                <p style={{ fontSize: "0.8125rem", color: "#7a5c00", lineHeight: 1.5 }}>
+                  Só um anúncio aparece por vez — o mais recentemente salvo tem prioridade, então os outros deixam de aparecer:{" "}
+                  <strong>{collisions.map((c) => c.title).join(", ")}</strong>.
+                </p>
+              </div>
+            </div>
           )}
 
           <SubmitButton>{item ? "Salvar alterações" : "Criar anúncio"}</SubmitButton>
