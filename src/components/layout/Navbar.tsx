@@ -129,7 +129,7 @@ export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
       <style>{`
         .hidden-mobile { display: flex; }
         .show-mobile { display: none; }
-        @media (max-width: 768px) {
+        @media (max-width: 640px) {
           .hidden-mobile { display: none !important; }
           .show-mobile { display: flex !important; }
         }
