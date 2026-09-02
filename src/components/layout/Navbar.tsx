@@ -7,6 +7,7 @@ import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 
 const navLinks = [
+  { key: "home", href: "/" as const },
   { key: "about", href: "/sobre" as const },
   { key: "services", href: "/servicos" as const },
   { key: "newsletter", href: "/mea-sententia" as const },

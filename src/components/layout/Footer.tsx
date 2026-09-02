@@ -84,6 +84,7 @@ export function Footer({ logoUrl }: { logoUrl?: string | null }) {
             </h4>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
               {[
+                { key: "home", href: "/" as const },
                 { key: "about", href: "/sobre" as const },
                 { key: "services", href: "/servicos" as const },
                 { key: "portfolio", href: "/portfolio" as const },
