@@ -1,10 +1,19 @@
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
+import { createClient } from "@/lib/supabase/server";
 
-export const metadata: Metadata = {
-  title: { default: "Admin | People & Growth", template: "%s | Admin" },
-  robots: { index: false, follow: false },
-};
+export async function generateMetadata(): Promise<Metadata> {
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any).from("site_config").select("value").eq("key", "favicon_url").single();
+  const faviconUrl = data?.value as string | undefined;
+
+  return {
+    title: { default: "Admin | People & Growth", template: "%s | Admin" },
+    robots: { index: false, follow: false },
+    icons: faviconUrl ? { icon: faviconUrl } : undefined,
+  };
+}
 
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
   return (
