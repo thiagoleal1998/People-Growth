@@ -82,7 +82,7 @@ export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
         </div>
 
         {/* Mobile hamburger */}
-        <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }} className="show-mobile">
+        <div style={{ alignItems: "center", gap: "0.25rem" }} className="show-mobile">
           <ThemeToggle />
           <button
             onClick={() => setMenuOpen(!menuOpen)}
