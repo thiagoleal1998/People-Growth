@@ -5,7 +5,9 @@ import { Loader2 } from "lucide-react";
 
 export function NewsletterForm({ compact = false, light = false }: { compact?: boolean; light?: boolean }) {
   const [email, setEmail] = useState("");
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [website, setWebsite] = useState(""); // honeypot — real users never fill this
+  const [renderedAt] = useState(() => Date.now());
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "rate-limited">("idle");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -16,11 +18,13 @@ export function NewsletterForm({ compact = false, light = false }: { compact?: b
       const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, website, renderedAt }),
       });
       if (res.ok) {
         setStatus("success");
         setEmail("");
+      } else if (res.status === 429) {
+        setStatus("rate-limited");
       } else {
         setStatus("error");
       }
@@ -50,6 +54,17 @@ export function NewsletterForm({ compact = false, light = false }: { compact?: b
 
   return (
     <form onSubmit={handleSubmit}>
+      {/* Honeypot — hidden from real users, bots tend to fill every field */}
+      <input
+        type="text"
+        name="website"
+        value={website}
+        onChange={(e) => setWebsite(e.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+      />
       <div
         style={{
           display: "flex",
@@ -101,6 +116,11 @@ export function NewsletterForm({ compact = false, light = false }: { compact?: b
       {status === "error" && (
         <p style={{ color: "#f87171", fontSize: "0.8125rem", marginTop: "0.5rem" }}>
           Algo deu errado. Tente novamente.
+        </p>
+      )}
+      {status === "rate-limited" && (
+        <p style={{ color: "#f87171", fontSize: "0.8125rem", marginTop: "0.5rem" }}>
+          Muitas tentativas por aqui. Tente novamente mais tarde.
         </p>
       )}
     </form>

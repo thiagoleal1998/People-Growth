@@ -16,7 +16,9 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
     service: serviceDefault,
     message: "",
   });
-  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error" | "rate-limited">("idle");
+  const [website, setWebsite] = useState(""); // honeypot — real users never fill this
+  const [renderedAt] = useState(() => Date.now());
 
   const inputStyle = {
     width: "100%",
@@ -37,11 +39,13 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
       const res = await fetch("/api/contact", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({ ...form, website, renderedAt }),
       });
       if (res.ok) {
         setStatus("success");
         setForm({ name: "", email: "", phone: "", service: "", message: "" });
+      } else if (res.status === 429) {
+        setStatus("rate-limited");
       } else {
         setStatus("error");
       }
@@ -62,6 +66,18 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
 
   return (
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+      {/* Honeypot — hidden from real users, bots tend to fill every field */}
+      <input
+        type="text"
+        name="website"
+        value={website}
+        onChange={(e) => setWebsite(e.target.value)}
+        tabIndex={-1}
+        autoComplete="off"
+        aria-hidden="true"
+        style={{ position: "absolute", left: "-9999px", width: "1px", height: "1px", opacity: 0 }}
+      />
+
       <div style={{ display: "grid", gridTemplateColumns: compact ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
         <div>
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "var(--site-text-secondary)", marginBottom: "0.375rem" }}>
@@ -142,6 +158,9 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
 
       {status === "error" && (
         <p style={{ color: "#ef4444", fontSize: "0.8125rem" }}>Algo deu errado. Tente novamente.</p>
+      )}
+      {status === "rate-limited" && (
+        <p style={{ color: "#ef4444", fontSize: "0.8125rem" }}>Muitas tentativas por aqui. Tente novamente mais tarde.</p>
       )}
 
       <button
