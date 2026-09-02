@@ -69,9 +69,9 @@ export function NewsletterForm({ compact = false, light = false }: { compact?: b
             minWidth: 0,
             padding: compact ? "0.625rem 0.875rem" : "0.875rem 1.25rem",
             borderRadius: "0.625rem",
-            border: light ? "1px solid #cbd5e1" : "1px solid rgba(255,255,255,0.15)",
-            backgroundColor: light ? "white" : compact ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.12)",
-            color: light ? "#0d1b2a" : "white",
+            border: light ? "1px solid var(--site-border-strong)" : "1px solid rgba(255,255,255,0.15)",
+            backgroundColor: light ? "var(--site-card)" : compact ? "rgba(255,255,255,0.08)" : "rgba(255,255,255,0.12)",
+            color: light ? "var(--site-text)" : "white",
             fontSize: "0.9rem",
             outline: "none",
           }}

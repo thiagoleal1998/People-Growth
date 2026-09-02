@@ -107,8 +107,20 @@ export default async function LocaleLayout({
     })),
   } : null;
 
+  const themeScript = `
+(function () {
+  try {
+    var theme = localStorage.getItem("site-theme");
+    if (theme === "dark") document.documentElement.setAttribute("data-theme", "dark");
+  } catch (e) {}
+})();
+`;
+
   return (
     <html lang={locale}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>
         <script
           type="application/ld+json"

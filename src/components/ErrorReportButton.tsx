@@ -73,20 +73,20 @@ export function ErrorReportButton() {
           <div
             onClick={(e) => e.stopPropagation()}
             style={{
-              backgroundColor: "white",
+              backgroundColor: "var(--site-card)",
               borderRadius: "1rem",
               padding: "1.75rem",
               maxWidth: "440px",
               width: "100%",
               position: "relative",
-              color: "#0d1b2a",
+              color: "var(--site-text)",
             }}
           >
             <button
               type="button"
               onClick={close}
               aria-label="Fechar"
-              style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", cursor: "pointer", color: "#94a3b8" }}
+              style={{ position: "absolute", top: "1rem", right: "1rem", background: "none", border: "none", cursor: "pointer", color: "var(--site-faint)" }}
             >
               <X size={20} />
             </button>
@@ -95,14 +95,14 @@ export function ErrorReportButton() {
               <div style={{ textAlign: "center", padding: "1rem 0" }}>
                 <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>✅</div>
                 <h3 style={{ fontWeight: 700, marginBottom: "0.5rem" }}>Obrigado pelo aviso!</h3>
-                <p style={{ color: "#64748b", fontSize: "0.9rem" }}>
+                <p style={{ color: "var(--site-muted)", fontSize: "0.9rem" }}>
                   Vamos analisar o erro reportado o quanto antes.
                 </p>
               </div>
             ) : (
               <form onSubmit={handleSubmit}>
                 <h3 style={{ fontWeight: 800, fontSize: "1.125rem", marginBottom: "0.25rem" }}>Comunicar erro</h3>
-                <p style={{ color: "#64748b", fontSize: "0.875rem", marginBottom: "1.25rem" }}>
+                <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", marginBottom: "1.25rem" }}>
                   Encontrou algo quebrado ou incorreto no site? Conte pra gente.
                 </p>
 
@@ -116,7 +116,7 @@ export function ErrorReportButton() {
                     value={description}
                     onChange={(e) => setDescription(e.target.value)}
                     placeholder="Descreva o erro que você encontrou..."
-                    style={{ width: "100%", padding: "0.75rem", borderRadius: "0.625rem", border: "1px solid #e2e8f0", fontSize: "0.9rem", boxSizing: "border-box", resize: "vertical", fontFamily: "inherit" }}
+                    style={{ width: "100%", padding: "0.75rem", borderRadius: "0.625rem", border: "1px solid var(--site-border-strong)", fontSize: "0.9rem", boxSizing: "border-box", resize: "vertical", fontFamily: "inherit", backgroundColor: "var(--site-card)", color: "var(--site-text)" }}
                   />
                 </div>
 
@@ -129,7 +129,7 @@ export function ErrorReportButton() {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="Para te avisarmos quando corrigirmos"
-                    style={{ width: "100%", padding: "0.75rem", borderRadius: "0.625rem", border: "1px solid #e2e8f0", fontSize: "0.9rem", boxSizing: "border-box" }}
+                    style={{ width: "100%", padding: "0.75rem", borderRadius: "0.625rem", border: "1px solid var(--site-border-strong)", fontSize: "0.9rem", boxSizing: "border-box", backgroundColor: "var(--site-card)", color: "var(--site-text)" }}
                   />
                 </div>
 

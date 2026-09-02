@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Menu, X } from "lucide-react";
+import { ThemeToggle } from "./ThemeToggle";
 
 const navLinks = [
   { key: "about", href: "/sobre" as const },
@@ -76,18 +77,21 @@ export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
               </Link>
             );
           })}
+          <ThemeToggle />
           <LocaleSwitcher />
         </div>
 
         {/* Mobile hamburger */}
-        <button
-          onClick={() => setMenuOpen(!menuOpen)}
-          style={{ color: "white", background: "none", border: "none", cursor: "pointer", padding: "0.5rem" }}
-          className="show-mobile"
-          aria-label="Toggle menu"
-        >
-          {menuOpen ? <X size={22} /> : <Menu size={22} />}
-        </button>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }} className="show-mobile">
+          <ThemeToggle />
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            style={{ color: "white", background: "none", border: "none", cursor: "pointer", padding: "0.5rem" }}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? <X size={22} /> : <Menu size={22} />}
+          </button>
+        </div>
       </nav>
 
       {/* Mobile menu */}
@@ -127,7 +131,7 @@ export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
         .show-mobile { display: none; }
         @media (max-width: 768px) {
           .hidden-mobile { display: none !important; }
-          .show-mobile { display: block !important; }
+          .show-mobile { display: flex !important; }
         }
       `}</style>
     </header>

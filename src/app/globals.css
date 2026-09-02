@@ -56,6 +56,30 @@
   --admin-faint: #6b7688;
 }
 
+:root {
+  --site-bg: #ffffff;
+  --site-surface-alt: #f0f4f8;
+  --site-card: #ffffff;
+  --site-text: #0d1b2a;
+  --site-text-secondary: #475569;
+  --site-muted: #64748b;
+  --site-faint: #94a3b8;
+  --site-border: rgba(0, 0, 0, 0.06);
+  --site-border-strong: #e2e8f0;
+}
+
+[data-theme="dark"] {
+  --site-bg: #0b0f17;
+  --site-surface-alt: #121826;
+  --site-card: #121826;
+  --site-text: #e8ecf1;
+  --site-text-secondary: #c3cbd6;
+  --site-muted: #97a1b0;
+  --site-faint: #6b7688;
+  --site-border: rgba(255, 255, 255, 0.08);
+  --site-border-strong: #2d3748;
+}
+
 @layer base {
   * {
     box-sizing: border-box;
@@ -71,8 +95,8 @@
 
   body {
     font-family: var(--font-sans);
-    background-color: white;
-    color: var(--color-navy);
+    background-color: var(--site-bg);
+    color: var(--site-text);
   }
 
   h1, h2, h3, h4, h5, h6 {

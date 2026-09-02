@@ -22,11 +22,11 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
     width: "100%",
     padding: compact ? "0.625rem 0.875rem" : "0.75rem 1rem",
     borderRadius: "0.625rem",
-    border: "1px solid #e2e8f0",
+    border: "1px solid var(--site-border-strong)",
     fontSize: "0.9rem",
-    color: "#0d1b2a",
+    color: "var(--site-text)",
     outline: "none",
-    backgroundColor: "white",
+    backgroundColor: "var(--site-card)",
     boxSizing: "border-box" as const,
   };
 
@@ -54,8 +54,8 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
     return (
       <div style={{ backgroundColor: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.3)", borderRadius: "0.875rem", padding: "2rem", textAlign: "center" }}>
         <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>✅</div>
-        <h3 style={{ fontWeight: 700, color: "#0d1b2a", marginBottom: "0.5rem" }}>Mensagem enviada!</h3>
-        <p style={{ color: "#475569", fontSize: "0.9rem" }}>Em breve entraremos em contato. Obrigado!</p>
+        <h3 style={{ fontWeight: 700, color: "var(--site-text)", marginBottom: "0.5rem" }}>Mensagem enviada!</h3>
+        <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9rem" }}>Em breve entraremos em contato. Obrigado!</p>
       </div>
     );
   }
@@ -64,7 +64,7 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
     <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
       <div style={{ display: "grid", gridTemplateColumns: compact ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
         <div>
-          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "#374151", marginBottom: "0.375rem" }}>
+          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "var(--site-text-secondary)", marginBottom: "0.375rem" }}>
             Nome completo *
           </label>
           <input
@@ -77,7 +77,7 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
           />
         </div>
         <div>
-          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "#374151", marginBottom: "0.375rem" }}>
+          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "var(--site-text-secondary)", marginBottom: "0.375rem" }}>
             E-mail *
           </label>
           <input
@@ -93,7 +93,7 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
 
       <div style={{ display: "grid", gridTemplateColumns: compact ? "1fr" : "1fr 1fr", gap: "0.75rem" }}>
         <div>
-          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "#374151", marginBottom: "0.375rem" }}>
+          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "var(--site-text-secondary)", marginBottom: "0.375rem" }}>
             WhatsApp
           </label>
           <input
@@ -105,7 +105,7 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
           />
         </div>
         <div>
-          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "#374151", marginBottom: "0.375rem" }}>
+          <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "var(--site-text-secondary)", marginBottom: "0.375rem" }}>
             Assunto / Serviço
           </label>
           <select
@@ -127,7 +127,7 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
       </div>
 
       <div>
-        <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "#374151", marginBottom: "0.375rem" }}>
+        <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 600, color: "var(--site-text-secondary)", marginBottom: "0.375rem" }}>
           Mensagem *
         </label>
         <textarea

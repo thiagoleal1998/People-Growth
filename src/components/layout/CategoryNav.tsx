@@ -17,7 +17,7 @@ export async function CategoryNav() {
   if (sorted.length === 0) return null;
 
   return (
-    <nav style={{ backgroundColor: "#f8fafc", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+    <nav style={{ backgroundColor: "var(--site-surface-alt)", borderBottom: "1px solid var(--site-border)" }}>
       <div
         className="container-xl"
         style={{ display: "flex", justifyContent: "center", gap: "1.75rem", overflowX: "auto", padding: "0.75rem 0" }}
@@ -32,7 +32,7 @@ export async function CategoryNav() {
               fontWeight: 700,
               letterSpacing: "0.03em",
               textTransform: "uppercase",
-              color: "#475569",
+              color: "var(--site-text-secondary)",
               textDecoration: "none",
               whiteSpace: "nowrap",
             }}

@@ -133,7 +133,7 @@ export default async function HomePage() {
 
       {/* News lead — UOL-style front page block */}
       {featured && (
-        <section style={{ backgroundColor: "white", paddingTop: "1.5rem", paddingBottom: "1.5rem" }}>
+        <section style={{ backgroundColor: "var(--site-bg)", paddingTop: "1.5rem", paddingBottom: "1.5rem" }}>
           <div className="container-xl">
             <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4361EE", letterSpacing: "0.08em", marginBottom: "0.75rem" }}>
               CONTEÚDO
@@ -162,11 +162,11 @@ export default async function HomePage() {
                     <div style={{ marginBottom: "0.5rem" }}>
                       <FormatTag format={featured.format} />
                     </div>
-                    <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "#0d1b2a", lineHeight: 1.1, marginBottom: "0.5rem" }}>
+                    <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "var(--site-text)", lineHeight: 1.1, marginBottom: "0.5rem" }}>
                       {featured.title_pt}
                     </h1>
                     {featured.excerpt_pt && (
-                      <p style={{ color: "#64748b", fontSize: "1.0625rem", lineHeight: 1.5 }}>
+                      <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", lineHeight: 1.5 }}>
                         {featured.excerpt_pt}
                       </p>
                     )}
@@ -179,7 +179,7 @@ export default async function HomePage() {
                       <li key={article.id}>
                         <Link
                           href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
-                          style={{ display: "flex", alignItems: "baseline", gap: "0.625rem", textDecoration: "none", color: "#334155", fontSize: "0.9375rem", fontWeight: 500 }}
+                          style={{ display: "flex", alignItems: "baseline", gap: "0.625rem", textDecoration: "none", color: "var(--site-text-secondary)", fontSize: "0.9375rem", fontWeight: 500 }}
                         >
                           <span style={{ width: "0.4375rem", height: "0.4375rem", backgroundColor: "#4361EE", flexShrink: 0 }} />
                           {article.title_pt}
@@ -190,7 +190,7 @@ export default async function HomePage() {
                 )}
 
                 {secondary.length > 0 && (
-                  <div style={{ borderTop: "1px solid rgba(0,0,0,0.08)", marginTop: "1.125rem", paddingTop: "1.125rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.125rem" }}>
+                  <div style={{ borderTop: "1px solid var(--site-border)", marginTop: "1.125rem", paddingTop: "1.125rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.125rem" }}>
                     {secondary.map((article) => (
                       <Link
                         key={article.id}
@@ -208,7 +208,7 @@ export default async function HomePage() {
                         <div style={{ marginBottom: "0.375rem" }}>
                           <FormatTag format={article.format} />
                         </div>
-                        <h4 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "#0d1b2a", lineHeight: 1.4 }}>
+                        <h4 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", lineHeight: 1.4 }}>
                           {article.title_pt}
                         </h4>
                       </Link>
@@ -226,10 +226,10 @@ export default async function HomePage() {
                     backgroundColor: "rgba(67,97,238,0.04)",
                   }}
                 >
-                  <h4 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "#0d1b2a", marginBottom: "0.375rem" }}>
+                  <h4 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)", marginBottom: "0.375rem" }}>
                     ✍️ Receba a Mea Sententia por e-mail
                   </h4>
-                  <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.5, marginBottom: "1rem" }}>
+                  <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.5, marginBottom: "1rem" }}>
                     Perspectivas sobre negócios, sociedade e os temas que impactam pessoas — direto na sua caixa de entrada.
                   </p>
                   <NewsletterForm light />
@@ -238,7 +238,7 @@ export default async function HomePage() {
                 {/* More news, alternating formats */}
                 {moreNews.length > 0 && (
                   <div style={{ marginTop: "0.5rem" }}>
-                    <h2 style={{ fontSize: "0.75rem", fontWeight: 700, color: "#64748b", marginTop: "1.5rem", marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    <h2 style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--site-muted)", marginTop: "1.5rem", marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                       Mais notícias
                     </h2>
                     {moreNews.map((article, i) => (
@@ -251,7 +251,7 @@ export default async function HomePage() {
                           alignItems: "flex-start",
                           textDecoration: "none",
                           padding: "1rem 0",
-                          borderTop: "1px solid rgba(0,0,0,0.08)",
+                          borderTop: "1px solid var(--site-border)",
                         }}
                       >
                         {i % 2 === 0 && article.cover_image && (
@@ -273,7 +273,7 @@ export default async function HomePage() {
                             style={{
                               fontWeight: 700,
                               fontSize: i % 2 === 0 ? "1rem" : "0.9375rem",
-                              color: "#0d1b2a",
+                              color: "var(--site-text)",
                               lineHeight: 1.35,
                               marginBottom: "0.25rem",
                             }}
@@ -281,11 +281,11 @@ export default async function HomePage() {
                             {article.title_pt}
                           </h4>
                           {i % 2 === 0 && article.excerpt_pt && (
-                            <p style={{ color: "#64748b", fontSize: "0.8125rem", lineHeight: 1.5, marginBottom: "0.25rem" }}>
+                            <p style={{ color: "var(--site-muted)", fontSize: "0.8125rem", lineHeight: 1.5, marginBottom: "0.25rem" }}>
                               {article.excerpt_pt}
                             </p>
                           )}
-                          <span style={{ fontSize: "0.75rem", color: "#94a3b8" }}>
+                          <span style={{ fontSize: "0.75rem", color: "var(--site-faint)" }}>
                             {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
                           </span>
                         </div>
@@ -331,7 +331,7 @@ export default async function HomePage() {
                     </div>
                     {config.live_caption_pt && (
                       <div style={{ padding: "0.75rem 0.875rem", borderTop: "2px solid #dc2626" }}>
-                        <p style={{ color: "#0d1b2a", fontWeight: 700, fontSize: "0.875rem", lineHeight: 1.4 }}>
+                        <p style={{ color: "var(--site-text)", fontWeight: 700, fontSize: "0.875rem", lineHeight: 1.4 }}>
                           {config.live_caption_pt}
                         </p>
                       </div>
@@ -339,7 +339,7 @@ export default async function HomePage() {
                   </div>
                 )}
 
-                <div style={{ borderRadius: "0.75rem", overflow: "hidden", border: "1px solid rgba(0,0,0,0.08)" }}>
+                <div style={{ borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
                   <div style={{ backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>
                     VÍDEO EM DESTAQUE
                   </div>
@@ -353,14 +353,14 @@ export default async function HomePage() {
                       />
                     </div>
                   ) : (
-                    <div style={{ aspectRatio: "16/9", backgroundColor: "#f0f4f8", display: "flex", alignItems: "center", justifyContent: "center", color: "#94a3b8", fontSize: "0.875rem", fontWeight: 600 }}>
+                    <div style={{ aspectRatio: "16/9", backgroundColor: "var(--site-surface-alt)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--site-faint)", fontSize: "0.875rem", fontWeight: 600 }}>
                       Em breve
                     </div>
                   )}
                 </div>
 
-                <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid rgba(0,0,0,0.08)" }}>
-                  <div style={{ backgroundColor: "white", padding: "0.625rem 1rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
+                  <div style={{ backgroundColor: "var(--site-card)", padding: "0.625rem 1rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
                     <Zap size={16} color="#dc2626" fill="#dc2626" />
                     <span style={{ color: "#dc2626", fontWeight: 800, fontSize: "0.9375rem", letterSpacing: "0.02em" }}>SHORTS</span>
                   </div>
@@ -415,7 +415,7 @@ export default async function HomePage() {
 
       {/* Columnists strip */}
       {authors.length > 0 && (
-        <section style={{ backgroundColor: "white", borderTop: "2px solid #4361EE", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        <section style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #4361EE", borderBottom: "1px solid var(--site-border)" }}>
           <div className="container-xl" style={{ display: "flex", justifyContent: "center", gap: "2rem", padding: "1.25rem 0", flexWrap: "wrap", overflowX: "auto" }}>
             {authors.map((author) => {
               const latest = latestByAuthor.get(author.id);
@@ -442,7 +442,7 @@ export default async function HomePage() {
                     <div style={{ fontWeight: 800, fontSize: "0.8125rem", color: "#4361EE", marginBottom: "0.25rem" }}>{author.name}</div>
                     <div
                       style={{
-                        color: "#1e293b",
+                        color: "var(--site-text-secondary)",
                         fontSize: "0.75rem",
                         lineHeight: 1.35,
                         display: "-webkit-box",
@@ -656,20 +656,20 @@ export default async function HomePage() {
       </section>
 
       {/* Services */}
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
           <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
             <h2
               style={{
                 fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
                 fontWeight: 800,
-                color: "#0d1b2a",
+                color: "var(--site-text)",
                 marginBottom: "0.75rem",
               }}
             >
               {t("servicesTitle")}
             </h2>
-            <p style={{ color: "#64748b", fontSize: "1.0625rem", maxWidth: "540px", margin: "0 auto" }}>
+            <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", maxWidth: "540px", margin: "0 auto" }}>
               {t("servicesSubtitle")}
             </p>
           </div>
@@ -687,10 +687,10 @@ export default async function HomePage() {
                 href={href}
                 style={{
                   display: "block",
-                  backgroundColor: "white",
+                  backgroundColor: "var(--site-card)",
                   borderRadius: "1rem",
                   padding: "1.75rem",
-                  border: "1px solid rgba(0,0,0,0.06)",
+                  border: "1px solid var(--site-border)",
                   transition: "all 0.2s",
                   textDecoration: "none",
                   boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
@@ -710,10 +710,10 @@ export default async function HomePage() {
                 >
                   <Icon size={22} color={color} />
                 </div>
-                <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "#0d1b2a", marginBottom: "0.5rem" }}>
+                <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--site-text)", marginBottom: "0.5rem" }}>
                   {title}
                 </h3>
-                <p style={{ color: "#64748b", fontSize: "0.9rem", lineHeight: 1.65 }}>
+                <p style={{ color: "var(--site-muted)", fontSize: "0.9rem", lineHeight: 1.65 }}>
                   {description}
                 </p>
               </Link>
@@ -724,14 +724,14 @@ export default async function HomePage() {
 
       {/* Testimonials */}
       {testimonials.length > 0 && (
-        <section className="section-padding" style={{ backgroundColor: "white" }}>
+        <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
           <div className="container-xl">
             <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
               <h2
                 style={{
                   fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
                   fontWeight: 800,
-                  color: "#0d1b2a",
+                  color: "var(--site-text)",
                   marginBottom: "0.75rem",
                 }}
               >
@@ -750,10 +750,10 @@ export default async function HomePage() {
                 <div
                   key={item.id}
                   style={{
-                    backgroundColor: "#f0f4f8",
+                    backgroundColor: "var(--site-surface-alt)",
                     borderRadius: "1.25rem",
                     padding: "1.75rem",
-                    border: "1px solid rgba(0,0,0,0.05)",
+                    border: "1px solid var(--site-border)",
                     display: "flex",
                     flexDirection: "column",
                   }}
@@ -771,7 +771,7 @@ export default async function HomePage() {
                       ))}
                     </div>
                   )}
-                  <p style={{ color: "#334155", fontSize: "0.9375rem", lineHeight: 1.7, marginBottom: "1.25rem", flex: 1 }}>
+                  <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.7, marginBottom: "1.25rem", flex: 1 }}>
                     &ldquo;{item.text_pt}&rdquo;
                   </p>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
@@ -787,9 +787,9 @@ export default async function HomePage() {
                       }}
                     />
                     <div>
-                      <div style={{ fontWeight: 700, fontSize: "0.9375rem", color: "#0d1b2a" }}>{item.name}</div>
+                      <div style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)" }}>{item.name}</div>
                       {(item.role || item.company) && (
-                        <div style={{ fontSize: "0.8125rem", color: "#64748b" }}>
+                        <div style={{ fontSize: "0.8125rem", color: "var(--site-muted)" }}>
                           {[item.role, item.company].filter(Boolean).join(" · ")}
                         </div>
                       )}
@@ -856,7 +856,7 @@ export default async function HomePage() {
                 alignItems: "center",
                 gap: "0.5rem",
                 backgroundColor: "#06D6A0",
-                color: "#0d1b2a",
+                color: "var(--site-text)",
                 padding: "0.875rem 1.75rem",
                 borderRadius: "0.75rem",
                 fontWeight: 700,
@@ -896,7 +896,7 @@ export default async function HomePage() {
       </section>
 
       {/* CTA Contact */}
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8", textAlign: "center" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)", textAlign: "center" }}>
         <div className="container-xl" style={{ maxWidth: "640px", margin: "0 auto" }}>
           <div
             style={{
@@ -912,10 +912,10 @@ export default async function HomePage() {
           >
             <Sparkles size={24} color="white" />
           </div>
-          <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.75rem" }}>
+          <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>
             {t("contactTitle")}
           </h2>
-          <p style={{ color: "#64748b", fontSize: "1.0625rem", marginBottom: "2rem" }}>
+          <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", marginBottom: "2rem" }}>
             {t("contactSubtitle")}
           </p>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
@@ -942,9 +942,9 @@ export default async function HomePage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "0.5rem",
-                backgroundColor: "white",
-                border: "1px solid rgba(0,0,0,0.1)",
-                color: "#0d1b2a",
+                backgroundColor: "var(--site-card)",
+                border: "1px solid var(--site-border-strong)",
+                color: "var(--site-text)",
                 padding: "0.875rem 1.75rem",
                 borderRadius: "0.75rem",
                 fontWeight: 600,
