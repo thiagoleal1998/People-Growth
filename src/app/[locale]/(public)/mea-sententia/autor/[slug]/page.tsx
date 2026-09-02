@@ -142,6 +142,7 @@ export default async function AuthorPage({
                     key={article.id}
                     href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
                     style={{ display: "block", textDecoration: "none" }}
+                    className="hover-card"
                   >
                     <article
                       style={{

@@ -42,7 +42,7 @@ export default async function CursosPage() {
               {courses.map((course, i) => {
                 const color = palette[i % palette.length];
                 return (
-                  <div key={course.id} style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)", position: "relative", overflow: "hidden" }}>
+                  <div key={course.id} className="hover-card" style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)", position: "relative", overflow: "hidden" }}>
                     {course.status === "coming_soon" && (
                       <div style={{ position: "absolute", top: "1rem", right: "1rem", backgroundColor: `${color}15`, color, padding: "0.2rem 0.625rem", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 700 }}>
                         {t("comingSoon")}

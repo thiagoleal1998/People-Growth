@@ -6,6 +6,7 @@ export function FounderCard({ author }: { author: Author }) {
   return (
     <Link
       href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
+      className="hover-card"
       style={{
         display: "block",
         textDecoration: "none",
@@ -56,8 +57,8 @@ export function FounderCard({ author }: { author: Author }) {
       )}
 
       <div
+        className="hover-link-move"
         style={{
-          display: "inline-flex",
           alignItems: "center",
           gap: "0.25rem",
           marginTop: "0.875rem",

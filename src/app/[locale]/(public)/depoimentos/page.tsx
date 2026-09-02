@@ -37,7 +37,7 @@ export default async function DepoimentosPage() {
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.75rem" }}>
               {testimonials.map((item) => (
-                <div key={item.id} style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", display: "flex", flexDirection: "column" }}>
+                <div key={item.id} className="hover-card" style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", display: "flex", flexDirection: "column" }}>
                   {item.rating && (
                     <div style={{ display: "flex", gap: "0.25rem", marginBottom: "1.25rem" }}>
                       {Array.from({ length: item.rating }).map((_, i) => (

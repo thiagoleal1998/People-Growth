@@ -196,6 +196,7 @@ export default async function HomePage() {
                         key={article.id}
                         href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
                         style={{ display: "block", textDecoration: "none" }}
+                        className="hover-card"
                       >
                         <div
                           style={{
@@ -685,13 +686,13 @@ export default async function HomePage() {
               <Link
                 key={title}
                 href={href}
+                className="hover-card"
                 style={{
                   display: "block",
                   backgroundColor: "var(--site-card)",
                   borderRadius: "1rem",
                   padding: "1.75rem",
                   border: "1px solid var(--site-border)",
-                  transition: "all 0.2s",
                   textDecoration: "none",
                   boxShadow: "0 1px 3px rgba(0,0,0,0.06)",
                 }}
@@ -749,6 +750,7 @@ export default async function HomePage() {
               {testimonials.slice(0, 6).map((item) => (
                 <div
                   key={item.id}
+                  className="hover-card"
                   style={{
                     backgroundColor: "var(--site-surface-alt)",
                     borderRadius: "1.25rem",
@@ -876,6 +878,7 @@ export default async function HomePage() {
             ].map(({ label, description }) => (
               <div
                 key={label}
+                className="hover-card-dark"
                 style={{
                   backgroundColor: "rgba(255,255,255,0.05)",
                   border: "1px solid rgba(255,255,255,0.08)",

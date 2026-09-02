@@ -92,6 +92,7 @@ export default async function ServicosPage() {
                 return (
                   <div
                     key={service.id}
+                    className="hover-card"
                     style={{
                       backgroundColor: "var(--site-card)",
                       borderRadius: "1.25rem",
@@ -187,6 +188,7 @@ export default async function ServicosPage() {
             ].map(({ step, title, desc }) => (
               <div
                 key={step}
+                className="hover-card-dark"
                 style={{
                   backgroundColor: "rgba(255,255,255,0.05)",
                   border: "1px solid rgba(255,255,255,0.08)",

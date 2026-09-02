@@ -194,6 +194,7 @@ export default async function SobrePage() {
             {philosophy.map(({ icon, title, description }) => (
               <div
                 key={title}
+                className="hover-card"
                 style={{
                   backgroundColor: "var(--site-surface-alt)",
                   borderRadius: "1rem",
@@ -247,6 +248,7 @@ export default async function SobrePage() {
             ].map(({ name, description, icon, color }) => (
               <div
                 key={name}
+                className="hover-card-dark"
                 style={{
                   backgroundColor: "rgba(255,255,255,0.05)",
                   border: "1px solid rgba(255,255,255,0.08)",

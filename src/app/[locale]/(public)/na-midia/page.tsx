@@ -47,7 +47,7 @@ export default async function NaMidiaPage() {
                 const meta = typeMeta[item.type];
                 const Icon = meta.icon;
                 const card = (
-                  <div style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.75rem", border: "1px solid var(--site-border)", display: "flex", gap: "1.25rem" }}>
+                  <div className="hover-card" style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.75rem", border: "1px solid var(--site-border)", display: "flex", gap: "1.25rem" }}>
                     <div
                       style={{
                         width: "3rem",

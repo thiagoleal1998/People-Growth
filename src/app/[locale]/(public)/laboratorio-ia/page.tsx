@@ -45,7 +45,7 @@ export default async function LaboratorioIAPage() {
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.75rem" }}>
             {projects.map(({ icon: Icon, title, description, tags, color }) => (
-              <div key={title} style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)" }}>
+              <div key={title} className="hover-card" style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)" }}>
                 <div style={{ width: "3.5rem", height: "3.5rem", borderRadius: "1rem", backgroundColor: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.25rem" }}>
                   <Icon size={24} color={color} />
                 </div>

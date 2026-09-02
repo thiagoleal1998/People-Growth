@@ -48,7 +48,7 @@ export default async function RecursosPage() {
                 const meta = typeMeta[resource.type];
                 const Icon = meta.icon;
                 return (
-                  <div key={resource.id} style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)", display: "flex", flexDirection: "column" }}>
+                  <div key={resource.id} className="hover-card" style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)", display: "flex", flexDirection: "column" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.25rem" }}>
                       <div style={{ width: "3rem", height: "3rem", borderRadius: "0.875rem", backgroundColor: `${meta.color}15`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <Icon size={20} color={meta.color} />

@@ -164,6 +164,7 @@ export default async function ArticlePage({
             {author && (
               <Link
                 href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
+                className="hover-card"
                 style={{
                   marginTop: "2.5rem",
                   padding: "1.75rem",

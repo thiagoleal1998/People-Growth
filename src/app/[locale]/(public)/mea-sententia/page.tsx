@@ -167,6 +167,7 @@ export default async function MeaSententiePage() {
                     <Link
                       href={{ pathname: "/mea-sententia/[slug]", params: { slug: featured.slug } }}
                       style={{ display: "block", textDecoration: "none" }}
+                      className="hover-card"
                     >
                       <article
                         style={{
@@ -248,6 +249,7 @@ export default async function MeaSententiePage() {
                             key={article.id}
                             href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
                             style={{ display: "block", textDecoration: "none" }}
+                            className="hover-card"
                           >
                             <article
                               style={{
@@ -258,7 +260,6 @@ export default async function MeaSententiePage() {
                                 display: "flex",
                                 gap: "1.25rem",
                                 alignItems: "flex-start",
-                                transition: "all 0.2s",
                               }}
                             >
                               <div

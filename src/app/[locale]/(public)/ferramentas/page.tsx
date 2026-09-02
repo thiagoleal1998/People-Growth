@@ -52,7 +52,7 @@ export default async function FerramentasPage() {
               </h2>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
                 {items.map(({ name, description, icon, badge }) => (
-                  <div key={name} style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--site-border)", position: "relative" }}>
+                  <div key={name} className="hover-card" style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--site-border)", position: "relative" }}>
                     {badge && (
                       <span style={{ position: "absolute", top: "1rem", right: "1rem", backgroundColor: badge === "Essencial" ? "rgba(67,97,238,0.12)" : "rgba(6,214,160,0.12)", color: badge === "Essencial" ? "#4361EE" : "#04a87d", padding: "0.15rem 0.5rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 700 }}>
                         {badge}

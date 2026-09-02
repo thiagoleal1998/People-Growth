@@ -53,6 +53,7 @@ export default async function PortfolioPage() {
                     key={c.id}
                     href={{ pathname: "/portfolio/[slug]", params: { slug: c.slug } }}
                     style={{ display: "block", textDecoration: "none" }}
+                    className="hover-card"
                   >
                     <article style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", overflow: "hidden", border: "1px solid var(--site-border)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", height: "100%", display: "flex", flexDirection: "column" }}>
                       <div

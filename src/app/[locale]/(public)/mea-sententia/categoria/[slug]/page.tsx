@@ -81,6 +81,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                   key={article.id}
                   href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
                   style={{ display: "block", textDecoration: "none" }}
+                  className="hover-card"
                 >
                   <article style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--site-border)", display: "flex", gap: "1.25rem", alignItems: "flex-start" }}>
                     <div
