@@ -4,6 +4,7 @@ import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
 import Script from "next/script";
 import NextTopLoader from "nextjs-toploader";
+import { Analytics } from "@/components/Analytics";
 import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import "../globals.css";
@@ -151,6 +152,7 @@ export default async function LocaleLayout({
           </>
         )}
         <NextTopLoader color="#4361EE" height={3} showSpinner={false} />
+        <Analytics />
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>

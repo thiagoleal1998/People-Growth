@@ -16,6 +16,7 @@ import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { MediaCarousel } from "@/components/MediaCarousel";
+import { AdBanner } from "@/components/AdBanner";
 import { toYouTubeEmbedUrl, withAutoplay } from "@/lib/youtube";
 import type { Article, Author, Testimonial, MediaItem } from "@/types/database.types";
 
@@ -132,6 +133,10 @@ export default async function HomePage() {
           </span>
         </div>
       </Link>
+
+      <div className="container-xl" style={{ paddingTop: "1.25rem" }}>
+        <AdBanner slotKey="home-top" />
+      </div>
 
       {/* News lead — UOL-style front page block */}
       {featured && (

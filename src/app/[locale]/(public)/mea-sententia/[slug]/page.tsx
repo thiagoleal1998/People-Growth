@@ -6,7 +6,8 @@ import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Comments } from "@/components/Comments";
-import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { AdBanner } from "@/components/AdBanner";
+import { createClient } from "@/lib/supabase/server";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
 import type { Article, Category, Author, Comment } from "@/types/database.types";
 
@@ -58,12 +59,6 @@ export default async function ArticlePage({
   if (!result) notFound();
 
   const { article, category, author, comments } = result;
-
-  // Fire-and-forget view counter; never block or fail the page render on it.
-  createAdminClient()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    .then((admin) => (admin as any).from("articles").update({ views: article.views + 1 }).eq("id", article.id))
-    .catch(() => {});
 
   return (
     <>
@@ -162,6 +157,10 @@ export default async function ArticlePage({
             />
 
             <ShareButtons title={article.title_pt} />
+
+            <div style={{ marginTop: "2rem" }}>
+              <AdBanner slotKey="article-instream" />
+            </div>
 
             {/* Author */}
             {author && (
@@ -271,6 +270,8 @@ export default async function ArticlePage({
                 Agendar conversa
               </Link>
             </div>
+
+            <AdBanner slotKey="article-sidebar" />
           </aside>
         </div>
 

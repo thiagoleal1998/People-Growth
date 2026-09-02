@@ -235,6 +235,35 @@ type AuthorRow = {
   updated_at: string;
 };
 
+type PageViewRow = {
+  id: string;
+  path: string;
+  page_type: "page" | "article";
+  article_id: string | null;
+  visitor_id: string;
+  locale: string | null;
+  created_at: string;
+};
+
+type AdSlotRow = {
+  key: string;
+  label: string;
+  image_url: string | null;
+  link_url: string | null;
+  alt_text: string | null;
+  active: boolean;
+  updated_at: string;
+};
+
+type AdEventRow = {
+  id: string;
+  ad_slot_key: string;
+  event_type: "impression" | "click";
+  path: string | null;
+  visitor_id: string | null;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -256,6 +285,9 @@ export type Database = {
       user_profiles: { Row: UserProfileRow; Insert: Omit<UserProfileRow, "created_at">; Update: Partial<Omit<UserProfileRow, "id" | "created_at">>; Relationships: [] };
       comments: { Row: CommentRow; Insert: Omit<CommentRow, "id" | "created_at" | "likes" | "reports">; Update: Partial<Omit<CommentRow, "id" | "created_at">>; Relationships: [] };
       institutional_pages: { Row: InstitutionalPageRow; Insert: Omit<InstitutionalPageRow, "updated_at">; Update: Partial<Omit<InstitutionalPageRow, "slug" | "updated_at">>; Relationships: [] };
+      page_views: { Row: PageViewRow; Insert: Omit<PageViewRow, "id" | "created_at">; Update: Partial<Omit<PageViewRow, "id" | "created_at">>; Relationships: [] };
+      ad_slots: { Row: AdSlotRow; Insert: Omit<AdSlotRow, "updated_at">; Update: Partial<Omit<AdSlotRow, "key" | "updated_at">>; Relationships: [] };
+      ad_events: { Row: AdEventRow; Insert: Omit<AdEventRow, "id" | "created_at">; Update: Partial<Omit<AdEventRow, "id" | "created_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -278,4 +310,7 @@ export type Author = AuthorRow;
 export type ErrorReport = ErrorReportRow;
 export type UserProfile = UserProfileRow;
 export type Comment = CommentRow;
+export type PageView = PageViewRow;
+export type AdSlot = AdSlotRow;
+export type AdEvent = AdEventRow;
 export type InstitutionalPage = InstitutionalPageRow;

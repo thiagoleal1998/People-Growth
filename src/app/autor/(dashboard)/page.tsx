@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Edit } from "lucide-react";
+import { Plus, Edit, BarChart3 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
@@ -41,6 +41,19 @@ export default async function AutorHomePage({ searchParams }: { searchParams: Pr
     .order("created_at", { ascending: false });
   const articles = (data ?? []) as Article[];
 
+  const commentCounts = new Map<string, number>();
+  if (articles.length > 0) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: commentsData } = await (supabase as any)
+      .from("comments")
+      .select("article_id")
+      .eq("status", "approved")
+      .in("article_id", articles.map((a) => a.id));
+    for (const c of (commentsData ?? []) as { article_id: string }[]) {
+      commentCounts.set(c.article_id, (commentCounts.get(c.article_id) ?? 0) + 1);
+    }
+  }
+
   return (
     <div>
       <SavedToast show={saved === "1"} />
@@ -62,7 +75,7 @@ export default async function AutorHomePage({ searchParams }: { searchParams: Pr
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "#f8fafc" }}>
-                {["Título", "Formato", "Status", "Data", ""].map((h) => (
+                {["Título", "Formato", "Status", "Visualizações", "Comentários", "Data", ""].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
                 ))}
               </tr>
@@ -79,9 +92,12 @@ export default async function AutorHomePage({ searchParams }: { searchParams: Pr
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <Badge tone={statusConfig[a.status].tone}>{statusConfig[a.status].label}</Badge>
                   </td>
+                  <td style={{ padding: "0.875rem 1.25rem", color: "#475569", fontSize: "0.875rem" }}>{a.views.toLocaleString("pt-BR")}</td>
+                  <td style={{ padding: "0.875rem 1.25rem", color: "#475569", fontSize: "0.875rem" }}>{commentCounts.get(a.id) ?? 0}</td>
                   <td style={{ padding: "0.875rem 1.25rem", color: "#94a3b8", fontSize: "0.8125rem" }}>{formatDate(a.created_at)}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <Link href={`/autor/artigos/${a.id}/estatisticas`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Estatísticas"><BarChart3 size={15} /></Link>
                       <Link href={`/autor/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
                       {a.status !== "published" && (
                         <ConfirmDeleteButton confirmText={`Excluir o artigo "${a.title_pt}"?`} onDelete={deleteOwnArticle.bind(null, a.id)} />

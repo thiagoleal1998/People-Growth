@@ -24,10 +24,13 @@ import {
   MessageCircle,
   ScrollText,
   Eye,
+  Megaphone,
+  BarChart3,
 } from "lucide-react";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/admin/relatorios", label: "Relatórios", icon: BarChart3 },
   { href: "/admin/artigos", label: "Artigos", icon: FileText },
   { href: "/admin/comentarios", label: "Comentários", icon: MessageCircle, countKey: "comentarios" as const },
   { href: "/admin/autores", label: "Autores", icon: UserCircle },
@@ -40,6 +43,7 @@ const links = [
   { href: "/admin/cursos", label: "Cursos", icon: BookOpen },
   { href: "/admin/recursos", label: "Recursos", icon: Download },
   { href: "/admin/midia", label: "Na Mídia", icon: Monitor },
+  { href: "/admin/publicidade", label: "Publicidade", icon: Megaphone },
   { href: "/admin/seo", label: "SEO, GEO & AEO", icon: Search },
   { href: "/admin/usuarios", label: "Usuários", icon: KeyRound },
   { href: "/admin/paginas", label: "Páginas Institucionais", icon: ScrollText },
