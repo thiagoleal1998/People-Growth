@@ -22,9 +22,9 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       <AdminSidebar logoUrl={logoUrl} userName={userName ?? profile?.email} userPhoto={userPhoto} />
-      <main style={{ flex: 1, padding: "2rem", overflow: "auto" }}>{children}</main>
+      <main style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%" }}>{children}</main>
     </div>
   );
 }

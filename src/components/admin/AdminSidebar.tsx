@@ -68,12 +68,13 @@ export function AdminSidebar({
     <aside
       style={{
         width: "240px",
-        minHeight: "100vh",
+        height: "100%",
         backgroundColor: "#0d1b2a",
         color: "white",
         display: "flex",
         flexDirection: "column",
         flexShrink: 0,
+        overflow: "hidden",
       }}
     >
       {/* Logo */}
@@ -90,7 +91,7 @@ export function AdminSidebar({
       </div>
 
       {/* Nav */}
-      <nav style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+      <nav style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
         {links.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || (href !== "/admin" && pathname.startsWith(href));
           return (
