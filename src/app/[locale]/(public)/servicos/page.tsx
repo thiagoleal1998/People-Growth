@@ -6,6 +6,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { Reveal } from "@/components/Reveal";
 import type { Service } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -79,6 +80,7 @@ export default async function ServicosPage() {
       {/* Services grid */}
       <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
+          <Reveal>
           {services.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               Nenhum serviço cadastrado no momento.
@@ -166,6 +168,7 @@ export default async function ServicosPage() {
               })}
             </div>
           )}
+          </Reveal>
         </div>
       </section>
 

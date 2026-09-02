@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { Reveal } from "@/components/Reveal";
 import type { PortfolioCase } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -39,6 +40,7 @@ export default async function PortfolioPage() {
 
       <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
+          <Reveal>
           {cases.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               Nenhum case cadastrado no momento.
@@ -103,6 +105,7 @@ export default async function PortfolioPage() {
               })}
             </div>
           )}
+          </Reveal>
         </div>
       </section>
     </>

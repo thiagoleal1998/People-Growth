@@ -246,4 +246,38 @@
     background-color: rgba(255, 255, 255, 0.08) !important;
     border-color: rgba(255, 255, 255, 0.18) !important;
   }
+
+  /* Scroll-reveal: fades/slides a section in once, the first time it enters
+     the viewport. */
+  .reveal {
+    opacity: 0;
+    transform: translateY(24px);
+    transition: opacity 0.6s ease, transform 0.6s ease;
+  }
+  .reveal.is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .reveal {
+      opacity: 1;
+      transform: none;
+      transition: none;
+    }
+  }
+
+  /* Loading skeletons (route-level loading.tsx placeholders). */
+  .skeleton {
+    background: linear-gradient(90deg, var(--site-surface-alt) 25%, var(--site-border-strong) 37%, var(--site-surface-alt) 63%);
+    background-size: 400% 100%;
+    animation: skeleton-shimmer 1.4s ease infinite;
+    border-radius: 0.5rem;
+  }
+  @keyframes skeleton-shimmer {
+    0% { background-position: 100% 50%; }
+    100% { background-position: 0 50%; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton { animation: none; }
+  }
 }

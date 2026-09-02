@@ -17,6 +17,7 @@ import { FormatTag } from "@/components/FormatTag";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { MediaCarousel } from "@/components/MediaCarousel";
 import { AdBanner } from "@/components/AdBanner";
+import { Reveal } from "@/components/Reveal";
 import { toYouTubeEmbedUrl, withAutoplay } from "@/lib/youtube";
 import type { Article, Author, Testimonial, MediaItem } from "@/types/database.types";
 
@@ -662,6 +663,7 @@ export default async function HomePage() {
       {/* Services */}
       <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
+          <Reveal>
           <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
             <h2
               style={{
@@ -723,6 +725,7 @@ export default async function HomePage() {
               </Link>
             ))}
           </div>
+          </Reveal>
         </div>
       </section>
 
@@ -730,6 +733,7 @@ export default async function HomePage() {
       {mediaItems.length > 0 && (
         <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
           <div className="container-xl">
+            <Reveal>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "1.5rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>
               <div>
                 <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4361EE", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>
@@ -748,6 +752,7 @@ export default async function HomePage() {
             </div>
 
             <MediaCarousel items={mediaItems} />
+            </Reveal>
           </div>
         </section>
       )}
@@ -756,6 +761,7 @@ export default async function HomePage() {
       {testimonials.length > 0 && (
         <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
           <div className="container-xl">
+            <Reveal>
             <div style={{ textAlign: "center", marginBottom: "3.5rem" }}>
               <h2
                 style={{
@@ -770,6 +776,7 @@ export default async function HomePage() {
             </div>
 
             <TestimonialsCarousel testimonials={testimonials} />
+            </Reveal>
           </div>
         </section>
       )}
@@ -791,6 +798,7 @@ export default async function HomePage() {
             alignItems: "center",
           }}
         >
+          <Reveal>
           <div>
             <div
               style={{
@@ -838,7 +846,9 @@ export default async function HomePage() {
               Conhecer o time <ArrowRight size={18} />
             </Link>
           </div>
+          </Reveal>
 
+          <Reveal delay={150}>
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {[
               { label: "Crescimento sustentável", description: "Estratégias que geram resultados duradouros sem comprometer a cultura." },
@@ -865,12 +875,14 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
+          </Reveal>
         </div>
       </section>
 
       {/* CTA Contact */}
       <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)", textAlign: "center" }}>
         <div className="container-xl" style={{ maxWidth: "640px", margin: "0 auto" }}>
+          <Reveal>
           <div
             style={{
               width: "4rem",
@@ -927,6 +939,7 @@ export default async function HomePage() {
               Explorar conteúdo
             </Link>
           </div>
+          </Reveal>
         </div>
       </section>
     </>
