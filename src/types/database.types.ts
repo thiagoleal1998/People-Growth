@@ -201,6 +201,15 @@ type CommentRow = {
   created_at: string;
 };
 
+type InstitutionalPageRow = {
+  slug: string;
+  title_pt: string;
+  title_en: string | null;
+  body_pt: string;
+  body_en: string | null;
+  updated_at: string;
+};
+
 type AuthorRow = {
   id: string;
   name: string;
@@ -243,6 +252,7 @@ export type Database = {
       error_reports: { Row: ErrorReportRow; Insert: Omit<ErrorReportRow, "id" | "created_at">; Update: Partial<Omit<ErrorReportRow, "id" | "created_at">>; Relationships: [] };
       user_profiles: { Row: UserProfileRow; Insert: Omit<UserProfileRow, "created_at">; Update: Partial<Omit<UserProfileRow, "id" | "created_at">>; Relationships: [] };
       comments: { Row: CommentRow; Insert: Omit<CommentRow, "id" | "created_at">; Update: Partial<Omit<CommentRow, "id" | "created_at">>; Relationships: [] };
+      institutional_pages: { Row: InstitutionalPageRow; Insert: Omit<InstitutionalPageRow, "updated_at">; Update: Partial<Omit<InstitutionalPageRow, "slug" | "updated_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -265,3 +275,4 @@ export type Author = AuthorRow;
 export type ErrorReport = ErrorReportRow;
 export type UserProfile = UserProfileRow;
 export type Comment = CommentRow;
+export type InstitutionalPage = InstitutionalPageRow;

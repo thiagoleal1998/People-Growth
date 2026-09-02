@@ -22,6 +22,7 @@ import {
   AlertTriangle,
   KeyRound,
   MessageCircle,
+  ScrollText,
 } from "lucide-react";
 
 const links = [
@@ -40,6 +41,7 @@ const links = [
   { href: "/admin/midia", label: "Na Mídia", icon: Monitor },
   { href: "/admin/seo", label: "SEO, GEO & AEO", icon: Search },
   { href: "/admin/usuarios", label: "Usuários", icon: KeyRound },
+  { href: "/admin/paginas", label: "Páginas Institucionais", icon: ScrollText },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 
