@@ -21,11 +21,13 @@ import {
   Search,
   AlertTriangle,
   KeyRound,
+  MessageCircle,
 } from "lucide-react";
 
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/artigos", label: "Artigos", icon: FileText },
+  { href: "/admin/comentarios", label: "Comentários", icon: MessageCircle },
   { href: "/admin/autores", label: "Autores", icon: UserCircle },
   { href: "/admin/portfolio", label: "Portfólio", icon: Briefcase },
   { href: "/admin/servicos", label: "Serviços", icon: Wrench },

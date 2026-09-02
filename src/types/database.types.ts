@@ -191,6 +191,16 @@ type UserProfileRow = {
   created_at: string;
 };
 
+type CommentRow = {
+  id: string;
+  article_id: string;
+  name: string;
+  email: string;
+  body: string;
+  status: "pending" | "approved" | "rejected";
+  created_at: string;
+};
+
 type AuthorRow = {
   id: string;
   name: string;
@@ -232,6 +242,7 @@ export type Database = {
       authors: { Row: AuthorRow; Insert: Omit<AuthorRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AuthorRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       error_reports: { Row: ErrorReportRow; Insert: Omit<ErrorReportRow, "id" | "created_at">; Update: Partial<Omit<ErrorReportRow, "id" | "created_at">>; Relationships: [] };
       user_profiles: { Row: UserProfileRow; Insert: Omit<UserProfileRow, "created_at">; Update: Partial<Omit<UserProfileRow, "id" | "created_at">>; Relationships: [] };
+      comments: { Row: CommentRow; Insert: Omit<CommentRow, "id" | "created_at">; Update: Partial<Omit<CommentRow, "id" | "created_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -253,3 +264,4 @@ export type MediaItem = MediaItemRow;
 export type Author = AuthorRow;
 export type ErrorReport = ErrorReportRow;
 export type UserProfile = UserProfileRow;
+export type Comment = CommentRow;

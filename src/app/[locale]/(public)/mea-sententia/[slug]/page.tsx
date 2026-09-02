@@ -5,9 +5,10 @@ import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { ShareButtons } from "@/components/ShareButtons";
+import { CommentForm } from "@/components/CommentForm";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
-import type { Article, Category, Author } from "@/types/database.types";
+import type { Article, Category, Author, Comment } from "@/types/database.types";
 
 export const revalidate = 300;
 
@@ -18,18 +19,17 @@ async function getArticle(slug: string) {
   const { data: article } = await client.from("articles").select("*").eq("slug", slug).eq("status", "published").single();
   if (!article) return null;
 
-  const category = article.category_id
-    ? (await client.from("categories").select("*").eq("id", article.category_id).single()).data
-    : null;
-
-  const author = article.author_id
-    ? (await client.from("authors").select("*").eq("id", article.author_id).single()).data
-    : null;
+  const [categoryRes, authorRes, commentsRes] = await Promise.all([
+    article.category_id ? client.from("categories").select("*").eq("id", article.category_id).single() : Promise.resolve({ data: null }),
+    article.author_id ? client.from("authors").select("*").eq("id", article.author_id).single() : Promise.resolve({ data: null }),
+    client.from("comments").select("*").eq("article_id", article.id).eq("status", "approved").order("created_at", { ascending: false }),
+  ]);
 
   return {
     article: article as Article,
-    category: category as Category | null,
-    author: author as Author | null,
+    category: categoryRes.data as Category | null,
+    author: authorRes.data as Author | null,
+    comments: (commentsRes.data ?? []) as Comment[],
   };
 }
 
@@ -57,7 +57,7 @@ export default async function ArticlePage({
 
   if (!result) notFound();
 
-  const { article, category, author } = result;
+  const { article, category, author, comments } = result;
 
   // Fire-and-forget view counter; never block or fail the page render on it.
   createAdminClient()
@@ -205,6 +205,40 @@ export default async function ArticlePage({
                 </div>
               </Link>
             )}
+
+            {/* Comments */}
+            <div style={{ marginTop: "3rem" }}>
+              <h2 style={{ fontWeight: 800, fontSize: "1.25rem", color: "var(--site-text)", marginBottom: "1.5rem" }}>
+                Comentários {comments.length > 0 && `(${comments.length})`}
+              </h2>
+
+              {comments.length > 0 && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", marginBottom: "2rem" }}>
+                  {comments.map((c) => (
+                    <div
+                      key={c.id}
+                      style={{
+                        backgroundColor: "var(--site-surface-alt)",
+                        borderRadius: "0.875rem",
+                        padding: "1.25rem 1.5rem",
+                      }}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
+                        <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)" }}>{c.name}</span>
+                        <span style={{ fontSize: "0.75rem", color: "var(--site-faint)" }}>
+                          {new Date(c.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                        </span>
+                      </div>
+                      <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.65, whiteSpace: "pre-line" }}>
+                        {c.body}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <CommentForm articleId={article.id} />
+            </div>
           </article>
 
           {/* Sidebar */}
