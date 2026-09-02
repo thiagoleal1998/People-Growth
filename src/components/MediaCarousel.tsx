@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Mic, Video, BookOpen, Headphones, Calendar, type LucideIcon } from "lucide-react";
+import { Mic, Video, BookOpen, Headphones, Calendar, ChevronLeft, ChevronRight, type LucideIcon } from "lucide-react";
 import type { MediaItem } from "@/types/database.types";
 
 const mediaTypeMeta: Record<MediaItem["type"], { icon: LucideIcon; color: string }> = {
@@ -20,11 +20,14 @@ export function MediaCarousel({ items }: { items: MediaItem[] }) {
 
   useEffect(() => {
     if (items.length <= VISIBLE || paused) return;
-    const id = setInterval(() => {
+    const id = setTimeout(() => {
       setStart((s) => (s + 1) % items.length);
     }, INTERVAL_MS);
-    return () => clearInterval(id);
-  }, [items.length, paused]);
+    return () => clearTimeout(id);
+  }, [start, items.length, paused]);
+
+  const goPrev = () => setStart((s) => (s - 1 + items.length) % items.length);
+  const goNext = () => setStart((s) => (s + 1) % items.length);
 
   const count = Math.min(VISIBLE, items.length);
   const visibleItems = Array.from({ length: count }, (_, i) => items[(start + i) % items.length]);
@@ -76,19 +79,45 @@ export function MediaCarousel({ items }: { items: MediaItem[] }) {
       </div>
 
       {items.length > VISIBLE && (
-        <div style={{ display: "flex", justifyContent: "center", gap: "0.375rem", marginTop: "1.5rem" }}>
-          {items.map((item, i) => (
-            <span
-              key={item.id}
-              style={{
-                width: "0.5rem",
-                height: "0.5rem",
-                borderRadius: "50%",
-                backgroundColor: i === start ? "#4361EE" : "var(--site-border-strong)",
-                transition: "background-color 0.3s",
-              }}
-            />
-          ))}
+        <div style={{ display: "flex", justifyContent: "center", alignItems: "center", gap: "1rem", marginTop: "1.5rem" }}>
+          <button
+            type="button"
+            onClick={goPrev}
+            aria-label="Menção anterior"
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "2.25rem", height: "2.25rem", borderRadius: "50%", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", color: "#4361EE", cursor: "pointer" }}
+          >
+            <ChevronLeft size={18} />
+          </button>
+
+          <div style={{ display: "flex", gap: "0.375rem" }}>
+            {items.map((item, i) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => setStart(i)}
+                aria-label={`Ir para a menção ${i + 1}`}
+                style={{
+                  width: "0.5rem",
+                  height: "0.5rem",
+                  borderRadius: "50%",
+                  border: "none",
+                  padding: 0,
+                  backgroundColor: i === start ? "#4361EE" : "var(--site-border-strong)",
+                  cursor: "pointer",
+                  transition: "background-color 0.3s",
+                }}
+              />
+            ))}
+          </div>
+
+          <button
+            type="button"
+            onClick={goNext}
+            aria-label="Próxima menção"
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "2.25rem", height: "2.25rem", borderRadius: "50%", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", color: "#4361EE", cursor: "pointer" }}
+          >
+            <ChevronRight size={18} />
+          </button>
         </div>
       )}
 
