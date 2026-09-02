@@ -23,6 +23,7 @@ import {
   KeyRound,
   MessageCircle,
   ScrollText,
+  Eye,
 } from "lucide-react";
 
 const links = [
@@ -164,6 +165,14 @@ export function AdminSidebar({
       {/* Footer */}
       <div style={{ padding: "1rem 0.75rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
         <ThemeToggle />
+        <Link
+          href="/autor"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0.875rem", borderRadius: "0.5rem", fontSize: "0.875rem", color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
+        >
+          <Eye size={17} /> Ver painel do colaborador
+        </Link>
         <Link
           href="/"
           style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0.875rem", borderRadius: "0.5rem", fontSize: "0.875rem", color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
