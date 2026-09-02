@@ -35,10 +35,10 @@ export default async function NaMidiaPage() {
         </div>
       </section>
 
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
           {items.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#94a3b8" }}>
+            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               Nenhuma menção cadastrada no momento.
             </div>
           ) : (
@@ -47,7 +47,7 @@ export default async function NaMidiaPage() {
                 const meta = typeMeta[item.type];
                 const Icon = meta.icon;
                 const card = (
-                  <div style={{ backgroundColor: "white", borderRadius: "1rem", padding: "1.75rem", border: "1px solid rgba(0,0,0,0.06)", display: "flex", gap: "1.25rem" }}>
+                  <div style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.75rem", border: "1px solid var(--site-border)", display: "flex", gap: "1.25rem" }}>
                     <div
                       style={{
                         width: "3rem",
@@ -63,10 +63,10 @@ export default async function NaMidiaPage() {
                       {!item.thumbnail && <Icon size={20} color={meta.color} />}
                     </div>
                     <div>
-                      <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "#0d1b2a", lineHeight: 1.4, marginBottom: "0.375rem" }}>{item.title}</h3>
-                      {item.outlet && <div style={{ color: "#64748b", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.25rem" }}>{item.outlet}</div>}
+                      <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.375rem" }}>{item.title}</h3>
+                      {item.outlet && <div style={{ color: "var(--site-muted)", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.25rem" }}>{item.outlet}</div>}
                       {item.date && (
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#94a3b8", fontSize: "0.75rem" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--site-faint)", fontSize: "0.75rem" }}>
                           <Calendar size={12} /> {new Date(item.date).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}
                         </div>
                       )}

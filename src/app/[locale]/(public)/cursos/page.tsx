@@ -31,10 +31,10 @@ export default async function CursosPage() {
         </div>
       </section>
 
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
           {courses.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#94a3b8" }}>
+            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               Nenhum curso cadastrado no momento.
             </div>
           ) : (
@@ -42,7 +42,7 @@ export default async function CursosPage() {
               {courses.map((course, i) => {
                 const color = palette[i % palette.length];
                 return (
-                  <div key={course.id} style={{ backgroundColor: "white", borderRadius: "1.25rem", padding: "2rem", border: "1px solid rgba(0,0,0,0.06)", position: "relative", overflow: "hidden" }}>
+                  <div key={course.id} style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)", position: "relative", overflow: "hidden" }}>
                     {course.status === "coming_soon" && (
                       <div style={{ position: "absolute", top: "1rem", right: "1rem", backgroundColor: `${color}15`, color, padding: "0.2rem 0.625rem", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 700 }}>
                         {t("comingSoon")}
@@ -58,14 +58,14 @@ export default async function CursosPage() {
                       }}
                     />
                     {course.category && (
-                      <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>{course.category}</div>
+                      <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--site-faint)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>{course.category}</div>
                     )}
-                    <h3 style={{ fontWeight: 800, fontSize: "1.125rem", color: "#0d1b2a", marginBottom: "0.625rem" }}>{course.title_pt}</h3>
+                    <h3 style={{ fontWeight: 800, fontSize: "1.125rem", color: "var(--site-text)", marginBottom: "0.625rem" }}>{course.title_pt}</h3>
                     {course.description_pt && (
-                      <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.65, marginBottom: "1.5rem" }}>{course.description_pt}</p>
+                      <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.65, marginBottom: "1.5rem" }}>{course.description_pt}</p>
                     )}
-                    <div style={{ borderTop: "1px solid #e2e8f0", paddingTop: "1.25rem" }}>
-                      <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "#64748b", marginBottom: "0.75rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                    <div style={{ borderTop: "1px solid var(--site-border-strong)", paddingTop: "1.25rem" }}>
+                      <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--site-muted)", marginBottom: "0.75rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
                         <Bell size={14} color={color} /> {t("notifyMe")}
                       </p>
                       <NewsletterForm compact />

@@ -36,10 +36,10 @@ export default async function RecursosPage() {
         </div>
       </section>
 
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
           {resources.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#94a3b8" }}>
+            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               Nenhum recurso disponível no momento.
             </div>
           ) : (
@@ -48,19 +48,19 @@ export default async function RecursosPage() {
                 const meta = typeMeta[resource.type];
                 const Icon = meta.icon;
                 return (
-                  <div key={resource.id} style={{ backgroundColor: "white", borderRadius: "1.25rem", padding: "2rem", border: "1px solid rgba(0,0,0,0.06)", display: "flex", flexDirection: "column" }}>
+                  <div key={resource.id} style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)", display: "flex", flexDirection: "column" }}>
                     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1.25rem" }}>
                       <div style={{ width: "3rem", height: "3rem", borderRadius: "0.875rem", backgroundColor: `${meta.color}15`, display: "flex", alignItems: "center", justifyContent: "center" }}>
                         <Icon size={20} color={meta.color} />
                       </div>
                       <span style={{ backgroundColor: `${meta.color}12`, color: meta.color, padding: "0.2rem 0.625rem", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 700 }}>{meta.label}</span>
                     </div>
-                    <h3 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "#0d1b2a", marginBottom: "0.5rem" }}>{resource.title_pt}</h3>
+                    <h3 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)", marginBottom: "0.5rem" }}>{resource.title_pt}</h3>
                     {resource.description_pt && (
-                      <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.65, flex: 1, marginBottom: "1.5rem" }}>{resource.description_pt}</p>
+                      <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.65, flex: 1, marginBottom: "1.5rem" }}>{resource.description_pt}</p>
                     )}
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid #e2e8f0", paddingTop: "1.25rem" }}>
-                      <span style={{ fontSize: "0.8125rem", color: "#94a3b8", fontWeight: 500 }}>{resource.download_count.toLocaleString("pt-BR")} downloads</span>
+                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--site-border-strong)", paddingTop: "1.25rem" }}>
+                      <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)", fontWeight: 500 }}>{resource.download_count.toLocaleString("pt-BR")} downloads</span>
                       {resource.file_url ? (
                         <a
                           href={resource.file_url}
@@ -71,7 +71,7 @@ export default async function RecursosPage() {
                           <Download size={14} /> {t("download")}
                         </a>
                       ) : (
-                        <span style={{ fontSize: "0.8125rem", color: "#cbd5e1", fontWeight: 600 }}>Em breve</span>
+                        <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)", fontWeight: 600 }}>Em breve</span>
                       )}
                     </div>
                   </div>

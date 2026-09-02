@@ -38,19 +38,19 @@ export default async function LaboratorioIAPage() {
         </div>
       </section>
 
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
-          <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "#0d1b2a", marginBottom: "2.5rem", textAlign: "center" }}>
+          <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "2.5rem", textAlign: "center" }}>
             Projetos & Experimentos
           </h2>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.75rem" }}>
             {projects.map(({ icon: Icon, title, description, tags, color }) => (
-              <div key={title} style={{ backgroundColor: "white", borderRadius: "1.25rem", padding: "2rem", border: "1px solid rgba(0,0,0,0.06)" }}>
+              <div key={title} style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)" }}>
                 <div style={{ width: "3.5rem", height: "3.5rem", borderRadius: "1rem", backgroundColor: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.25rem" }}>
                   <Icon size={24} color={color} />
                 </div>
-                <h3 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "#0d1b2a", marginBottom: "0.625rem" }}>{title}</h3>
-                <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.7, marginBottom: "1.25rem" }}>{description}</p>
+                <h3 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)", marginBottom: "0.625rem" }}>{title}</h3>
+                <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.7, marginBottom: "1.25rem" }}>{description}</p>
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
                   {tags.map((tag) => (
                     <span key={tag} style={{ backgroundColor: `${color}12`, color, padding: "0.2rem 0.625rem", borderRadius: "0.375rem", fontSize: "0.75rem", fontWeight: 700 }}>{tag}</span>
