@@ -77,10 +77,10 @@ export default async function ServicosPage() {
       </section>
 
       {/* Services grid */}
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
           {services.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#94a3b8" }}>
+            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               Nenhum serviço cadastrado no momento.
             </div>
           ) : (
@@ -93,10 +93,10 @@ export default async function ServicosPage() {
                   <div
                     key={service.id}
                     style={{
-                      backgroundColor: "white",
+                      backgroundColor: "var(--site-card)",
                       borderRadius: "1.25rem",
                       padding: "2rem",
-                      border: "1px solid rgba(0,0,0,0.06)",
+                      border: "1px solid var(--site-border)",
                       boxShadow: "0 2px 12px rgba(0,0,0,0.04)",
                       display: "flex",
                       flexDirection: "column",
@@ -119,21 +119,21 @@ export default async function ServicosPage() {
                       <Icon size={22} color={color} />
                     </div>
 
-                    <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.625rem" }}>
+                    <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.625rem" }}>
                       {service.title_pt}
                     </h2>
-                    <p style={{ color: "#64748b", fontSize: "0.9rem", lineHeight: 1.7, marginBottom: "1.5rem", flex: 1 }}>
+                    <p style={{ color: "var(--site-muted)", fontSize: "0.9rem", lineHeight: 1.7, marginBottom: "1.5rem", flex: 1 }}>
                       {service.description_pt}
                     </p>
 
                     {benefits.length > 0 && (
                       <div style={{ marginBottom: "1.5rem" }}>
-                        <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "#94a3b8", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.625rem" }}>
+                        <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--site-faint)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.625rem" }}>
                           Benefícios
                         </p>
                         <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.375rem" }}>
                           {benefits.map((benefit) => (
-                            <li key={benefit} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "#374151" }}>
+                            <li key={benefit} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--site-text-secondary)" }}>
                               <CheckCircle2 size={14} color={color} />
                               {benefit}
                             </li>

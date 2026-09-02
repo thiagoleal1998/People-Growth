@@ -114,7 +114,7 @@ function Section({ icon: Icon, title, children, color = "#4361EE" }: {
         >
           <Icon size={18} color={color} />
         </div>
-        <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0d1b2a" }}>{title}</h2>
+        <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)" }}>{title}</h2>
       </div>
       {children}
     </div>
@@ -173,7 +173,7 @@ export default async function CurriculoPage() {
               alignItems: "center",
               gap: "0.5rem",
               backgroundColor: "#06D6A0",
-              color: "#0d1b2a",
+              color: "var(--site-text)",
               padding: "0.875rem 1.75rem",
               borderRadius: "0.75rem",
               fontWeight: 700,
@@ -188,7 +188,7 @@ export default async function CurriculoPage() {
       </section>
 
       {/* Content */}
-      <section className="section-padding" style={{ backgroundColor: "white" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
         <div className="container-xl" style={{ maxWidth: "900px" }}>
           {/* Education */}
           <Section icon={GraduationCap} title={t("education")} color="#4361EE">
@@ -202,14 +202,14 @@ export default async function CurriculoPage() {
                     alignItems: "flex-start",
                     gap: "1rem",
                     padding: "1.25rem 1.5rem",
-                    backgroundColor: "#f0f4f8",
+                    backgroundColor: "var(--site-surface-alt)",
                     borderRadius: "0.75rem",
                     flexWrap: "wrap",
                   }}
                 >
                   <div>
-                    <div style={{ fontWeight: 700, color: "#0d1b2a", fontSize: "0.9375rem" }}>{item.degree}</div>
-                    <div style={{ color: "#64748b", fontSize: "0.875rem", marginTop: "0.25rem" }}>{item.institution}</div>
+                    <div style={{ fontWeight: 700, color: "var(--site-text)", fontSize: "0.9375rem" }}>{item.degree}</div>
+                    <div style={{ color: "var(--site-muted)", fontSize: "0.875rem", marginTop: "0.25rem" }}>{item.institution}</div>
                   </div>
                   <span
                     style={{
@@ -237,19 +237,19 @@ export default async function CurriculoPage() {
                   key={item.role}
                   style={{
                     padding: "1.5rem",
-                    border: "1px solid #e2e8f0",
+                    border: "1px solid var(--site-border-strong)",
                     borderRadius: "0.75rem",
                     borderLeft: "4px solid #06D6A0",
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.75rem" }}>
                     <div>
-                      <div style={{ fontWeight: 700, color: "#0d1b2a", fontSize: "1rem" }}>{item.role}</div>
+                      <div style={{ fontWeight: 700, color: "var(--site-text)", fontSize: "1rem" }}>{item.role}</div>
                       <div style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.875rem" }}>{item.company}</div>
                     </div>
-                    <span style={{ color: "#94a3b8", fontSize: "0.8125rem", fontWeight: 500 }}>{item.period}</span>
+                    <span style={{ color: "var(--site-faint)", fontSize: "0.8125rem", fontWeight: 500 }}>{item.period}</span>
                   </div>
-                  <p style={{ color: "#475569", fontSize: "0.9rem", lineHeight: 1.65, marginBottom: "0.875rem" }}>
+                  <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9rem", lineHeight: 1.65, marginBottom: "0.875rem" }}>
                     {item.description}
                   </p>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
@@ -285,12 +285,12 @@ export default async function CurriculoPage() {
                     alignItems: "center",
                     gap: "0.625rem",
                     padding: "0.75rem 1rem",
-                    backgroundColor: "#f0f4f8",
+                    backgroundColor: "var(--site-surface-alt)",
                     borderRadius: "0.625rem",
                   }}
                 >
                   <span style={{ color: "#FFB703", fontSize: "1rem", flexShrink: 0 }}>🏆</span>
-                  <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "#0d1b2a" }}>{cert}</span>
+                  <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--site-text)" }}>{cert}</span>
                 </div>
               ))}
             </div>
@@ -314,8 +314,8 @@ export default async function CurriculoPage() {
                   }}
                 >
                   <div>
-                    <div style={{ fontWeight: 700, color: "#0d1b2a", fontSize: "0.9375rem" }}>🥇 {award.title}</div>
-                    <div style={{ color: "#64748b", fontSize: "0.8125rem" }}>{award.org}</div>
+                    <div style={{ fontWeight: 700, color: "var(--site-text)", fontSize: "0.9375rem" }}>🥇 {award.title}</div>
+                    <div style={{ color: "var(--site-muted)", fontSize: "0.8125rem" }}>{award.org}</div>
                   </div>
                   <span style={{ color: "#4361EE", fontWeight: 700, fontSize: "0.875rem" }}>{award.year}</span>
                 </div>
@@ -340,7 +340,7 @@ export default async function CurriculoPage() {
                   }}
                 >
                   <span style={{ color: "#06D6A0", flexShrink: 0 }}>📚</span>
-                  <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "#0d1b2a" }}>{c}</span>
+                  <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--site-text)" }}>{c}</span>
                 </div>
               ))}
             </div>
@@ -365,8 +365,8 @@ export default async function CurriculoPage() {
                   }}
                 >
                   <div>
-                    <div style={{ fontWeight: 700, color: "#0d1b2a", fontSize: "0.9375rem" }}>🎤 {ev.title}</div>
-                    <div style={{ color: "#64748b", fontSize: "0.8125rem" }}>{ev.event}</div>
+                    <div style={{ fontWeight: 700, color: "var(--site-text)", fontSize: "0.9375rem" }}>🎤 {ev.title}</div>
+                    <div style={{ color: "var(--site-muted)", fontSize: "0.8125rem" }}>{ev.event}</div>
                   </div>
                   <span style={{ color: "#cc9200", fontWeight: 700, fontSize: "0.875rem" }}>{ev.year}</span>
                 </div>

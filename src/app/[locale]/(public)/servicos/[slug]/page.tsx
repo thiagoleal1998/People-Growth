@@ -65,20 +65,20 @@ export default async function ServicePage({
         </div>
       </section>
 
-      <section className="section-padding" style={{ backgroundColor: "white" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
         <div className="container-xl servico-detail-grid" style={{ display: "grid", gridTemplateColumns: "1fr 380px", gap: "4rem", alignItems: "start" }}>
           <div>
             {/* Methodology */}
             {methodology.length > 0 && (
               <>
-                <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1.5rem" }}>Metodologia</h2>
+                <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.5rem" }}>Metodologia</h2>
                 <ol style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.875rem", marginBottom: "3rem" }}>
                   {methodology.map((item, i) => (
                     <li key={item} style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
                       <span style={{ width: "2rem", height: "2rem", borderRadius: "50%", backgroundColor: `${color}15`, color, fontWeight: 800, fontSize: "0.875rem", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
                         {i + 1}
                       </span>
-                      <span style={{ color: "#374151", fontSize: "0.9375rem", lineHeight: 1.6, paddingTop: "0.25rem" }}>{item}</span>
+                      <span style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.6, paddingTop: "0.25rem" }}>{item}</span>
                     </li>
                   ))}
                 </ol>
@@ -88,12 +88,12 @@ export default async function ServicePage({
             {/* Benefits */}
             {benefits.length > 0 && (
               <>
-                <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1.5rem" }}>Benefícios</h2>
+                <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.5rem" }}>Benefícios</h2>
                 <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "3rem" }}>
                   {benefits.map((b) => (
                     <li key={b} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
                       <CheckCircle2 size={20} color={color} style={{ flexShrink: 0, marginTop: "1px" }} />
-                      <span style={{ color: "#374151", fontSize: "0.9375rem", lineHeight: 1.6 }}>{b}</span>
+                      <span style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.6 }}>{b}</span>
                     </li>
                   ))}
                 </ul>
@@ -103,11 +103,11 @@ export default async function ServicePage({
             {/* Results */}
             {results.length > 0 && (
               <>
-                <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1.5rem" }}>Resultados típicos</h2>
+                <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.5rem" }}>Resultados típicos</h2>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem" }}>
                   {results.map((r) => (
-                    <div key={r} style={{ backgroundColor: "#f0f4f8", borderRadius: "0.75rem", padding: "1.25rem", border: `1px solid ${color}25` }}>
-                      <p style={{ color: "#0d1b2a", fontWeight: 600, fontSize: "0.9rem", lineHeight: 1.5 }}>✓ {r}</p>
+                    <div key={r} style={{ backgroundColor: "var(--site-surface-alt)", borderRadius: "0.75rem", padding: "1.25rem", border: `1px solid ${color}25` }}>
+                      <p style={{ color: "var(--site-text)", fontWeight: 600, fontSize: "0.9rem", lineHeight: 1.5 }}>✓ {r}</p>
                     </div>
                   ))}
                 </div>
@@ -117,12 +117,12 @@ export default async function ServicePage({
 
           {/* Contact form */}
           <div style={{ position: "sticky", top: "5rem" }}>
-            <div style={{ backgroundColor: "#f0f4f8", borderRadius: "1.25rem", padding: "2rem" }}>
-              <h3 style={{ fontSize: "1.25rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.5rem" }}>
+            <div style={{ backgroundColor: "var(--site-surface-alt)", borderRadius: "1.25rem", padding: "2rem" }}>
+              <h3 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.5rem" }}>
                 Solicitar proposta
               </h3>
-              <p style={{ color: "#64748b", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
-                Preencha abaixo e entrarei em contato em até 24h.
+              <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
+                Preencha abaixo e entraremos em contato em até 24h.
               </p>
               <ContactForm serviceDefault={service.title_pt} />
             </div>

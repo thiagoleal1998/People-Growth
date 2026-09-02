@@ -55,21 +55,21 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
         </div>
       </section>
 
-      <section className="section-padding" style={{ backgroundColor: "white" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
         <div className="container-xl" style={{ maxWidth: "900px" }}>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "3rem" }}>
             <div>
               {c.challenge_pt && (
                 <>
-                  <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1rem" }}>Desafio</h2>
-                  <p style={{ color: "#475569", lineHeight: 1.75, marginBottom: "2rem" }}>{c.challenge_pt}</p>
+                  <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1rem" }}>Desafio</h2>
+                  <p style={{ color: "var(--site-text-secondary)", lineHeight: 1.75, marginBottom: "2rem" }}>{c.challenge_pt}</p>
                 </>
               )}
 
               {c.solution_pt && (
                 <>
-                  <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1rem" }}>Solução</h2>
-                  <p style={{ color: "#475569", lineHeight: 1.75 }}>{c.solution_pt}</p>
+                  <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1rem" }}>Solução</h2>
+                  <p style={{ color: "var(--site-text-secondary)", lineHeight: 1.75 }}>{c.solution_pt}</p>
                 </>
               )}
             </div>
@@ -77,10 +77,10 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
             <div>
               {c.tools && c.tools.length > 0 && (
                 <>
-                  <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1rem" }}>Ferramentas utilizadas</h2>
+                  <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1rem" }}>Ferramentas utilizadas</h2>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "2rem" }}>
                     {c.tools.map((tool) => (
-                      <span key={tool} style={{ backgroundColor: "#f0f4f8", color: "#475569", padding: "0.375rem 0.875rem", borderRadius: "0.5rem", fontSize: "0.875rem", fontWeight: 600 }}>
+                      <span key={tool} style={{ backgroundColor: "var(--site-surface-alt)", color: "var(--site-text-secondary)", padding: "0.375rem 0.875rem", borderRadius: "0.5rem", fontSize: "0.875rem", fontWeight: 600 }}>
                         {tool}
                       </span>
                     ))}
@@ -90,12 +90,12 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
 
               {results.length > 0 && (
                 <>
-                  <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1rem" }}>Resultados</h2>
+                  <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1rem" }}>Resultados</h2>
                   <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
                     {results.map((r) => (
                       <li key={r} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
                         <CheckCircle2 size={18} color={meta.color} style={{ flexShrink: 0, marginTop: "2px" }} />
-                        <span style={{ color: "#374151", fontSize: "0.9375rem", lineHeight: 1.5 }}>{r}</span>
+                        <span style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.5 }}>{r}</span>
                       </li>
                     ))}
                   </ul>

@@ -37,10 +37,10 @@ export default async function PortfolioPage() {
         </div>
       </section>
 
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
           {cases.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#94a3b8" }}>
+            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               Nenhum case cadastrado no momento.
             </div>
           ) : (
@@ -54,7 +54,7 @@ export default async function PortfolioPage() {
                     href={{ pathname: "/portfolio/[slug]", params: { slug: c.slug } }}
                     style={{ display: "block", textDecoration: "none" }}
                   >
-                    <article style={{ backgroundColor: "white", borderRadius: "1.25rem", overflow: "hidden", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", height: "100%", display: "flex", flexDirection: "column" }}>
+                    <article style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", overflow: "hidden", border: "1px solid var(--site-border)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", height: "100%", display: "flex", flexDirection: "column" }}>
                       <div
                         style={{
                           height: "220px",
@@ -77,15 +77,15 @@ export default async function PortfolioPage() {
                       </div>
 
                       <div style={{ padding: "1.75rem", flex: 1, display: "flex", flexDirection: "column" }}>
-                        <h3 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "#0d1b2a", lineHeight: 1.4, marginBottom: "0.625rem" }}>{c.title_pt}</h3>
+                        <h3 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.625rem" }}>{c.title_pt}</h3>
                         {c.challenge_pt && (
-                          <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.65, marginBottom: "1.25rem", flex: 1 }}>{c.challenge_pt}</p>
+                          <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.65, marginBottom: "1.25rem", flex: 1 }}>{c.challenge_pt}</p>
                         )}
 
                         {c.tools && c.tools.length > 0 && (
                           <div style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginBottom: "1.25rem" }}>
                             {c.tools.map((tool) => (
-                              <span key={tool} style={{ backgroundColor: "#f0f4f8", color: "#475569", padding: "0.2rem 0.625rem", borderRadius: "0.375rem", fontSize: "0.75rem", fontWeight: 600 }}>
+                              <span key={tool} style={{ backgroundColor: "var(--site-surface-alt)", color: "var(--site-text-secondary)", padding: "0.2rem 0.625rem", borderRadius: "0.375rem", fontSize: "0.75rem", fontWeight: 600 }}>
                                 {tool}
                               </span>
                             ))}
