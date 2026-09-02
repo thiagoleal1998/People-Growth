@@ -28,16 +28,16 @@ export default async function DepoimentosPage() {
         </div>
       </section>
 
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
           {testimonials.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#94a3b8" }}>
+            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               Nenhum depoimento cadastrado no momento.
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "1.75rem" }}>
               {testimonials.map((item) => (
-                <div key={item.id} style={{ backgroundColor: "white", borderRadius: "1.25rem", padding: "2rem", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", display: "flex", flexDirection: "column" }}>
+                <div key={item.id} style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)", boxShadow: "0 2px 12px rgba(0,0,0,0.04)", display: "flex", flexDirection: "column" }}>
                   {item.rating && (
                     <div style={{ display: "flex", gap: "0.25rem", marginBottom: "1.25rem" }}>
                       {Array.from({ length: item.rating }).map((_, i) => (
@@ -45,7 +45,7 @@ export default async function DepoimentosPage() {
                       ))}
                     </div>
                   )}
-                  <p style={{ color: "#374151", fontSize: "0.9375rem", lineHeight: 1.75, flex: 1, marginBottom: "1.5rem", fontStyle: "italic" }}>
+                  <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.75, flex: 1, marginBottom: "1.5rem", fontStyle: "italic" }}>
                     &ldquo;{item.text_pt}&rdquo;
                   </p>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
@@ -67,8 +67,8 @@ export default async function DepoimentosPage() {
                       {!item.avatar_url && item.name[0]}
                     </div>
                     <div>
-                      <div style={{ fontWeight: 700, color: "#0d1b2a", fontSize: "0.9375rem" }}>{item.name}</div>
-                      <div style={{ color: "#64748b", fontSize: "0.8125rem" }}>
+                      <div style={{ fontWeight: 700, color: "var(--site-text)", fontSize: "0.9375rem" }}>{item.name}</div>
+                      <div style={{ color: "var(--site-muted)", fontSize: "0.8125rem" }}>
                         {[item.role, item.company].filter(Boolean).join(" · ")}
                       </div>
                     </div>

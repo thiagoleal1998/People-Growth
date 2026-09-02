@@ -43,24 +43,24 @@ export default async function FerramentasPage() {
         </div>
       </section>
 
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
           {tools.map(({ category, items }) => (
             <div key={category} style={{ marginBottom: "3rem" }}>
-              <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1.5rem", paddingBottom: "0.75rem", borderBottom: "2px solid #e2e8f0" }}>
+              <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.5rem", paddingBottom: "0.75rem", borderBottom: "2px solid var(--site-border-strong)" }}>
                 {category}
               </h2>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
                 {items.map(({ name, description, icon, badge }) => (
-                  <div key={name} style={{ backgroundColor: "white", borderRadius: "1rem", padding: "1.5rem", border: "1px solid rgba(0,0,0,0.06)", position: "relative" }}>
+                  <div key={name} style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--site-border)", position: "relative" }}>
                     {badge && (
                       <span style={{ position: "absolute", top: "1rem", right: "1rem", backgroundColor: badge === "Essencial" ? "rgba(67,97,238,0.12)" : "rgba(6,214,160,0.12)", color: badge === "Essencial" ? "#4361EE" : "#04a87d", padding: "0.15rem 0.5rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 700 }}>
                         {badge}
                       </span>
                     )}
                     <div style={{ fontSize: "1.75rem", marginBottom: "0.75rem" }}>{icon}</div>
-                    <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "#0d1b2a", marginBottom: "0.375rem" }}>{name}</h3>
-                    <p style={{ color: "#64748b", fontSize: "0.8125rem", lineHeight: 1.6 }}>{description}</p>
+                    <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", marginBottom: "0.375rem" }}>{name}</h3>
+                    <p style={{ color: "var(--site-muted)", fontSize: "0.8125rem", lineHeight: 1.6 }}>{description}</p>
                   </div>
                 ))}
               </div>

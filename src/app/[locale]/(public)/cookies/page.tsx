@@ -30,20 +30,20 @@ const sections: { title: string; body: string }[] = [
 
 export default function CookiesPage() {
   return (
-    <section className="section-padding" style={{ backgroundColor: "white" }}>
+    <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
       <div className="container-xl" style={{ maxWidth: "720px" }}>
-        <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.75rem" }}>
+        <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>
           Política de Cookies
         </h1>
-        <p style={{ color: "#64748b", fontSize: "1rem", marginBottom: "2.5rem" }}>
+        <p style={{ color: "var(--site-muted)", fontSize: "1rem", marginBottom: "2.5rem" }}>
           Última atualização: {new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
         </p>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
           {sections.map((s) => (
             <div key={s.title}>
-              <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "#0d1b2a", marginBottom: "0.625rem" }}>{s.title}</h2>
-              <p style={{ color: "#475569", lineHeight: 1.75 }}>{s.body}</p>
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 700, color: "var(--site-text)", marginBottom: "0.625rem" }}>{s.title}</h2>
+              <p style={{ color: "var(--site-text-secondary)", lineHeight: 1.75 }}>{s.body}</p>
             </div>
           ))}
         </div>

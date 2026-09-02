@@ -40,13 +40,13 @@ export default async function ContatoPage() {
         </div>
       </section>
 
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl" style={{ maxWidth: "560px", margin: "0 auto" }}>
-          <div style={{ backgroundColor: "white", borderRadius: "1.25rem", padding: "2rem", border: "1px solid rgba(0,0,0,0.06)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
-            <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.5rem" }}>
+          <div style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)", boxShadow: "0 4px 24px rgba(0,0,0,0.06)" }}>
+            <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.5rem" }}>
               Enviar mensagem
             </h2>
-            <p style={{ color: "#64748b", fontSize: "0.9rem", marginBottom: "1.75rem" }}>
+            <p style={{ color: "var(--site-muted)", fontSize: "0.9rem", marginBottom: "1.75rem" }}>
               Respondemos em até 24 horas úteis.
             </p>
             <ContactForm />
