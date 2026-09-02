@@ -67,12 +67,30 @@ export default async function SeoPage({ searchParams }: { searchParams: Promise<
             <SectionCard
               title="AEO"
               subtitle="Answer Engine Optimization — perguntas e respostas usadas para gerar dados estruturados (FAQ) que aparecem em respostas diretas de busca e assistentes de voz."
+              wide
             >
+              <FieldGrid>
+                <Field
+                  label="Perguntas frequentes (PT)"
+                  hint='Uma pergunta e resposta por linha, separadas por " | ". Ex: O que é a People & Growth? | Uma consultoria e um espaço de conteúdo sobre negócios, pessoas e os temas que os impactam.'
+                >
+                  <Textarea name="aeo_faq_pt" rows={6} defaultValue={values.aeo_faq_pt ?? ""} />
+                </Field>
+                <Field
+                  label="Perguntas frequentes (EN)"
+                  hint="Deixe em branco para usar as mesmas perguntas em português também na versão em inglês do site."
+                >
+                  <Textarea name="aeo_faq_en" rows={6} defaultValue={values.aeo_faq_en ?? ""} />
+                </Field>
+              </FieldGrid>
+            </SectionCard>
+
+            <SectionCard title="Analytics" subtitle="Métricas de audiência do site.">
               <Field
-                label="Perguntas frequentes (PT)"
-                hint='Uma pergunta e resposta por linha, separadas por " | ". Ex: O que é a People & Growth? | Uma consultoria e um espaço de conteúdo sobre negócios, pessoas e os temas que os impactam.'
+                label="ID de métricas do Google Analytics (GA4)"
+                hint="Encontrado em Admin > Fluxos de dados no Google Analytics. Deixe em branco para não carregar o Analytics no site."
               >
-                <Textarea name="aeo_faq_pt" rows={6} defaultValue={values.aeo_faq_pt ?? ""} />
+                <Input name="ga4_measurement_id" defaultValue={values.ga4_measurement_id ?? ""} placeholder="G-XXXXXXXXXX" />
               </Field>
             </SectionCard>
           </SectionGrid>

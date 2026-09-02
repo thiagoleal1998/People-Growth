@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations } from "next-intl/server";
 import { notFound } from "next/navigation";
+import Script from "next/script";
 import NextTopLoader from "nextjs-toploader";
 import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
@@ -92,7 +93,8 @@ export default async function LocaleLayout({
     sameAs: [config.linkedin, config.instagram].filter(Boolean),
   };
 
-  const faqEntries = (config.aeo_faq_pt || "")
+  const faqKey = locale === "en" ? "aeo_faq_en" : "aeo_faq_pt";
+  const faqEntries = (config[faqKey] || config.aeo_faq_pt || "")
     .split("\n")
     .map((line) => line.split("|").map((part) => part.trim()))
     .filter((parts) => parts.length === 2 && parts[0] && parts[1]);
@@ -131,6 +133,22 @@ export default async function LocaleLayout({
             type="application/ld+json"
             dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
           />
+        )}
+        {config.ga4_measurement_id && (
+          <>
+            <Script
+              src={`https://www.googletagmanager.com/gtag/js?id=${config.ga4_measurement_id}`}
+              strategy="afterInteractive"
+            />
+            <Script id="ga4-init" strategy="afterInteractive">
+              {`
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${config.ga4_measurement_id}');
+              `}
+            </Script>
+          </>
         )}
         <NextTopLoader color="#4361EE" height={3} showSpinner={false} />
         <NextIntlClientProvider messages={messages}>
