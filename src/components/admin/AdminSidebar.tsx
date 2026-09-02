@@ -18,6 +18,7 @@ import {
   Wrench,
   UserCircle,
   Search,
+  AlertTriangle,
 } from "lucide-react";
 
 const links = [
@@ -27,6 +28,7 @@ const links = [
   { href: "/admin/portfolio", label: "Portfólio", icon: Briefcase },
   { href: "/admin/servicos", label: "Serviços", icon: Wrench },
   { href: "/admin/leads", label: "Leads / CRM", icon: Users },
+  { href: "/admin/erros", label: "Erros reportados", icon: AlertTriangle },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
   { href: "/admin/cursos", label: "Cursos", icon: BookOpen },

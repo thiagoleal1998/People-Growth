@@ -174,6 +174,15 @@ type MediaItemRow = {
 
 type SiteConfigRow = { key: string; value: string | null; updated_at: string };
 
+type ErrorReportRow = {
+  id: string;
+  page_url: string;
+  description: string;
+  email: string | null;
+  status: "new" | "reviewing" | "resolved";
+  created_at: string;
+};
+
 type AuthorRow = {
   id: string;
   name: string;
@@ -211,6 +220,7 @@ export type Database = {
       media_items: { Row: MediaItemRow; Insert: Omit<MediaItemRow, "id" | "created_at">; Update: Partial<Omit<MediaItemRow, "id" | "created_at">>; Relationships: [] };
       site_config: { Row: SiteConfigRow; Insert: Omit<SiteConfigRow, "updated_at">; Update: Partial<Omit<SiteConfigRow, "updated_at">>; Relationships: [] };
       authors: { Row: AuthorRow; Insert: Omit<AuthorRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AuthorRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      error_reports: { Row: ErrorReportRow; Insert: Omit<ErrorReportRow, "id" | "created_at">; Update: Partial<Omit<ErrorReportRow, "id" | "created_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -230,3 +240,4 @@ export type Course = CourseRow;
 export type Resource = ResourceRow;
 export type MediaItem = MediaItemRow;
 export type Author = AuthorRow;
+export type ErrorReport = ErrorReportRow;

@@ -2,6 +2,7 @@ import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import NextLink from "next/link";
 import { Linkedin, Mail, Instagram } from "lucide-react";
+import { ErrorReportButton } from "@/components/ErrorReportButton";
 
 export function Footer({ logoUrl }: { logoUrl?: string | null }) {
   const t = useTranslations("footer");
@@ -170,22 +171,7 @@ export function Footer({ logoUrl }: { logoUrl?: string | null }) {
             <NextLink href="/admin" style={{ fontSize: "0.8125rem", color: "inherit" }}>
               Admin
             </NextLink>
-            <a
-              href="mailto:contato.neurobotics@gmail.com?subject=Erro%20no%20site%20People%20%26%20Growth"
-              style={{
-                fontSize: "0.75rem",
-                fontWeight: 700,
-                color: "white",
-                backgroundColor: "#dc2626",
-                padding: "0.375rem 0.75rem",
-                borderRadius: "0.375rem",
-                textDecoration: "none",
-                textTransform: "uppercase",
-                letterSpacing: "0.03em",
-              }}
-            >
-              Comunicar erro
-            </a>
+            <ErrorReportButton />
           </div>
         </div>
       </div>
