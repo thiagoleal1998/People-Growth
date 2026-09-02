@@ -28,12 +28,12 @@ import {
 const links = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/artigos", label: "Artigos", icon: FileText },
-  { href: "/admin/comentarios", label: "Comentários", icon: MessageCircle },
+  { href: "/admin/comentarios", label: "Comentários", icon: MessageCircle, countKey: "comentarios" as const },
   { href: "/admin/autores", label: "Autores", icon: UserCircle },
   { href: "/admin/portfolio", label: "Portfólio", icon: Briefcase },
   { href: "/admin/servicos", label: "Serviços", icon: Wrench },
-  { href: "/admin/leads", label: "Leads / CRM", icon: Users },
-  { href: "/admin/erros", label: "Erros reportados", icon: AlertTriangle },
+  { href: "/admin/leads", label: "Leads / CRM", icon: Users, countKey: "leads" as const },
+  { href: "/admin/erros", label: "Erros reportados", icon: AlertTriangle, countKey: "erros" as const },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
   { href: "/admin/cursos", label: "Cursos", icon: BookOpen },
@@ -49,10 +49,12 @@ export function AdminSidebar({
   logoUrl,
   userName,
   userPhoto,
+  counts,
 }: {
   logoUrl?: string;
   userName?: string;
   userPhoto?: string;
+  counts?: { comentarios: number; leads: number; erros: number };
 }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -92,8 +94,9 @@ export function AdminSidebar({
 
       {/* Nav */}
       <nav className="admin-sidebar-scroll" style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
-        {links.map(({ href, label, icon: Icon }) => {
+        {links.map(({ href, label, icon: Icon, countKey }) => {
           const isActive = pathname === href || (href !== "/admin" && pathname.startsWith(href));
+          const count = countKey ? counts?.[countKey] ?? 0 : 0;
           return (
             <Link
               key={href}
@@ -114,6 +117,27 @@ export function AdminSidebar({
             >
               <Icon size={17} />
               {label}
+              {count > 0 && (
+                <span
+                  style={{
+                    marginLeft: "auto",
+                    backgroundColor: "#dc2626",
+                    color: "white",
+                    fontSize: "0.6875rem",
+                    fontWeight: 800,
+                    minWidth: "1.25rem",
+                    height: "1.25rem",
+                    borderRadius: "9999px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "0 0.3rem",
+                    flexShrink: 0,
+                  }}
+                >
+                  {count > 99 ? "99+" : count}
+                </span>
+              )}
             </Link>
           );
         })}
