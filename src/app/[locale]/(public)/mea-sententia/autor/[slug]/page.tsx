@@ -127,10 +127,10 @@ export default async function AuthorPage({
         </div>
       </section>
 
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl" style={{ maxWidth: "800px" }}>
           {articles.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "#94a3b8" }}>
+            <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               {author.name} ainda não publicou nenhum artigo.
             </div>
           ) : (
@@ -145,10 +145,10 @@ export default async function AuthorPage({
                   >
                     <article
                       style={{
-                        backgroundColor: "white",
+                        backgroundColor: "var(--site-card)",
                         borderRadius: "1rem",
                         padding: "1.5rem",
-                        border: "1px solid rgba(0,0,0,0.06)",
+                        border: "1px solid var(--site-border)",
                         display: "flex",
                         gap: "1.25rem",
                         alignItems: "flex-start",
@@ -187,15 +187,15 @@ export default async function AuthorPage({
                         <div style={{ marginBottom: "0.375rem" }}>
                           <FormatTag format={article.format} />
                         </div>
-                        <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "#0d1b2a", lineHeight: 1.4, marginBottom: "0.375rem" }}>
+                        <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.375rem" }}>
                           {article.title_pt}
                         </h3>
                         {article.excerpt_pt && (
-                          <p style={{ fontSize: "0.875rem", color: "#64748b", lineHeight: 1.6, marginBottom: "0.625rem" }}>
+                          <p style={{ fontSize: "0.875rem", color: "var(--site-muted)", lineHeight: 1.6, marginBottom: "0.625rem" }}>
                             {article.excerpt_pt}
                           </p>
                         )}
-                        <span style={{ fontSize: "0.8125rem", color: "#94a3b8", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                        <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)", display: "flex", alignItems: "center", gap: "0.25rem" }}>
                           {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                           <ChevronRight size={13} />
                         </span>

@@ -138,7 +138,7 @@ export default async function ArticlePage({
       </section>
 
       {/* Content */}
-      <section className="section-padding" style={{ backgroundColor: "white" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
         <div
           className="container-xl article-detail-grid"
           style={{
@@ -155,7 +155,7 @@ export default async function ArticlePage({
               style={{
                 fontSize: "1.0625rem",
                 lineHeight: 1.85,
-                color: "#374151",
+                color: "var(--site-text-secondary)",
               }}
               dangerouslySetInnerHTML={{ __html: renderMarkdownLite(article.content_pt) }}
             />
@@ -167,7 +167,7 @@ export default async function ArticlePage({
                 style={{
                   marginTop: "2.5rem",
                   padding: "1.75rem",
-                  backgroundColor: "#f0f4f8",
+                  backgroundColor: "var(--site-surface-alt)",
                   borderRadius: "1rem",
                   display: "flex",
                   gap: "1.25rem",
@@ -185,7 +185,7 @@ export default async function ArticlePage({
                   }}
                 />
                 <div>
-                  <div style={{ fontWeight: 800, color: "#0d1b2a", fontSize: "1rem", marginBottom: "0.25rem" }}>
+                  <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "1rem", marginBottom: "0.25rem" }}>
                     {author.name}
                   </div>
                   {author.role_pt && (
@@ -194,7 +194,7 @@ export default async function ArticlePage({
                     </div>
                   )}
                   {author.bio_pt && (
-                    <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.6 }}>
+                    <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6 }}>
                       {author.bio_pt}
                     </p>
                   )}
@@ -224,15 +224,15 @@ export default async function ArticlePage({
 
             <div
               style={{
-                backgroundColor: "#f0f4f8",
+                backgroundColor: "var(--site-surface-alt)",
                 borderRadius: "1rem",
                 padding: "1.5rem",
               }}
             >
-              <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "#0d1b2a", marginBottom: "1rem" }}>
+              <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", marginBottom: "1rem" }}>
                 Precisa de consultoria?
               </h3>
-              <p style={{ color: "#64748b", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: "1rem" }}>
+              <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: "1rem" }}>
                 Ajudamos empresas a crescerem com Marketing, Growth e IA.
               </p>
               <Link
