@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
+import { ShareButtons } from "@/components/ShareButtons";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
 import type { Article, Category, Author } from "@/types/database.types";
@@ -159,6 +160,8 @@ export default async function ArticlePage({
               }}
               dangerouslySetInnerHTML={{ __html: renderMarkdownLite(article.content_pt) }}
             />
+
+            <ShareButtons title={article.title_pt} />
 
             {/* Author */}
             {author && (
