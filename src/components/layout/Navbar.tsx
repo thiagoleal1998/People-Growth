@@ -11,6 +11,7 @@ const navLinks = [
   { key: "services", href: "/servicos" as const },
   { key: "newsletter", href: "/mea-sententia" as const },
   { key: "portfolio", href: "/portfolio" as const },
+  { key: "courses", href: "/cursos" as const },
   { key: "resources", href: "/recursos" as const },
   { key: "media", href: "/na-midia" as const },
   { key: "contact", href: "/contato" as const },
@@ -130,7 +131,7 @@ export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
       <style>{`
         .hidden-mobile { display: flex; }
         .show-mobile { display: none; }
-        @media (max-width: 640px) {
+        @media (max-width: 1024px) {
           .hidden-mobile { display: none !important; }
           .show-mobile { display: flex !important; }
         }
