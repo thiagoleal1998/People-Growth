@@ -17,7 +17,7 @@ type ArticleRow = {
   excerpt_en: string | null;
   cover_image: string | null;
   category_id: string | null;
-  status: "draft" | "published";
+  status: "draft" | "pending" | "published";
   format: "noticia" | "opiniao";
   published_at: string | null;
   author_id: string | null;
@@ -183,6 +183,14 @@ type ErrorReportRow = {
   created_at: string;
 };
 
+type UserProfileRow = {
+  id: string;
+  email: string;
+  role: "admin" | "author";
+  author_id: string | null;
+  created_at: string;
+};
+
 type AuthorRow = {
   id: string;
   name: string;
@@ -223,6 +231,7 @@ export type Database = {
       site_config: { Row: SiteConfigRow; Insert: Omit<SiteConfigRow, "updated_at">; Update: Partial<Omit<SiteConfigRow, "updated_at">>; Relationships: [] };
       authors: { Row: AuthorRow; Insert: Omit<AuthorRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AuthorRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       error_reports: { Row: ErrorReportRow; Insert: Omit<ErrorReportRow, "id" | "created_at">; Update: Partial<Omit<ErrorReportRow, "id" | "created_at">>; Relationships: [] };
+      user_profiles: { Row: UserProfileRow; Insert: Omit<UserProfileRow, "created_at">; Update: Partial<Omit<UserProfileRow, "id" | "created_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -243,3 +252,4 @@ export type Resource = ResourceRow;
 export type MediaItem = MediaItemRow;
 export type Author = AuthorRow;
 export type ErrorReport = ErrorReportRow;
+export type UserProfile = UserProfileRow;

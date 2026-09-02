@@ -1,14 +1,14 @@
 "use client";
 
 import { FormShell, Field, Input, Textarea, Select, SubmitButton } from "@/components/admin/ui";
-import { upsertArticle } from "./actions";
-import type { Article, Category, Author } from "@/types/database.types";
+import { upsertOwnArticle } from "./actions";
+import type { Article, Category } from "@/types/database.types";
 
-export function ArticleForm({ item, categories, authors }: { item?: Article; categories: Category[]; authors: Author[] }) {
-  const action = upsertArticle.bind(null, item?.id ?? null);
+export function AuthorArticleForm({ item, categories }: { item?: Article; categories: Category[] }) {
+  const action = upsertOwnArticle.bind(null, item?.id ?? null);
 
   return (
-    <FormShell title={item ? "Editar artigo" : "Novo artigo"} backHref="/admin/artigos">
+    <FormShell title={item ? "Editar artigo" : "Novo artigo"} backHref="/autor">
       <form action={action}>
         <Field label="Título (PT)">
           <Input name="title_pt" defaultValue={item?.title_pt} required />
@@ -20,9 +20,9 @@ export function ArticleForm({ item, categories, authors }: { item?: Article; cat
           <Input name="slug" defaultValue={item?.slug ?? ""} />
         </Field>
         <Field label="Tipo de conteúdo" hint="Notícia: reportagem/atualidade. Opinião: aparece com a tag Mea Sententia.">
-          <Select name="format" defaultValue={item?.format ?? "noticia"}>
-            <option value="noticia">Notícia</option>
+          <Select name="format" defaultValue={item?.format ?? "opiniao"}>
             <option value="opiniao">Opinião (Mea Sententia)</option>
+            <option value="noticia">Notícia</option>
           </Select>
         </Field>
         <Field label="Categoria">
@@ -30,14 +30,6 @@ export function ArticleForm({ item, categories, authors }: { item?: Article; cat
             <option value="">Sem categoria</option>
             {categories.map((c) => (
               <option key={c.id} value={c.id}>{c.name_pt}</option>
-            ))}
-          </Select>
-        </Field>
-        <Field label="Autor">
-          <Select name="author_id" defaultValue={item?.author_id ?? ""}>
-            <option value="">Sem autor definido</option>
-            {authors.map((a) => (
-              <option key={a.id} value={a.id}>{a.name}</option>
             ))}
           </Select>
         </Field>
@@ -56,17 +48,13 @@ export function ArticleForm({ item, categories, authors }: { item?: Article; cat
         <Field label="Imagem de capa (URL)">
           <Input name="cover_image" defaultValue={item?.cover_image ?? ""} />
         </Field>
-        <Field label="SEO — título (PT)">
-          <Input name="seo_title_pt" defaultValue={item?.seo_title_pt ?? ""} />
-        </Field>
-        <Field label="SEO — descrição (PT)">
-          <Textarea name="seo_desc_pt" rows={2} defaultValue={item?.seo_desc_pt ?? ""} />
-        </Field>
-        <Field label="Status">
-          <Select name="status" defaultValue={item?.status ?? "draft"}>
+        <Field
+          label="Status"
+          hint="Você não publica diretamente — um admin revisa e publica. Rascunho fica só com você; Pendente entra na fila de revisão."
+        >
+          <Select name="status" defaultValue={item?.status === "pending" ? "pending" : "draft"}>
             <option value="draft">Rascunho</option>
-            <option value="pending">Pendente (aguardando revisão)</option>
-            <option value="published">Publicado</option>
+            <option value="pending">Enviar para revisão</option>
           </Select>
         </Field>
         <SubmitButton>{item ? "Salvar alterações" : "Criar artigo"}</SubmitButton>

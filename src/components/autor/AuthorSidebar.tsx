@@ -3,44 +3,14 @@
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import {
-  LayoutDashboard,
-  FileText,
-  Briefcase,
-  Settings,
-  Users,
-  Mail,
-  BookOpen,
-  Download,
-  Monitor,
-  MessageSquare,
-  LogOut,
-  Wrench,
-  UserCircle,
-  Search,
-  AlertTriangle,
-  KeyRound,
-} from "lucide-react";
+import { FileText, UserCircle, Monitor, LogOut } from "lucide-react";
 
 const links = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/artigos", label: "Artigos", icon: FileText },
-  { href: "/admin/autores", label: "Autores", icon: UserCircle },
-  { href: "/admin/portfolio", label: "Portfólio", icon: Briefcase },
-  { href: "/admin/servicos", label: "Serviços", icon: Wrench },
-  { href: "/admin/leads", label: "Leads / CRM", icon: Users },
-  { href: "/admin/erros", label: "Erros reportados", icon: AlertTriangle },
-  { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
-  { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
-  { href: "/admin/cursos", label: "Cursos", icon: BookOpen },
-  { href: "/admin/recursos", label: "Recursos", icon: Download },
-  { href: "/admin/midia", label: "Na Mídia", icon: Monitor },
-  { href: "/admin/seo", label: "SEO, GEO & AEO", icon: Search },
-  { href: "/admin/usuarios", label: "Usuários", icon: KeyRound },
-  { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
+  { href: "/autor", label: "Meus artigos", icon: FileText },
+  { href: "/autor/perfil", label: "Meu perfil", icon: UserCircle },
 ];
 
-export function AdminSidebar() {
+export function AuthorSidebar() {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -63,18 +33,16 @@ export function AdminSidebar() {
         flexShrink: 0,
       }}
     >
-      {/* Logo */}
       <div style={{ padding: "1.5rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
           People & Growth
         </div>
-        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.125rem" }}>Painel Admin</div>
+        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.125rem" }}>Painel do Autor</div>
       </div>
 
-      {/* Nav */}
       <nav style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem" }}>
         {links.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname === href || (href !== "/admin" && pathname.startsWith(href));
+          const isActive = pathname === href || (href !== "/autor" && pathname.startsWith(href));
           return (
             <Link
               key={href}
@@ -100,7 +68,6 @@ export function AdminSidebar() {
         })}
       </nav>
 
-      {/* Footer */}
       <div style={{ padding: "1rem 0.75rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
         <Link
           href="/"

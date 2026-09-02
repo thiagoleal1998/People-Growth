@@ -53,6 +53,14 @@ export async function upsertArticle(id: string | null, formData: FormData) {
   redirect("/admin/artigos?saved=1");
 }
 
+export async function publishArticle(id: string) {
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase as any).from("articles").update({ status: "published", published_at: new Date().toISOString() }).eq("id", id);
+  revalidatePath("/admin/artigos");
+  revalidatePath("/[locale]", "page");
+}
+
 export async function deleteArticle(id: string) {
   const supabase = await createClient();
   await supabase.from("articles").delete().eq("id", id);

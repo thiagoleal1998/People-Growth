@@ -65,7 +65,7 @@ export default function AdminLoginPage() {
           People &amp; Growth
         </div>
         <div style={{ color: "#64748b", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
-          Login administrativo
+          Acesse sua conta
         </div>
 
         <label style={{ display: "block", fontSize: "0.8rem", fontWeight: 600, color: "#334155", marginBottom: "0.375rem" }}>

@@ -1,14 +1,15 @@
 import Link from "next/link";
-import { Plus, Edit, Check } from "lucide-react";
+import { Plus, Edit } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/profile";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
-import { deleteArticle, publishArticle } from "./actions";
+import { deleteOwnArticle } from "./artigos/actions";
 import type { Article } from "@/types/database.types";
 
 const statusConfig: Record<Article["status"], { label: string; tone: "success" | "warning" | "neutral" }> = {
   draft: { label: "Rascunho", tone: "neutral" },
-  pending: { label: "Pendente", tone: "warning" },
+  pending: { label: "Em revisão", tone: "warning" },
   published: { label: "Publicado", tone: "success" },
 };
 
@@ -16,30 +17,52 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR");
 }
 
-export default async function ArtigosAdminPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
-  const { saved } = await searchParams;
+export default async function AutorHomePage({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string }> }) {
+  const { saved, error } = await searchParams;
+  const profile = await getCurrentProfile();
+
+  if (!profile?.author_id) {
+    return (
+      <div>
+        <PageHeader title="Meus artigos" />
+        <Card>
+          <EmptyState text="Seu login ainda não está vinculado a um perfil de autor. Peça a um admin para vincular em Admin → Usuários." />
+        </Card>
+      </div>
+    );
+  }
+
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any).from("articles").select("*").order("created_at", { ascending: false });
+  const { data } = await (supabase as any)
+    .from("articles")
+    .select("*")
+    .eq("author_id", profile.author_id)
+    .order("created_at", { ascending: false });
   const articles = (data ?? []) as Article[];
 
   return (
     <div>
       <SavedToast show={saved === "1"} />
+      {error && (
+        <div style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#dc2626", padding: "0.75rem 1rem", borderRadius: "0.625rem", fontSize: "0.875rem", marginBottom: "1.25rem" }}>
+          {error}
+        </div>
+      )}
       <PageHeader
-        title="Artigos"
+        title="Meus artigos"
         subtitle={`${articles.length} artigo${articles.length === 1 ? "" : "s"}`}
-        action={<PrimaryLinkButton href="/admin/artigos/novo"><Plus size={16} /> Novo artigo</PrimaryLinkButton>}
+        action={<PrimaryLinkButton href="/autor/artigos/novo"><Plus size={16} /> Novo artigo</PrimaryLinkButton>}
       />
 
       <Card>
         {articles.length === 0 ? (
-          <EmptyState text="Nenhum artigo cadastrado ainda." />
+          <EmptyState text="Você ainda não escreveu nenhum artigo." />
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "#f8fafc" }}>
-                {["Título", "Formato", "Status", "Visualizações", "Data", ""].map((h) => (
+                {["Título", "Formato", "Status", "Data", ""].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
                 ))}
               </tr>
@@ -56,23 +79,13 @@ export default async function ArtigosAdminPage({ searchParams }: { searchParams:
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <Badge tone={statusConfig[a.status].tone}>{statusConfig[a.status].label}</Badge>
                   </td>
-                  <td style={{ padding: "0.875rem 1.25rem", color: "#64748b", fontSize: "0.875rem" }}>{a.views.toLocaleString("pt-BR")}</td>
                   <td style={{ padding: "0.875rem 1.25rem", color: "#94a3b8", fontSize: "0.8125rem" }}>{formatDate(a.created_at)}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                      {a.status === "pending" && (
-                        <form action={publishArticle.bind(null, a.id)}>
-                          <button
-                            type="submit"
-                            title="Aprovar e publicar"
-                            style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.5rem", color: "#04a87d", backgroundColor: "rgba(6,214,160,0.1)", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 700 }}
-                          >
-                            <Check size={13} /> Aprovar
-                          </button>
-                        </form>
+                    <div style={{ display: "flex", gap: "0.5rem" }}>
+                      <Link href={`/autor/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
+                      {a.status !== "published" && (
+                        <ConfirmDeleteButton confirmText={`Excluir o artigo "${a.title_pt}"?`} onDelete={deleteOwnArticle.bind(null, a.id)} />
                       )}
-                      <Link href={`/admin/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
-                      <ConfirmDeleteButton confirmText={`Excluir o artigo "${a.title_pt}"?`} onDelete={deleteArticle.bind(null, a.id)} />
                     </div>
                   </td>
                 </tr>

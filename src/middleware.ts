@@ -7,13 +7,13 @@ import type { Database } from "@/types/database.types";
 const intlMiddleware = createMiddleware(routing);
 
 export async function middleware(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith("/admin")) {
-    return handleAdminAuth(request);
+  if (request.nextUrl.pathname.startsWith("/admin") || request.nextUrl.pathname.startsWith("/autor")) {
+    return handlePanelAuth(request);
   }
   return intlMiddleware(request);
 }
 
-async function handleAdminAuth(request: NextRequest) {
+async function handlePanelAuth(request: NextRequest) {
   let response = NextResponse.next({ request });
 
   const supabase = createServerClient<Database>(
@@ -39,17 +39,45 @@ async function handleAdminAuth(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isLoginPage = request.nextUrl.pathname === "/admin/login";
+  const pathname = request.nextUrl.pathname;
+  const isLoginPage = pathname === "/admin/login";
 
-  if (!user && !isLoginPage) {
+  if (!user) {
+    if (isLoginPage) return response;
     const url = request.nextUrl.clone();
     url.pathname = "/admin/login";
     return NextResponse.redirect(url);
   }
 
-  if (user && isLoginPage) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: profile } = await (supabase as any)
+    .from("user_profiles")
+    .select("role")
+    .eq("id", user.id)
+    .single();
+  const role = profile?.role as "admin" | "author" | undefined;
+
+  // Authenticated but no profile row at all (shouldn't happen in normal
+  // operation) — sign out instead of bouncing between routes forever.
+  if (!role) {
+    await supabase.auth.signOut();
+    if (isLoginPage) return response;
     const url = request.nextUrl.clone();
-    url.pathname = "/admin";
+    url.pathname = "/admin/login";
+    return NextResponse.redirect(url);
+  }
+
+  const home = role === "admin" ? "/admin" : "/autor";
+
+  if (isLoginPage) {
+    const url = request.nextUrl.clone();
+    url.pathname = home;
+    return NextResponse.redirect(url);
+  }
+
+  if (pathname.startsWith("/admin") && role !== "admin") {
+    const url = request.nextUrl.clone();
+    url.pathname = home;
     return NextResponse.redirect(url);
   }
 
