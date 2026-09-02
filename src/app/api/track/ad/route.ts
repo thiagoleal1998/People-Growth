@@ -5,9 +5,10 @@ import { getClientIp, checkRateLimit } from "@/lib/rate-limit";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { slotKey, eventType, path, visitorId } = body as Record<string, unknown>;
+    const { adId, slotKey, eventType, path, visitorId } = body as Record<string, unknown>;
 
     if (
+      typeof adId !== "string" || !adId ||
       typeof slotKey !== "string" || !slotKey ||
       (eventType !== "impression" && eventType !== "click")
     ) {
@@ -26,6 +27,7 @@ export async function POST(req: NextRequest) {
 
     const { error } = await client.from("ad_events").insert({
       ad_slot_key: slotKey,
+      ad_id: adId,
       event_type: eventType,
       path: typeof path === "string" ? path.slice(0, 500) : null,
       visitor_id: typeof visitorId === "string" ? visitorId.slice(0, 100) : null,

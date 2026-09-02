@@ -3,9 +3,9 @@
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { getVisitorId } from "@/lib/visitor";
-import type { AdSlot } from "@/types/database.types";
+import type { Ad } from "@/types/database.types";
 
-export function AdBannerClient({ slot, style }: { slot: AdSlot; style?: React.CSSProperties }) {
+export function AdBannerClient({ ad, style }: { ad: Ad; style?: React.CSSProperties }) {
   const linkRef = useRef<HTMLAnchorElement>(null);
   const firedRef = useRef(false);
   const pathname = usePathname();
@@ -14,7 +14,7 @@ export function AdBannerClient({ slot, style }: { slot: AdSlot; style?: React.CS
     fetch("/api/track/ad", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slotKey: slot.key, eventType, path: pathname, visitorId: getVisitorId() }),
+      body: JSON.stringify({ adId: ad.id, slotKey: ad.slot_key, eventType, path: pathname, visitorId: getVisitorId() }),
       keepalive: true,
     }).catch(() => {});
   }
@@ -36,19 +36,19 @@ export function AdBannerClient({ slot, style }: { slot: AdSlot; style?: React.CS
     observer.observe(el);
     return () => observer.disconnect();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [slot.key, pathname]);
+  }, [ad.id, pathname]);
 
   return (
     <a
       ref={linkRef}
-      href={slot.link_url || "#"}
+      href={ad.link_url || "#"}
       target="_blank"
       rel="noopener noreferrer sponsored"
       onClick={() => track("click")}
       style={{ display: "block", textDecoration: "none", ...style }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={slot.image_url!} alt={slot.alt_text || "Publicidade"} style={{ width: "100%", height: "auto", display: "block", borderRadius: "0.5rem" }} />
+      <img src={ad.image_url!} alt={ad.alt_text || "Publicidade"} style={{ width: "100%", height: "auto", display: "block", borderRadius: "0.5rem" }} />
       <div style={{ fontSize: "0.6875rem", color: "var(--site-faint)", textAlign: "center", marginTop: "0.25rem" }}>Publicidade</div>
     </a>
   );

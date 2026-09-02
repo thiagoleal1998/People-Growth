@@ -248,16 +248,31 @@ type PageViewRow = {
 type AdSlotRow = {
   key: string;
   label: string;
+  updated_at: string;
+};
+
+type AdRow = {
+  id: string;
+  slot_key: string;
+  title: string;
   image_url: string | null;
   link_url: string | null;
   alt_text: string | null;
+  target_mode: "all" | "specific";
   active: boolean;
+  created_at: string;
   updated_at: string;
+};
+
+type AdTargetRow = {
+  ad_id: string;
+  article_id: string;
 };
 
 type AdEventRow = {
   id: string;
   ad_slot_key: string;
+  ad_id: string | null;
   event_type: "impression" | "click";
   path: string | null;
   visitor_id: string | null;
@@ -287,6 +302,8 @@ export type Database = {
       institutional_pages: { Row: InstitutionalPageRow; Insert: Omit<InstitutionalPageRow, "updated_at">; Update: Partial<Omit<InstitutionalPageRow, "slug" | "updated_at">>; Relationships: [] };
       page_views: { Row: PageViewRow; Insert: Omit<PageViewRow, "id" | "created_at">; Update: Partial<Omit<PageViewRow, "id" | "created_at">>; Relationships: [] };
       ad_slots: { Row: AdSlotRow; Insert: Omit<AdSlotRow, "updated_at">; Update: Partial<Omit<AdSlotRow, "key" | "updated_at">>; Relationships: [] };
+      ads: { Row: AdRow; Insert: Omit<AdRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AdRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      ad_targets: { Row: AdTargetRow; Insert: AdTargetRow; Update: Partial<AdTargetRow>; Relationships: [] };
       ad_events: { Row: AdEventRow; Insert: Omit<AdEventRow, "id" | "created_at">; Update: Partial<Omit<AdEventRow, "id" | "created_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
@@ -312,5 +329,7 @@ export type UserProfile = UserProfileRow;
 export type Comment = CommentRow;
 export type PageView = PageViewRow;
 export type AdSlot = AdSlotRow;
+export type Ad = AdRow;
+export type AdTarget = AdTargetRow;
 export type AdEvent = AdEventRow;
 export type InstitutionalPage = InstitutionalPageRow;

@@ -3,7 +3,7 @@ import { Eye, Users, MousePointerClick, Percent, X } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, Card } from "@/components/admin/ui";
 import { AD_SLOT_DEFS } from "../publicidade/ad-slots";
-import type { Article } from "@/types/database.types";
+import type { Article, Ad } from "@/types/database.types";
 
 const PERIODS = [
   { key: "7", label: "7 dias" },
@@ -72,9 +72,9 @@ function DailyChart({ days }: { days: { date: string; impressions: number; click
 export default async function RelatoriosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string; from?: string; to?: string; slot?: string }>;
+  searchParams: Promise<{ period?: string; from?: string; to?: string; ad?: string }>;
 }) {
-  const { period = "30", from, to, slot } = await searchParams;
+  const { period = "30", from, to, ad: adParam } = await searchParams;
   const usingCustomRange = Boolean(from || to);
 
   let since: string | null;
@@ -94,20 +94,24 @@ export default async function RelatoriosPage({
   let viewsQuery = client.from("page_views").select("path, page_type, article_id, visitor_id");
   if (since) viewsQuery = viewsQuery.gte("created_at", since);
   if (until) viewsQuery = viewsQuery.lte("created_at", until);
-  let adQuery = client.from("ad_events").select("ad_slot_key, event_type");
-  if (since) adQuery = adQuery.gte("created_at", since);
-  if (until) adQuery = adQuery.lte("created_at", until);
+  let adEventsQuery = client.from("ad_events").select("ad_slot_key, ad_id, event_type");
+  if (since) adEventsQuery = adEventsQuery.gte("created_at", since);
+  if (until) adEventsQuery = adEventsQuery.lte("created_at", until);
 
-  const [{ data: viewsData }, { data: adData }, { data: articlesData }] = await Promise.all([
+  const [{ data: viewsData }, { data: adEventsData }, { data: articlesData }, { data: adsData }] = await Promise.all([
     viewsQuery,
-    adQuery,
+    adEventsQuery,
     client.from("articles").select("id, title_pt"),
+    client.from("ads").select("id, title, slot_key"),
   ]);
 
   const views = (viewsData ?? []) as { path: string; page_type: string; article_id: string | null; visitor_id: string }[];
-  const adEvents = (adData ?? []) as { ad_slot_key: string; event_type: string }[];
+  const adEvents = (adEventsData ?? []) as { ad_slot_key: string; ad_id: string | null; event_type: string }[];
   const articleTitles = new Map(((articlesData ?? []) as Pick<Article, "id" | "title_pt">[]).map((a) => [a.id, a.title_pt]));
   const slotLabels = new Map<string, string>(AD_SLOT_DEFS.map((d) => [d.key, d.label]));
+  const adsById = new Map<string, Pick<Ad, "id" | "title" | "slot_key">>(
+    ((adsData ?? []) as Pick<Ad, "id" | "title" | "slot_key">[]).map((a) => [a.id, a])
+  );
 
   const totalViews = views.length;
   const uniqueVisitors = new Set(views.map((v) => v.visitor_id)).size;
@@ -129,31 +133,32 @@ export default async function RelatoriosPage({
     .slice(0, 10);
   const maxPageViews = topPages[0]?.views ?? 0;
 
-  const adByKey = new Map<string, { impressions: number; clicks: number }>();
+  const statsByAd = new Map<string, { impressions: number; clicks: number }>();
   for (const e of adEvents) {
-    const s = adByKey.get(e.ad_slot_key) ?? { impressions: 0, clicks: 0 };
+    if (!e.ad_id) continue;
+    const s = statsByAd.get(e.ad_id) ?? { impressions: 0, clicks: 0 };
     if (e.event_type === "impression") s.impressions++;
     else s.clicks++;
-    adByKey.set(e.ad_slot_key, s);
+    statsByAd.set(e.ad_id, s);
   }
 
-  let slotDetail: { key: string; label: string; days: { date: string; impressions: number; clicks: number }[] } | null = null;
-  if (slot) {
-    let slotQuery = client.from("ad_events").select("event_type, created_at").eq("ad_slot_key", slot);
-    if (since) slotQuery = slotQuery.gte("created_at", since);
-    if (until) slotQuery = slotQuery.lte("created_at", until);
-    const { data: slotEvents } = await slotQuery;
+  let adDetail: { label: string; days: { date: string; impressions: number; clicks: number }[] } | null = null;
+  if (adParam) {
+    let adDetailQuery = client.from("ad_events").select("event_type, created_at").eq("ad_id", adParam);
+    if (since) adDetailQuery = adDetailQuery.gte("created_at", since);
+    if (until) adDetailQuery = adDetailQuery.lte("created_at", until);
+    const { data: adDetailEvents } = await adDetailQuery;
     const byDay = new Map<string, { impressions: number; clicks: number }>();
-    for (const e of (slotEvents ?? []) as { event_type: string; created_at: string }[]) {
+    for (const e of (adDetailEvents ?? []) as { event_type: string; created_at: string }[]) {
       const day = e.created_at.slice(0, 10);
       const d = byDay.get(day) ?? { impressions: 0, clicks: 0 };
       if (e.event_type === "impression") d.impressions++;
       else d.clicks++;
       byDay.set(day, d);
     }
-    slotDetail = {
-      key: slot,
-      label: slotLabels.get(slot) ?? slot,
+    const adInfo = adsById.get(adParam);
+    adDetail = {
+      label: adInfo ? `${adInfo.title} · ${slotLabels.get(adInfo.slot_key) ?? adInfo.slot_key}` : adParam,
       days: Array.from(byDay.entries()).map(([date, v]) => ({ date, ...v })).sort((a, b) => a.date.localeCompare(b.date)),
     };
   }
@@ -192,7 +197,7 @@ export default async function RelatoriosPage({
           method="get"
           style={{ display: "flex", gap: "0.5rem", alignItems: "center", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "0.625rem", padding: "0.375rem 0.625rem" }}
         >
-          {slot && <input type="hidden" name="slot" value={slot} />}
+          {adParam && <input type="hidden" name="ad" value={adParam} />}
           <input
             type="date"
             name="from"
@@ -239,34 +244,38 @@ export default async function RelatoriosPage({
         <Card>
           <div style={{ padding: "1.5rem" }}>
             <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.375rem" }}>Desempenho dos anúncios</h2>
-            <p style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginBottom: "1rem" }}>Clique num espaço para ver o gráfico diário.</p>
-            {adByKey.size === 0 ? (
+            <p style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginBottom: "1rem" }}>Clique num anúncio para ver o gráfico diário.</p>
+            {statsByAd.size === 0 ? (
               <p style={{ color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum anúncio ativo gerou impressões neste período.</p>
             ) : (
               <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
                 <thead>
                   <tr>
-                    {["Espaço", "Impressões", "Cliques", "CTR"].map((h) => (
+                    {["Anúncio", "Espaço", "Impressões", "Cliques", "CTR"].map((h) => (
                       <th key={h} style={{ textAlign: "left", padding: "0.5rem 0", color: "var(--admin-muted)", fontWeight: 700, fontSize: "0.75rem", textTransform: "uppercase" }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
-                  {Array.from(adByKey.entries()).map(([key, s]) => (
-                    <tr key={key} style={{ borderTop: "1px solid var(--admin-border)" }}>
-                      <td style={{ padding: "0.625rem 0" }}>
-                        <Link
-                          href={`/admin/relatorios?${new URLSearchParams({ ...rangeQuery, slot: key }).toString()}`}
-                          style={{ color: slot === key ? "#4361EE" : "var(--admin-text)", fontWeight: 700, textDecoration: slot === key ? "underline" : "none" }}
-                        >
-                          {slotLabels.get(key) ?? key}
-                        </Link>
-                      </td>
-                      <td style={{ padding: "0.625rem 0", color: "var(--admin-text-secondary)" }}>{s.impressions.toLocaleString("pt-BR")}</td>
-                      <td style={{ padding: "0.625rem 0", color: "var(--admin-text-secondary)" }}>{s.clicks.toLocaleString("pt-BR")}</td>
-                      <td style={{ padding: "0.625rem 0", color: "var(--admin-faint)" }}>{s.impressions > 0 ? `${((s.clicks / s.impressions) * 100).toFixed(1)}%` : "—"}</td>
-                    </tr>
-                  ))}
+                  {Array.from(statsByAd.entries()).map(([id, s]) => {
+                    const info = adsById.get(id);
+                    return (
+                      <tr key={id} style={{ borderTop: "1px solid var(--admin-border)" }}>
+                        <td style={{ padding: "0.625rem 0" }}>
+                          <Link
+                            href={`/admin/relatorios?${new URLSearchParams({ ...rangeQuery, ad: id }).toString()}`}
+                            style={{ color: adParam === id ? "#4361EE" : "var(--admin-text)", fontWeight: 700, textDecoration: adParam === id ? "underline" : "none" }}
+                          >
+                            {info?.title ?? id}
+                          </Link>
+                        </td>
+                        <td style={{ padding: "0.625rem 0", color: "var(--admin-text-secondary)" }}>{info ? (slotLabels.get(info.slot_key) ?? info.slot_key) : "—"}</td>
+                        <td style={{ padding: "0.625rem 0", color: "var(--admin-text-secondary)" }}>{s.impressions.toLocaleString("pt-BR")}</td>
+                        <td style={{ padding: "0.625rem 0", color: "var(--admin-text-secondary)" }}>{s.clicks.toLocaleString("pt-BR")}</td>
+                        <td style={{ padding: "0.625rem 0", color: "var(--admin-faint)" }}>{s.impressions > 0 ? `${((s.clicks / s.impressions) * 100).toFixed(1)}%` : "—"}</td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             )}
@@ -274,12 +283,12 @@ export default async function RelatoriosPage({
         </Card>
       </div>
 
-      {slotDetail && (
+      {adDetail && (
         <Card>
           <div style={{ padding: "1.5rem" }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.25rem" }}>
               <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)" }}>
-                Desempenho diário — {slotDetail.label}
+                Desempenho diário — {adDetail.label}
               </h2>
               <Link
                 href={`/admin/relatorios?${new URLSearchParams(rangeQuery).toString()}`}
@@ -288,10 +297,10 @@ export default async function RelatoriosPage({
                 <X size={14} /> Fechar
               </Link>
             </div>
-            {slotDetail.days.length === 0 ? (
+            {adDetail.days.length === 0 ? (
               <p style={{ color: "var(--admin-faint)", fontSize: "0.875rem" }}>Sem eventos registrados neste período.</p>
             ) : (
-              <DailyChart days={slotDetail.days} />
+              <DailyChart days={adDetail.days} />
             )}
           </div>
         </Card>

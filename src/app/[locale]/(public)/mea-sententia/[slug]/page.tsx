@@ -159,7 +159,7 @@ export default async function ArticlePage({
             <ShareButtons title={article.title_pt} />
 
             <div style={{ marginTop: "2rem" }}>
-              <AdBanner slotKey="article-instream" />
+              <AdBanner slotKey="article-instream" articleId={article.id} />
             </div>
 
             {/* Author */}
@@ -271,7 +271,7 @@ export default async function ArticlePage({
               </Link>
             </div>
 
-            <AdBanner slotKey="article-sidebar" />
+            <AdBanner slotKey="article-sidebar" articleId={article.id} />
           </aside>
         </div>
 
