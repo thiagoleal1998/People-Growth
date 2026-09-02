@@ -10,7 +10,7 @@ const links = [
   { href: "/autor/perfil", label: "Meu perfil", icon: UserCircle },
 ];
 
-export function AuthorSidebar() {
+export function AuthorSidebar({ logoUrl }: { logoUrl?: string }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -34,10 +34,15 @@ export function AuthorSidebar() {
       }}
     >
       <div style={{ padding: "1.5rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          People & Growth
-        </div>
-        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.125rem" }}>Painel do Autor</div>
+        {logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={logoUrl} alt="People & Growth" style={{ height: "2.25rem", width: "auto", display: "block" }} />
+        ) : (
+          <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            People & Growth
+          </div>
+        )}
+        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.375rem" }}>Painel do Autor</div>
       </div>
 
       <nav style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem" }}>
