@@ -149,13 +149,13 @@ export default async function SobrePage() {
       </section>
 
       {/* Founders */}
-      <section className="section-padding" style={{ backgroundColor: "white" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
         <div className="container-xl">
           <div style={{ textAlign: "center", maxWidth: "720px", margin: "0 auto 3rem" }}>
-            <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.75rem" }}>
+            <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>
               Quem faz a People &amp; Growth
             </h2>
-            <p style={{ color: "#64748b", fontSize: "1.0625rem", lineHeight: 1.7 }}>
+            <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", lineHeight: 1.7 }}>
               Três olhares, uma mesma convicção: negócios fortes nascem de pessoas fortes — e de um olhar atento ao que acontece ao redor delas.
             </p>
           </div>
@@ -166,27 +166,27 @@ export default async function SobrePage() {
             ))}
           </div>
 
-          <p style={{ color: "#475569", fontSize: "1.0625rem", lineHeight: 1.75, maxWidth: "760px", margin: "3rem auto 0", textAlign: "center" }}>
+          <p style={{ color: "var(--site-text-secondary)", fontSize: "1.0625rem", lineHeight: 1.75, maxWidth: "760px", margin: "3rem auto 0", textAlign: "center" }}>
             Juntos, unem consultoria de negócios, tecnologia e um espaço de conteúdo — notícias e a coluna de opinião <strong>Mea Sententia</strong> — com lives aos sábados e vídeos ao longo da semana sobre temas que vão de negócios a política, economia e meio ambiente, no regional, no Brasil e no mundo.
           </p>
         </div>
       </section>
 
       {/* Philosophy */}
-      <section className="section-padding" style={{ backgroundColor: "white" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
         <div className="container-xl">
           <h2
             style={{
               fontSize: "clamp(1.75rem, 4vw, 2.5rem)",
               fontWeight: 800,
-              color: "#0d1b2a",
+              color: "var(--site-text)",
               marginBottom: "0.75rem",
               textAlign: "center",
             }}
           >
             {t("philosophy")}
           </h2>
-          <p style={{ color: "#64748b", textAlign: "center", marginBottom: "3rem", fontSize: "1.0625rem" }}>
+          <p style={{ color: "var(--site-muted)", textAlign: "center", marginBottom: "3rem", fontSize: "1.0625rem" }}>
             Os princípios que guiam cada projeto, consultoria e treinamento.
           </p>
 
@@ -195,17 +195,17 @@ export default async function SobrePage() {
               <div
                 key={title}
                 style={{
-                  backgroundColor: "#f0f4f8",
+                  backgroundColor: "var(--site-surface-alt)",
                   borderRadius: "1rem",
                   padding: "2rem",
-                  border: "1px solid rgba(0,0,0,0.05)",
+                  border: "1px solid var(--site-border)",
                 }}
               >
                 <div style={{ fontSize: "2.5rem", marginBottom: "1rem" }}>{icon}</div>
-                <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "#0d1b2a", marginBottom: "0.5rem" }}>
+                <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--site-text)", marginBottom: "0.5rem" }}>
                   {title}
                 </h3>
-                <p style={{ color: "#64748b", fontSize: "0.9rem", lineHeight: 1.65 }}>{description}</p>
+                <p style={{ color: "var(--site-muted)", fontSize: "0.9rem", lineHeight: 1.65 }}>{description}</p>
               </div>
             ))}
           </div>
@@ -278,13 +278,13 @@ export default async function SobrePage() {
       </section>
 
       {/* CTA */}
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8", textAlign: "center" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)", textAlign: "center" }}>
         <div className="container-xl" style={{ maxWidth: "560px", margin: "0 auto" }}>
           <Lightbulb size={40} color="#4361EE" style={{ marginBottom: "1rem" }} />
-          <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.75rem" }}>
+          <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>
             Vamos criar algo juntos?
           </h2>
-          <p style={{ color: "#64748b", fontSize: "1.0625rem", marginBottom: "2rem" }}>
+          <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", marginBottom: "2rem" }}>
             Agende uma conversa e descubra como podemos ajudar sua empresa a crescer.
           </p>
           <Link

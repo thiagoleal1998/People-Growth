@@ -10,10 +10,10 @@ export function FounderCard({ author }: { author: Author }) {
         display: "block",
         textDecoration: "none",
         color: "inherit",
-        backgroundColor: "#f0f4f8",
+        backgroundColor: "var(--site-surface-alt)",
         borderRadius: "1rem",
         padding: "1.25rem",
-        border: "1px solid rgba(0,0,0,0.05)",
+        border: "1px solid var(--site-border)",
       }}
     >
       <div style={{ display: "flex", gap: "0.875rem", alignItems: "center" }}>
@@ -29,7 +29,7 @@ export function FounderCard({ author }: { author: Author }) {
           }}
         />
         <div>
-          <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "#0d1b2a" }}>{author.name}</h3>
+          <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--site-text)" }}>{author.name}</h3>
           {author.role_pt && (
             <div style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.8125rem", marginTop: "0.125rem" }}>
               {author.role_pt}
@@ -41,7 +41,7 @@ export function FounderCard({ author }: { author: Author }) {
       {author.tagline_pt && (
         <p
           style={{
-            color: "#475569",
+            color: "var(--site-text-secondary)",
             fontSize: "0.875rem",
             lineHeight: 1.6,
             marginTop: "0.875rem",

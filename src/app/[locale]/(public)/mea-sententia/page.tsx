@@ -99,7 +99,7 @@ export default async function MeaSententiePage() {
 
       {/* Columnists strip */}
       {authors.length > 0 && (
-        <section style={{ backgroundColor: "white", borderTop: "2px solid #4361EE", borderBottom: "1px solid rgba(0,0,0,0.06)" }}>
+        <section style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #4361EE", borderBottom: "1px solid var(--site-border)" }}>
           <div
             className="container-xl"
             style={{ display: "flex", justifyContent: "center", gap: "2rem", padding: "1.5rem 0", flexWrap: "wrap", overflowX: "auto" }}
@@ -129,7 +129,7 @@ export default async function MeaSententiePage() {
                     <div style={{ fontWeight: 800, fontSize: "0.875rem", color: "#4361EE", marginBottom: "0.25rem" }}>{author.name}</div>
                     <div
                       style={{
-                        color: "#1e293b",
+                        color: "var(--site-text-secondary)",
                         fontSize: "0.75rem",
                         lineHeight: 1.35,
                         display: "-webkit-box",
@@ -148,10 +148,10 @@ export default async function MeaSententiePage() {
         </section>
       )}
 
-      <section className="section-padding" style={{ backgroundColor: "#f0f4f8" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
           {articles.length === 0 ? (
-            <div style={{ textAlign: "center", padding: "4rem 1rem", color: "#94a3b8" }}>
+            <div style={{ textAlign: "center", padding: "4rem 1rem", color: "var(--site-faint)" }}>
               Nenhum artigo publicado ainda. Volte em breve.
             </div>
           ) : (
@@ -161,7 +161,7 @@ export default async function MeaSententiePage() {
                 {/* Featured */}
                 {featured && (
                   <div style={{ marginBottom: "2.5rem" }}>
-                    <h2 style={{ fontSize: "1.0625rem", fontWeight: 700, color: "#64748b", marginBottom: "1.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    <h2 style={{ fontSize: "1.0625rem", fontWeight: 700, color: "var(--site-muted)", marginBottom: "1.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                       Destaque
                     </h2>
                     <Link
@@ -170,10 +170,10 @@ export default async function MeaSententiePage() {
                     >
                       <article
                         style={{
-                          backgroundColor: "white",
+                          backgroundColor: "var(--site-card)",
                           borderRadius: "1.25rem",
                           overflow: "hidden",
-                          border: "1px solid rgba(0,0,0,0.06)",
+                          border: "1px solid var(--site-border)",
                           boxShadow: "0 4px 24px rgba(0,0,0,0.06)",
                         }}
                       >
@@ -211,16 +211,16 @@ export default async function MeaSententiePage() {
                           <div style={{ marginBottom: "0.75rem" }}>
                             <FormatTag format={featured.format} />
                           </div>
-                          <h3 style={{ fontSize: "1.375rem", fontWeight: 800, color: "#0d1b2a", lineHeight: 1.3, marginBottom: "0.875rem" }}>
+                          <h3 style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)", lineHeight: 1.3, marginBottom: "0.875rem" }}>
                             {featured.title_pt}
                           </h3>
                           {featured.excerpt_pt && (
-                            <p style={{ color: "#64748b", lineHeight: 1.7, marginBottom: "1.25rem" }}>
+                            <p style={{ color: "var(--site-muted)", lineHeight: 1.7, marginBottom: "1.25rem" }}>
                               {featured.excerpt_pt}
                             </p>
                           )}
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                            <span style={{ fontSize: "0.875rem", color: "#94a3b8" }}>
+                            <span style={{ fontSize: "0.875rem", color: "var(--site-faint)" }}>
                               {featured.published_at && new Date(featured.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                               {featured.read_time ? ` · ${featured.read_time} min de leitura` : ""}
                             </span>
@@ -237,7 +237,7 @@ export default async function MeaSententiePage() {
                 {/* Rest */}
                 {rest.length > 0 && (
                   <>
-                    <h2 style={{ fontSize: "1.0625rem", fontWeight: 700, color: "#64748b", marginBottom: "1.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
+                    <h2 style={{ fontSize: "1.0625rem", fontWeight: 700, color: "var(--site-muted)", marginBottom: "1.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
                       Todos os artigos
                     </h2>
                     <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
@@ -251,10 +251,10 @@ export default async function MeaSententiePage() {
                           >
                             <article
                               style={{
-                                backgroundColor: "white",
+                                backgroundColor: "var(--site-card)",
                                 borderRadius: "1rem",
                                 padding: "1.5rem",
-                                border: "1px solid rgba(0,0,0,0.06)",
+                                border: "1px solid var(--site-border)",
                                 display: "flex",
                                 gap: "1.25rem",
                                 alignItems: "flex-start",
@@ -294,15 +294,15 @@ export default async function MeaSententiePage() {
                                 <div style={{ marginBottom: "0.375rem" }}>
                                   <FormatTag format={article.format} />
                                 </div>
-                                <h3 style={{ fontWeight: 700, fontSize: "1rem", color: "#0d1b2a", lineHeight: 1.4, marginBottom: "0.375rem" }}>
+                                <h3 style={{ fontWeight: 700, fontSize: "1rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.375rem" }}>
                                   {article.title_pt}
                                 </h3>
                                 {article.excerpt_pt && (
-                                  <p style={{ fontSize: "0.875rem", color: "#64748b", lineHeight: 1.6, marginBottom: "0.625rem" }}>
+                                  <p style={{ fontSize: "0.875rem", color: "var(--site-muted)", lineHeight: 1.6, marginBottom: "0.625rem" }}>
                                     {article.excerpt_pt}
                                   </p>
                                 )}
-                                <span style={{ fontSize: "0.8125rem", color: "#94a3b8" }}>
+                                <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
                                   {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                                   {article.read_time ? ` · ${article.read_time} min` : ""}
                                 </span>
@@ -321,10 +321,10 @@ export default async function MeaSententiePage() {
                 {/* Search */}
                 <div
                   style={{
-                    backgroundColor: "white",
+                    backgroundColor: "var(--site-card)",
                     borderRadius: "1rem",
                     padding: "1.25rem",
-                    border: "1px solid rgba(0,0,0,0.06)",
+                    border: "1px solid var(--site-border)",
                   }}
                 >
                   <div
@@ -332,12 +332,12 @@ export default async function MeaSententiePage() {
                       display: "flex",
                       alignItems: "center",
                       gap: "0.625rem",
-                      backgroundColor: "#f0f4f8",
+                      backgroundColor: "var(--site-surface-alt)",
                       borderRadius: "0.625rem",
                       padding: "0.625rem 1rem",
                     }}
                   >
-                    <Search size={16} color="#94a3b8" />
+                    <Search size={16} color="var(--site-faint)" />
                     <input
                       type="text"
                       placeholder={t("search")}
@@ -346,7 +346,7 @@ export default async function MeaSententiePage() {
                         background: "none",
                         outline: "none",
                         fontSize: "0.875rem",
-                        color: "#0d1b2a",
+                        color: "var(--site-text)",
                         width: "100%",
                       }}
                     />
@@ -357,13 +357,13 @@ export default async function MeaSententiePage() {
                 {mostRead.length > 0 && (
                   <div
                     style={{
-                      backgroundColor: "white",
+                      backgroundColor: "var(--site-card)",
                       borderRadius: "1rem",
                       padding: "1.5rem",
-                      border: "1px solid rgba(0,0,0,0.06)",
+                      border: "1px solid var(--site-border)",
                     }}
                   >
-                    <h3 style={{ fontWeight: 700, color: "#0d1b2a", marginBottom: "1rem", fontSize: "0.9375rem" }}>
+                    <h3 style={{ fontWeight: 700, color: "var(--site-text)", marginBottom: "1rem", fontSize: "0.9375rem" }}>
                       Mais lidos
                     </h3>
                     <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
@@ -373,8 +373,8 @@ export default async function MeaSententiePage() {
                           href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
                           style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", textDecoration: "none" }}
                         >
-                          <span style={{ fontWeight: 800, fontSize: "1.125rem", color: "#cbd5e1", lineHeight: 1.3 }}>{i + 1}</span>
-                          <span style={{ fontSize: "0.875rem", color: "#0d1b2a", fontWeight: 600, lineHeight: 1.4 }}>{article.title_pt}</span>
+                          <span style={{ fontWeight: 800, fontSize: "1.125rem", color: "var(--site-faint)", lineHeight: 1.3 }}>{i + 1}</span>
+                          <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, lineHeight: 1.4 }}>{article.title_pt}</span>
                         </Link>
                       ))}
                     </div>
@@ -385,13 +385,13 @@ export default async function MeaSententiePage() {
                 {tags.length > 0 && (
                   <div
                     style={{
-                      backgroundColor: "white",
+                      backgroundColor: "var(--site-card)",
                       borderRadius: "1rem",
                       padding: "1.5rem",
-                      border: "1px solid rgba(0,0,0,0.06)",
+                      border: "1px solid var(--site-border)",
                     }}
                   >
-                    <h3 style={{ fontWeight: 700, color: "#0d1b2a", marginBottom: "1rem", fontSize: "0.9375rem" }}>
+                    <h3 style={{ fontWeight: 700, color: "var(--site-text)", marginBottom: "1rem", fontSize: "0.9375rem" }}>
                       {t("tags")}
                     </h3>
                     <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
@@ -399,8 +399,8 @@ export default async function MeaSententiePage() {
                         <span
                           key={tag.id}
                           style={{
-                            backgroundColor: "#f0f4f8",
-                            color: "#475569",
+                            backgroundColor: "var(--site-surface-alt)",
+                            color: "var(--site-text-secondary)",
                             padding: "0.3rem 0.75rem",
                             borderRadius: "9999px",
                             fontSize: "0.8125rem",

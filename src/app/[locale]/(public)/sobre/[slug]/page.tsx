@@ -124,7 +124,7 @@ export default async function FounderPage({
         </div>
       </section>
 
-      <section className="section-padding" style={{ backgroundColor: "white" }}>
+      <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
         <div
           className="container-xl"
           style={{
@@ -138,12 +138,12 @@ export default async function FounderPage({
           <div>
             {paragraphs.length > 0 && (
               <div style={{ marginBottom: "2.5rem" }}>
-                <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1rem" }}>
+                <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1rem" }}>
                   Sobre {author.name.split(" ")[0]}
                 </h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   {paragraphs.map((p, i) => (
-                    <p key={i} style={{ color: "#475569", fontSize: "1rem", lineHeight: 1.75 }}>
+                    <p key={i} style={{ color: "var(--site-text-secondary)", fontSize: "1rem", lineHeight: 1.75 }}>
                       {p}
                     </p>
                   ))}
@@ -158,8 +158,8 @@ export default async function FounderPage({
                   display: "inline-flex",
                   alignItems: "center",
                   gap: "0.5rem",
-                  backgroundColor: "#f0f4f8",
-                  color: "#0d1b2a",
+                  backgroundColor: "var(--site-surface-alt)",
+                  color: "var(--site-text)",
                   padding: "0.875rem 1.5rem",
                   borderRadius: "0.75rem",
                   fontWeight: 700,
@@ -173,7 +173,7 @@ export default async function FounderPage({
 
           {milestones.length > 0 && (
             <div>
-              <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1.25rem" }}>
+              <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem" }}>
                 Trajetória
               </h2>
               <div style={{ position: "relative" }}>
@@ -184,7 +184,7 @@ export default async function FounderPage({
                     top: "0.25rem",
                     bottom: "0.25rem",
                     width: "2px",
-                    backgroundColor: "#e2e8f0",
+                    backgroundColor: "var(--site-border-strong)",
                   }}
                 />
                 <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
@@ -201,7 +201,7 @@ export default async function FounderPage({
                           justifyContent: "center",
                           flexShrink: 0,
                           zIndex: 1,
-                          border: "3px solid white",
+                          border: "3px solid var(--site-bg)",
                         }}
                       >
                         <Award size={12} color="white" />
@@ -221,7 +221,7 @@ export default async function FounderPage({
                         >
                           {m.year}
                         </div>
-                        <div style={{ color: "#334155", fontSize: "0.875rem", fontWeight: 600, lineHeight: 1.4 }}>{m.label}</div>
+                        <div style={{ color: "var(--site-text-secondary)", fontSize: "0.875rem", fontWeight: 600, lineHeight: 1.4 }}>{m.label}</div>
                       </div>
                     </div>
                   ))}
