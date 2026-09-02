@@ -153,3 +153,39 @@ export function DangerButton({ children, ...props }: React.ButtonHTMLAttributes<
     </button>
   );
 }
+
+export function SectionGrid({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(440px, 1fr))", gap: "1.25rem", alignItems: "start" }}>
+      {children}
+    </div>
+  );
+}
+
+export function SectionCard({ title, subtitle, children, wide }: { title: string; subtitle: string; children: ReactNode; wide?: boolean }) {
+  return (
+    <section
+      style={{
+        backgroundColor: "var(--admin-surface)",
+        borderRadius: "1rem",
+        border: "1px solid var(--admin-border)",
+        padding: "1.75rem",
+        gridColumn: wide ? "1 / -1" : undefined,
+      }}
+    >
+      <div style={{ marginBottom: "1.375rem" }}>
+        <h2 style={{ fontSize: "1.0625rem", fontWeight: 800, color: "var(--admin-text)" }}>{title}</h2>
+        <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.1875rem" }}>{subtitle}</p>
+      </div>
+      {children}
+    </section>
+  );
+}
+
+export function FieldGrid({ children }: { children: ReactNode }) {
+  return (
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "0 1.5rem" }}>
+      {children}
+    </div>
+  );
+}

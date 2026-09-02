@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader, Field, Input, Textarea, SubmitButton } from "@/components/admin/ui";
+import { PageHeader, Field, Input, Textarea, SubmitButton, SectionGrid, SectionCard, FieldGrid } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
 import { updateSeoConfig } from "./actions";
 
@@ -36,51 +36,49 @@ export default async function SeoPage({ searchParams }: { searchParams: Promise<
       <SavedToast show={saved === "1"} />
       <PageHeader title="SEO, GEO & AEO" subtitle="Como o site aparece em buscadores tradicionais e em ferramentas de IA" />
 
-      <form action={updateSeoConfig} style={{ maxWidth: "640px", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
-          <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.25rem" }}>SEO</h2>
-          <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "1.25rem" }}>
-            Otimização para buscadores tradicionais (Google, Bing).
-          </p>
-          {seoFields.map(({ key, label, placeholder, hint }) => (
-            <Field key={key} label={label} hint={hint}>
-              {key.includes("description") ? (
-                <Textarea name={key} rows={2} defaultValue={values[key] ?? ""} placeholder={placeholder} />
-              ) : (
-                <Input name={key} defaultValue={values[key] ?? ""} placeholder={placeholder} />
-              )}
-            </Field>
-          ))}
+      <form action={updateSeoConfig} style={{ maxWidth: "1400px" }}>
+        <div style={{ marginBottom: "1.5rem" }}>
+          <SectionGrid>
+            <SectionCard title="SEO" subtitle="Otimização para buscadores tradicionais (Google, Bing)." wide>
+              <FieldGrid>
+                {seoFields.map(({ key, label, placeholder, hint }) => (
+                  <Field key={key} label={label} hint={hint}>
+                    {key.includes("description") ? (
+                      <Textarea name={key} rows={2} defaultValue={values[key] ?? ""} placeholder={placeholder} />
+                    ) : (
+                      <Input name={key} defaultValue={values[key] ?? ""} placeholder={placeholder} />
+                    )}
+                  </Field>
+                ))}
+              </FieldGrid>
+            </SectionCard>
+
+            <SectionCard
+              title="GEO"
+              subtitle="Generative Engine Optimization — como assistentes de IA descrevem a marca. O robots.txt do site já permite o acesso de crawlers de IA (GPTBot, ClaudeBot, PerplexityBot, etc)."
+            >
+              {geoFields.map(({ key, label, hint }) => (
+                <Field key={key} label={label} hint={hint}>
+                  <Textarea name={key} rows={3} defaultValue={values[key] ?? ""} />
+                </Field>
+              ))}
+            </SectionCard>
+
+            <SectionCard
+              title="AEO"
+              subtitle="Answer Engine Optimization — perguntas e respostas usadas para gerar dados estruturados (FAQ) que aparecem em respostas diretas de busca e assistentes de voz."
+            >
+              <Field
+                label="Perguntas frequentes (PT)"
+                hint='Uma pergunta e resposta por linha, separadas por " | ". Ex: O que é a People & Growth? | Uma consultoria e um espaço de conteúdo sobre negócios, pessoas e os temas que os impactam.'
+              >
+                <Textarea name="aeo_faq_pt" rows={6} defaultValue={values.aeo_faq_pt ?? ""} />
+              </Field>
+            </SectionCard>
+          </SectionGrid>
         </div>
 
-        <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
-          <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.25rem" }}>GEO</h2>
-          <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "1.25rem" }}>
-            Generative Engine Optimization — como assistentes de IA descrevem a marca. O robots.txt do site já permite o acesso de crawlers de IA (GPTBot, ClaudeBot, PerplexityBot, etc).
-          </p>
-          {geoFields.map(({ key, label, hint }) => (
-            <Field key={key} label={label} hint={hint}>
-              <Textarea name={key} rows={3} defaultValue={values[key] ?? ""} />
-            </Field>
-          ))}
-        </div>
-
-        <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
-          <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.25rem" }}>AEO</h2>
-          <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "1.25rem" }}>
-            Answer Engine Optimization — perguntas e respostas usadas para gerar dados estruturados (FAQ) que aparecem em respostas diretas de busca e assistentes de voz.
-          </p>
-          <Field
-            label="Perguntas frequentes (PT)"
-            hint='Uma pergunta e resposta por linha, separadas por " | ". Ex: O que é a People & Growth? | Uma consultoria e um espaço de conteúdo sobre negócios, pessoas e os temas que os impactam.'
-          >
-            <Textarea name="aeo_faq_pt" rows={6} defaultValue={values.aeo_faq_pt ?? ""} />
-          </Field>
-        </div>
-
-        <div>
-          <SubmitButton>Salvar alterações</SubmitButton>
-        </div>
+        <SubmitButton>Salvar alterações</SubmitButton>
       </form>
     </div>
   );
