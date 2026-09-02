@@ -40,7 +40,15 @@ const links = [
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
 
-export function AdminSidebar() {
+export function AdminSidebar({
+  logoUrl,
+  userName,
+  userPhoto,
+}: {
+  logoUrl?: string;
+  userName?: string;
+  userPhoto?: string;
+}) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -65,10 +73,15 @@ export function AdminSidebar() {
     >
       {/* Logo */}
       <div style={{ padding: "1.5rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-          People & Growth
-        </div>
-        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.125rem" }}>Painel Admin</div>
+        {logoUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={logoUrl} alt="People & Growth" style={{ height: "2.25rem", width: "auto", display: "block" }} />
+        ) : (
+          <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            People & Growth
+          </div>
+        )}
+        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.375rem" }}>Painel Admin</div>
       </div>
 
       {/* Nav */}
@@ -99,6 +112,24 @@ export function AdminSidebar() {
           );
         })}
       </nav>
+
+      {/* Logged-in user */}
+      {userName && (
+        <div style={{ padding: "0.875rem 1.25rem", borderTop: "1px solid rgba(255,255,255,0.08)", display: "flex", alignItems: "center", gap: "0.625rem" }}>
+          <div
+            style={{
+              width: "2rem",
+              height: "2rem",
+              borderRadius: "50%",
+              flexShrink: 0,
+              background: userPhoto ? `url(${userPhoto}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+            }}
+          />
+          <div style={{ fontSize: "0.8125rem", fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {userName}
+          </div>
+        </div>
+      )}
 
       {/* Footer */}
       <div style={{ padding: "1rem 0.75rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
