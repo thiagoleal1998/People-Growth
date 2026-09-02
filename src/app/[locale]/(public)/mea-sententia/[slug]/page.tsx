@@ -207,10 +207,17 @@ export default async function ArticlePage({
             )}
 
             {/* Comments */}
-            <div style={{ marginTop: "3rem" }}>
-              <h2 style={{ fontWeight: 800, fontSize: "1.25rem", color: "var(--site-text)", marginBottom: "1.5rem" }}>
-                Comentários {comments.length > 0 && `(${comments.length})`}
+            <div style={{ marginTop: "3rem", paddingTop: "1.5rem", borderTop: "2px solid #4361EE" }}>
+              <h2 style={{ fontWeight: 800, fontSize: "1.375rem", color: "var(--site-text)", marginBottom: "0.75rem" }}>
+                {comments.length} comentário{comments.length === 1 ? "" : "s"}
               </h2>
+              <p style={{ color: "var(--site-muted)", fontSize: "0.8125rem", lineHeight: 1.6, marginBottom: "2rem" }}>
+                O autor da mensagem, e não a People &amp; Growth, é o responsável pelo comentário. Leia as{" "}
+                <Link href="/comentarios" style={{ color: "#4361EE", fontWeight: 600, textDecoration: "underline" }}>
+                  Regras de Uso dos Comentários
+                </Link>
+                .
+              </p>
 
               {comments.length > 0 && (
                 <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", marginBottom: "2rem" }}>
