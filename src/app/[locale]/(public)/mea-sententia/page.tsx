@@ -106,11 +106,7 @@ export default async function MeaSententiePage() {
               return (
                 <Link
                   key={author.id}
-                  href={
-                    latest
-                      ? { pathname: "/mea-sententia/[slug]", params: { slug: latest.slug } }
-                      : { pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }
-                  }
+                  href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
                   style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none", width: "260px" }}
                 >
                   <div
