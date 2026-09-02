@@ -91,7 +91,7 @@ export function AdminSidebar({
       </div>
 
       {/* Nav */}
-      <nav style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
+      <nav className="admin-sidebar-scroll" style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
         {links.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || (href !== "/admin" && pathname.startsWith(href));
           return (
