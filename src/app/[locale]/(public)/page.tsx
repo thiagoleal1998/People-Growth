@@ -10,8 +10,6 @@ import {
   Sparkles,
   Zap,
   Radio,
-  Star,
-  Quote,
   Mic,
   Video,
   BookOpen,
@@ -22,6 +20,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
+import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { toYouTubeEmbedUrl, withAutoplay } from "@/lib/youtube";
 import type { Article, Author, Testimonial, MediaItem } from "@/types/database.types";
 
@@ -98,7 +97,7 @@ export default async function HomePage() {
     client.from("authors").select("*").eq("status", "active").order("order"),
     client.from("site_config").select("*"),
     client.from("testimonials").select("*").eq("status", "active").order("order"),
-    client.from("media_items").select("*").order("order").limit(4),
+    client.from("media_items").select("*").order("order").limit(5),
   ]);
 
   const allArticles = (articlesData ?? []) as Article[];
@@ -816,66 +815,7 @@ export default async function HomePage() {
               </h2>
             </div>
 
-            <div
-              style={{
-                display: "grid",
-                gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
-                gap: "1.5rem",
-              }}
-            >
-              {testimonials.slice(0, 6).map((item) => (
-                <div
-                  key={item.id}
-                  className="hover-card"
-                  style={{
-                    backgroundColor: "var(--site-surface-alt)",
-                    borderRadius: "1.25rem",
-                    padding: "1.75rem",
-                    border: "1px solid var(--site-border)",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <Quote size={22} color="#4361EE" style={{ marginBottom: "0.75rem", opacity: 0.5 }} />
-                  {item.rating && (
-                    <div style={{ display: "flex", gap: "0.125rem", marginBottom: "0.75rem" }}>
-                      {Array.from({ length: 5 }).map((_, i) => (
-                        <Star
-                          key={i}
-                          size={14}
-                          color="#FFB703"
-                          fill={i < item.rating! ? "#FFB703" : "none"}
-                        />
-                      ))}
-                    </div>
-                  )}
-                  <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.7, marginBottom: "1.25rem", flex: 1 }}>
-                    &ldquo;{item.text_pt}&rdquo;
-                  </p>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                    <div
-                      style={{
-                        width: "2.75rem",
-                        height: "2.75rem",
-                        borderRadius: "50%",
-                        flexShrink: 0,
-                        background: item.avatar_url
-                          ? `url(${item.avatar_url}) center/cover`
-                          : "linear-gradient(135deg, #4361EE, #06D6A0)",
-                      }}
-                    />
-                    <div>
-                      <div style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)" }}>{item.name}</div>
-                      {(item.role || item.company) && (
-                        <div style={{ fontSize: "0.8125rem", color: "var(--site-muted)" }}>
-                          {[item.role, item.company].filter(Boolean).join(" · ")}
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
+            <TestimonialsCarousel testimonials={testimonials} />
           </div>
         </section>
       )}
