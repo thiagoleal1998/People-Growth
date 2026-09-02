@@ -38,16 +38,16 @@ export default async function ArtigosAdminPage({ searchParams }: { searchParams:
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ backgroundColor: "#f8fafc" }}>
+              <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
                 {["Título", "Formato", "Status", "Visualizações", "Data", ""].map((h) => (
-                  <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
+                  <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {articles.map((a) => (
-                <tr key={a.id} style={{ borderTop: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "#0d1b2a", fontSize: "0.875rem", maxWidth: "320px" }}>
+                <tr key={a.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
+                  <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.875rem", maxWidth: "320px" }}>
                     <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{a.title_pt}</div>
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
@@ -56,8 +56,8 @@ export default async function ArtigosAdminPage({ searchParams }: { searchParams:
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <Badge tone={statusConfig[a.status].tone}>{statusConfig[a.status].label}</Badge>
                   </td>
-                  <td style={{ padding: "0.875rem 1.25rem", color: "#64748b", fontSize: "0.875rem" }}>{a.views.toLocaleString("pt-BR")}</td>
-                  <td style={{ padding: "0.875rem 1.25rem", color: "#94a3b8", fontSize: "0.8125rem" }}>{formatDate(a.created_at)}</td>
+                  <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.875rem" }}>{a.views.toLocaleString("pt-BR")}</td>
+                  <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem" }}>{formatDate(a.created_at)}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
                       {a.status === "pending" && (

@@ -20,18 +20,18 @@ export function ErrorReportsClient({ reports }: { reports: ErrorReport[] }) {
   const [items, setItems] = useState(reports);
 
   return (
-    <div style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden" }}>
+    <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
       {items.length === 0 ? (
-        <div style={{ padding: "3rem", textAlign: "center", color: "#94a3b8", fontSize: "0.9rem" }}>
+        <div style={{ padding: "3rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.9rem" }}>
           Nenhum erro reportado até agora.
         </div>
       ) : (
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ backgroundColor: "#f8fafc" }}>
+              <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
                 {["Descrição", "Página", "E-mail", "Status", "Data", ""].map((h) => (
-                  <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
+                  <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
             </thead>
@@ -39,14 +39,14 @@ export function ErrorReportsClient({ reports }: { reports: ErrorReport[] }) {
               {items.map((report) => {
                 const s = statusConfig[report.status];
                 return (
-                  <tr key={report.id} style={{ borderTop: "1px solid #f1f5f9" }}>
-                    <td style={{ padding: "0.875rem 1.25rem", color: "#334155", fontSize: "0.875rem", maxWidth: "360px" }}>{report.description}</td>
+                  <tr key={report.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
+                    <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem", maxWidth: "360px" }}>{report.description}</td>
                     <td style={{ padding: "0.875rem 1.25rem", fontSize: "0.8125rem" }}>
                       <a href={report.page_url} target="_blank" rel="noopener noreferrer" style={{ color: "#4361EE" }}>
                         {report.page_url.replace(/^https?:\/\/[^/]+/, "") || "/"}
                       </a>
                     </td>
-                    <td style={{ padding: "0.875rem 1.25rem", color: "#64748b", fontSize: "0.875rem" }}>{report.email ?? "—"}</td>
+                    <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.875rem" }}>{report.email ?? "—"}</td>
                     <td style={{ padding: "0.875rem 1.25rem" }}>
                       <select
                         defaultValue={report.status}
@@ -62,7 +62,7 @@ export function ErrorReportsClient({ reports }: { reports: ErrorReport[] }) {
                         ))}
                       </select>
                     </td>
-                    <td style={{ padding: "0.875rem 1.25rem", color: "#94a3b8", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>{formatDate(report.created_at)}</td>
+                    <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>{formatDate(report.created_at)}</td>
                     <td style={{ padding: "0.875rem 1.25rem" }}>
                       <button
                         onClick={() => {

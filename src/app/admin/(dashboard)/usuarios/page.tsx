@@ -35,9 +35,9 @@ export default async function UsuariosPage({
       <div style={{ display: "grid", gridTemplateColumns: "minmax(280px, 380px) 1fr", gap: "1.5rem", alignItems: "start" }}>
         <form
           action={createUser}
-          style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid rgba(0,0,0,0.06)", padding: "1.75rem" }}
+          style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}
         >
-          <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "1.25rem" }}>Criar novo acesso</h2>
+          <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "1.25rem" }}>Criar novo acesso</h2>
           <Field label="E-mail">
             <Input name="email" type="email" required />
           </Field>

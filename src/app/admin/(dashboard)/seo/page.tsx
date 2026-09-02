@@ -37,9 +37,9 @@ export default async function SeoPage({ searchParams }: { searchParams: Promise<
       <PageHeader title="SEO, GEO & AEO" subtitle="Como o site aparece em buscadores tradicionais e em ferramentas de IA" />
 
       <form action={updateSeoConfig} style={{ maxWidth: "640px", display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-        <div style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid rgba(0,0,0,0.06)", padding: "1.75rem" }}>
-          <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.25rem" }}>SEO</h2>
-          <p style={{ fontSize: "0.8125rem", color: "#94a3b8", marginBottom: "1.25rem" }}>
+        <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
+          <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.25rem" }}>SEO</h2>
+          <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "1.25rem" }}>
             Otimização para buscadores tradicionais (Google, Bing).
           </p>
           {seoFields.map(({ key, label, placeholder, hint }) => (
@@ -53,9 +53,9 @@ export default async function SeoPage({ searchParams }: { searchParams: Promise<
           ))}
         </div>
 
-        <div style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid rgba(0,0,0,0.06)", padding: "1.75rem" }}>
-          <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.25rem" }}>GEO</h2>
-          <p style={{ fontSize: "0.8125rem", color: "#94a3b8", marginBottom: "1.25rem" }}>
+        <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
+          <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.25rem" }}>GEO</h2>
+          <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "1.25rem" }}>
             Generative Engine Optimization — como assistentes de IA descrevem a marca. O robots.txt do site já permite o acesso de crawlers de IA (GPTBot, ClaudeBot, PerplexityBot, etc).
           </p>
           {geoFields.map(({ key, label, hint }) => (
@@ -65,9 +65,9 @@ export default async function SeoPage({ searchParams }: { searchParams: Promise<
           ))}
         </div>
 
-        <div style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid rgba(0,0,0,0.06)", padding: "1.75rem" }}>
-          <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "#0d1b2a", marginBottom: "0.25rem" }}>AEO</h2>
-          <p style={{ fontSize: "0.8125rem", color: "#94a3b8", marginBottom: "1.25rem" }}>
+        <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
+          <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.25rem" }}>AEO</h2>
+          <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "1.25rem" }}>
             Answer Engine Optimization — perguntas e respostas usadas para gerar dados estruturados (FAQ) que aparecem em respostas diretas de busca e assistentes de voz.
           </p>
           <Field

@@ -28,18 +28,18 @@ export default async function RecursosPage({ searchParams }: { searchParams: Pro
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ backgroundColor: "#f8fafc" }}>
+              <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
                 {["Título", "Tipo", "Downloads", "Status", ""].map((h) => (
-                  <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
+                  <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {items.map((s) => (
-                <tr key={s.id} style={{ borderTop: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "#0d1b2a", fontSize: "0.875rem" }}>{s.title_pt}</td>
+                <tr key={s.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
+                  <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.875rem" }}>{s.title_pt}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}><Badge>{s.type}</Badge></td>
-                  <td style={{ padding: "0.875rem 1.25rem", color: "#64748b", fontSize: "0.875rem" }}>
+                  <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.875rem" }}>
                     <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}><Download size={13} /> {s.download_count}</span>
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>

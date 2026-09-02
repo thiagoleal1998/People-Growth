@@ -44,7 +44,7 @@ export function ResourceForm({ item }: { item?: Resource }) {
           <Input name="cover_image" defaultValue={item?.cover_image ?? ""} />
         </Field>
         <Field label="Exige cadastro de lead para baixar?">
-          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "#334155" }}>
+          <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
             <input type="checkbox" name="lead_required" defaultChecked={item?.lead_required ?? true} />
             Sim, pedir e-mail antes do download
           </label>

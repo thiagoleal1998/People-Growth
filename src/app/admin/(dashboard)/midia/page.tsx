@@ -28,19 +28,19 @@ export default async function MidiaPage({ searchParams }: { searchParams: Promis
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ backgroundColor: "#f8fafc" }}>
+              <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
                 {["Título", "Veículo", "Tipo", "Data", ""].map((h) => (
-                  <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
+                  <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {items.map((s) => (
-                <tr key={s.id} style={{ borderTop: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "#0d1b2a", fontSize: "0.875rem" }}>{s.title}</td>
-                  <td style={{ padding: "0.875rem 1.25rem", color: "#64748b", fontSize: "0.875rem" }}>{s.outlet ?? "—"}</td>
+                <tr key={s.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
+                  <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.875rem" }}>{s.title}</td>
+                  <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.875rem" }}>{s.outlet ?? "—"}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}><Badge>{s.type}</Badge></td>
-                  <td style={{ padding: "0.875rem 1.25rem", color: "#94a3b8", fontSize: "0.8125rem" }}>{s.date ? new Date(s.date).toLocaleDateString("pt-BR") : "—"}</td>
+                  <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem" }}>{s.date ? new Date(s.date).toLocaleDateString("pt-BR") : "—"}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
                       <Link href={`/admin/midia/${s.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>

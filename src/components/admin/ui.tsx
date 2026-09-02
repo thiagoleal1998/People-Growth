@@ -10,8 +10,8 @@ export function PageHeader({ title, subtitle, action }: { title: string; subtitl
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.75rem", flexWrap: "wrap", gap: "1rem" }}>
       <div>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "#0d1b2a" }}>{title}</h1>
-        {subtitle && <p style={{ color: "#64748b", fontSize: "0.9375rem" }}>{subtitle}</p>}
+        <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--admin-text)" }}>{title}</h1>
+        {subtitle && <p style={{ color: "var(--admin-muted)", fontSize: "0.9375rem" }}>{subtitle}</p>}
       </div>
       {action}
     </div>
@@ -31,7 +31,7 @@ export function PrimaryLinkButton({ href, children }: { href: string; children: 
 
 export function Card({ children }: { children: ReactNode }) {
   return (
-    <div style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden" }}>
+    <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
       {children}
     </div>
   );
@@ -39,7 +39,7 @@ export function Card({ children }: { children: ReactNode }) {
 
 export function EmptyState({ text }: { text: string }) {
   return (
-    <div style={{ padding: "3rem", textAlign: "center", color: "#94a3b8", fontSize: "0.9rem" }}>{text}</div>
+    <div style={{ padding: "3rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.9rem" }}>{text}</div>
   );
 }
 
@@ -48,7 +48,7 @@ export function Badge({ children, tone = "neutral" }: { children: ReactNode; ton
     success: { bg: "rgba(6,214,160,0.1)", color: "#04a87d" },
     warning: { bg: "rgba(255,183,3,0.15)", color: "#cc9200" },
     danger: { bg: "rgba(239,68,68,0.1)", color: "#dc2626" },
-    neutral: { bg: "rgba(148,163,184,0.15)", color: "#64748b" },
+    neutral: { bg: "rgba(148,163,184,0.15)", color: "var(--admin-muted)" },
   };
   const t = tones[tone];
   return (
@@ -58,15 +58,15 @@ export function Badge({ children, tone = "neutral" }: { children: ReactNode; ton
   );
 }
 
-const fieldLabelStyle = { display: "block", fontSize: "0.8rem", fontWeight: 600, color: "#334155", marginBottom: "0.375rem" } as const;
-const fieldControlStyle = { width: "100%", padding: "0.625rem 0.75rem", borderRadius: "0.5rem", border: "1px solid #cbd5e1", fontSize: "0.9rem", boxSizing: "border-box" as const, fontFamily: "inherit" };
+const fieldLabelStyle = { display: "block", fontSize: "0.8rem", fontWeight: 600, color: "var(--admin-text-secondary)", marginBottom: "0.375rem" } as const;
+const fieldControlStyle = { width: "100%", padding: "0.625rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.9rem", boxSizing: "border-box" as const, fontFamily: "inherit", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" };
 
 export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
   return (
     <div style={{ marginBottom: "1.125rem" }}>
       <label style={fieldLabelStyle}>{label}</label>
       {children}
-      {hint && <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "0.25rem" }}>{hint}</div>}
+      {hint && <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.25rem" }}>{hint}</div>}
     </div>
   );
 }
@@ -87,12 +87,12 @@ export function FormShell({ title, backHref, children }: { title: string; backHr
   return (
     <div style={{ maxWidth: "640px" }}>
       <div style={{ marginBottom: "1.5rem" }}>
-        <Link href={backHref} style={{ color: "#64748b", fontSize: "0.875rem", textDecoration: "none" }}>
+        <Link href={backHref} style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>
           &larr; Voltar
         </Link>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0d1b2a", marginTop: "0.5rem" }}>{title}</h1>
+        <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--admin-text)", marginTop: "0.5rem" }}>{title}</h1>
       </div>
-      <div style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid rgba(0,0,0,0.06)", padding: "1.75rem" }}>
+      <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
         {children}
       </div>
     </div>

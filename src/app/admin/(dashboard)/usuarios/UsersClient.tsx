@@ -11,25 +11,25 @@ export function UsersClient({ users, authors }: { users: UserProfile[]; authors:
   const authorById = new Map(authors.map((a) => [a.id, a]));
 
   return (
-    <div style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid rgba(0,0,0,0.06)", overflow: "hidden" }}>
+    <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
       {items.length === 0 ? (
-        <div style={{ padding: "3rem", textAlign: "center", color: "#94a3b8", fontSize: "0.9rem" }}>
+        <div style={{ padding: "3rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.9rem" }}>
           Nenhum usuário cadastrado.
         </div>
       ) : (
         <div style={{ overflowX: "auto" }}>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
-              <tr style={{ backgroundColor: "#f8fafc" }}>
+              <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
                 {["E-mail", "Papel", "Vinculado ao autor", ""].map((h) => (
-                  <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
+                  <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody>
               {items.map((u) => (
-                <tr key={u.id} style={{ borderTop: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "#0d1b2a", fontSize: "0.875rem" }}>{u.email}</td>
+                <tr key={u.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
+                  <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.875rem" }}>{u.email}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <select
                       defaultValue={u.role}
@@ -61,7 +61,7 @@ export function UsersClient({ users, authors }: { users: UserProfile[]; authors:
                         setItems((prev) => prev.map((i) => (i.id === u.id ? { ...i, author_id: authorId } : i)));
                         startTransition(() => updateUserAuthorLink(u.id, authorId));
                       }}
-                      style={{ padding: "0.375rem 0.5rem", borderRadius: "0.375rem", border: "1px solid #cbd5e1", fontSize: "0.8125rem" }}
+                      style={{ padding: "0.375rem 0.5rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.8125rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" }}
                     >
                       <option value="">— nenhum —</option>
                       {authors.map((a) => (

@@ -1,6 +1,16 @@
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import { createClient } from "@/lib/supabase/server";
+import "../globals.css";
+
+const THEME_SCRIPT = `
+(function () {
+  try {
+    var theme = localStorage.getItem("admin-theme");
+    if (theme === "dark") document.documentElement.setAttribute("data-theme", "dark");
+  } catch (e) {}
+})();
+`;
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient();
@@ -18,7 +28,10 @@ export async function generateMetadata(): Promise<Metadata> {
 export default function AdminRootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt">
-      <body style={{ margin: 0, fontFamily: "system-ui, sans-serif", backgroundColor: "#f0f4f8" }}>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
+      </head>
+      <body style={{ margin: 0, fontFamily: "system-ui, sans-serif", backgroundColor: "var(--admin-bg)", color: "var(--admin-text)" }}>
         <NextTopLoader color="#4361EE" height={3} showSpinner={false} />
         {children}
         <style>{`
