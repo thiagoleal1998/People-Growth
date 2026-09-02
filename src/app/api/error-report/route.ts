@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
+import { getClientIp, checkRateLimit } from "@/lib/rate-limit";
 import type { Database } from "@/types/database.types";
 
 type ErrorReportInsert = Database["public"]["Tables"]["error_reports"]["Insert"];
@@ -11,6 +12,12 @@ export async function POST(req: NextRequest) {
 
     if (!pageUrl || !description) {
       return NextResponse.json({ error: "Campos obrigatórios faltando." }, { status: 400 });
+    }
+
+    const ip = getClientIp(req);
+    const { limited } = await checkRateLimit(ip, "error-report", { maxAttempts: 10, windowMinutes: 60 });
+    if (limited) {
+      return NextResponse.json({ error: "Muitas tentativas. Tente novamente mais tarde." }, { status: 429 });
     }
 
     const supabase = await createAdminClient();

@@ -25,6 +25,11 @@ export async function POST(req: NextRequest) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const client = supabase as any;
 
+    const { data: ad } = await client.from("ads").select("id, slot_key").eq("id", adId).eq("active", true).single();
+    if (!ad || ad.slot_key !== slotKey) {
+      return NextResponse.json({ success: true }); // silently drop — don't help probing for valid ad ids
+    }
+
     const { error } = await client.from("ad_events").insert({
       ad_slot_key: slotKey,
       ad_id: adId,

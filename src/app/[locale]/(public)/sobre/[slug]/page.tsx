@@ -126,7 +126,7 @@ export default async function FounderPage({
 
       <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
         <div
-          className="container-xl"
+          className="container-xl sobre-bio-grid"
           style={{
             maxWidth: "920px",
             display: "grid",
@@ -230,6 +230,12 @@ export default async function FounderPage({
             </div>
           )}
         </div>
+
+        <style>{`
+          @media (max-width: 900px) {
+            .sobre-bio-grid { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
       </section>
     </>
   );

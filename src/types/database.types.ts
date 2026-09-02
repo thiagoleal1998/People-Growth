@@ -16,6 +16,7 @@ type ArticleRow = {
   excerpt_pt: string | null;
   excerpt_en: string | null;
   cover_image: string | null;
+  video_url: string | null;
   category_id: string | null;
   status: "draft" | "pending" | "published";
   format: "noticia" | "opiniao";

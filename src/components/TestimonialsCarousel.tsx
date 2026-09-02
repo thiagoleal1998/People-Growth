@@ -26,7 +26,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
   const items = Array.from({ length: count }, (_, i) => testimonials[(start + i) % testimonials.length]);
 
   return (
-    <div onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+    <div onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onTouchStart={() => setPaused(true)}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
         {items.map((item) => (
           <div

@@ -4,8 +4,15 @@ import { getCurrentProfile } from "@/lib/auth/profile";
 import { AuthorArticleForm } from "../AuthorArticleForm";
 import type { Article, Category } from "@/types/database.types";
 
-export default async function EditarArtigoAutorPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EditarArtigoAutorPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{ imageError?: string }>;
+}) {
   const { id } = await params;
+  const { imageError } = await searchParams;
   const profile = await getCurrentProfile();
   if (!profile?.author_id) notFound();
 
@@ -19,5 +26,5 @@ export default async function EditarArtigoAutorPage({ params }: { params: Promis
 
   if (!item) notFound();
 
-  return <AuthorArticleForm item={item as Article} categories={(categoriesData ?? []) as Category[]} />;
+  return <AuthorArticleForm item={item as Article} categories={(categoriesData ?? []) as Category[]} imageError={imageError} />;
 }

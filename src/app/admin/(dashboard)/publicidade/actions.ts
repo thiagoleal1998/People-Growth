@@ -49,8 +49,10 @@ export async function upsertAd(id: string | null, formData: FormData) {
   revalidatePath("/admin/publicidade");
   revalidatePath("/[locale]", "layout");
 
-  const errorParam = imageError ? `&imageError=${encodeURIComponent(imageError)}` : "";
-  redirect(`/admin/publicidade?saved=1${errorParam}`);
+  if (imageError) {
+    redirect(`/admin/publicidade/${adId}?imageError=${encodeURIComponent(imageError)}`);
+  }
+  redirect("/admin/publicidade?saved=1");
 }
 
 export async function deleteAd(id: string) {

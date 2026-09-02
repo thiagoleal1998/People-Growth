@@ -4,10 +4,13 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
 import { createClient } from "@/lib/supabase/server";
+import { uploadPublicImage } from "@/lib/supabase/storage";
 import type { Article } from "@/types/database.types";
 
 export async function upsertArticle(id: string | null, formData: FormData) {
   const supabase = await createClient();
+
+  const { url: coverImageUrl, error: imageError } = await uploadPublicImage(formData.get("cover_image_file"), "articles");
 
   const title_pt = String(formData.get("title_pt") ?? "");
   const slugInput = String(formData.get("slug") ?? "").trim();
@@ -24,7 +27,8 @@ export async function upsertArticle(id: string | null, formData: FormData) {
     content_en: String(formData.get("content_en") ?? "") || null,
     excerpt_pt: String(formData.get("excerpt_pt") ?? "") || null,
     excerpt_en: String(formData.get("excerpt_en") ?? "") || null,
-    cover_image: String(formData.get("cover_image") ?? "") || null,
+    cover_image: coverImageUrl || String(formData.get("current_cover_image") ?? "") || null,
+    video_url: String(formData.get("video_url") ?? "").trim() || null,
     category_id: categoryId || null,
     format,
     status,
@@ -39,17 +43,23 @@ export async function upsertArticle(id: string | null, formData: FormData) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  if (id) {
+  let articleId = id;
+  if (articleId) {
     // Only overwrite published_at when transitioning into "published"; keep existing otherwise.
     const { published_at: _publishedAt, ...updatePayload } = payload;
     const finalPayload = status === "published" ? payload : updatePayload;
-    await client.from("articles").update(finalPayload).eq("id", id);
+    await client.from("articles").update(finalPayload).eq("id", articleId);
   } else {
-    await client.from("articles").insert(payload);
+    const { data } = await client.from("articles").insert(payload).select("id").single();
+    articleId = data?.id ?? null;
   }
 
   revalidatePath("/admin/artigos");
   revalidatePath("/[locale]", "page");
+
+  if (imageError && articleId) {
+    redirect(`/admin/artigos/${articleId}?imageError=${encodeURIComponent(imageError)}`);
+  }
   redirect("/admin/artigos?saved=1");
 }
 

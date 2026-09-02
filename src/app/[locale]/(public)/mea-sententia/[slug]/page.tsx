@@ -9,6 +9,7 @@ import { Comments } from "@/components/Comments";
 import { AdBanner } from "@/components/AdBanner";
 import { createClient } from "@/lib/supabase/server";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
+import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import type { Article, Category, Author, Comment } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -147,6 +148,16 @@ export default async function ArticlePage({
         >
           {/* Article body */}
           <article>
+            {article.video_url && (
+              <div style={{ position: "relative", paddingTop: "56.25%", borderRadius: "0.75rem", overflow: "hidden", marginBottom: "1.75rem" }}>
+                <iframe
+                  src={toYouTubeEmbedUrl(article.video_url)}
+                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+            )}
             <div
               style={{
                 fontSize: "1.0625rem",

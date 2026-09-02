@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Field, Input, Textarea, Select, SubmitButton, FieldGrid } from "@/components/admin/ui";
+import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { upsertArticle } from "./actions";
 import type { Article, Category, Author } from "@/types/database.types";
 
@@ -14,7 +15,17 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]["id"];
 
-export function ArticleForm({ item, categories, authors }: { item?: Article; categories: Category[]; authors: Author[] }) {
+export function ArticleForm({
+  item,
+  categories,
+  authors,
+  imageError,
+}: {
+  item?: Article;
+  categories: Category[];
+  authors: Author[];
+  imageError?: string;
+}) {
   const action = upsertArticle.bind(null, item?.id ?? null);
   const [active, setActive] = useState<TabId>("conteudo");
 
@@ -77,6 +88,9 @@ export function ArticleForm({ item, categories, authors }: { item?: Article; cat
                 <Textarea name="content_en" rows={14} defaultValue={item?.content_en ?? ""} />
               </Field>
             </FieldGrid>
+            <Field label="Vídeo (URL do YouTube)" hint="Opcional — aparece embutido no topo do artigo, antes do texto.">
+              <Input name="video_url" defaultValue={item?.video_url ?? ""} placeholder="https://www.youtube.com/watch?v=..." />
+            </Field>
           </div>
 
           <div style={{ display: active === "detalhes" ? "block" : "none" }}>
@@ -113,10 +127,20 @@ export function ArticleForm({ item, categories, authors }: { item?: Article; cat
                   ))}
                 </Select>
               </Field>
-              <Field label="Imagem de capa (URL)">
-                <Input name="cover_image" defaultValue={item?.cover_image ?? ""} />
-              </Field>
             </FieldGrid>
+            <Field label="Imagem de capa" hint="PNG, JPG ou WEBP — convertida automaticamente para WebP e comprimida para menos de 1MB.">
+              {item?.cover_image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={item.cover_image}
+                  alt="Capa atual"
+                  style={{ maxHeight: "6rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border)" }}
+                />
+              )}
+              <input type="file" name="cover_image_file" accept="image/png,image/jpeg,image/webp" />
+              <input type="hidden" name="current_cover_image" value={item?.cover_image ?? ""} />
+              <ErrorBanner message={imageError} />
+            </Field>
           </div>
 
           <div style={{ display: active === "seo" ? "block" : "none" }}>

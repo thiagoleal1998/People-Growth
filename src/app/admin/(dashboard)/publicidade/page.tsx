@@ -1,4 +1,4 @@
-import { Plus, Edit } from "lucide-react";
+import { Plus, Edit, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
@@ -14,13 +14,39 @@ export default async function PublicidadePage({ searchParams }: { searchParams: 
   const client = supabase as any;
 
   const since = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-  const [{ data: adsData }, { data: eventsData }] = await Promise.all([
+  const [{ data: adsData }, { data: eventsData }, { data: targetsData }, { data: latestArticleData }] = await Promise.all([
     client.from("ads").select("*").order("created_at", { ascending: false }),
     client.from("ad_events").select("ad_id, event_type").gte("created_at", since),
+    client.from("ad_targets").select("ad_id, article_id"),
+    client.from("articles").select("slug").eq("status", "published").order("published_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
 
   const ads = (adsData ?? []) as Ad[];
   const slotLabels = new Map<string, string>(AD_SLOT_DEFS.map((s) => [s.key, s.label]));
+  const latestArticleSlug = (latestArticleData as { slug: string } | null)?.slug ?? null;
+
+  const targetsByAd = new Map<string, string[]>();
+  for (const t of (targetsData ?? []) as { ad_id: string; article_id: string }[]) {
+    const list = targetsByAd.get(t.ad_id) ?? [];
+    list.push(t.article_id);
+    targetsByAd.set(t.ad_id, list);
+  }
+  let targetedArticleSlugs = new Map<string, string>();
+  const targetedIds = Array.from(new Set(Array.from(targetsByAd.values()).flat()));
+  if (targetedIds.length > 0) {
+    const { data: targetedArticles } = await client.from("articles").select("id, slug").in("id", targetedIds);
+    targetedArticleSlugs = new Map(((targetedArticles ?? []) as { id: string; slug: string }[]).map((a) => [a.id, a.slug]));
+  }
+
+  function previewUrl(ad: Ad): string | null {
+    if (ad.slot_key === "home-top") return "/pt";
+    if (ad.target_mode === "specific") {
+      const firstId = targetsByAd.get(ad.id)?.[0];
+      const slug = firstId ? targetedArticleSlugs.get(firstId) : null;
+      if (slug) return `/pt/mea-sententia/${slug}`;
+    }
+    return latestArticleSlug ? `/pt/mea-sententia/${latestArticleSlug}` : null;
+  }
 
   const statsByAd = new Map<string, { impressions: number; clicks: number }>();
   for (const e of (eventsData ?? []) as Pick<AdEvent, "ad_id" | "event_type">[]) {
@@ -74,6 +100,14 @@ export default async function PublicidadePage({ searchParams }: { searchParams: 
                     <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem" }}>{ctr === "—" ? ctr : `${ctr}%`}</td>
                     <td style={{ padding: "0.875rem 1.25rem" }}>
                       <div style={{ display: "flex", gap: "0.5rem" }}>
+                        {(() => {
+                          const url = previewUrl(ad);
+                          return url ? (
+                            <a href={url} target="_blank" rel="noopener noreferrer" style={{ padding: "0.375rem", color: "var(--admin-muted)", borderRadius: "0.375rem" }} title="Ver onde aparece no site">
+                              <Eye size={15} />
+                            </a>
+                          ) : null;
+                        })()}
                         <Link href={`/admin/publicidade/${ad.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar">
                           <Edit size={15} />
                         </Link>

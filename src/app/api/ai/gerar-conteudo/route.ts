@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCurrentProfile } from "@/lib/auth/profile";
 
 const PLATFORM_INSTRUCTIONS: Record<string, string> = {
   linkedin: "LinkedIn: post profissional, 150-300 palavras, parágrafos curtos, poucos emojis, foco em insights e valor",
@@ -40,6 +41,11 @@ Retorne SOMENTE um JSON válido, sem texto antes ou depois:
 
 export async function POST(request: NextRequest) {
   try {
+    const profile = await getCurrentProfile();
+    if (profile?.role !== "admin") {
+      return NextResponse.json({ error: "Não autorizado." }, { status: 401 });
+    }
+
     const { tema, plataformas, tom, contexto } = await request.json();
 
     if (!tema || !plataformas?.length) {

@@ -1,10 +1,11 @@
 "use client";
 
 import { FormShell, Field, Input, Textarea, Select, SubmitButton } from "@/components/admin/ui";
+import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { upsertOwnArticle } from "./actions";
 import type { Article, Category } from "@/types/database.types";
 
-export function AuthorArticleForm({ item, categories }: { item?: Article; categories: Category[] }) {
+export function AuthorArticleForm({ item, categories, imageError }: { item?: Article; categories: Category[]; imageError?: string }) {
   const action = upsertOwnArticle.bind(null, item?.id ?? null);
 
   return (
@@ -45,8 +46,21 @@ export function AuthorArticleForm({ item, categories }: { item?: Article; catego
         <Field label="Conteúdo (EN)">
           <Textarea name="content_en" rows={12} defaultValue={item?.content_en ?? ""} />
         </Field>
-        <Field label="Imagem de capa (URL)">
-          <Input name="cover_image" defaultValue={item?.cover_image ?? ""} />
+        <Field label="Vídeo (URL do YouTube)" hint="Opcional — aparece embutido no topo do artigo, antes do texto.">
+          <Input name="video_url" defaultValue={item?.video_url ?? ""} placeholder="https://www.youtube.com/watch?v=..." />
+        </Field>
+        <Field label="Imagem de capa" hint="PNG, JPG ou WEBP — convertida automaticamente para WebP e comprimida para menos de 1MB.">
+          {item?.cover_image && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={item.cover_image}
+              alt="Capa atual"
+              style={{ maxHeight: "6rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.375rem", border: "1px solid #e2e8f0" }}
+            />
+          )}
+          <input type="file" name="cover_image_file" accept="image/png,image/jpeg,image/webp" />
+          <input type="hidden" name="current_cover_image" value={item?.cover_image ?? ""} />
+          <ErrorBanner message={imageError} />
         </Field>
         <Field
           label="Status"

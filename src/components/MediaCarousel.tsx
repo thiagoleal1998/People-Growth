@@ -33,7 +33,7 @@ export function MediaCarousel({ items }: { items: MediaItem[] }) {
   const visibleItems = Array.from({ length: count }, (_, i) => items[(start + i) % items.length]);
 
   return (
-    <div onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)}>
+    <div onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onTouchStart={() => setPaused(true)}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem" }}>
         {visibleItems.map((item) => {
           const meta = mediaTypeMeta[item.type];

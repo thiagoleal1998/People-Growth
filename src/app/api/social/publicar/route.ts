@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { getCurrentProfile } from "@/lib/auth/profile";
 
 async function postLinkedIn(caption: string): Promise<{ success: boolean; url?: string; error?: string }> {
   const accessToken = process.env.LINKEDIN_ACCESS_TOKEN;
@@ -76,6 +77,11 @@ async function postInstagram(caption: string, imageUrl?: string): Promise<{ succ
 
 export async function POST(request: NextRequest) {
   try {
+    const profile = await getCurrentProfile();
+    if (profile?.role !== "admin") {
+      return NextResponse.json({ success: false, error: "Não autorizado." }, { status: 401 });
+    }
+
     const { platform, caption, imageUrl } = await request.json();
 
     if (!platform || !caption) {
