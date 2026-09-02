@@ -8,7 +8,7 @@ type CommentInsert = Database["public"]["Tables"]["comments"]["Insert"];
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { articleId, name, email, comment, website, renderedAt } = body as Record<string, unknown>;
+    const { articleId, parentId, name, email, comment, website, renderedAt } = body as Record<string, unknown>;
 
     if (looksLikeBot(website, renderedAt)) {
       return NextResponse.json({ success: true });
@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
 
     const payload: CommentInsert = {
       article_id: articleId,
+      parent_id: typeof parentId === "string" && parentId ? parentId : null,
       name: name.trim().slice(0, 120),
       email: email.trim().slice(0, 200),
       body: comment.trim().slice(0, 3000),

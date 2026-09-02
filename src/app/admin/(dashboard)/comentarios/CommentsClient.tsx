@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Flag, CornerDownRight } from "lucide-react";
 import type { Comment } from "@/types/database.types";
 import { updateCommentStatus, deleteComment } from "./actions";
 
@@ -36,7 +36,7 @@ export function CommentsClient({
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                {["Artigo", "Comentário", "Nome", "E-mail", "Status", "Data", ""].map((h) => (
+                {["Artigo", "Comentário", "Nome", "E-mail", "Denúncias", "Status", "Data", ""].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -51,9 +51,25 @@ export function CommentsClient({
                         {articleTitles[c.article_id] ?? "—"}
                       </div>
                     </td>
-                    <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem", maxWidth: "360px" }}>{c.body}</td>
+                    <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem", maxWidth: "360px" }}>
+                      {c.parent_id && (
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "var(--admin-faint)", fontSize: "0.75rem", fontWeight: 600, marginBottom: "0.25rem" }}>
+                          <CornerDownRight size={11} /> resposta
+                        </span>
+                      )}
+                      <div>{c.body}</div>
+                    </td>
                     <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text)", fontSize: "0.875rem", fontWeight: 600 }}>{c.name}</td>
                     <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.8125rem" }}>{c.email}</td>
+                    <td style={{ padding: "0.875rem 1.25rem" }}>
+                      {c.reports > 0 ? (
+                        <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "#dc2626", backgroundColor: "rgba(239,68,68,0.1)", padding: "0.2rem 0.5rem", borderRadius: "0.375rem", fontSize: "0.75rem", fontWeight: 700 }}>
+                          <Flag size={11} /> {c.reports}
+                        </span>
+                      ) : (
+                        <span style={{ color: "var(--admin-faint)", fontSize: "0.8125rem" }}>—</span>
+                      )}
+                    </td>
                     <td style={{ padding: "0.875rem 1.25rem" }}>
                       <select
                         defaultValue={c.status}

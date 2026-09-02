@@ -5,7 +5,7 @@ import { ArrowLeft, Clock, Calendar } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { ShareButtons } from "@/components/ShareButtons";
-import { CommentForm } from "@/components/CommentForm";
+import { Comments } from "@/components/Comments";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
 import type { Article, Category, Author, Comment } from "@/types/database.types";
@@ -219,32 +219,7 @@ export default async function ArticlePage({
                 .
               </p>
 
-              {comments.length > 0 && (
-                <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem", marginBottom: "2rem" }}>
-                  {comments.map((c) => (
-                    <div
-                      key={c.id}
-                      style={{
-                        backgroundColor: "var(--site-surface-alt)",
-                        borderRadius: "0.875rem",
-                        padding: "1.25rem 1.5rem",
-                      }}
-                    >
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem", flexWrap: "wrap", gap: "0.5rem" }}>
-                        <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)" }}>{c.name}</span>
-                        <span style={{ fontSize: "0.75rem", color: "var(--site-faint)" }}>
-                          {new Date(c.created_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
-                        </span>
-                      </div>
-                      <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.65, whiteSpace: "pre-line" }}>
-                        {c.body}
-                      </p>
-                    </div>
-                  ))}
-                </div>
-              )}
-
-              <CommentForm articleId={article.id} />
+              <Comments articleId={article.id} comments={comments} />
             </div>
           </article>
 

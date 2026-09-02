@@ -194,9 +194,12 @@ type UserProfileRow = {
 type CommentRow = {
   id: string;
   article_id: string;
+  parent_id: string | null;
   name: string;
   email: string;
   body: string;
+  likes: number;
+  reports: number;
   status: "pending" | "approved" | "rejected";
   created_at: string;
 };
@@ -251,7 +254,7 @@ export type Database = {
       authors: { Row: AuthorRow; Insert: Omit<AuthorRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AuthorRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       error_reports: { Row: ErrorReportRow; Insert: Omit<ErrorReportRow, "id" | "created_at">; Update: Partial<Omit<ErrorReportRow, "id" | "created_at">>; Relationships: [] };
       user_profiles: { Row: UserProfileRow; Insert: Omit<UserProfileRow, "created_at">; Update: Partial<Omit<UserProfileRow, "id" | "created_at">>; Relationships: [] };
-      comments: { Row: CommentRow; Insert: Omit<CommentRow, "id" | "created_at">; Update: Partial<Omit<CommentRow, "id" | "created_at">>; Relationships: [] };
+      comments: { Row: CommentRow; Insert: Omit<CommentRow, "id" | "created_at" | "likes" | "reports">; Update: Partial<Omit<CommentRow, "id" | "created_at">>; Relationships: [] };
       institutional_pages: { Row: InstitutionalPageRow; Insert: Omit<InstitutionalPageRow, "updated_at">; Update: Partial<Omit<InstitutionalPageRow, "slug" | "updated_at">>; Relationships: [] };
     };
     Views: Record<string, never>;

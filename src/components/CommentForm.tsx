@@ -3,7 +3,17 @@
 import { useState } from "react";
 import { Loader2 } from "lucide-react";
 
-export function CommentForm({ articleId }: { articleId: string }) {
+export function CommentForm({
+  articleId,
+  parentId,
+  compact = false,
+  onCancel,
+}: {
+  articleId: string;
+  parentId?: string;
+  compact?: boolean;
+  onCancel?: () => void;
+}) {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [comment, setComment] = useState("");
@@ -13,10 +23,10 @@ export function CommentForm({ articleId }: { articleId: string }) {
 
   const inputStyle = {
     width: "100%",
-    padding: "0.75rem 1rem",
+    padding: compact ? "0.625rem 0.875rem" : "0.75rem 1rem",
     borderRadius: "0.625rem",
     border: "1px solid var(--site-border-strong)",
-    fontSize: "0.9rem",
+    fontSize: compact ? "0.875rem" : "0.9rem",
     color: "var(--site-text)",
     outline: "none",
     backgroundColor: "var(--site-card)",
@@ -31,7 +41,7 @@ export function CommentForm({ articleId }: { articleId: string }) {
       const res = await fetch("/api/comments", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ articleId, name, email, comment, website, renderedAt }),
+        body: JSON.stringify({ articleId, parentId, name, email, comment, website, renderedAt }),
       });
       if (res.ok) {
         setStatus("success");
@@ -50,9 +60,9 @@ export function CommentForm({ articleId }: { articleId: string }) {
 
   if (status === "success") {
     return (
-      <div style={{ backgroundColor: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.3)", borderRadius: "0.75rem", padding: "1.25rem", textAlign: "center" }}>
-        <p style={{ color: "var(--site-text)", fontWeight: 600, fontSize: "0.9375rem" }}>
-          Comentário enviado! Ele aparece aqui assim que for aprovado.
+      <div style={{ backgroundColor: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.3)", borderRadius: "0.75rem", padding: compact ? "1rem" : "1.25rem", textAlign: "center" }}>
+        <p style={{ color: "var(--site-text)", fontWeight: 600, fontSize: compact ? "0.875rem" : "0.9375rem" }}>
+          {parentId ? "Resposta enviada!" : "Comentário enviado!"} Ela aparece aqui assim que for aprovada.
         </p>
       </div>
     );
@@ -92,11 +102,11 @@ export function CommentForm({ articleId }: { articleId: string }) {
       </div>
       <textarea
         required
-        rows={4}
+        rows={compact ? 3 : 4}
         maxLength={3000}
         value={comment}
         onChange={(e) => setComment(e.target.value)}
-        placeholder="Deixe seu comentário..."
+        placeholder={parentId ? "Escreva sua resposta..." : "Deixe seu comentário..."}
         style={{ ...inputStyle, resize: "vertical" }}
       />
 
@@ -107,35 +117,48 @@ export function CommentForm({ articleId }: { articleId: string }) {
         <p style={{ color: "#ef4444", fontSize: "0.8125rem" }}>Muitas tentativas por aqui. Tente novamente mais tarde.</p>
       )}
 
-      <button
-        type="submit"
-        disabled={status === "loading"}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          gap: "0.5rem",
-          alignSelf: "flex-start",
-          backgroundColor: "#4361EE",
-          color: "white",
-          padding: "0.75rem 1.5rem",
-          borderRadius: "0.625rem",
-          fontWeight: 700,
-          fontSize: "0.875rem",
-          border: "none",
-          cursor: status === "loading" ? "not-allowed" : "pointer",
-          opacity: status === "loading" ? 0.8 : 1,
-        }}
-      >
-        {status === "loading" ? (
-          <>
-            <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
-            Enviando...
-          </>
-        ) : (
-          "Comentar"
+      <div style={{ display: "flex", gap: "0.625rem", alignItems: "center" }}>
+        <button
+          type="submit"
+          disabled={status === "loading"}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "0.5rem",
+            alignSelf: "flex-start",
+            backgroundColor: "#4361EE",
+            color: "white",
+            padding: compact ? "0.625rem 1.25rem" : "0.75rem 1.5rem",
+            borderRadius: "0.625rem",
+            fontWeight: 700,
+            fontSize: compact ? "0.8125rem" : "0.875rem",
+            border: "none",
+            cursor: status === "loading" ? "not-allowed" : "pointer",
+            opacity: status === "loading" ? 0.8 : 1,
+          }}
+        >
+          {status === "loading" ? (
+            <>
+              <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />
+              Enviando...
+            </>
+          ) : parentId ? (
+            "Responder"
+          ) : (
+            "Comentar"
+          )}
+        </button>
+        {onCancel && (
+          <button
+            type="button"
+            onClick={onCancel}
+            style={{ background: "none", border: "none", color: "var(--site-muted)", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer" }}
+          >
+            Cancelar
+          </button>
         )}
-      </button>
+      </div>
     </form>
   );
 }
