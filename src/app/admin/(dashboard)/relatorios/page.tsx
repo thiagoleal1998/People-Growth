@@ -80,13 +80,24 @@ export default async function RelatoriosPage({
   searchParams: Promise<{ period?: string; from?: string; to?: string; ad?: string; tab?: string }>;
 }) {
   const { period = "30", from, to, ad: adParam, tab = "geral" } = await searchParams;
-  const usingCustomRange = Boolean(from || to);
+
+  // Guards against a malformed ?from=/?to= crashing the page with an
+  // uncaught RangeError — only a strict YYYY-MM-DD value is accepted.
+  function parseDateParam(value: string | undefined, timeSuffix: string): string | null {
+    if (!value || !/^\d{4}-\d{2}-\d{2}$/.test(value)) return null;
+    const date = new Date(`${value}T${timeSuffix}`);
+    return Number.isNaN(date.getTime()) ? null : date.toISOString();
+  }
+
+  const validFrom = parseDateParam(from, "00:00:00");
+  const validTo = parseDateParam(to, "23:59:59");
+  const usingCustomRange = Boolean(validFrom || validTo);
 
   let since: string | null;
   let until: string | null = null;
   if (usingCustomRange) {
-    since = from ? new Date(`${from}T00:00:00`).toISOString() : null;
-    until = to ? new Date(`${to}T23:59:59`).toISOString() : null;
+    since = validFrom;
+    until = validTo;
   } else {
     const days = period === "all" ? null : Number(period) || 30;
     since = days ? new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString() : null;
