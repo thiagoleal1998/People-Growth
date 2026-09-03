@@ -618,6 +618,23 @@ export default async function HomePage() {
               {t("ctaSecondary")}
             </Link>
           </div>
+          </div>
+
+          {heroVideoUrl && (
+            <div
+              style={{
+                position: "relative",
+                paddingTop: "56.25%",
+                borderRadius: "1.25rem",
+                overflow: "hidden",
+                boxShadow: "0 24px 60px -12px rgba(0,0,0,0.55)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <VideoFacade embedUrl={heroVideoUrl} thumbnailUrl={heroVideoThumbnail} title="Vídeo institucional People & Growth" />
+            </div>
+          )}
+          </div>
 
           {/* Stats */}
           <div
@@ -650,23 +667,6 @@ export default async function HomePage() {
                 </div>
               </div>
             ))}
-          </div>
-          </div>
-
-          {heroVideoUrl && (
-            <div
-              style={{
-                position: "relative",
-                paddingTop: "56.25%",
-                borderRadius: "1.25rem",
-                overflow: "hidden",
-                boxShadow: "0 24px 60px -12px rgba(0,0,0,0.55)",
-                border: "1px solid rgba(255,255,255,0.1)",
-              }}
-            >
-              <VideoFacade embedUrl={heroVideoUrl} thumbnailUrl={heroVideoThumbnail} title="Vídeo institucional People & Growth" />
-            </div>
-          )}
           </div>
 
           {/* Founders */}
