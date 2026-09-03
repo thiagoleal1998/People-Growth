@@ -4,12 +4,15 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { uploadPublicImage } from "@/lib/supabase/storage";
+import { getCurrentProfile } from "@/lib/auth/profile";
+import { logActivity } from "@/lib/activity-log";
 import type { Database } from "@/types/database.types";
 
 type AdInsert = Database["public"]["Tables"]["ads"]["Insert"];
 
 export async function upsertAd(id: string | null, formData: FormData) {
   const supabase = await createClient();
+  const actor = await getCurrentProfile();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
@@ -17,10 +20,11 @@ export async function upsertAd(id: string | null, formData: FormData) {
 
   const slotKey = String(formData.get("slot_key") ?? "home-top");
   const targetMode = slotKey === "home-top" ? "all" : (String(formData.get("target_mode") ?? "all") as "all" | "specific");
+  const title = String(formData.get("title") ?? "").trim();
 
   const payload: Partial<AdInsert> = {
     slot_key: slotKey,
-    title: String(formData.get("title") ?? "").trim(),
+    title,
     link_url: String(formData.get("link_url") ?? "").trim() || null,
     alt_text: String(formData.get("alt_text") ?? "").trim() || null,
     target_mode: targetMode,
@@ -28,6 +32,7 @@ export async function upsertAd(id: string | null, formData: FormData) {
   };
   if (imageUrl) payload.image_url = imageUrl;
 
+  const isNew = !id;
   let adId = id;
   if (adId) {
     const { error } = await client.from("ads").update(payload).eq("id", adId);
@@ -46,6 +51,10 @@ export async function upsertAd(id: string | null, formData: FormData) {
     }
   }
 
+  if (actor) {
+    await logActivity({ userId: actor.id, userEmail: actor.email, action: isNew ? "create" : "update", entityType: "anúncio", entityLabel: title });
+  }
+
   revalidatePath("/admin/publicidade");
   revalidatePath("/[locale]", "layout");
 
@@ -57,7 +66,14 @@ export async function upsertAd(id: string | null, formData: FormData) {
 
 export async function deleteAd(id: string) {
   const supabase = await createClient();
-  await supabase.from("ads").delete().eq("id", id);
+  const actor = await getCurrentProfile();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { data: ad } = await client.from("ads").select("title").eq("id", id).single();
+  await client.from("ads").delete().eq("id", id);
+  if (actor) {
+    await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "anúncio", entityLabel: ad?.title });
+  }
   revalidatePath("/admin/publicidade");
   revalidatePath("/[locale]", "layout");
 }

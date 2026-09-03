@@ -4,6 +4,8 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/profile";
+import { logActivity } from "@/lib/activity-log";
 import type { PortfolioCase } from "@/types/database.types";
 
 function linesToArray(text: string): string[] {
@@ -12,6 +14,7 @@ function linesToArray(text: string): string[] {
 
 export async function upsertPortfolioCase(id: string | null, formData: FormData) {
   const supabase = await createClient();
+  const actor = await getCurrentProfile();
 
   const title_pt = String(formData.get("title_pt") ?? "");
   const slugInput = String(formData.get("slug") ?? "").trim();
@@ -35,10 +38,15 @@ export async function upsertPortfolioCase(id: string | null, formData: FormData)
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
+  const isNew = !id;
   if (id) {
     await client.from("portfolio_cases").update(payload).eq("id", id);
   } else {
     await client.from("portfolio_cases").insert(payload);
+  }
+
+  if (actor) {
+    await logActivity({ userId: actor.id, userEmail: actor.email, action: isNew ? "create" : "update", entityType: "case de portfólio", entityLabel: title_pt });
   }
 
   revalidatePath("/admin/portfolio");
@@ -47,6 +55,13 @@ export async function upsertPortfolioCase(id: string | null, formData: FormData)
 
 export async function deletePortfolioCase(id: string) {
   const supabase = await createClient();
-  await supabase.from("portfolio_cases").delete().eq("id", id);
+  const actor = await getCurrentProfile();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { data: item } = await client.from("portfolio_cases").select("title_pt").eq("id", id).single();
+  await client.from("portfolio_cases").delete().eq("id", id);
+  if (actor) {
+    await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "case de portfólio", entityLabel: item?.title_pt });
+  }
   revalidatePath("/admin/portfolio");
 }

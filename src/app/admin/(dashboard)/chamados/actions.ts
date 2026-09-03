@@ -3,18 +3,32 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
+import { logActivity } from "@/lib/activity-log";
 import type { ErrorReport, InternalTicket } from "@/types/database.types";
 
 export async function updateErrorReportStatus(id: string, status: ErrorReport["status"]) {
   const supabase = await createClient();
+  const actor = await getCurrentProfile();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any).from("error_reports").update({ status }).eq("id", id);
+  const client = supabase as any;
+  const { data: report } = await client.from("error_reports").select("page_url").eq("id", id).single();
+  await client.from("error_reports").update({ status }).eq("id", id);
+  if (actor) {
+    await logActivity({ userId: actor.id, userEmail: actor.email, action: "update", entityType: "chamado", entityLabel: `${report?.page_url} → ${status}` });
+  }
   revalidatePath("/admin/chamados");
 }
 
 export async function deleteErrorReport(id: string) {
   const supabase = await createClient();
-  await supabase.from("error_reports").delete().eq("id", id);
+  const actor = await getCurrentProfile();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { data: report } = await client.from("error_reports").select("page_url").eq("id", id).single();
+  await client.from("error_reports").delete().eq("id", id);
+  if (actor) {
+    await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "chamado", entityLabel: report?.page_url });
+  }
   revalidatePath("/admin/chamados");
 }
 
@@ -46,6 +60,8 @@ export async function createInternalTicket(data: { type: InternalTicket["type"];
 
   if (error) throw error;
 
+  await logActivity({ userId: profile.id, userEmail: profile.email, action: "create", entityType: "chamado interno", entityLabel: data.title });
+
   revalidatePath("/admin/chamados");
   revalidatePath("/autor/chamados");
   return created as InternalTicket;
@@ -53,17 +69,30 @@ export async function createInternalTicket(data: { type: InternalTicket["type"];
 
 export async function updateInternalTicket(id: string, data: { status: InternalTicket["status"]; admin_response: string }) {
   const supabase = await createClient();
+  const actor = await getCurrentProfile();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any)
+  const client = supabase as any;
+  const { data: ticket } = await client.from("internal_tickets").select("title").eq("id", id).single();
+  await client
     .from("internal_tickets")
     .update({ status: data.status, admin_response: data.admin_response || null, updated_at: new Date().toISOString() })
     .eq("id", id);
+  if (actor) {
+    await logActivity({ userId: actor.id, userEmail: actor.email, action: "update", entityType: "chamado interno", entityLabel: `${ticket?.title} → ${data.status}` });
+  }
   revalidatePath("/admin/chamados");
   revalidatePath("/autor/chamados");
 }
 
 export async function deleteInternalTicket(id: string) {
   const supabase = await createClient();
-  await supabase.from("internal_tickets").delete().eq("id", id);
+  const actor = await getCurrentProfile();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { data: ticket } = await client.from("internal_tickets").select("title").eq("id", id).single();
+  await client.from("internal_tickets").delete().eq("id", id);
+  if (actor) {
+    await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "chamado interno", entityLabel: ticket?.title });
+  }
   revalidatePath("/admin/chamados");
 }
