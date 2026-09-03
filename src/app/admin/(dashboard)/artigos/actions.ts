@@ -64,7 +64,9 @@ export async function upsertArticle(id: string | null, formData: FormData) {
   if (imageError && articleId) {
     redirect(`/admin/artigos/${articleId}?imageError=${encodeURIComponent(imageError)}`);
   }
-  redirect("/admin/artigos?saved=1");
+  // Stay on the article being edited instead of bouncing back to the list —
+  // the person decides when they're done, not the save action.
+  redirect(`/admin/artigos/${articleId}?saved=1`);
 }
 
 export async function publishArticle(id: string) {

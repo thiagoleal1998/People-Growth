@@ -4,14 +4,17 @@ import Link from "next/link";
 import { Eye } from "lucide-react";
 import { FormShell, Field, Input, Textarea, Select, SubmitButton } from "@/components/admin/ui";
 import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
+import { SavedToast } from "@/components/admin/SavedToast";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { upsertOwnArticle } from "./actions";
 import type { Article, Category } from "@/types/database.types";
 
-export function AuthorArticleForm({ item, categories, imageError }: { item?: Article; categories: Category[]; imageError?: string }) {
+export function AuthorArticleForm({ item, categories, imageError, saved }: { item?: Article; categories: Category[]; imageError?: string; saved?: boolean }) {
   const action = upsertOwnArticle.bind(null, item?.id ?? null);
 
   return (
+    <>
+    <SavedToast show={Boolean(saved)} />
     <FormShell
       title={item ? "Editar artigo" : "Novo artigo"}
       backHref="/autor"
@@ -107,5 +110,6 @@ export function AuthorArticleForm({ item, categories, imageError }: { item?: Art
         <SubmitButton>{item ? "Salvar alterações" : "Criar artigo"}</SubmitButton>
       </form>
     </FormShell>
+    </>
   );
 }

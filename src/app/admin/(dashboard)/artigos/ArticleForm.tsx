@@ -6,6 +6,7 @@ import { Eye } from "lucide-react";
 import { Field, Input, Textarea, Select, SubmitButton, FieldGrid } from "@/components/admin/ui";
 import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
 import { SeoPreview } from "@/components/admin/SeoPreview";
+import { SavedToast } from "@/components/admin/SavedToast";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { upsertArticle } from "./actions";
 import type { Article, Category, Author } from "@/types/database.types";
@@ -33,11 +34,13 @@ export function ArticleForm({
   categories,
   authors,
   imageError,
+  saved,
 }: {
   item?: Article;
   categories: Category[];
   authors: Author[];
   imageError?: string;
+  saved?: boolean;
 }) {
   const action = upsertArticle.bind(null, item?.id ?? null);
   const [active, setActive] = useState<TabId>("conteudo");
@@ -51,6 +54,7 @@ export function ArticleForm({
 
   return (
     <div style={{ maxWidth: "900px" }}>
+      <SavedToast show={Boolean(saved)} />
       <div style={{ marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
         <div>
           <Link href="/admin/artigos" style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>

@@ -9,10 +9,10 @@ export default async function EditarArtigoAutorPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ imageError?: string }>;
+  searchParams: Promise<{ imageError?: string; saved?: string }>;
 }) {
   const { id } = await params;
-  const { imageError } = await searchParams;
+  const { imageError, saved } = await searchParams;
   const profile = await getCurrentProfile();
   if (!profile?.author_id) notFound();
 
@@ -26,5 +26,5 @@ export default async function EditarArtigoAutorPage({
 
   if (!item) notFound();
 
-  return <AuthorArticleForm item={item as Article} categories={(categoriesData ?? []) as Category[]} imageError={imageError} />;
+  return <AuthorArticleForm item={item as Article} categories={(categoriesData ?? []) as Category[]} imageError={imageError} saved={saved === "1"} />;
 }
