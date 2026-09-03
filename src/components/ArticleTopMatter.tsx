@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import type { CSSProperties } from "react";
 import { List, ChevronDown } from "lucide-react";
 import { TextToSpeechButton } from "./TextToSpeechButton";
 
@@ -15,25 +14,13 @@ type Props = {
   hasVideo: boolean;
 };
 
-const controlButtonStyle: CSSProperties = {
-  display: "flex",
-  alignItems: "center",
-  gap: "0.625rem",
-  padding: "0.75rem 1.125rem",
-  borderRadius: "0.625rem",
-  fontSize: "0.9375rem",
-  fontWeight: 700,
-  cursor: "pointer",
-};
-
 export function ArticleTopMatter({ title, summary, speechText, coverImage, coverImageCaption, coverImageCredit, hasVideo }: Props) {
-  const [expanded, setExpanded] = useState(true);
+  const [expanded, setExpanded] = useState(false);
 
   // A video is already the article's main visual (rendered further down),
-  // so the cover photo only shows here — beside the summary, or full width
-  // on its own — when there's no video competing for that same spot.
+  // so the cover photo only shows here — beside the summary, or on its
+  // own — when there's no video competing for that same spot.
   const showCoverImage = Boolean(coverImage) && !hasVideo;
-  const twoCol = summary && showCoverImage;
 
   if (!summary && !showCoverImage) {
     return (
@@ -45,16 +32,20 @@ export function ArticleTopMatter({ title, summary, speechText, coverImage, cover
 
   return (
     <div style={{ marginBottom: "1.75rem" }}>
-      <div
-        style={twoCol ? { display: "grid", gridTemplateColumns: "1fr 320px", gap: "1rem" } : { display: "flex", gap: "0.75rem", flexWrap: "wrap" }}
-        className="article-top-matter-grid"
-      >
+      <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
         {summary && (
           <button
             type="button"
             onClick={() => setExpanded((v) => !v)}
             style={{
-              ...controlButtonStyle,
+              display: "flex",
+              alignItems: "center",
+              gap: "0.625rem",
+              padding: "0.75rem 1.125rem",
+              borderRadius: "0.625rem",
+              fontSize: "0.9375rem",
+              fontWeight: 700,
+              cursor: "pointer",
               border: "1.5px solid #4361EE",
               backgroundColor: "var(--site-surface)",
               color: "var(--site-text)",
@@ -62,25 +53,19 @@ export function ArticleTopMatter({ title, summary, speechText, coverImage, cover
           >
             <List size={18} color="#4361EE" />
             Resumo
-            <ChevronDown size={16} style={{ marginLeft: "auto", transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+            <ChevronDown size={16} style={{ transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
           </button>
         )}
         <TextToSpeechButton text={speechText} title={title} fill={!summary} />
       </div>
 
+      {/* Photo floats right so short summary text wraps beside it, like a
+          traditional news layout — rather than two independent columns
+          that leave awkward empty space when the text is short. */}
       {((summary && expanded) || (showCoverImage && !summary)) && (
-        <div
-          style={{ display: "grid", gridTemplateColumns: twoCol ? "1fr 320px" : "1fr", gap: "1.5rem", alignItems: "start", marginTop: "1.25rem" }}
-          className="article-top-matter-grid"
-        >
-          {summary && expanded && (
-            <p style={{ fontSize: "1.0625rem", lineHeight: 1.75, color: "var(--site-text)", whiteSpace: "pre-line", margin: 0 }}>
-              {summary}
-            </p>
-          )}
-
+        <div style={{ marginTop: "1.25rem", overflow: "hidden" }}>
           {showCoverImage && (
-            <div>
+            <div className="article-top-matter-photo" style={{ float: "right", width: "300px", marginLeft: "1.5rem", marginBottom: "0.75rem" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={coverImage!}
@@ -95,12 +80,18 @@ export function ArticleTopMatter({ title, summary, speechText, coverImage, cover
               )}
             </div>
           )}
+
+          {summary && expanded && (
+            <p style={{ fontSize: "1.0625rem", lineHeight: 1.75, color: "var(--site-text)", whiteSpace: "pre-line", margin: 0 }}>
+              {summary}
+            </p>
+          )}
         </div>
       )}
 
       <style>{`
         @media (max-width: 640px) {
-          .article-top-matter-grid { grid-template-columns: 1fr !important; }
+          .article-top-matter-photo { float: none !important; width: 100% !important; margin-left: 0 !important; }
         }
       `}</style>
     </div>

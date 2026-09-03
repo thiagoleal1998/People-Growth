@@ -219,16 +219,6 @@ export default async function ArticlePage({
         >
           {/* Article body */}
           <article>
-            <ArticleTopMatter
-              title={article.title_pt}
-              summary={article.summary_pt}
-              speechText={stripMarkdownLite(article.content_pt)}
-              coverImage={article.cover_image}
-              coverImageCaption={article.cover_image_caption}
-              coverImageCredit={article.cover_image_credit}
-              hasVideo={Boolean(article.video_url)}
-            />
-
             {author && (
               <div
                 style={{
@@ -283,6 +273,16 @@ export default async function ArticlePage({
                 )}
               </div>
             )}
+
+            <ArticleTopMatter
+              title={article.title_pt}
+              summary={article.summary_pt}
+              speechText={stripMarkdownLite(article.content_pt)}
+              coverImage={article.cover_image}
+              coverImageCaption={article.cover_image_caption}
+              coverImageCredit={article.cover_image_credit}
+              hasVideo={Boolean(article.video_url)}
+            />
 
             {article.video_url && (
               <div style={{ position: "relative", paddingTop: "56.25%", borderRadius: "0.75rem", overflow: "hidden", marginBottom: "1.75rem" }}>
