@@ -46,7 +46,7 @@ const links = [
   { href: "/admin/midia", label: "Na Mídia", icon: Monitor },
   { href: "/admin/publicidade", label: "Publicidade", icon: Megaphone },
   { href: "/admin/seo", label: "SEO, GEO & AEO", icon: Search },
-  { href: "/admin/usuarios", label: "Usuários", icon: KeyRound },
+  { href: "/admin/usuarios", label: "Usuários", icon: KeyRound, countKey: "resetRequests" as const },
   { href: "/admin/paginas", label: "Páginas Institucionais", icon: ScrollText },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
@@ -60,7 +60,7 @@ export function AdminSidebar({
   logoUrl?: string;
   userName?: string;
   userPhoto?: string;
-  counts?: { comentarios: number; leads: number; chamados: number };
+  counts?: { comentarios: number; leads: number; chamados: number; resetRequests: number };
 }) {
   const pathname = usePathname();
   const [loggingOut, setLoggingOut] = useState(false);

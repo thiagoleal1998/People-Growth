@@ -55,3 +55,33 @@ export async function deleteUser(id: string) {
   await admin.auth.admin.deleteUser(id);
   revalidatePath("/admin/usuarios");
 }
+
+export async function resetUserPassword(userId: string, newPassword: string, requestId: string | null) {
+  if (newPassword.length < 6) {
+    throw new Error("A senha precisa ter pelo menos 6 caracteres.");
+  }
+
+  const admin = await createAdminClient();
+  const { error } = await admin.auth.admin.updateUserById(userId, { password: newPassword });
+  if (error) throw error;
+
+  if (requestId) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    await (admin as any)
+      .from("password_reset_requests")
+      .update({ status: "resolved", resolved_at: new Date().toISOString() })
+      .eq("id", requestId);
+  }
+
+  revalidatePath("/admin/usuarios");
+}
+
+export async function dismissPasswordResetRequest(requestId: string) {
+  const admin = await createAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (admin as any)
+    .from("password_reset_requests")
+    .update({ status: "resolved", resolved_at: new Date().toISOString() })
+    .eq("id", requestId);
+  revalidatePath("/admin/usuarios");
+}

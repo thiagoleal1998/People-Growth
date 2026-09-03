@@ -3,8 +3,9 @@ import { PageHeader, Field, Input, Select, SubmitButton } from "@/components/adm
 import { SavedToast } from "@/components/admin/SavedToast";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { UsersClient } from "./UsersClient";
+import { PasswordResetRequestsClient } from "./PasswordResetRequestsClient";
 import { createUser } from "./actions";
-import type { UserProfile, Author } from "@/types/database.types";
+import type { UserProfile, Author, PasswordResetRequest } from "@/types/database.types";
 
 export default async function UsuariosPage({
   searchParams,
@@ -16,13 +17,15 @@ export default async function UsuariosPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = admin as any;
 
-  const [{ data: usersData }, { data: authorsData }] = await Promise.all([
+  const [{ data: usersData }, { data: authorsData }, { data: resetRequestsData }] = await Promise.all([
     client.from("user_profiles").select("*").order("created_at"),
     client.from("authors").select("*").order("order"),
+    client.from("password_reset_requests").select("*").eq("status", "pending").order("created_at", { ascending: false }),
   ]);
 
   const users = (usersData ?? []) as UserProfile[];
   const authors = (authorsData ?? []) as Author[];
+  const resetRequests = (resetRequestsData ?? []) as PasswordResetRequest[];
 
   return (
     <div>
@@ -31,6 +34,12 @@ export default async function UsuariosPage({
         title="Usuários"
         subtitle="Cada pessoa tem seu próprio login. Admins têm acesso total; autores só escrevem e editam o próprio perfil."
       />
+
+      {resetRequests.length > 0 && (
+        <div style={{ marginBottom: "1.5rem" }}>
+          <PasswordResetRequestsClient requests={resetRequests} users={users} />
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "minmax(280px, 380px) 1fr", gap: "1.5rem", alignItems: "start" }}>
         <form
