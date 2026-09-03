@@ -140,6 +140,12 @@ function LoginFields({ onForgotPassword }: { onForgotPassword: () => void }) {
       return;
     }
 
+    await fetch("/api/auth/log-activity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "login" }),
+    }).catch(() => {});
+
     // Hard navigation, and loading stays true: a client-side router.push
     // here can visually flip the button back to "Entrar" for a moment
     // before the redirect lands, making it look stuck (same root cause

@@ -4,9 +4,12 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { uploadPublicImage } from "@/lib/supabase/storage";
+import { getCurrentProfile } from "@/lib/auth/profile";
+import { logActivity } from "@/lib/activity-log";
 
 export async function updateSiteConfig(formData: FormData) {
   const supabase = await createClient();
+  const actor = await getCurrentProfile();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
@@ -29,6 +32,10 @@ export async function updateSiteConfig(formData: FormData) {
 
   for (const [key, value] of entries) {
     await client.from("site_config").upsert({ key, value: String(value) });
+  }
+
+  if (actor) {
+    await logActivity({ userId: actor.id, userEmail: actor.email, action: "update", entityType: "configurações" });
   }
 
   revalidatePath("/admin/configuracoes");

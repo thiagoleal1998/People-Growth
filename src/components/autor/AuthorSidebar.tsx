@@ -20,6 +20,14 @@ export function AuthorSidebar({ logoUrl, pendingComments = 0 }: { logoUrl?: stri
 
   async function handleLogout() {
     setLoggingOut(true);
+    // Logged before signOut() — once the session cookie clears, the log
+    // endpoint's own auth check would see nobody logged in.
+    await fetch("/api/auth/log-activity", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ action: "logout" }),
+      keepalive: true,
+    }).catch(() => {});
     const supabase = createClient();
     await supabase.auth.signOut();
     // Hard navigation instead of router.push: guarantees the browser sends a

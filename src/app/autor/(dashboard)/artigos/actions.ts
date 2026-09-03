@@ -6,6 +6,7 @@ import slugify from "slugify";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { uploadPublicImage } from "@/lib/supabase/storage";
+import { logActivity } from "@/lib/activity-log";
 import type { Article } from "@/types/database.types";
 
 export async function upsertOwnArticle(id: string | null, formData: FormData) {
@@ -47,12 +48,21 @@ export async function upsertOwnArticle(id: string | null, formData: FormData) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
   let articleId = id;
+  const isNew = !articleId;
   if (articleId) {
     await client.from("articles").update(payload).eq("id", articleId).eq("author_id", profile.author_id);
   } else {
     const { data } = await client.from("articles").insert(payload).select("id").single();
     articleId = data?.id ?? null;
   }
+
+  await logActivity({
+    userId: profile.id,
+    userEmail: profile.email,
+    action: isNew ? "create" : "update",
+    entityType: "artigo",
+    entityLabel: title_pt,
+  });
 
   revalidatePath("/autor");
 
@@ -69,6 +79,10 @@ export async function deleteOwnArticle(id: string) {
   if (!profile?.author_id) return;
 
   const supabase = await createClient();
-  await supabase.from("articles").delete().eq("id", id).eq("author_id", profile.author_id);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { data: article } = await client.from("articles").select("title_pt").eq("id", id).single();
+  await client.from("articles").delete().eq("id", id).eq("author_id", profile.author_id);
+  await logActivity({ userId: profile.id, userEmail: profile.email, action: "delete", entityType: "artigo", entityLabel: article?.title_pt });
   revalidatePath("/autor");
 }

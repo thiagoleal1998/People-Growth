@@ -3,7 +3,7 @@ import { Eye, Users, MousePointerClick, Percent, X, ThumbsUp, MessageCircle, Fla
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
 import { AD_SLOT_DEFS } from "../publicidade/ad-slots";
-import type { Article, Ad, Author, Comment } from "@/types/database.types";
+import type { Article, Ad, Author, Comment, ActivityLog } from "@/types/database.types";
 
 const PERIODS = [
   { key: "7", label: "7 dias" },
@@ -15,7 +15,17 @@ const PERIODS = [
 const TABS = [
   { key: "geral", label: "Visão geral" },
   { key: "artigos", label: "Artigos" },
+  { key: "atividade", label: "Relatório de atividade" },
 ] as const;
+
+const ACTIVITY_ACTION_LABELS: Record<string, { label: string; color: string }> = {
+  create: { label: "Criou", color: "#06D6A0" },
+  update: { label: "Atualizou", color: "#4361EE" },
+  delete: { label: "Excluiu", color: "#dc2626" },
+  publish: { label: "Publicou", color: "#04a87d" },
+  login: { label: "Entrou", color: "#FFB703" },
+  logout: { label: "Saiu", color: "var(--admin-faint)" },
+};
 
 function StatCard({ icon: Icon, label, value, color }: { icon: typeof Eye; label: string; value: string; color: string }) {
   return (
@@ -77,9 +87,9 @@ function DailyChart({ days }: { days: { date: string; impressions: number; click
 export default async function RelatoriosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string; from?: string; to?: string; ad?: string; tab?: string }>;
+  searchParams: Promise<{ period?: string; from?: string; to?: string; ad?: string; tab?: string; user?: string }>;
 }) {
-  const { period = "30", from, to, ad: adParam, tab = "geral" } = await searchParams;
+  const { period = "30", from, to, ad: adParam, tab = "geral", user: userFilter } = await searchParams;
 
   // Guards against a malformed ?from=/?to= crashing the page with an
   // uncaught RangeError — only a strict YYYY-MM-DD value is accepted.
@@ -292,6 +302,21 @@ export default async function RelatoriosPage({
       .sort((a, b) => b.views - a.views);
   }
 
+  let activityLogs: ActivityLog[] = [];
+  let activityUsers: string[] = [];
+  if (tab === "atividade") {
+    let activityQuery = client.from("activity_log").select("*").order("created_at", { ascending: false }).limit(150);
+    if (since) activityQuery = activityQuery.gte("created_at", since);
+    if (until) activityQuery = activityQuery.lte("created_at", until);
+    if (userFilter) activityQuery = activityQuery.eq("user_email", userFilter);
+    const [{ data: activityData }, { data: allUsersData }] = await Promise.all([
+      activityQuery,
+      client.from("user_profiles").select("email").order("email"),
+    ]);
+    activityLogs = (activityData ?? []) as ActivityLog[];
+    activityUsers = ((allUsersData ?? []) as { email: string }[]).map((u) => u.email);
+  }
+
   return (
     <div>
       <PageHeader
@@ -303,7 +328,7 @@ export default async function RelatoriosPage({
         {TABS.map((t) => (
           <Link
             key={t.key}
-            href={t.key === "geral" ? `/admin/relatorios?${new URLSearchParams(rangeQuery).toString()}` : "/admin/relatorios?tab=artigos"}
+            href={t.key === "geral" ? `/admin/relatorios?${new URLSearchParams(rangeQuery).toString()}` : `/admin/relatorios?tab=${t.key}`}
             style={{
               padding: "0.5rem 1rem",
               borderRadius: "0.5rem",
@@ -368,6 +393,61 @@ export default async function RelatoriosPage({
             </table>
           )}
         </Card>
+      ) : tab === "atividade" ? (
+        <>
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", marginBottom: "1.25rem" }}>
+            <form method="get" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+              <input type="hidden" name="tab" value="atividade" />
+              <select
+                name="user"
+                defaultValue={userFilter ?? ""}
+                onChange={(e) => e.currentTarget.form?.requestSubmit()}
+                style={{ padding: "0.5rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.8125rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" }}
+              >
+                <option value="">Todos os usuários</option>
+                {activityUsers.map((email) => (
+                  <option key={email} value={email}>{email}</option>
+                ))}
+              </select>
+            </form>
+          </div>
+
+          <Card>
+            {activityLogs.length === 0 ? (
+              <EmptyState text="Nenhuma atividade registrada ainda." />
+            ) : (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
+                    {["Quando", "Usuário", "Ação", "Tipo", "Detalhe"].map((h) => (
+                      <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {activityLogs.map((log) => {
+                    const actionInfo = ACTIVITY_ACTION_LABELS[log.action] ?? { label: log.action, color: "var(--admin-muted)" };
+                    return (
+                      <tr key={log.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
+                        <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>
+                          {new Date(log.created_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        </td>
+                        <td style={{ padding: "0.75rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.8125rem" }}>{log.user_email}</td>
+                        <td style={{ padding: "0.75rem 1.25rem" }}>
+                          <span style={{ fontSize: "0.75rem", fontWeight: 700, color: actionInfo.color }}>{actionInfo.label}</span>
+                        </td>
+                        <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.8125rem", textTransform: "capitalize" }}>{log.entity_type}</td>
+                        <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem", maxWidth: "360px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                          {log.entity_label ?? "—"}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+          </Card>
+        </>
       ) : (
         <>
       <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", marginBottom: "1.5rem" }}>

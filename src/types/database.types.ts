@@ -197,6 +197,16 @@ type UserProfileRow = {
   created_at: string;
 };
 
+type ActivityLogRow = {
+  id: string;
+  user_id: string | null;
+  user_email: string;
+  action: string;
+  entity_type: string;
+  entity_label: string | null;
+  created_at: string;
+};
+
 type PasswordResetRequestRow = {
   id: string;
   email: string;
@@ -337,6 +347,7 @@ export type Database = {
       user_profiles: { Row: UserProfileRow; Insert: Omit<UserProfileRow, "created_at">; Update: Partial<Omit<UserProfileRow, "id" | "created_at">>; Relationships: [] };
       internal_tickets: { Row: InternalTicketRow; Insert: Omit<InternalTicketRow, "id" | "created_at" | "updated_at" | "status" | "admin_response">; Update: Partial<Omit<InternalTicketRow, "id" | "created_at">>; Relationships: [] };
       password_reset_requests: { Row: PasswordResetRequestRow; Insert: Omit<PasswordResetRequestRow, "id" | "created_at" | "status" | "resolved_at">; Update: Partial<Omit<PasswordResetRequestRow, "id" | "created_at">>; Relationships: [] };
+      activity_log: { Row: ActivityLogRow; Insert: Omit<ActivityLogRow, "id" | "created_at">; Update: Partial<Omit<ActivityLogRow, "id" | "created_at">>; Relationships: [] };
       comments: { Row: CommentRow; Insert: Omit<CommentRow, "id" | "created_at" | "likes" | "reports">; Update: Partial<Omit<CommentRow, "id" | "created_at">>; Relationships: [] };
       institutional_pages: { Row: InstitutionalPageRow; Insert: Omit<InstitutionalPageRow, "updated_at">; Update: Partial<Omit<InstitutionalPageRow, "slug" | "updated_at">>; Relationships: [] };
       page_views: { Row: PageViewRow; Insert: Omit<PageViewRow, "id" | "created_at">; Update: Partial<Omit<PageViewRow, "id" | "created_at">>; Relationships: [] };
@@ -367,6 +378,7 @@ export type ErrorReport = ErrorReportRow;
 export type UserProfile = UserProfileRow;
 export type InternalTicket = InternalTicketRow;
 export type PasswordResetRequest = PasswordResetRequestRow;
+export type ActivityLog = ActivityLogRow;
 export type Comment = CommentRow;
 export type PageView = PageViewRow;
 export type AdSlot = AdSlotRow;

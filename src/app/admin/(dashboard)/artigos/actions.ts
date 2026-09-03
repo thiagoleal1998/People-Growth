@@ -5,10 +5,13 @@ import { redirect } from "next/navigation";
 import slugify from "slugify";
 import { createClient } from "@/lib/supabase/server";
 import { uploadPublicImage } from "@/lib/supabase/storage";
+import { getCurrentProfile } from "@/lib/auth/profile";
+import { logActivity } from "@/lib/activity-log";
 import type { Article } from "@/types/database.types";
 
 export async function upsertArticle(id: string | null, formData: FormData) {
   const supabase = await createClient();
+  const profile = await getCurrentProfile();
 
   const { url: coverImageUrl, error: imageError } = await uploadPublicImage(formData.get("cover_image_file"), "articles");
 
@@ -48,6 +51,7 @@ export async function upsertArticle(id: string | null, formData: FormData) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
   let articleId = id;
+  const isNew = !articleId;
   if (articleId) {
     // Only overwrite published_at when transitioning into "published"; keep existing otherwise.
     const { published_at: _publishedAt, ...updatePayload } = payload;
@@ -56,6 +60,16 @@ export async function upsertArticle(id: string | null, formData: FormData) {
   } else {
     const { data } = await client.from("articles").insert(payload).select("id").single();
     articleId = data?.id ?? null;
+  }
+
+  if (profile) {
+    await logActivity({
+      userId: profile.id,
+      userEmail: profile.email,
+      action: isNew ? "create" : "update",
+      entityType: "artigo",
+      entityLabel: title_pt,
+    });
   }
 
   revalidatePath("/admin/artigos");
@@ -71,15 +85,28 @@ export async function upsertArticle(id: string | null, formData: FormData) {
 
 export async function publishArticle(id: string) {
   const supabase = await createClient();
+  const profile = await getCurrentProfile();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any).from("articles").update({ status: "published", published_at: new Date().toISOString() }).eq("id", id);
+  const client = supabase as any;
+  const { data: article } = await client.from("articles").select("title_pt").eq("id", id).single();
+  await client.from("articles").update({ status: "published", published_at: new Date().toISOString() }).eq("id", id);
+  if (profile) {
+    await logActivity({ userId: profile.id, userEmail: profile.email, action: "publish", entityType: "artigo", entityLabel: article?.title_pt });
+  }
   revalidatePath("/admin/artigos");
   revalidatePath("/[locale]", "page");
 }
 
 export async function deleteArticle(id: string) {
   const supabase = await createClient();
-  await supabase.from("articles").delete().eq("id", id);
+  const profile = await getCurrentProfile();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { data: article } = await client.from("articles").select("title_pt").eq("id", id).single();
+  await client.from("articles").delete().eq("id", id);
+  if (profile) {
+    await logActivity({ userId: profile.id, userEmail: profile.email, action: "delete", entityType: "artigo", entityLabel: article?.title_pt });
+  }
   revalidatePath("/admin/artigos");
   revalidatePath("/[locale]", "page");
 }
