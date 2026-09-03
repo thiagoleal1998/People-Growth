@@ -37,7 +37,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
         <div style={{ position: "relative", maxWidth: "440px" }}>
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="People & Growth" style={{ height: "2.5rem", width: "auto", display: "block", marginBottom: "2rem" }} />
+            <img src={logoUrl} alt="People & Growth" style={{ height: "3.75rem", width: "auto", display: "block", margin: "0 auto 2rem" }} />
           ) : (
             <div style={{ fontWeight: 800, fontSize: "1.5rem", marginBottom: "2rem", background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               People &amp; Growth
