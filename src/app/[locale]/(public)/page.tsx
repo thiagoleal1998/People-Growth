@@ -93,6 +93,11 @@ export default async function HomePage() {
 
   const allArticles = (articlesData ?? []) as Article[];
   const authors = (authorsData ?? []) as Author[];
+  const founderFirstNames = authors.map((a) => a.name.split(" ")[0]);
+  const founderNamesText =
+    founderFirstNames.length > 1
+      ? `${founderFirstNames.slice(0, -1).join(", ")} e ${founderFirstNames[founderFirstNames.length - 1]}`
+      : (founderFirstNames[0] ?? "");
   const testimonials = (testimonialsData ?? []) as Testimonial[];
   const mediaItems = (mediaData ?? []) as MediaItem[];
   const config = Object.fromEntries(
@@ -1002,6 +1007,30 @@ export default async function HomePage() {
               Explorar conteúdo
             </Link>
           </div>
+
+          {authors.length > 0 && (
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", marginTop: "2.5rem" }}>
+              <div style={{ display: "flex" }}>
+                {authors.slice(0, 4).map((author, i) => (
+                  <div
+                    key={author.id}
+                    style={{
+                      width: "2.5rem",
+                      height: "2.5rem",
+                      borderRadius: "50%",
+                      border: "2px solid var(--site-surface-alt)",
+                      marginLeft: i === 0 ? 0 : "-0.625rem",
+                      flexShrink: 0,
+                      background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                    }}
+                  />
+                ))}
+              </div>
+              <span style={{ fontSize: "0.875rem", color: "var(--site-muted)", textAlign: "left" }}>
+                Fale direto com {founderNamesText} — sem intermediários.
+              </span>
+            </div>
+          )}
           </Reveal>
         </div>
       </section>
