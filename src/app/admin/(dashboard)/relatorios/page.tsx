@@ -418,8 +418,58 @@ export default async function RelatoriosPage({
       ) : tab === "atividade" ? (
         <>
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", marginBottom: "1.25rem" }}>
+            <div style={{ display: "flex", gap: "0.25rem", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "0.625rem", padding: "0.25rem" }}>
+              {PERIODS.map((p) => (
+                <Link
+                  key={p.key}
+                  href={`/admin/relatorios?tab=atividade&period=${p.key}${userFilter ? `&user=${encodeURIComponent(userFilter)}` : ""}`}
+                  style={{
+                    padding: "0.375rem 0.75rem",
+                    borderRadius: "0.375rem",
+                    fontSize: "0.8125rem",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    color: !usingCustomRange && period === p.key ? "white" : "var(--admin-muted)",
+                    backgroundColor: !usingCustomRange && period === p.key ? "#4361EE" : "transparent",
+                  }}
+                >
+                  {p.label}
+                </Link>
+              ))}
+            </div>
+
+            <form
+              method="get"
+              style={{ display: "flex", gap: "0.5rem", alignItems: "center", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "0.625rem", padding: "0.375rem 0.625rem" }}
+            >
+              <input type="hidden" name="tab" value="atividade" />
+              {userFilter && <input type="hidden" name="user" value={userFilter} />}
+              <input
+                type="date"
+                name="from"
+                defaultValue={from ?? ""}
+                style={{ border: "1px solid var(--admin-border-strong)", borderRadius: "0.375rem", padding: "0.3rem 0.5rem", fontSize: "0.8125rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" }}
+              />
+              <span style={{ color: "var(--admin-faint)", fontSize: "0.8125rem" }}>até</span>
+              <input
+                type="date"
+                name="to"
+                defaultValue={to ?? ""}
+                style={{ border: "1px solid var(--admin-border-strong)", borderRadius: "0.375rem", padding: "0.3rem 0.5rem", fontSize: "0.8125rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" }}
+              />
+              <button
+                type="submit"
+                style={{ backgroundColor: "#4361EE", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.375rem 0.875rem", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+              >
+                Aplicar
+              </button>
+            </form>
+
             <form method="get" style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
               <input type="hidden" name="tab" value="atividade" />
+              {!usingCustomRange && <input type="hidden" name="period" value={period} />}
+              {from && <input type="hidden" name="from" value={from} />}
+              {to && <input type="hidden" name="to" value={to} />}
               <select
                 name="user"
                 defaultValue={userFilter ?? ""}
