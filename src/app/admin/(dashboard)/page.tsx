@@ -3,10 +3,6 @@ import { FileText, Users, Mail, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { Lead } from "@/types/database.types";
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
-
 const statusLabels: Record<Lead["status"], { label: string; color: string; bg: string }> = {
   new: { label: "Novo", color: "#4361EE", bg: "rgba(67,97,238,0.12)" },
   contacted: { label: "Em contato", color: "#FFB703", bg: "rgba(255,183,3,0.12)" },

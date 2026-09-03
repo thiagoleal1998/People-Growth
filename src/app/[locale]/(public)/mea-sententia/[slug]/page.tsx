@@ -14,10 +14,6 @@ import { renderMarkdownLite } from "@/lib/markdown-lite";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import type { Article, Category, Author, Comment } from "@/types/database.types";
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
-
 export const revalidate = 300;
 
 async function getArticle(slug: string) {

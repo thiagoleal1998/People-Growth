@@ -2,10 +2,6 @@ import { createClient } from "@/lib/supabase/server";
 import { AdForm } from "../AdForm";
 import type { Article, Ad } from "@/types/database.types";
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
-
 export default async function NovoAnuncioPage({ searchParams }: { searchParams: Promise<{ imageError?: string }> }) {
   const { imageError } = await searchParams;
   const supabase = await createClient();

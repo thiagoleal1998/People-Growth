@@ -9,10 +9,6 @@ import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import "../globals.css";
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
-
 type SiteConfigRow = { key: string; value: string | null };
 
 async function getSiteConfig() {
@@ -124,7 +120,7 @@ export default async function LocaleLayout({
 `;
 
   return (
-    <html lang={locale}>
+    <html lang={locale} data-scroll-behavior="smooth">
       <head>
         <link rel="alternate" type="application/rss+xml" title="People & Growth — Mea Sententia" href="/rss.xml" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />

@@ -2,10 +2,6 @@ import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import { createClient } from "@/lib/supabase/server";
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
-
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -21,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function AuthorRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt">
+    <html lang="pt" data-scroll-behavior="smooth">
       <body style={{ margin: 0, fontFamily: "system-ui, sans-serif", backgroundColor: "#f0f4f8" }}>
         <NextTopLoader color="#4361EE" height={3} showSpinner={false} />
         {children}

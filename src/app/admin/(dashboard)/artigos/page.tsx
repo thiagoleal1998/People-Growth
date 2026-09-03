@@ -6,10 +6,6 @@ import { SavedToast } from "@/components/admin/SavedToast";
 import { ArticlesTabs } from "./ArticlesTabs";
 import type { Article } from "@/types/database.types";
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
-
 export default async function ArtigosAdminPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   const { saved } = await searchParams;
   const supabase = await createClient();

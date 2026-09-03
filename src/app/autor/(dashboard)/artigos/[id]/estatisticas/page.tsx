@@ -7,10 +7,6 @@ import { Card, EmptyState, Badge } from "@/components/admin/ui";
 import { timeAgo } from "@/lib/time-ago";
 import type { Article, Comment } from "@/types/database.types";
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
-
 const statusConfig: Record<Comment["status"], { label: string; tone: "success" | "warning" | "neutral" }> = {
   pending: { label: "Pendente", tone: "warning" },
   approved: { label: "Aprovado", tone: "success" },
