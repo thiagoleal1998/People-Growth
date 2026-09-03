@@ -401,7 +401,6 @@ export default async function RelatoriosPage({
               <select
                 name="user"
                 defaultValue={userFilter ?? ""}
-                onChange={(e) => e.currentTarget.form?.requestSubmit()}
                 style={{ padding: "0.5rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.8125rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" }}
               >
                 <option value="">Todos os usuários</option>
@@ -409,6 +408,12 @@ export default async function RelatoriosPage({
                   <option key={email} value={email}>{email}</option>
                 ))}
               </select>
+              <button
+                type="submit"
+                style={{ backgroundColor: "#4361EE", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.5rem 0.875rem", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+              >
+                Filtrar
+              </button>
             </form>
           </div>
 
