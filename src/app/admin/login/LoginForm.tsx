@@ -21,6 +21,19 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
             pointerEvents: "none",
           }}
         />
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            backgroundImage: "radial-gradient(rgba(255,255,255,0.06) 1px, transparent 1px)",
+            backgroundSize: "28px 28px",
+            maskImage: "radial-gradient(circle at 35% 40%, black 0%, transparent 65%)",
+            WebkitMaskImage: "radial-gradient(circle at 35% 40%, black 0%, transparent 65%)",
+            pointerEvents: "none",
+          }}
+        />
+        <div style={{ position: "absolute", width: "22rem", height: "22rem", borderRadius: "50%", background: "#4361EE", opacity: 0.18, filter: "blur(90px)", top: "-6rem", right: "-6rem", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", width: "18rem", height: "18rem", borderRadius: "50%", background: "#06D6A0", opacity: 0.14, filter: "blur(90px)", bottom: "-4rem", left: "-4rem", pointerEvents: "none" }} />
         <div style={{ position: "relative", maxWidth: "440px" }}>
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
