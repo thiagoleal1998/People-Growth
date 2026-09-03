@@ -59,10 +59,11 @@ export function ArticleTopMatter({ title, summary, speechText, coverImage, cover
         <TextToSpeechButton text={speechText} title={title} fill={!summary} />
       </div>
 
-      {/* Photo floats right so short summary text wraps beside it, like a
-          traditional news layout — rather than two independent columns
-          that leave awkward empty space when the text is short. */}
-      {((summary && expanded) || (showCoverImage && !summary)) && (
+      {/* The photo always shows here (when there's no video) — it's not
+          part of what the Resumo toggle hides. It floats right so the
+          summary text, when open, wraps beside it in one flow rather than
+          sitting in a rigid independent column. */}
+      {(showCoverImage || (summary && expanded)) && (
         <div style={{ marginTop: "1.25rem", overflow: "hidden" }}>
           {showCoverImage && (
             <div className="article-top-matter-photo" style={{ float: "right", width: "300px", marginLeft: "1.5rem", marginBottom: "0.75rem" }}>
