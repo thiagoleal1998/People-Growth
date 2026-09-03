@@ -30,12 +30,23 @@ function WeatherIcon({ code }: { code: number }) {
 async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
   try {
     const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=pt`);
+    if (!res.ok) {
+      console.error("[WeatherWidget] reverse geocode HTTP error:", res.status);
+      return null;
+    }
     const json = await res.json();
     return json.city || json.locality || null;
-  } catch {
+  } catch (err) {
+    console.error("[WeatherWidget] reverse geocode fetch failed:", err);
     return null;
   }
 }
+
+const GEOLOCATION_ERROR_NAMES: Record<number, string> = {
+  1: "PERMISSION_DENIED",
+  2: "POSITION_UNAVAILABLE (verifique se a Localização está ativada no Windows/macOS)",
+  3: "TIMEOUT",
+};
 
 export function WeatherWidget({ cityName, lat, lon }: { cityName: string; lat: number; lon: number }) {
   const [location, setLocation] = useState<Location | null>(null);
@@ -69,7 +80,8 @@ export function WeatherWidget({ cityName, lat, lon }: { cityName: string; lat: n
         const detectedCity = await reverseGeocode(latitude, longitude);
         setLocation({ cityName: detectedCity ?? cityName, lat: latitude, lon: longitude });
       },
-      () => {
+      (err) => {
+        console.error(`[WeatherWidget] geolocation failed: ${GEOLOCATION_ERROR_NAMES[err.code] ?? err.code} — ${err.message}`);
         clearTimeout(timer);
         applyFallbackLocation();
       },
@@ -89,6 +101,10 @@ export function WeatherWidget({ cityName, lat, lon }: { cityName: string; lat: n
       try {
         const url = `https://api.open-meteo.com/v1/forecast?latitude=${location.lat}&longitude=${location.lon}&current=temperature_2m,weather_code&daily=temperature_2m_max,temperature_2m_min&timezone=auto`;
         const res = await fetch(url);
+        if (!res.ok) {
+          console.error("[WeatherWidget] forecast HTTP error:", res.status, await res.text());
+          return;
+        }
         const json = await res.json();
         if (cancelled) return;
         setData({
@@ -97,8 +113,8 @@ export function WeatherWidget({ cityName, lat, lon }: { cityName: string; lat: n
           min: Math.round(json.daily.temperature_2m_min[0]),
           code: json.current.weather_code,
         });
-      } catch {
-        // Silently skip — the widget just doesn't render this cycle.
+      } catch (err) {
+        console.error("[WeatherWidget] forecast fetch failed:", err);
       }
     }
 
