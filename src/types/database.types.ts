@@ -192,6 +192,20 @@ type UserProfileRow = {
   created_at: string;
 };
 
+type InternalTicketRow = {
+  id: string;
+  created_by: string | null;
+  created_by_name: string;
+  created_by_role: "admin" | "author";
+  type: "bug" | "suggestion";
+  title: string;
+  description: string;
+  status: "open" | "in_progress" | "resolved";
+  admin_response: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 type CommentRow = {
   id: string;
   article_id: string;
@@ -303,6 +317,7 @@ export type Database = {
       authors: { Row: AuthorRow; Insert: Omit<AuthorRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AuthorRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       error_reports: { Row: ErrorReportRow; Insert: Omit<ErrorReportRow, "id" | "created_at">; Update: Partial<Omit<ErrorReportRow, "id" | "created_at">>; Relationships: [] };
       user_profiles: { Row: UserProfileRow; Insert: Omit<UserProfileRow, "created_at">; Update: Partial<Omit<UserProfileRow, "id" | "created_at">>; Relationships: [] };
+      internal_tickets: { Row: InternalTicketRow; Insert: Omit<InternalTicketRow, "id" | "created_at" | "updated_at" | "status" | "admin_response">; Update: Partial<Omit<InternalTicketRow, "id" | "created_at">>; Relationships: [] };
       comments: { Row: CommentRow; Insert: Omit<CommentRow, "id" | "created_at" | "likes" | "reports">; Update: Partial<Omit<CommentRow, "id" | "created_at">>; Relationships: [] };
       institutional_pages: { Row: InstitutionalPageRow; Insert: Omit<InstitutionalPageRow, "updated_at">; Update: Partial<Omit<InstitutionalPageRow, "slug" | "updated_at">>; Relationships: [] };
       page_views: { Row: PageViewRow; Insert: Omit<PageViewRow, "id" | "created_at">; Update: Partial<Omit<PageViewRow, "id" | "created_at">>; Relationships: [] };
@@ -331,6 +346,7 @@ export type MediaItem = MediaItemRow;
 export type Author = AuthorRow;
 export type ErrorReport = ErrorReportRow;
 export type UserProfile = UserProfileRow;
+export type InternalTicket = InternalTicketRow;
 export type Comment = CommentRow;
 export type PageView = PageViewRow;
 export type AdSlot = AdSlotRow;

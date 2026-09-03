@@ -4,11 +4,12 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { FileText, MessageCircle, UserCircle, Monitor, LogOut } from "lucide-react";
+import { FileText, MessageCircle, UserCircle, Monitor, LogOut, LifeBuoy } from "lucide-react";
 
 const links = [
   { href: "/autor", label: "Meus artigos", icon: FileText },
   { href: "/autor/comentarios", label: "Comentários", icon: MessageCircle },
+  { href: "/autor/chamados", label: "Chamados", icon: LifeBuoy },
   { href: "/autor/perfil", label: "Meu perfil", icon: UserCircle },
 ];
 

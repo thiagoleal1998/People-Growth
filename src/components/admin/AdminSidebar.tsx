@@ -20,13 +20,13 @@ import {
   Wrench,
   UserCircle,
   Search,
-  AlertTriangle,
   KeyRound,
   MessageCircle,
   ScrollText,
   Eye,
   Megaphone,
   BarChart3,
+  LifeBuoy,
 } from "lucide-react";
 
 const links = [
@@ -38,7 +38,7 @@ const links = [
   { href: "/admin/portfolio", label: "Portfólio", icon: Briefcase },
   { href: "/admin/servicos", label: "Serviços", icon: Wrench },
   { href: "/admin/leads", label: "Leads / CRM", icon: Users, countKey: "leads" as const },
-  { href: "/admin/erros", label: "Erros reportados", icon: AlertTriangle, countKey: "erros" as const },
+  { href: "/admin/chamados", label: "Chamados", icon: LifeBuoy, countKey: "chamados" as const },
   { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
   { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
   { href: "/admin/cursos", label: "Cursos", icon: BookOpen },
@@ -60,7 +60,7 @@ export function AdminSidebar({
   logoUrl?: string;
   userName?: string;
   userPhoto?: string;
-  counts?: { comentarios: number; leads: number; erros: number };
+  counts?: { comentarios: number; leads: number; chamados: number };
 }) {
   const pathname = usePathname();
   const [loggingOut, setLoggingOut] = useState(false);
