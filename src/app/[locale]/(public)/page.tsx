@@ -641,6 +641,7 @@ export default async function HomePage() {
             style={{
               display: "flex",
               flexWrap: "wrap",
+              justifyContent: "center",
               gap: "2.5rem",
               marginTop: "4rem",
               paddingTop: "3rem",
