@@ -14,6 +14,7 @@ const contactFields: { key: string; label: string; placeholder?: string }[] = [
 
 const homeContentFields: { key: string; label: string; placeholder?: string }[] = [
   { key: "hero_photo", label: "Foto de destaque (URL da imagem)" },
+  { key: "hero_video_url", label: "Vídeo institucional (topo da home, ao lado do título — URL do YouTube)", placeholder: "https://www.youtube.com/watch?v=..." },
   { key: "featured_video_url", label: "Vídeo em destaque (URL de embed do YouTube)", placeholder: "https://www.youtube.com/embed/..." },
   { key: "shorts_video_url", label: "Vídeo vertical (Shorts, URL de embed do YouTube)", placeholder: "https://www.youtube.com/shorts/..." },
 ];

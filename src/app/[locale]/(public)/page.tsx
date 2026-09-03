@@ -18,7 +18,8 @@ import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { MediaCarousel } from "@/components/MediaCarousel";
 import { AdBanner } from "@/components/AdBanner";
 import { Reveal } from "@/components/Reveal";
-import { toYouTubeEmbedUrl, withAutoplay } from "@/lib/youtube";
+import { VideoFacade } from "@/components/VideoFacade";
+import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/youtube";
 import type { Article, Author, Testimonial, MediaItem } from "@/types/database.types";
 
 const stats = [
@@ -97,6 +98,8 @@ export default async function HomePage() {
   const config = Object.fromEntries(
     ((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""])
   );
+  const heroVideoUrl = config.hero_video_url ? toYouTubeEmbedUrl(config.hero_video_url) : "";
+  const heroVideoThumbnail = config.hero_video_url ? getYouTubeThumbnail(config.hero_video_url) : null;
   const featuredVideoUrl = config.featured_video_url ? toYouTubeEmbedUrl(config.featured_video_url) : "";
   const liveStreamUrl = config.live_stream_url ? toYouTubeEmbedUrl(config.live_stream_url) : "";
   const shortsVideoUrl = config.shorts_video_url ? toYouTubeEmbedUrl(config.shorts_video_url) : "";
@@ -518,6 +521,8 @@ export default async function HomePage() {
         />
 
         <div className="container-xl" style={{ position: "relative", zIndex: 1, paddingTop: "5rem", paddingBottom: "5rem" }}>
+          <div className={heroVideoUrl ? "hero-grid" : undefined} style={heroVideoUrl ? { display: "grid", gridTemplateColumns: "1.1fr 0.9fr", gap: "3rem", alignItems: "center" } : undefined}>
+          <div>
           {/* Badge */}
           <div
             style={{
@@ -646,6 +651,23 @@ export default async function HomePage() {
               </div>
             ))}
           </div>
+          </div>
+
+          {heroVideoUrl && (
+            <div
+              style={{
+                position: "relative",
+                paddingTop: "56.25%",
+                borderRadius: "1.25rem",
+                overflow: "hidden",
+                boxShadow: "0 24px 60px -12px rgba(0,0,0,0.55)",
+                border: "1px solid rgba(255,255,255,0.1)",
+              }}
+            >
+              <VideoFacade embedUrl={heroVideoUrl} thumbnailUrl={heroVideoThumbnail} title="Vídeo institucional People & Growth" />
+            </div>
+          )}
+          </div>
 
           {/* Founders */}
           {authors.length > 0 && (
@@ -687,6 +709,14 @@ export default async function HomePage() {
             </div>
           )}
         </div>
+
+        {heroVideoUrl && (
+          <style>{`
+            @media (max-width: 860px) {
+              .hero-grid { grid-template-columns: 1fr !important; }
+            }
+          `}</style>
+        )}
       </section>
 
       {/* Services */}
