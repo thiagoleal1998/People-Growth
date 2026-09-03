@@ -9,8 +9,9 @@ import { Comments } from "@/components/Comments";
 import { AdBanner } from "@/components/AdBanner";
 import { MostRead } from "@/components/MostRead";
 import { ReadingProgress } from "@/components/ReadingProgress";
+import { ArticleTopMatter } from "@/components/ArticleTopMatter";
 import { createClient } from "@/lib/supabase/server";
-import { renderMarkdownLite } from "@/lib/markdown-lite";
+import { renderMarkdownLite, stripMarkdownLite } from "@/lib/markdown-lite";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import type { Article, Category, Author, Comment } from "@/types/database.types";
 
@@ -218,6 +219,16 @@ export default async function ArticlePage({
         >
           {/* Article body */}
           <article>
+            <ArticleTopMatter
+              title={article.title_pt}
+              summary={article.summary_pt}
+              speechText={stripMarkdownLite(article.content_pt)}
+              coverImage={article.cover_image}
+              coverImageCaption={article.cover_image_caption}
+              coverImageCredit={article.cover_image_credit}
+              hasVideo={Boolean(article.video_url)}
+            />
+
             {author && (
               <div
                 style={{

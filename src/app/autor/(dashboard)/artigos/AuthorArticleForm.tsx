@@ -34,19 +34,28 @@ export function AuthorArticleForm({ item, categories, imageError }: { item?: Art
             ))}
           </Select>
         </Field>
-        <Field label="Resumo (PT)">
+        <Field label="Linha fina / subtítulo (PT)" hint="Aparece nas listagens e cards de artigos — não é o Resumo em destaque abaixo.">
           <Textarea name="excerpt_pt" rows={2} defaultValue={item?.excerpt_pt ?? ""} />
         </Field>
-        <Field label="Resumo (EN)">
+        <Field label="Linha fina / subtítulo (EN)">
           <Textarea name="excerpt_en" rows={2} defaultValue={item?.excerpt_en ?? ""} />
         </Field>
-        <Field label="Conteúdo (PT)" hint="Suporta markdown simples">
+        <Field label="Resumo em destaque (PT)" hint='Opcional. Aparece numa caixa "Resumo" expansível, no início do artigo. Deixe em branco para não mostrar essa caixa.'>
+          <Textarea name="summary_pt" rows={3} defaultValue={item?.summary_pt ?? ""} />
+        </Field>
+        <Field label="Resumo em destaque (EN)">
+          <Textarea name="summary_en" rows={3} defaultValue={item?.summary_en ?? ""} />
+        </Field>
+        <Field
+          label="Conteúdo (PT)"
+          hint='Suporta markdown simples: **negrito**, [link](url), ## subtítulo, listas com "- " ou "1. ", e citação em destaque com "> texto" (opcionalmente seguido de "> — Autor da frase" numa linha própria).'
+        >
           <Textarea name="content_pt" rows={12} defaultValue={item?.content_pt} required />
         </Field>
         <Field label="Conteúdo (EN)">
           <Textarea name="content_en" rows={12} defaultValue={item?.content_en ?? ""} />
         </Field>
-        <Field label="Vídeo (URL do YouTube)" hint="Opcional — aparece embutido no topo do artigo, antes do texto.">
+        <Field label="Vídeo (URL do YouTube)" hint="Opcional — vira o visual principal do artigo, no lugar da imagem de capa. Mesmo assim, cadastre uma imagem de capa abaixo: ela é usada como miniatura ao compartilhar o link.">
           <Input name="video_url" defaultValue={item?.video_url ?? ""} placeholder="https://www.youtube.com/watch?v=..." />
         </Field>
         <Field label="Imagem de capa" hint="PNG, JPG ou WEBP — convertida automaticamente para WebP e comprimida para menos de 1MB.">
@@ -61,6 +70,12 @@ export function AuthorArticleForm({ item, categories, imageError }: { item?: Art
           <input type="file" name="cover_image_file" accept="image/png,image/jpeg,image/webp" />
           <input type="hidden" name="current_cover_image" value={item?.cover_image ?? ""} />
           <ErrorBanner message={imageError} />
+        </Field>
+        <Field label="Legenda da imagem" hint="Descrição curta exibida junto da foto no início do artigo.">
+          <Input name="cover_image_caption" defaultValue={item?.cover_image_caption ?? ""} />
+        </Field>
+        <Field label="Crédito da imagem" hint="Fotógrafo ou fonte da imagem.">
+          <Input name="cover_image_credit" defaultValue={item?.cover_image_credit ?? ""} />
         </Field>
         <Field
           label="Status"
