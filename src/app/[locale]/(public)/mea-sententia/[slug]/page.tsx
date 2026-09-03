@@ -9,7 +9,7 @@ import { Comments } from "@/components/Comments";
 import { AdBanner } from "@/components/AdBanner";
 import { MostRead } from "@/components/MostRead";
 import { ReadingProgress } from "@/components/ReadingProgress";
-import { ArticleTopMatter } from "@/components/ArticleTopMatter";
+import { ArticleBody } from "@/components/ArticleBody";
 import { createClient } from "@/lib/supabase/server";
 import { renderMarkdownLite, stripMarkdownLite } from "@/lib/markdown-lite";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
@@ -274,33 +274,15 @@ export default async function ArticlePage({
               </div>
             )}
 
-            <ArticleTopMatter
+            <ArticleBody
               title={article.title_pt}
               summary={article.summary_pt}
               speechText={stripMarkdownLite(article.content_pt)}
+              bodyHtml={renderMarkdownLite(article.content_pt)}
               coverImage={article.cover_image}
               coverImageCaption={article.cover_image_caption}
               coverImageCredit={article.cover_image_credit}
-              hasVideo={Boolean(article.video_url)}
-            />
-
-            {article.video_url && (
-              <div style={{ position: "relative", paddingTop: "56.25%", borderRadius: "0.75rem", overflow: "hidden", marginBottom: "1.75rem" }}>
-                <iframe
-                  src={toYouTubeEmbedUrl(article.video_url)}
-                  style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
-                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                  allowFullScreen
-                />
-              </div>
-            )}
-            <div
-              style={{
-                fontSize: "1.0625rem",
-                lineHeight: 1.85,
-                color: "var(--site-text-secondary)",
-              }}
-              dangerouslySetInnerHTML={{ __html: renderMarkdownLite(article.content_pt) }}
+              videoEmbedUrl={article.video_url ? toYouTubeEmbedUrl(article.video_url) : null}
             />
 
             <ShareButtons title={article.title_pt} />
