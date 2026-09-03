@@ -683,9 +683,9 @@ export default async function HomePage() {
               <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#06D6A0", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
                 Quem está por trás da People &amp; Growth
               </div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "2rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "2rem" }}>
                 {authors.map((author) => (
-                  <div key={author.id} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start", maxWidth: "280px" }}>
+                  <div key={author.id} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
                     <div
                       style={{
                         width: "3.25rem",
