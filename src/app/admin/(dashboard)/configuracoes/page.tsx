@@ -19,6 +19,12 @@ const homeContentFields: { key: string; label: string; placeholder?: string }[] 
   { key: "shorts_video_url", label: "Vídeo vertical (Shorts, URL de embed do YouTube)", placeholder: "https://www.youtube.com/shorts/..." },
 ];
 
+const weatherFields: { key: string; label: string; placeholder?: string }[] = [
+  { key: "weather_city_name", label: "Cidade exibida", placeholder: "São Paulo" },
+  { key: "weather_lat", label: "Latitude", placeholder: "-23.5505" },
+  { key: "weather_lon", label: "Longitude", placeholder: "-46.6333" },
+];
+
 const liveFields: { key: string; label: string; placeholder?: string }[] = [
   { key: "live_stream_url", label: "Live (URL de embed do YouTube)", placeholder: "https://www.youtube.com/embed/live_stream?channel=..." },
   { key: "live_caption_pt", label: "Legenda da live", placeholder: "Ex: Thiago Leal comenta os principais temas da semana" },
@@ -90,6 +96,16 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
             <SectionCard title="Conteúdo em destaque na home" subtitle="Foto e vídeos exibidos na página inicial do site." wide>
               <FieldGrid>
                 {homeContentFields.map(({ key, label, placeholder }) => (
+                  <Field key={key} label={label}>
+                    <Input name={key} defaultValue={values[key] ?? ""} placeholder={placeholder} />
+                  </Field>
+                ))}
+              </FieldGrid>
+            </SectionCard>
+
+            <SectionCard title="Barra de topo" subtitle='Cotação de dólar/euro, previsão do tempo e busca, exibidas acima do menu em todo o site. Encontre a latitude/longitude da cidade em latlong.net.' wide>
+              <FieldGrid>
+                {weatherFields.map(({ key, label, placeholder }) => (
                   <Field key={key} label={label}>
                     <Input name={key} defaultValue={values[key] ?? ""} placeholder={placeholder} />
                   </Field>

@@ -25,9 +25,10 @@ export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
 
   return (
     <header
+      className="site-navbar"
       style={{
         position: "fixed",
-        top: 0,
+        top: "2.25rem",
         left: 0,
         right: 0,
         zIndex: 50,
@@ -135,6 +136,9 @@ export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
         @media (max-width: 1024px) {
           .hidden-mobile { display: none !important; }
           .show-mobile { display: flex !important; }
+        }
+        @media (max-width: 768px) {
+          .site-navbar { top: 0 !important; }
         }
       `}</style>
     </header>
