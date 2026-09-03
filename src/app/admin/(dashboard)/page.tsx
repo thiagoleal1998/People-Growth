@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { FileText, Users, Mail, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { LiveStatsWidget } from "@/components/admin/LiveStatsWidget";
 import type { Lead } from "@/types/database.types";
 
 const statusLabels: Record<Lead["status"], { label: string; color: string; bg: string }> = {
@@ -43,6 +44,8 @@ export default async function AdminDashboard() {
         <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.25rem" }}>Dashboard</h1>
         <p style={{ color: "var(--admin-muted)", fontSize: "0.9375rem" }}>Bem-vindo! Aqui está o resumo do seu site.</p>
       </div>
+
+      <LiveStatsWidget />
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.25rem", marginBottom: "2.5rem" }}>
         {stats.map(({ label, value, icon: Icon, color }) => (

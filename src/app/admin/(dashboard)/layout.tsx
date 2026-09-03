@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
 
@@ -17,6 +17,14 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     client.from("password_reset_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
   ]);
   const logoUrl = configData?.value as string | undefined;
+
+  if (profile?.id) {
+    const admin = await createAdminClient();
+    await (admin as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      .from("user_profiles")
+      .update({ last_seen_at: new Date().toISOString() })
+      .eq("id", profile.id);
+  }
 
   let userName: string | undefined;
   let userPhoto: string | undefined;

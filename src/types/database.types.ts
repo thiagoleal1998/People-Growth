@@ -193,6 +193,7 @@ type UserProfileRow = {
   email: string;
   role: "admin" | "author";
   author_id: string | null;
+  last_seen_at: string | null;
   created_at: string;
 };
 

@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { AuthorSidebar } from "@/components/autor/AuthorSidebar";
 
@@ -12,6 +12,14 @@ export default async function AuthorDashboardLayout({ children }: { children: Re
     getCurrentProfile(),
   ]);
   const logoUrl = configData?.value as string | undefined;
+
+  if (profile?.id) {
+    const admin = await createAdminClient();
+    await (admin as any) // eslint-disable-line @typescript-eslint/no-explicit-any
+      .from("user_profiles")
+      .update({ last_seen_at: new Date().toISOString() })
+      .eq("id", profile.id);
+  }
 
   let pendingComments = 0;
   if (profile?.author_id) {
