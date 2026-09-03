@@ -240,6 +240,7 @@ type AuthorRow = {
   id: string;
   name: string;
   slug: string;
+  gender: "masculino" | "feminino";
   role_pt: string | null;
   role_en: string | null;
   tagline_pt: string | null;

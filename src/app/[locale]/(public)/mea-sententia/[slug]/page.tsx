@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { ArrowLeft, Clock, Calendar } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, ChevronRight, Linkedin, Instagram } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { ShareButtons } from "@/components/ShareButtons";
@@ -218,6 +218,61 @@ export default async function ArticlePage({
         >
           {/* Article body */}
           <article>
+            {author && (
+              <div
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  gap: "1rem",
+                  flexWrap: "wrap",
+                  padding: "1rem 0",
+                  marginBottom: "1.75rem",
+                  borderTop: "1px solid var(--site-border)",
+                  borderBottom: "1px solid var(--site-border)",
+                }}
+              >
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <div
+                    style={{
+                      width: "2.75rem",
+                      height: "2.75rem",
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                    }}
+                  />
+                  <div>
+                    <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "0.9375rem" }}>{author.name}</div>
+                    <Link
+                      href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
+                      style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
+                    >
+                      Sobre {author.gender === "feminino" ? "a autora" : "o autor"} <ChevronRight size={14} />
+                    </Link>
+                  </div>
+                </div>
+
+                {(author.linkedin_url || author.instagram_url) && (
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <span style={{ color: "var(--site-muted)", fontSize: "0.8125rem", fontWeight: 600 }}>Siga nas redes</span>
+                    <div style={{ display: "flex", gap: "0.625rem" }}>
+                      {author.linkedin_url && (
+                        <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={{ color: "var(--site-text)" }}>
+                          <Linkedin size={17} />
+                        </a>
+                      )}
+                      {author.instagram_url && (
+                        <a href={author.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "var(--site-text)" }}>
+                          <Instagram size={17} />
+                        </a>
+                      )}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             {article.video_url && (
               <div style={{ position: "relative", paddingTop: "56.25%", borderRadius: "0.75rem", overflow: "hidden", marginBottom: "1.75rem" }}>
                 <iframe

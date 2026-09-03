@@ -84,6 +84,12 @@ export function AuthorForm({ item }: { item?: Author }) {
               <Field label="Nome">
                 <Input name="name" defaultValue={item?.name} required />
               </Field>
+              <Field label="Gênero" hint='Usado para escrever "Sobre o autor" ou "Sobre a autora" corretamente na página do artigo.'>
+                <Select name="gender" defaultValue={item?.gender ?? "masculino"}>
+                  <option value="masculino">Masculino (autor)</option>
+                  <option value="feminino">Feminino (autora)</option>
+                </Select>
+              </Field>
               <Field label="Slug" hint="Usado na URL da página do autor — deixe em branco para gerar automaticamente">
                 <Input name="slug" defaultValue={item?.slug ?? ""} />
               </Field>

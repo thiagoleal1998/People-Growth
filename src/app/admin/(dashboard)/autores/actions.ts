@@ -15,6 +15,7 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
   const payload: Omit<Author, "id" | "created_at" | "updated_at"> = {
     name,
     slug: slugInput || slugify(name, { lower: true, strict: true }),
+    gender: (String(formData.get("gender") ?? "masculino")) as Author["gender"],
     role_pt: String(formData.get("role_pt") ?? "") || null,
     role_en: String(formData.get("role_en") ?? "") || null,
     tagline_pt: String(formData.get("tagline_pt") ?? "").slice(0, 80) || null,
