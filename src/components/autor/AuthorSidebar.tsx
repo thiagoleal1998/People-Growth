@@ -1,6 +1,7 @@
 "use client";
 
-import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
+import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { FileText, MessageCircle, UserCircle, Monitor, LogOut } from "lucide-react";
@@ -13,13 +14,16 @@ const links = [
 
 export function AuthorSidebar({ logoUrl, pendingComments = 0 }: { logoUrl?: string; pendingComments?: number }) {
   const pathname = usePathname();
-  const router = useRouter();
+  const [loggingOut, setLoggingOut] = useState(false);
 
   async function handleLogout() {
+    setLoggingOut(true);
     const supabase = createClient();
     await supabase.auth.signOut();
-    router.push("/admin/login");
-    router.refresh();
+    // Hard navigation instead of router.push: guarantees the browser sends a
+    // fresh request through middleware with the now-cleared session cookie,
+    // instead of racing a client-side transition against cookie clearing.
+    window.location.href = "/admin/login";
   }
 
   return (
@@ -104,9 +108,10 @@ export function AuthorSidebar({ logoUrl, pendingComments = 0 }: { logoUrl?: stri
         </Link>
         <button
           onClick={handleLogout}
-          style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0.875rem", borderRadius: "0.5rem", fontSize: "0.875rem", color: "rgba(255,255,255,0.4)", background: "none", border: "none", cursor: "pointer", width: "100%" }}
+          disabled={loggingOut}
+          style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0.875rem", borderRadius: "0.5rem", fontSize: "0.875rem", color: "rgba(255,255,255,0.4)", background: "none", border: "none", cursor: loggingOut ? "default" : "pointer", width: "100%", opacity: loggingOut ? 0.6 : 1 }}
         >
-          <LogOut size={17} /> Sair
+          <LogOut size={17} className={loggingOut ? "admin-spin" : undefined} /> {loggingOut ? "Saindo..." : "Sair"}
         </button>
       </div>
     </aside>
