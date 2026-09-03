@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { Eye, Users, MousePointerClick, Percent, X, ThumbsUp, MessageCircle, Flag, MoveDown } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
 import { AD_SLOT_DEFS } from "../publicidade/ad-slots";
 import type { Article, Ad, Author, Comment, ActivityLog } from "@/types/database.types";
@@ -303,18 +303,40 @@ export default async function RelatoriosPage({
   }
 
   let activityLogs: ActivityLog[] = [];
-  let activityUsers: string[] = [];
+  let activityUsers: { email: string; name: string }[] = [];
+  let activityNameByEmail = new Map<string, string>();
   if (tab === "atividade") {
     let activityQuery = client.from("activity_log").select("*").order("created_at", { ascending: false }).limit(150);
     if (since) activityQuery = activityQuery.gte("created_at", since);
     if (until) activityQuery = activityQuery.lte("created_at", until);
     if (userFilter) activityQuery = activityQuery.eq("user_email", userFilter);
+
+    // user_profiles only lets a session see its own row (RLS) — this list
+    // needs every admin/author, so it goes through the service role, same
+    // as the Usuários page does.
+    const admin = await createAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const adminClient = admin as any;
+
     const [{ data: activityData }, { data: allUsersData }] = await Promise.all([
       activityQuery,
-      client.from("user_profiles").select("email").order("email"),
+      adminClient.from("user_profiles").select("email, author_id").order("email"),
     ]);
     activityLogs = (activityData ?? []) as ActivityLog[];
-    activityUsers = ((allUsersData ?? []) as { email: string }[]).map((u) => u.email);
+
+    const profiles = (allUsersData ?? []) as { email: string; author_id: string | null }[];
+    const authorIds = profiles.map((p) => p.author_id).filter((id): id is string => Boolean(id));
+    let authorNamesById = new Map<string, string>();
+    if (authorIds.length > 0) {
+      const { data: authorsData } = await adminClient.from("authors").select("id, name").in("id", authorIds);
+      authorNamesById = new Map(((authorsData ?? []) as { id: string; name: string }[]).map((a) => [a.id, a.name]));
+    }
+
+    activityUsers = profiles.map((p) => ({
+      email: p.email,
+      name: (p.author_id && authorNamesById.get(p.author_id)) || p.email,
+    }));
+    activityNameByEmail = new Map(activityUsers.map((u) => [u.email, u.name]));
   }
 
   return (
@@ -404,8 +426,8 @@ export default async function RelatoriosPage({
                 style={{ padding: "0.5rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.8125rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" }}
               >
                 <option value="">Todos os usuários</option>
-                {activityUsers.map((email) => (
-                  <option key={email} value={email}>{email}</option>
+                {activityUsers.map((u) => (
+                  <option key={u.email} value={u.email}>{u.name}</option>
                 ))}
               </select>
               <button
@@ -437,7 +459,7 @@ export default async function RelatoriosPage({
                         <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>
                           {new Date(log.created_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
                         </td>
-                        <td style={{ padding: "0.75rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.8125rem" }}>{log.user_email}</td>
+                        <td style={{ padding: "0.75rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.8125rem" }}>{activityNameByEmail.get(log.user_email) ?? log.user_email}</td>
                         <td style={{ padding: "0.75rem 1.25rem" }}>
                           <span style={{ fontSize: "0.75rem", fontWeight: 700, color: actionInfo.color }}>{actionInfo.label}</span>
                         </td>
