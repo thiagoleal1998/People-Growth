@@ -17,7 +17,7 @@ export async function generateMetadata(): Promise<Metadata> {
 
 export default function AuthorRootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="pt">
+    <html lang="pt" data-scroll-behavior="smooth">
       <body style={{ margin: 0, fontFamily: "system-ui, sans-serif", backgroundColor: "#f0f4f8" }}>
         <NextTopLoader color="#4361EE" height={3} showSpinner={false} />
         {children}

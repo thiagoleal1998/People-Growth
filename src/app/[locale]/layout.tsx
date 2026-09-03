@@ -120,7 +120,7 @@ export default async function LocaleLayout({
 `;
 
   return (
-    <html lang={locale}>
+    <html lang={locale} data-scroll-behavior="smooth">
       <head>
         <link rel="alternate" type="application/rss+xml" title="People & Growth — Mea Sententia" href="/rss.xml" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
