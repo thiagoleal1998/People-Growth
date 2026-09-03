@@ -171,7 +171,7 @@ export function Footer({ logoUrl }: { logoUrl?: string | null }) {
               Cookies
             </Link>
             <NextLink href="/admin" style={{ fontSize: "0.8125rem", color: "inherit" }}>
-              Admin
+              Área Administrativa
             </NextLink>
             <ErrorReportButton />
           </div>

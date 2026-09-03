@@ -1,15 +1,20 @@
 import Link from "next/link";
-import { Eye, Users, MousePointerClick, Percent, X } from "lucide-react";
+import { Eye, Users, MousePointerClick, Percent, X, ThumbsUp, MessageCircle, Flag } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader, Card } from "@/components/admin/ui";
+import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
 import { AD_SLOT_DEFS } from "../publicidade/ad-slots";
-import type { Article, Ad } from "@/types/database.types";
+import type { Article, Ad, Author, Comment } from "@/types/database.types";
 
 const PERIODS = [
   { key: "7", label: "7 dias" },
   { key: "30", label: "30 dias" },
   { key: "90", label: "90 dias" },
   { key: "all", label: "Tudo" },
+] as const;
+
+const TABS = [
+  { key: "geral", label: "Visão geral" },
+  { key: "artigos", label: "Artigos" },
 ] as const;
 
 function StatCard({ icon: Icon, label, value, color }: { icon: typeof Eye; label: string; value: string; color: string }) {
@@ -72,9 +77,9 @@ function DailyChart({ days }: { days: { date: string; impressions: number; click
 export default async function RelatoriosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string; from?: string; to?: string; ad?: string }>;
+  searchParams: Promise<{ period?: string; from?: string; to?: string; ad?: string; tab?: string }>;
 }) {
-  const { period = "30", from, to, ad: adParam } = await searchParams;
+  const { period = "30", from, to, ad: adParam, tab = "geral" } = await searchParams;
   const usingCustomRange = Boolean(from || to);
 
   let since: string | null;
@@ -199,6 +204,46 @@ export default async function RelatoriosPage({
 
   const rangeQuery: Record<string, string> = usingCustomRange ? { ...(from ? { from } : {}), ...(to ? { to } : {}) } : { period };
 
+  let articleStats: {
+    id: string;
+    title: string;
+    author: string;
+    views: number;
+    comments: number;
+    likes: number;
+    reports: number;
+  }[] = [];
+  if (tab === "artigos") {
+    const [{ data: articlesForStats }, { data: authorsData }, { data: commentsData }] = await Promise.all([
+      client.from("articles").select("id, title_pt, author_id, views").eq("status", "published"),
+      client.from("authors").select("id, name"),
+      client.from("comments").select("article_id, likes, reports"),
+    ]);
+    const authorNames = new Map(((authorsData ?? []) as Pick<Author, "id" | "name">[]).map((a) => [a.id, a.name]));
+    const byArticle = new Map<string, { comments: number; likes: number; reports: number }>();
+    for (const c of (commentsData ?? []) as Pick<Comment, "article_id" | "likes" | "reports">[]) {
+      const entry = byArticle.get(c.article_id) ?? { comments: 0, likes: 0, reports: 0 };
+      entry.comments++;
+      entry.likes += c.likes;
+      entry.reports += c.reports;
+      byArticle.set(c.article_id, entry);
+    }
+    articleStats = ((articlesForStats ?? []) as Pick<Article, "id" | "title_pt" | "author_id" | "views">[])
+      .map((a) => {
+        const s = byArticle.get(a.id) ?? { comments: 0, likes: 0, reports: 0 };
+        return {
+          id: a.id,
+          title: a.title_pt,
+          author: a.author_id ? (authorNames.get(a.author_id) ?? "—") : "—",
+          views: a.views,
+          comments: s.comments,
+          likes: s.likes,
+          reports: s.reports,
+        };
+      })
+      .sort((a, b) => b.views - a.views);
+  }
+
   return (
     <div>
       <PageHeader
@@ -206,6 +251,70 @@ export default async function RelatoriosPage({
         subtitle="Métricas reais de audiência do site — visitas anônimas, sem cookies de rastreamento."
       />
 
+      <div style={{ display: "flex", gap: "0.25rem", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "0.625rem", padding: "0.25rem", marginBottom: "1.25rem", width: "fit-content" }}>
+        {TABS.map((t) => (
+          <Link
+            key={t.key}
+            href={t.key === "geral" ? `/admin/relatorios?${new URLSearchParams(rangeQuery).toString()}` : "/admin/relatorios?tab=artigos"}
+            style={{
+              padding: "0.5rem 1rem",
+              borderRadius: "0.5rem",
+              fontSize: "0.8125rem",
+              fontWeight: 700,
+              textDecoration: "none",
+              color: tab === t.key ? "white" : "var(--admin-muted)",
+              backgroundColor: tab === t.key ? "#4361EE" : "transparent",
+            }}
+          >
+            {t.label}
+          </Link>
+        ))}
+      </div>
+
+      {tab === "artigos" ? (
+        <Card>
+          {articleStats.length === 0 ? (
+            <EmptyState text="Nenhum artigo publicado ainda." />
+          ) : (
+            <table style={{ width: "100%", borderCollapse: "collapse" }}>
+              <thead>
+                <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
+                  {["Artigo", "Autor", "Visualizações", "Comentários", "Curtidas", "Denúncias"].map((h) => (
+                    <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {articleStats.map((a) => (
+                  <tr key={a.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
+                    <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.875rem", maxWidth: "320px" }}>
+                      <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{a.title}</div>
+                    </td>
+                    <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem" }}>{a.author}</td>
+                    <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem" }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}><Eye size={13} /> {a.views.toLocaleString("pt-BR")}</span>
+                    </td>
+                    <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem" }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}><MessageCircle size={13} /> {a.comments}</span>
+                    </td>
+                    <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem" }}>
+                      <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}><ThumbsUp size={13} /> {a.likes}</span>
+                    </td>
+                    <td style={{ padding: "0.875rem 1.25rem", fontSize: "0.875rem" }}>
+                      {a.reports > 0 ? (
+                        <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#dc2626", fontWeight: 700 }}><Flag size={13} /> {a.reports}</span>
+                      ) : (
+                        <span style={{ color: "var(--admin-faint)" }}>—</span>
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </Card>
+      ) : (
+        <>
       <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", marginBottom: "1.5rem" }}>
         <div style={{ display: "flex", gap: "0.25rem", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "0.625rem", padding: "0.25rem" }}>
           {PERIODS.map((p) => (
@@ -351,6 +460,8 @@ export default async function RelatoriosPage({
             )}
           </div>
         </Card>
+      )}
+        </>
       )}
     </div>
   );

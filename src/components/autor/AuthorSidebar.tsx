@@ -3,14 +3,15 @@
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { FileText, UserCircle, Monitor, LogOut } from "lucide-react";
+import { FileText, MessageCircle, UserCircle, Monitor, LogOut } from "lucide-react";
 
 const links = [
   { href: "/autor", label: "Meus artigos", icon: FileText },
+  { href: "/autor/comentarios", label: "Comentários", icon: MessageCircle },
   { href: "/autor/perfil", label: "Meu perfil", icon: UserCircle },
 ];
 
-export function AuthorSidebar({ logoUrl }: { logoUrl?: string }) {
+export function AuthorSidebar({ logoUrl, pendingComments = 0 }: { logoUrl?: string; pendingComments?: number }) {
   const pathname = usePathname();
   const router = useRouter();
 
@@ -68,6 +69,27 @@ export function AuthorSidebar({ logoUrl }: { logoUrl?: string }) {
             >
               <Icon size={17} />
               {label}
+              {href === "/autor/comentarios" && pendingComments > 0 && (
+                <span
+                  style={{
+                    marginLeft: "auto",
+                    backgroundColor: "#dc2626",
+                    color: "white",
+                    fontSize: "0.6875rem",
+                    fontWeight: 800,
+                    minWidth: "1.25rem",
+                    height: "1.25rem",
+                    borderRadius: "9999px",
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    padding: "0 0.3rem",
+                    flexShrink: 0,
+                  }}
+                >
+                  {pendingComments > 99 ? "99+" : pendingComments}
+                </span>
+              )}
             </Link>
           );
         })}
