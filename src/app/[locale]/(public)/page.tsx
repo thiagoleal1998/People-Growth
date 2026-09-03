@@ -18,7 +18,6 @@ import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { MediaCarousel } from "@/components/MediaCarousel";
 import { AdBanner } from "@/components/AdBanner";
 import { Reveal } from "@/components/Reveal";
-import { MostRead } from "@/components/MostRead";
 import { toYouTubeEmbedUrl, withAutoplay } from "@/lib/youtube";
 import type { Article, Author, Testimonial, MediaItem } from "@/types/database.types";
 
@@ -430,9 +429,6 @@ export default async function HomePage() {
                   </div>
                 </div>
 
-                <div style={{ marginTop: "0.875rem" }}>
-                  <MostRead limit={5} />
-                </div>
               </aside>
             </div>
           </div>
