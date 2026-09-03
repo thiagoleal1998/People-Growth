@@ -275,6 +275,9 @@ type PageViewRow = {
   utm_medium: string | null;
   utm_campaign: string | null;
   scroll_depth: number | null;
+  visitor_country: string | null;
+  visitor_region: string | null;
+  visitor_city: string | null;
   created_at: string;
 };
 

@@ -107,7 +107,7 @@ export default async function RelatoriosPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  let viewsQuery = client.from("page_views").select("path, page_type, article_id, visitor_id, referrer, utm_source, utm_campaign, scroll_depth");
+  let viewsQuery = client.from("page_views").select("path, page_type, article_id, visitor_id, referrer, utm_source, utm_campaign, scroll_depth, visitor_city, visitor_country");
   if (since) viewsQuery = viewsQuery.gte("created_at", since);
   if (until) viewsQuery = viewsQuery.lte("created_at", until);
   let adEventsQuery = client.from("ad_events").select("ad_slot_key, ad_id, event_type");
@@ -130,6 +130,8 @@ export default async function RelatoriosPage({
     utm_source: string | null;
     utm_campaign: string | null;
     scroll_depth: number | null;
+    visitor_city: string | null;
+    visitor_country: string | null;
   }[];
   const adEvents = (adEventsData ?? []) as { ad_slot_key: string; ad_id: string | null; event_type: string }[];
   const articleTitles = new Map(((articlesData ?? []) as Pick<Article, "id" | "title_pt">[]).map((a) => [a.id, a.title_pt]));
@@ -185,6 +187,25 @@ export default async function RelatoriosPage({
     .sort((a, b) => b.views - a.views)
     .slice(0, 8);
   const maxSourceViews = topSources[0]?.views ?? 0;
+
+  function locationLabel(v: { visitor_city: string | null; visitor_country: string | null }): string {
+    if (v.visitor_city && v.visitor_country) return `${v.visitor_city}, ${v.visitor_country}`;
+    return v.visitor_city || v.visitor_country || "Desconhecida";
+  }
+
+  const byLocation = new Map<string, { views: number; visitors: Set<string> }>();
+  for (const v of views) {
+    const label = locationLabel(v);
+    const entry = byLocation.get(label) ?? { views: 0, visitors: new Set<string>() };
+    entry.views++;
+    entry.visitors.add(v.visitor_id);
+    byLocation.set(label, entry);
+  }
+  const topLocations = Array.from(byLocation.entries())
+    .map(([location, v]) => ({ location, views: v.views, uniques: v.visitors.size }))
+    .sort((a, b) => b.views - a.views)
+    .slice(0, 8);
+  const maxLocationViews = topLocations[0]?.views ?? 0;
 
   const statsByAd = new Map<string, { impressions: number; clicks: number }>();
   for (const e of adEvents) {
@@ -427,6 +448,20 @@ export default async function RelatoriosPage({
             ) : (
               topSources.map((s) => (
                 <Bar key={s.source} label={s.source} value={s.views} max={maxSourceViews} sub={`${s.uniques} únicos`} />
+              ))
+            )}
+          </div>
+        </Card>
+
+        <Card>
+          <div style={{ padding: "1.5rem" }}>
+            <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.375rem" }}>De onde vem nosso público</h2>
+            <p style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginBottom: "1rem" }}>Localização aproximada por IP — sem cookies, sem pedir permissão ao visitante.</p>
+            {topLocations.length === 0 ? (
+              <p style={{ color: "var(--admin-faint)", fontSize: "0.875rem" }}>Ainda sem dados suficientes neste período.</p>
+            ) : (
+              topLocations.map((l) => (
+                <Bar key={l.location} label={l.location} value={l.views} max={maxLocationViews} sub={`${l.uniques} únicos`} />
               ))
             )}
           </div>

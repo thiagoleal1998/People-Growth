@@ -38,6 +38,13 @@ export async function POST(req: NextRequest) {
 
     const asStr = (v: unknown) => (typeof v === "string" && v ? v.slice(0, 300) : null);
 
+    // Populated by Vercel's edge network on every production request — no
+    // visitor permission needed, unlike browser geolocation.
+    const geoHeader = (name: string) => {
+      const value = req.headers.get(name);
+      return value ? decodeURIComponent(value).slice(0, 200) : null;
+    };
+
     const { data: inserted } = await client
       .from("page_views")
       .insert({
@@ -50,6 +57,9 @@ export async function POST(req: NextRequest) {
         utm_source: asStr(utmSource),
         utm_medium: asStr(utmMedium),
         utm_campaign: asStr(utmCampaign),
+        visitor_country: geoHeader("x-vercel-ip-country"),
+        visitor_region: geoHeader("x-vercel-ip-country-region"),
+        visitor_city: geoHeader("x-vercel-ip-city"),
       })
       .select("id")
       .single();
