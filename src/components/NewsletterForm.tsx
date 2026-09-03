@@ -94,6 +94,7 @@ export function NewsletterForm({ compact = false, light = false }: { compact?: b
         <button
           type="submit"
           disabled={status === "loading"}
+          className="hover-cta"
           style={{
             display: "flex",
             alignItems: "center",

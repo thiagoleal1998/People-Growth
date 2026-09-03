@@ -437,6 +437,7 @@ export default async function HomePage() {
                 <Link
                   key={author.id}
                   href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
+                  className="columnist-hover"
                   style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none", width: "260px" }}
                 >
                   <div
@@ -554,6 +555,7 @@ export default async function HomePage() {
           <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
             <Link
               href="/sobre"
+              className="hover-cta"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -564,7 +566,6 @@ export default async function HomePage() {
                 borderRadius: "0.75rem",
                 fontWeight: 600,
                 fontSize: "0.9375rem",
-                transition: "all 0.2s",
                 boxShadow: "0 4px 24px -4px rgba(67,97,238,0.5)",
               }}
             >
@@ -572,6 +573,7 @@ export default async function HomePage() {
             </Link>
             <Link
               href="/contato"
+              className="hover-cta"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -583,7 +585,6 @@ export default async function HomePage() {
                 borderRadius: "0.75rem",
                 fontWeight: 600,
                 fontSize: "0.9375rem",
-                transition: "all 0.2s",
               }}
             >
               {t("ctaSecondary")}
@@ -836,6 +837,7 @@ export default async function HomePage() {
             </p>
             <Link
               href="/sobre"
+              className="hover-cta"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -911,6 +913,7 @@ export default async function HomePage() {
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
             <Link
               href="/contato"
+              className="hover-cta"
               style={{
                 display: "inline-flex",
                 alignItems: "center",
@@ -928,6 +931,7 @@ export default async function HomePage() {
             </Link>
             <Link
               href="/mea-sententia"
+              className="hover-cta"
               style={{
                 display: "inline-flex",
                 alignItems: "center",

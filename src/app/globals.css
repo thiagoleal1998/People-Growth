@@ -266,6 +266,33 @@
     }
   }
 
+  /* Photo+text row that turns into a soft card on hover, without needing a
+     permanent border/background (e.g. the homepage columnist strip). */
+  .columnist-hover {
+    padding: 0.625rem;
+    margin: -0.625rem;
+    border-radius: 0.75rem;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+  .columnist-hover:hover {
+    background-color: var(--site-surface-alt);
+    transform: translateY(-2px);
+  }
+  [data-theme="dark"] .columnist-hover:hover {
+    background-color: rgba(255, 255, 255, 0.06);
+  }
+
+  /* Buttons/CTAs: a small lift + brighten, distinct from .hover-card's
+     bigger lift (meant for whole cards, not inline buttons). */
+  .hover-cta {
+    transition: transform 0.2s ease, filter 0.2s ease, box-shadow 0.25s ease;
+  }
+  .hover-cta:hover {
+    transform: translateY(-2px);
+    filter: brightness(1.08);
+    box-shadow: 0 8px 20px -6px rgba(0, 0, 0, 0.25);
+  }
+
   /* Loading skeletons (route-level loading.tsx placeholders). */
   .skeleton {
     background: linear-gradient(90deg, var(--site-surface-alt) 25%, var(--site-border-strong) 37%, var(--site-surface-alt) 63%);

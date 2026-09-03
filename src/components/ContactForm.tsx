@@ -166,6 +166,7 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
       <button
         type="submit"
         disabled={status === "loading"}
+        className="hover-cta"
         style={{
           display: "flex",
           alignItems: "center",
