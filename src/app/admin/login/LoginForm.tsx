@@ -9,7 +9,7 @@ export function LoginForm({ logoUrl }: { logoUrl?: string }) {
 
   return (
     <div style={{ minHeight: "100vh", display: "flex" }}>
-      <div className="login-brand-panel" style={{ flex: "1 1 50%", background: "linear-gradient(135deg, #0d1b2a 0%, #162236 50%, #1a1f3e 100%)", position: "relative", overflow: "hidden", padding: "3rem", display: "flex", flexDirection: "column", justifyContent: "center" }}>
+      <div className="login-brand-panel" style={{ flex: "1 1 50%", background: "linear-gradient(135deg, #0d1b2a 0%, #162236 50%, #1a1f3e 100%)", position: "relative", overflow: "hidden", padding: "3rem", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
         <div
           style={{
             position: "absolute",
