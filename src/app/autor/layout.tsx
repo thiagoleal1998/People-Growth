@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import { createClient } from "@/lib/supabase/server";
+import "../globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const supabase = await createClient();
