@@ -104,7 +104,13 @@ export default async function HomePage() {
   const isLive = config.is_live === "true" && Boolean(liveStreamUrl);
   const [featured, ...rest] = allArticles;
   const secondary = rest.slice(0, 3);
-  const moreNews = rest.slice(3);
+  // Capped rather than showing every remaining article: this column sits next
+  // to a sidebar of fixed-height widgets, and an unbounded list would either
+  // fall short of or run past it depending on how many articles exist at any
+  // given time. A short preview + link to the full listing stays visually
+  // balanced regardless of how much content accumulates over time.
+  const moreNews = rest.slice(3, 7);
+  const hasMoreBeyondPreview = rest.length > 7;
 
   const latestByAuthor = new Map<string, Article>();
   for (const a of allArticles) {
@@ -301,6 +307,28 @@ export default async function HomePage() {
                         </div>
                       </Link>
                     ))}
+                    {hasMoreBeyondPreview && (
+                      <Link
+                        href="/mea-sententia"
+                        className="hover-cta"
+                        style={{
+                          display: "flex",
+                          alignItems: "center",
+                          justifyContent: "center",
+                          gap: "0.5rem",
+                          marginTop: "1rem",
+                          padding: "0.75rem",
+                          borderRadius: "0.625rem",
+                          border: "1px solid var(--site-border-strong)",
+                          color: "var(--site-text)",
+                          fontWeight: 700,
+                          fontSize: "0.875rem",
+                          textDecoration: "none",
+                        }}
+                      >
+                        Ver todas as notícias <ArrowRight size={16} />
+                      </Link>
+                    )}
                   </div>
                 )}
               </div>
