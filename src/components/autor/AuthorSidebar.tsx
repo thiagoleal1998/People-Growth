@@ -32,12 +32,13 @@ export function AuthorSidebar({ logoUrl, pendingComments = 0 }: { logoUrl?: stri
     <aside
       style={{
         width: "240px",
-        minHeight: "100vh",
+        height: "100%",
         backgroundColor: "#0d1b2a",
         color: "white",
         display: "flex",
         flexDirection: "column",
         flexShrink: 0,
+        overflow: "hidden",
       }}
     >
       <div style={{ padding: "1.5rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
@@ -52,7 +53,7 @@ export function AuthorSidebar({ logoUrl, pendingComments = 0 }: { logoUrl?: stri
         <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.375rem" }}>Painel do Autor</div>
       </div>
 
-      <nav style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+      <nav className="admin-sidebar-scroll" style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
         {links.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || (href !== "/autor" && pathname.startsWith(href));
           return (

@@ -28,9 +28,9 @@ export default async function AuthorDashboardLayout({ children }: { children: Re
   }
 
   return (
-    <div style={{ display: "flex", minHeight: "100vh" }}>
+    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       <AuthorSidebar logoUrl={logoUrl} pendingComments={pendingComments} />
-      <main style={{ flex: 1, padding: "2rem", overflow: "auto" }}>{children}</main>
+      <main className="admin-scroll" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%" }}>{children}</main>
     </div>
   );
 }
