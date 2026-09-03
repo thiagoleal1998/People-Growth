@@ -3,8 +3,10 @@
 import { useState } from "react";
 import { Eye, EyeOff, Loader2, Sparkles, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
+import { APP_VERSION } from "@/lib/version";
+import type { Author } from "@/types/database.types";
 
-export function LoginForm({ logoUrl }: { logoUrl?: string }) {
+export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Author[] }) {
   const [mode, setMode] = useState<"login" | "forgot">("login");
 
   return (
@@ -39,10 +41,31 @@ export function LoginForm({ logoUrl }: { logoUrl?: string }) {
             <br />
             Vamos construir <span style={{ background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>juntos</span>.
           </h1>
-          <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1rem", lineHeight: 1.6 }}>
+          <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1rem", lineHeight: 1.6, marginBottom: authors.length > 0 ? "2.5rem" : 0 }}>
             Publique artigos, acompanhe métricas e mantenha o People &amp; Growth sempre atualizado — tudo em um só lugar.
           </p>
+
+          {authors.length > 0 && (
+            <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+              {authors.slice(0, 4).map((author) => (
+                <div key={author.id} style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                  <div
+                    style={{
+                      width: "2.25rem",
+                      height: "2.25rem",
+                      borderRadius: "50%",
+                      flexShrink: 0,
+                      background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                    }}
+                  />
+                  <span style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8125rem", fontWeight: 600 }}>{author.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
+
+        <div style={{ position: "absolute", left: "3rem", bottom: "1.5rem", color: "rgba(255,255,255,0.25)", fontSize: "0.75rem" }}>v{APP_VERSION}</div>
       </div>
 
       <div style={{ flex: "1 1 50%", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f8fafc", padding: "1.5rem" }}>

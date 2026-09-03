@@ -1,11 +1,19 @@
 import { createClient } from "@/lib/supabase/server";
 import { LoginForm } from "./LoginForm";
+import type { Author } from "@/types/database.types";
 
 export default async function AdminLoginPage() {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any).from("site_config").select("value").eq("key", "logo_url").maybeSingle();
-  const logoUrl = data?.value as string | undefined;
+  const client = supabase as any;
 
-  return <LoginForm logoUrl={logoUrl} />;
+  const [{ data: configData }, { data: authorsData }] = await Promise.all([
+    client.from("site_config").select("value").eq("key", "logo_url").maybeSingle(),
+    client.from("authors").select("*").eq("status", "active").order("order"),
+  ]);
+
+  const logoUrl = configData?.value as string | undefined;
+  const authors = (authorsData ?? []) as Author[];
+
+  return <LoginForm logoUrl={logoUrl} authors={authors} />;
 }

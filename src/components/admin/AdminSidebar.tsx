@@ -4,6 +4,7 @@ import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
+import { APP_VERSION } from "@/lib/version";
 import { ThemeToggle } from "./ThemeToggle";
 import {
   LayoutDashboard,
@@ -194,6 +195,7 @@ export function AdminSidebar({
         >
           <LogOut size={17} className={loggingOut ? "admin-spin" : undefined} /> {loggingOut ? "Saindo..." : "Sair"}
         </button>
+        <div style={{ padding: "0.5rem 0.875rem 0", fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)" }}>v{APP_VERSION}</div>
       </div>
     </aside>
   );
