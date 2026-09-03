@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { Check, Copy } from "lucide-react";
 import { Field, Input, Textarea, SubmitButton, FieldGrid } from "@/components/admin/ui";
 
 const seoFields: { key: string; label: string; placeholder?: string; hint?: string }[] = [
@@ -31,12 +32,53 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]["id"];
 
+function SitemapField({ siteUrl }: { siteUrl: string }) {
+  const [copied, setCopied] = useState(false);
+  const sitemapUrl = `${siteUrl}/sitemap.xml`;
+
+  async function copy() {
+    try {
+      await navigator.clipboard.writeText(sitemapUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard API unavailable — user can still select the text manually
+    }
+  }
+
+  return (
+    <Field
+      label="Sitemap"
+      hint="Cole essa URL no Google Search Console em Sitemaps (e no Bing Webmaster Tools, se usar). Ele é gerado automaticamente e já inclui todas as matérias publicadas."
+    >
+      <div style={{ display: "flex", gap: "0.5rem" }}>
+        <input
+          readOnly
+          value={sitemapUrl}
+          onFocus={(e) => e.target.select()}
+          style={{ flex: 1, padding: "0.625rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.85rem", backgroundColor: "var(--admin-surface-alt)", color: "var(--admin-text)", fontFamily: "inherit" }}
+        />
+        <button
+          type="button"
+          onClick={copy}
+          style={{ display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.625rem 0.875rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", backgroundColor: "var(--admin-surface)", color: copied ? "#04a87d" : "var(--admin-text-secondary)", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
+        >
+          {copied ? <Check size={14} /> : <Copy size={14} />}
+          {copied ? "Copiado" : "Copiar"}
+        </button>
+      </div>
+    </Field>
+  );
+}
+
 export function SeoTabs({
   values,
   action,
+  siteUrl,
 }: {
   values: Record<string, string>;
   action: (formData: FormData) => void;
+  siteUrl: string;
 }) {
   const [active, setActive] = useState<TabId>("seo");
 
@@ -72,6 +114,7 @@ export function SeoTabs({
           <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginBottom: "1.375rem" }}>
             Otimização para buscadores tradicionais (Google, Bing).
           </p>
+          <SitemapField siteUrl={siteUrl} />
           <FieldGrid>
             {seoFields.map(({ key, label, placeholder, hint }) => (
               <Field key={key} label={label} hint={hint}>

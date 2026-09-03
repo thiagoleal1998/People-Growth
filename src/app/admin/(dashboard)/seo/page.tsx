@@ -17,7 +17,7 @@ export default async function SeoPage({ searchParams }: { searchParams: Promise<
     <div>
       <SavedToast show={saved === "1"} />
       <PageHeader title="SEO, GEO & AEO" subtitle="Como o site aparece em buscadores tradicionais e em ferramentas de IA" />
-      <SeoTabs values={values} action={updateSeoConfig} />
+      <SeoTabs values={values} action={updateSeoConfig} siteUrl={process.env.NEXT_PUBLIC_SITE_URL ?? "https://peopleandgrowth.com.br"} />
     </div>
   );
 }
