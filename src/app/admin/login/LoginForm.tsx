@@ -46,7 +46,11 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
           </p>
 
           {authors.length > 0 && (
-            <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap", paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+            <div style={{ paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+              <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#06D6A0", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
+                Quem está por trás do People &amp; Growth
+              </div>
+              <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
               {authors.slice(0, 4).map((author) => (
                 <div key={author.id} style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
                   <div
@@ -61,6 +65,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
                   <span style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8125rem", fontWeight: 600 }}>{author.name}</span>
                 </div>
               ))}
+              </div>
             </div>
           )}
         </div>
