@@ -41,7 +41,7 @@ export async function CategoryNav() {
           </Link>
         ))}
         <Link
-          href="/mea-sententia"
+          href="/mea-sententia/colunistas"
           style={{
             flexShrink: 0,
             fontSize: "0.8125rem",
