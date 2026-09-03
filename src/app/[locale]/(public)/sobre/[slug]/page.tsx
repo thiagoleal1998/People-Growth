@@ -4,7 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { ArrowLeft, ArrowRight, Award, Linkedin, Instagram, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { Author } from "@/types/database.types";
-import { parseMilestones, bioParagraphs } from "../founderData";
+import { parseMilestones, bioParagraphs } from "@/lib/founder-data";
 
 export const revalidate = 300;
 

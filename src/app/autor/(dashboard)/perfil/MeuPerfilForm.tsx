@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
-import { Linkedin, Instagram } from "lucide-react";
+import { Linkedin, Instagram, Award } from "lucide-react";
 import { Field, Input, Textarea, SubmitButton } from "@/components/admin/ui";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
+import { parseMilestones } from "@/lib/founder-data";
 import { updateOwnAuthorProfile } from "./actions";
 import type { Author } from "@/types/database.types";
 
@@ -11,7 +12,9 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
   const [photoPreview, setPhotoPreview] = useState<string | null>(author?.photo_url ?? null);
   const [taglinePt, setTaglinePt] = useState(author?.tagline_pt ?? "");
   const [bioPt, setBioPt] = useState(author?.bio_pt ?? "");
+  const [milestonesPt, setMilestonesPt] = useState(author?.milestones_pt ?? "");
   const taglineRemaining = 80 - taglinePt.length;
+  const milestones = parseMilestones(milestonesPt);
 
   function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -67,7 +70,7 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
           label="Trajetória / Marcos (PT)"
           hint='Aparece como uma linha do tempo na sua página "Sobre". Um marco por linha, no formato "Ano | Descrição". Ex: "2019 | Comecei minha carreira em marketing digital" — cada linha vira um item da linha do tempo.'
         >
-          <Textarea name="milestones_pt" rows={4} defaultValue={author?.milestones_pt ?? ""} placeholder={"2019 | Comecei minha carreira em marketing digital\n2024 | Entrei para a People & Growth"} />
+          <Textarea name="milestones_pt" rows={4} value={milestonesPt} onChange={(e) => setMilestonesPt(e.target.value)} placeholder={"2019 | Comecei minha carreira em marketing digital\n2024 | Entrei para a People & Growth"} />
         </Field>
         <Field label="Trajetória / Marcos (EN)" hint='Mesmo formato: "Year | Description", uma por linha.'>
           <Textarea name="milestones_en" rows={4} defaultValue={author?.milestones_en ?? ""} />
@@ -127,13 +130,50 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
               {author?.name ?? "Seu nome"}
             </div>
           </div>
+          {taglinePt.trim() && (
+            <p style={{ color: "#06D6A0", fontSize: "0.8125rem", fontStyle: "italic", marginBottom: "0.75rem" }}>
+              &ldquo;{taglinePt.trim()}&rdquo;
+            </p>
+          )}
           <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "0.8125rem", lineHeight: 1.6 }}>
             {bioPt.trim() || "Sua bio aparece aqui, contando sua trajetória para quem visita a página Sobre."}
           </p>
-          <div style={{ display: "flex", gap: "0.625rem", marginTop: "0.875rem" }}>
+          <div style={{ display: "flex", gap: "0.625rem", marginTop: "0.875rem", marginBottom: milestones.length > 0 ? "1.125rem" : 0 }}>
             <Linkedin size={15} color="rgba(255,255,255,0.4)" />
             <Instagram size={15} color="rgba(255,255,255,0.4)" />
           </div>
+
+          {milestones.length > 0 && (
+            <div style={{ borderTop: "1px solid rgba(255,255,255,0.08)", paddingTop: "1rem" }}>
+              <p style={{ fontSize: "0.6875rem", fontWeight: 700, color: "rgba(255,255,255,0.4)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.75rem" }}>
+                Trajetória
+              </p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                {milestones.map((m, i) => (
+                  <div key={i} style={{ display: "flex", gap: "0.625rem", alignItems: "flex-start" }}>
+                    <div
+                      style={{
+                        width: "1.5rem",
+                        height: "1.5rem",
+                        borderRadius: "50%",
+                        backgroundColor: "#4361EE",
+                        display: "flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        flexShrink: 0,
+                      }}
+                    >
+                      <Award size={9} color="white" />
+                    </div>
+                    <div>
+                      <div style={{ color: "white", fontWeight: 700, fontSize: "0.75rem" }}>{m.year}</div>
+                      <div style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.75rem", lineHeight: 1.4 }}>{m.label}</div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
