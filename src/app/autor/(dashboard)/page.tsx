@@ -7,6 +7,10 @@ import { SavedToast } from "@/components/admin/SavedToast";
 import { deleteOwnArticle } from "./artigos/actions";
 import type { Article } from "@/types/database.types";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 const statusConfig: Record<Article["status"], { label: string; tone: "success" | "warning" | "neutral" }> = {
   draft: { label: "Rascunho", tone: "neutral" },
   pending: { label: "Em revisão", tone: "warning" },

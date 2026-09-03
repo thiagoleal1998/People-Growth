@@ -4,6 +4,10 @@ import { SavedToast } from "@/components/admin/SavedToast";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { updateSiteConfig } from "./actions";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 const contactFields: { key: string; label: string; placeholder?: string }[] = [
   { key: "contact_email", label: "E-mail de contato" },
   { key: "whatsapp", label: "WhatsApp", placeholder: "+55 11 99999-9999" },

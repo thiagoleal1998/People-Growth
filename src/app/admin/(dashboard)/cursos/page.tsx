@@ -6,6 +6,10 @@ import { SavedToast } from "@/components/admin/SavedToast";
 import { deleteCourse } from "./actions";
 import type { Course } from "@/types/database.types";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 const statusLabel: Record<Course["status"], string> = { coming_soon: "Em breve", active: "Ativo", draft: "Rascunho" };
 const statusTone: Record<Course["status"], "success" | "warning" | "neutral"> = { coming_soon: "warning", active: "success", draft: "neutral" };
 

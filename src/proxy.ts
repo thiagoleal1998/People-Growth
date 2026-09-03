@@ -6,7 +6,7 @@ import type { Database } from "@/types/database.types";
 
 const intlMiddleware = createMiddleware(routing);
 
-export async function middleware(request: NextRequest) {
+export async function proxy(request: NextRequest) {
   if (request.nextUrl.pathname.startsWith("/admin") || request.nextUrl.pathname.startsWith("/autor")) {
     return handlePanelAuth(request);
   }
