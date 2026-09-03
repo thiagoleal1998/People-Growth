@@ -38,19 +38,23 @@ export async function POST(req: NextRequest) {
 
     const asStr = (v: unknown) => (typeof v === "string" && v ? v.slice(0, 300) : null);
 
-    await client.from("page_views").insert({
-      path: path.slice(0, 500),
-      page_type: articleId ? "article" : "page",
-      article_id: articleId,
-      visitor_id: visitorId.slice(0, 100),
-      locale,
-      referrer: asStr(referrer),
-      utm_source: asStr(utmSource),
-      utm_medium: asStr(utmMedium),
-      utm_campaign: asStr(utmCampaign),
-    });
+    const { data: inserted } = await client
+      .from("page_views")
+      .insert({
+        path: path.slice(0, 500),
+        page_type: articleId ? "article" : "page",
+        article_id: articleId,
+        visitor_id: visitorId.slice(0, 100),
+        locale,
+        referrer: asStr(referrer),
+        utm_source: asStr(utmSource),
+        utm_medium: asStr(utmMedium),
+        utm_campaign: asStr(utmCampaign),
+      })
+      .select("id")
+      .single();
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, id: inserted?.id ?? null });
   } catch (err) {
     console.error("Track view error:", err);
     return NextResponse.json({ error: "Erro interno." }, { status: 500 });

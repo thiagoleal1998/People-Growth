@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Eye, Users, MousePointerClick, Percent, X, ThumbsUp, MessageCircle, Flag } from "lucide-react";
+import { Eye, Users, MousePointerClick, Percent, X, ThumbsUp, MessageCircle, Flag, MoveDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
 import { AD_SLOT_DEFS } from "../publicidade/ad-slots";
@@ -107,7 +107,7 @@ export default async function RelatoriosPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  let viewsQuery = client.from("page_views").select("path, page_type, article_id, visitor_id, referrer, utm_source, utm_campaign");
+  let viewsQuery = client.from("page_views").select("path, page_type, article_id, visitor_id, referrer, utm_source, utm_campaign, scroll_depth");
   if (since) viewsQuery = viewsQuery.gte("created_at", since);
   if (until) viewsQuery = viewsQuery.lte("created_at", until);
   let adEventsQuery = client.from("ad_events").select("ad_slot_key, ad_id, event_type");
@@ -129,6 +129,7 @@ export default async function RelatoriosPage({
     referrer: string | null;
     utm_source: string | null;
     utm_campaign: string | null;
+    scroll_depth: number | null;
   }[];
   const adEvents = (adEventsData ?? []) as { ad_slot_key: string; ad_id: string | null; event_type: string }[];
   const articleTitles = new Map(((articlesData ?? []) as Pick<Article, "id" | "title_pt">[]).map((a) => [a.id, a.title_pt]));
@@ -142,6 +143,8 @@ export default async function RelatoriosPage({
   const totalImpressions = adEvents.filter((e) => e.event_type === "impression").length;
   const totalClicks = adEvents.filter((e) => e.event_type === "click").length;
   const ctr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(1) : "0";
+  const scrollSamples = views.map((v) => v.scroll_depth).filter((d): d is number => d != null);
+  const avgScrollDepth = scrollSamples.length > 0 ? Math.round(scrollSamples.reduce((sum, d) => sum + d, 0) / scrollSamples.length) : null;
 
   const byPath = new Map<string, { views: number; visitors: Set<string>; title: string }>();
   for (const v of views) {
@@ -223,12 +226,14 @@ export default async function RelatoriosPage({
     comments: number;
     likes: number;
     reports: number;
+    avgScrollDepth: number | null;
   }[] = [];
   if (tab === "artigos") {
-    const [{ data: articlesForStats }, { data: authorsData }, { data: commentsData }] = await Promise.all([
+    const [{ data: articlesForStats }, { data: authorsData }, { data: commentsData }, { data: scrollData }] = await Promise.all([
       client.from("articles").select("id, title_pt, author_id, views").eq("status", "published"),
       client.from("authors").select("id, name"),
       client.from("comments").select("article_id, likes, reports"),
+      client.from("page_views").select("article_id, scroll_depth").not("article_id", "is", null).not("scroll_depth", "is", null),
     ]);
     const authorNames = new Map(((authorsData ?? []) as Pick<Author, "id" | "name">[]).map((a) => [a.id, a.name]));
     const byArticle = new Map<string, { comments: number; likes: number; reports: number }>();
@@ -239,9 +244,19 @@ export default async function RelatoriosPage({
       entry.reports += c.reports;
       byArticle.set(c.article_id, entry);
     }
+    const scrollByArticle = new Map<string, number[]>();
+    for (const v of (scrollData ?? []) as { article_id: string; scroll_depth: number }[]) {
+      const arr = scrollByArticle.get(v.article_id) ?? [];
+      arr.push(v.scroll_depth);
+      scrollByArticle.set(v.article_id, arr);
+    }
     articleStats = ((articlesForStats ?? []) as Pick<Article, "id" | "title_pt" | "author_id" | "views">[])
       .map((a) => {
         const s = byArticle.get(a.id) ?? { comments: 0, likes: 0, reports: 0 };
+        const scrollSamplesForArticle = scrollByArticle.get(a.id);
+        const avgScrollDepth = scrollSamplesForArticle?.length
+          ? Math.round(scrollSamplesForArticle.reduce((sum, d) => sum + d, 0) / scrollSamplesForArticle.length)
+          : null;
         return {
           id: a.id,
           title: a.title_pt,
@@ -250,6 +265,7 @@ export default async function RelatoriosPage({
           comments: s.comments,
           likes: s.likes,
           reports: s.reports,
+          avgScrollDepth,
         };
       })
       .sort((a, b) => b.views - a.views);
@@ -290,7 +306,7 @@ export default async function RelatoriosPage({
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                  {["Artigo", "Autor", "Visualizações", "Comentários", "Curtidas", "Denúncias"].map((h) => (
+                  {["Artigo", "Autor", "Visualizações", "Leitura média", "Comentários", "Curtidas", "Denúncias"].map((h) => (
                     <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
                   ))}
                 </tr>
@@ -304,6 +320,13 @@ export default async function RelatoriosPage({
                     <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem" }}>{a.author}</td>
                     <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem" }}>
                       <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}><Eye size={13} /> {a.views.toLocaleString("pt-BR")}</span>
+                    </td>
+                    <td style={{ padding: "0.875rem 1.25rem", fontSize: "0.875rem" }}>
+                      {a.avgScrollDepth != null ? (
+                        <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--admin-text-secondary)" }}><MoveDown size={13} /> {a.avgScrollDepth}%</span>
+                      ) : (
+                        <span style={{ color: "var(--admin-faint)" }}>—</span>
+                      )}
                     </td>
                     <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem" }}>
                       <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}><MessageCircle size={13} /> {a.comments}</span>
@@ -379,6 +402,7 @@ export default async function RelatoriosPage({
         <StatCard icon={Users} label="Visitantes únicos" value={uniqueVisitors.toLocaleString("pt-BR")} color="#06D6A0" />
         <StatCard icon={MousePointerClick} label="Cliques em anúncios" value={totalClicks.toLocaleString("pt-BR")} color="#FFB703" />
         <StatCard icon={Percent} label="CTR de anúncios" value={`${ctr}%`} color="#4361EE" />
+        <StatCard icon={MoveDown} label="Quanto da página é vista, em média" value={avgScrollDepth != null ? `${avgScrollDepth}%` : "—"} color="#06D6A0" />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))", gap: "1.25rem", marginBottom: "1.25rem" }}>
