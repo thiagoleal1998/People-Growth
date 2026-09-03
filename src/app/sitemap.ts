@@ -1,4 +1,5 @@
 import { MetadataRoute } from "next";
+import { createClient } from "@/lib/supabase/server";
 
 const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://peopleandgrowth.com.br";
 
@@ -18,10 +19,10 @@ const routes = [
   { path: "/contato", priority: 0.8 },
 ];
 
-export default function sitemap(): MetadataRoute.Sitemap {
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const locales = ["pt", "en"];
 
-  return routes.flatMap(({ path, priority }) =>
+  const staticEntries: MetadataRoute.Sitemap = routes.flatMap(({ path, priority }) =>
     locales.map((locale) => ({
       url: `${baseUrl}/${locale}${path}`,
       lastModified: new Date(),
@@ -29,4 +30,23 @@ export default function sitemap(): MetadataRoute.Sitemap {
       priority,
     }))
   );
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any)
+    .from("articles")
+    .select("slug, updated_at, published_at")
+    .eq("status", "published");
+
+  type ArticleRow = { slug: string; updated_at: string; published_at: string | null };
+  const articleEntries: MetadataRoute.Sitemap = ((data ?? []) as ArticleRow[]).flatMap((a) =>
+    locales.map((locale) => ({
+      url: `${baseUrl}/${locale}/mea-sententia/${a.slug}`,
+      lastModified: new Date(a.updated_at ?? a.published_at ?? Date.now()),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    }))
+  );
+
+  return [...staticEntries, ...articleEntries];
 }

@@ -7,6 +7,8 @@ import { FormatTag } from "@/components/FormatTag";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Comments } from "@/components/Comments";
 import { AdBanner } from "@/components/AdBanner";
+import { MostRead } from "@/components/MostRead";
+import { ReadingProgress } from "@/components/ReadingProgress";
 import { createClient } from "@/lib/supabase/server";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
@@ -27,11 +29,36 @@ async function getArticle(slug: string) {
     client.from("comments").select("*").eq("article_id", article.id).eq("status", "approved").order("created_at", { ascending: false }),
   ]);
 
+  let related: Article[] = [];
+  if (article.category_id) {
+    const { data } = await client
+      .from("articles")
+      .select("*")
+      .eq("status", "published")
+      .eq("category_id", article.category_id)
+      .neq("id", article.id)
+      .order("published_at", { ascending: false })
+      .limit(3);
+    related = (data ?? []) as Article[];
+  }
+  if (related.length < 3) {
+    const { data } = await client
+      .from("articles")
+      .select("*")
+      .eq("status", "published")
+      .neq("id", article.id)
+      .order("published_at", { ascending: false })
+      .limit(3 + related.length);
+    const fill = ((data ?? []) as Article[]).filter((a) => !related.some((r) => r.id === a.id));
+    related = [...related, ...fill].slice(0, 3);
+  }
+
   return {
     article: article as Article,
     category: categoryRes.data as Category | null,
     author: authorRes.data as Author | null,
     comments: (commentsRes.data ?? []) as Comment[],
+    related,
   };
 }
 
@@ -43,9 +70,28 @@ export async function generateMetadata({
   const { slug } = await params;
   const result = await getArticle(slug);
   if (!result) return { title: "Artigo não encontrado" };
+
+  const title = result.article.seo_title_pt || result.article.title_pt;
+  const description = result.article.seo_desc_pt || result.article.excerpt_pt || undefined;
+  const images = result.article.cover_image ? [{ url: result.article.cover_image, width: 1200, height: 630 }] : undefined;
+
   return {
-    title: result.article.seo_title_pt || result.article.title_pt,
-    description: result.article.seo_desc_pt || result.article.excerpt_pt || undefined,
+    title,
+    description,
+    openGraph: {
+      type: "article",
+      title,
+      description,
+      images,
+      publishedTime: result.article.published_at ?? undefined,
+      authors: result.author ? [result.author.name] : undefined,
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: result.article.cover_image ? [result.article.cover_image] : undefined,
+    },
   };
 }
 
@@ -59,10 +105,34 @@ export default async function ArticlePage({
 
   if (!result) notFound();
 
-  const { article, category, author, comments } = result;
+  const { article, category, author, comments, related } = result;
+
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://peopleandgrowth.com.br";
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "NewsArticle",
+    headline: article.title_pt,
+    description: article.excerpt_pt ?? undefined,
+    image: article.cover_image ? [article.cover_image] : undefined,
+    datePublished: article.published_at ?? article.created_at,
+    dateModified: article.updated_at ?? article.published_at ?? article.created_at,
+    author: author ? { "@type": "Person", name: author.name, url: `${siteUrl}/mea-sententia/autor/${author.slug}` } : undefined,
+    publisher: {
+      "@type": "Organization",
+      name: "People & Growth",
+      logo: { "@type": "ImageObject", url: `${siteUrl}/favicon.ico` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${siteUrl}/mea-sententia/${article.slug}` },
+  };
 
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
+      <ReadingProgress />
+
       {/* Header */}
       <section
         style={{
@@ -216,6 +286,40 @@ export default async function ArticlePage({
               </Link>
             )}
 
+            {/* Related articles */}
+            {related.length > 0 && (
+              <div style={{ marginTop: "3rem" }}>
+                <h2 style={{ fontWeight: 800, fontSize: "1.125rem", color: "var(--site-text)", marginBottom: "1.25rem" }}>
+                  Leia também
+                </h2>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.25rem" }}>
+                  {related.map((r) => (
+                    <Link
+                      key={r.id}
+                      href={{ pathname: "/mea-sententia/[slug]", params: { slug: r.slug } }}
+                      className="hover-card"
+                      style={{ display: "block", textDecoration: "none" }}
+                    >
+                      <div
+                        style={{
+                          height: "110px",
+                          borderRadius: "0.5rem",
+                          marginBottom: "0.625rem",
+                          background: r.cover_image ? `url(${r.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                        }}
+                      />
+                      <div style={{ marginBottom: "0.375rem" }}>
+                        <FormatTag format={r.format} />
+                      </div>
+                      <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", lineHeight: 1.4 }}>
+                        {r.title_pt}
+                      </h3>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Comments */}
             <div style={{ marginTop: "3rem", paddingTop: "1.5rem", borderTop: "2px solid #4361EE" }}>
               <h2 style={{ fontWeight: 800, fontSize: "1.375rem", color: "var(--site-text)", marginBottom: "0.75rem" }}>
@@ -281,6 +385,8 @@ export default async function ArticlePage({
                 Agendar conversa
               </Link>
             </div>
+
+            <MostRead excludeId={article.id} />
 
             <AdBanner slotKey="article-sidebar" articleId={article.id} />
           </aside>

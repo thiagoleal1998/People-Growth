@@ -91,7 +91,7 @@ export default async function RelatoriosPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  let viewsQuery = client.from("page_views").select("path, page_type, article_id, visitor_id");
+  let viewsQuery = client.from("page_views").select("path, page_type, article_id, visitor_id, referrer, utm_source, utm_campaign");
   if (since) viewsQuery = viewsQuery.gte("created_at", since);
   if (until) viewsQuery = viewsQuery.lte("created_at", until);
   let adEventsQuery = client.from("ad_events").select("ad_slot_key, ad_id, event_type");
@@ -105,7 +105,15 @@ export default async function RelatoriosPage({
     client.from("ads").select("id, title, slot_key"),
   ]);
 
-  const views = (viewsData ?? []) as { path: string; page_type: string; article_id: string | null; visitor_id: string }[];
+  const views = (viewsData ?? []) as {
+    path: string;
+    page_type: string;
+    article_id: string | null;
+    visitor_id: string;
+    referrer: string | null;
+    utm_source: string | null;
+    utm_campaign: string | null;
+  }[];
   const adEvents = (adEventsData ?? []) as { ad_slot_key: string; ad_id: string | null; event_type: string }[];
   const articleTitles = new Map(((articlesData ?? []) as Pick<Article, "id" | "title_pt">[]).map((a) => [a.id, a.title_pt]));
   const slotLabels = new Map<string, string>(AD_SLOT_DEFS.map((d) => [d.key, d.label]));
@@ -132,6 +140,32 @@ export default async function RelatoriosPage({
     .sort((a, b) => b.views - a.views)
     .slice(0, 10);
   const maxPageViews = topPages[0]?.views ?? 0;
+
+  function sourceLabel(v: { referrer: string | null; utm_source: string | null; utm_campaign: string | null }): string {
+    if (v.utm_source) return v.utm_campaign ? `${v.utm_source} / ${v.utm_campaign}` : v.utm_source;
+    if (v.referrer) {
+      try {
+        return new URL(v.referrer).hostname.replace(/^www\./, "");
+      } catch {
+        return "Outro";
+      }
+    }
+    return "Direto";
+  }
+
+  const bySource = new Map<string, { views: number; visitors: Set<string> }>();
+  for (const v of views) {
+    const label = sourceLabel(v);
+    const entry = bySource.get(label) ?? { views: 0, visitors: new Set<string>() };
+    entry.views++;
+    entry.visitors.add(v.visitor_id);
+    bySource.set(label, entry);
+  }
+  const topSources = Array.from(bySource.entries())
+    .map(([source, v]) => ({ source, views: v.views, uniques: v.visitors.size }))
+    .sort((a, b) => b.views - a.views)
+    .slice(0, 8);
+  const maxSourceViews = topSources[0]?.views ?? 0;
 
   const statsByAd = new Map<string, { impressions: number; clicks: number }>();
   for (const e of adEvents) {
@@ -236,6 +270,19 @@ export default async function RelatoriosPage({
             ) : (
               topPages.map((p) => (
                 <Bar key={p.path} label={p.title} value={p.views} max={maxPageViews} sub={`${p.uniques} únicos`} />
+              ))
+            )}
+          </div>
+        </Card>
+
+        <Card>
+          <div style={{ padding: "1.5rem" }}>
+            <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "1.25rem" }}>Origem do tráfego</h2>
+            {topSources.length === 0 ? (
+              <p style={{ color: "var(--admin-faint)", fontSize: "0.875rem" }}>Ainda sem dados suficientes neste período.</p>
+            ) : (
+              topSources.map((s) => (
+                <Bar key={s.source} label={s.source} value={s.views} max={maxSourceViews} sub={`${s.uniques} únicos`} />
               ))
             )}
           </div>

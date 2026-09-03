@@ -128,6 +128,18 @@ export function SeoTabs({
           >
             <Input name="ga4_measurement_id" defaultValue={values.ga4_measurement_id ?? ""} placeholder="G-XXXXXXXXXX" />
           </Field>
+          <Field
+            label="Meta Pixel ID (Facebook/Instagram Ads)"
+            hint="Encontrado no Gerenciador de Eventos do Meta Business. Necessário para remarketing em anúncios de Facebook/Instagram."
+          >
+            <Input name="meta_pixel_id" defaultValue={values.meta_pixel_id ?? ""} placeholder="123456789012345" />
+          </Field>
+          <Field
+            label="LinkedIn Insight Tag — Partner ID"
+            hint="Encontrado no LinkedIn Campaign Manager, em Ferramentas de Conta > Insight Tag. Necessário para remarketing em anúncios de LinkedIn."
+          >
+            <Input name="linkedin_partner_id" defaultValue={values.linkedin_partner_id ?? ""} placeholder="1234567" />
+          </Field>
         </div>
       </div>
 

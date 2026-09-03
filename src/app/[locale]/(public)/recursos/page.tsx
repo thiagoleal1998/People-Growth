@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { Download, FileText, Layout, BookOpen, CheckSquare, Zap, type LucideIcon } from "lucide-react";
+import { FileText, Layout, BookOpen, CheckSquare, Zap, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { ResourceDownloadButton } from "@/components/ResourceDownloadButton";
 import type { Resource } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -59,21 +60,20 @@ export default async function RecursosPage() {
                     {resource.description_pt && (
                       <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.65, flex: 1, marginBottom: "1.5rem" }}>{resource.description_pt}</p>
                     )}
-                    <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--site-border-strong)", paddingTop: "1.25rem" }}>
-                      <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)", fontWeight: 500 }}>{resource.download_count.toLocaleString("pt-BR")} downloads</span>
-                      {resource.file_url ? (
-                        <a
-                          href={resource.file_url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          style={{ display: "flex", alignItems: "center", gap: "0.375rem", backgroundColor: meta.color, color: meta.color === "#FFB703" ? "#0d1b2a" : "white", padding: "0.5rem 1rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
-                        >
-                          <Download size={14} /> {t("download")}
-                        </a>
-                      ) : (
+                    {resource.file_url ? (
+                      <ResourceDownloadButton
+                        resourceId={resource.id}
+                        leadRequired={resource.lead_required}
+                        downloadCount={resource.download_count}
+                        color={meta.color}
+                        label={t("download")}
+                      />
+                    ) : (
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--site-border-strong)", paddingTop: "1.25rem" }}>
+                        <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)", fontWeight: 500 }}>{resource.download_count.toLocaleString("pt-BR")} downloads</span>
                         <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)", fontWeight: 600 }}>Em breve</span>
-                      )}
-                    </div>
+                      </div>
+                    )}
                   </div>
                 );
               })}

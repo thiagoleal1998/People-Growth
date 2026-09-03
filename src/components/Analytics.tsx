@@ -10,10 +10,20 @@ export function Analytics() {
   useEffect(() => {
     const visitorId = getVisitorId();
     if (!visitorId) return;
+
+    const params = new URLSearchParams(window.location.search);
+
     fetch("/api/track/view", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path: pathname, visitorId }),
+      body: JSON.stringify({
+        path: pathname,
+        visitorId,
+        referrer: document.referrer || null,
+        utmSource: params.get("utm_source"),
+        utmMedium: params.get("utm_medium"),
+        utmCampaign: params.get("utm_campaign"),
+      }),
       keepalive: true,
     }).catch(() => {});
   }, [pathname]);

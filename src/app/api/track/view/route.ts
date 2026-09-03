@@ -7,7 +7,7 @@ const ARTICLE_PATH_RE = /^\/(pt|en)\/mea-sententia\/(?!autor(?:\/|$))([^/]+)\/?$
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { path, visitorId } = body as Record<string, unknown>;
+    const { path, visitorId, referrer, utmSource, utmMedium, utmCampaign } = body as Record<string, unknown>;
 
     if (typeof path !== "string" || !path || typeof visitorId !== "string" || !visitorId) {
       return NextResponse.json({ error: "Campos obrigatórios faltando." }, { status: 400 });
@@ -36,12 +36,18 @@ export async function POST(req: NextRequest) {
       }
     }
 
+    const asStr = (v: unknown) => (typeof v === "string" && v ? v.slice(0, 300) : null);
+
     await client.from("page_views").insert({
       path: path.slice(0, 500),
       page_type: articleId ? "article" : "page",
       article_id: articleId,
       visitor_id: visitorId.slice(0, 100),
       locale,
+      referrer: asStr(referrer),
+      utm_source: asStr(utmSource),
+      utm_medium: asStr(utmMedium),
+      utm_campaign: asStr(utmCampaign),
     });
 
     return NextResponse.json({ success: true });
