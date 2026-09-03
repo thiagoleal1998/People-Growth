@@ -104,13 +104,12 @@ export default async function HomePage() {
   const isLive = config.is_live === "true" && Boolean(liveStreamUrl);
   const [featured, ...rest] = allArticles;
   const secondary = rest.slice(0, 3);
-  // Capped rather than showing every remaining article: this column sits next
-  // to a sidebar of fixed-height widgets, and an unbounded list would either
-  // fall short of or run past it depending on how many articles exist at any
-  // given time. A short preview + link to the full listing stays visually
-  // balanced regardless of how much content accumulates over time.
-  const moreNews = rest.slice(3, 7);
-  const hasMoreBeyondPreview = rest.length > 7;
+  // Deliberately uncapped: this sits next to a sidebar of fixed-height video
+  // widgets. Capping it to "match" that height leaves dead whitespace once
+  // there's more news than fits the cap, since the two columns grow in
+  // fundamentally different units (video aspect ratio vs. text rows) — the
+  // only stable option is to let this one run its natural length.
+  const moreNews = rest.slice(3);
 
   const latestByAuthor = new Map<string, Article>();
   for (const a of allArticles) {
@@ -307,7 +306,7 @@ export default async function HomePage() {
                         </div>
                       </Link>
                     ))}
-                    {hasMoreBeyondPreview && (
+                    {moreNews.length > 0 && (
                       <Link
                         href="/mea-sententia"
                         className="hover-cta"
