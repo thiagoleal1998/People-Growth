@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Eye, MessageCircle, ThumbsUp, Flag } from "lucide-react";
+import { ArrowLeft, Eye, MessageCircle, ThumbsUp, Flag, MoveDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { Card, EmptyState, Badge } from "@/components/admin/ui";
@@ -47,6 +47,10 @@ export default async function EstatisticasArtigoPage({ params }: { params: Promi
   const totalLikes = comments.reduce((sum, c) => sum + c.likes, 0);
   const totalReports = comments.reduce((sum, c) => sum + c.reports, 0);
 
+  const { data: scrollData } = await client.from("page_views").select("scroll_depth").eq("article_id", id).not("scroll_depth", "is", null);
+  const scrollSamples = ((scrollData ?? []) as { scroll_depth: number }[]).map((v) => v.scroll_depth);
+  const avgScrollDepth = scrollSamples.length > 0 ? Math.round(scrollSamples.reduce((sum, d) => sum + d, 0) / scrollSamples.length) : null;
+
   return (
     <div>
       <div style={{ marginBottom: "1.5rem" }}>
@@ -58,6 +62,7 @@ export default async function EstatisticasArtigoPage({ params }: { params: Promi
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1.25rem", marginBottom: "1.5rem" }}>
         <StatCard icon={Eye} label="Visualizações" value={typedArticle.views.toLocaleString("pt-BR")} color="#4361EE" />
+        <StatCard icon={MoveDown} label="Quanto do artigo é lido, em média" value={avgScrollDepth != null ? `${avgScrollDepth}%` : "—"} color="#06D6A0" />
         <StatCard icon={MessageCircle} label="Comentários" value={comments.length} color="#06D6A0" />
         <StatCard icon={ThumbsUp} label="Curtidas em comentários" value={totalLikes} color="#FFB703" />
         <StatCard icon={Flag} label="Denúncias" value={totalReports} color="#dc2626" />
