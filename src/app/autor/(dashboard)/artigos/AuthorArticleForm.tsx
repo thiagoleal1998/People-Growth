@@ -1,6 +1,9 @@
 "use client";
 
+import Link from "next/link";
+import { Eye } from "lucide-react";
 import { FormShell, Field, Input, Textarea, Select, SubmitButton } from "@/components/admin/ui";
+import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { upsertOwnArticle } from "./actions";
 import type { Article, Category } from "@/types/database.types";
@@ -9,7 +12,22 @@ export function AuthorArticleForm({ item, categories, imageError }: { item?: Art
   const action = upsertOwnArticle.bind(null, item?.id ?? null);
 
   return (
-    <FormShell title={item ? "Editar artigo" : "Novo artigo"} backHref="/autor">
+    <FormShell
+      title={item ? "Editar artigo" : "Novo artigo"}
+      backHref="/autor"
+      maxWidth="900px"
+      action={
+        item && (
+          <Link
+            href={`/autor/artigos/${item.id}/preview`}
+            target="_blank"
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "white", border: "1px solid #e2e8f0", color: "#0d1b2a", padding: "0.625rem 1.125rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none", flexShrink: 0 }}
+          >
+            <Eye size={16} /> Visualizar
+          </Link>
+        )
+      }
+    >
       <form action={action}>
         <Field label="Título (PT)">
           <Input name="title_pt" defaultValue={item?.title_pt} required />
@@ -48,12 +66,12 @@ export function AuthorArticleForm({ item, categories, imageError }: { item?: Art
         </Field>
         <Field
           label="Conteúdo (PT)"
-          hint='Suporta markdown simples: **negrito**, [link](url), ## subtítulo, listas com "- " ou "1. ", e citação em destaque com "> texto" (opcionalmente seguido de "> — Autor da frase" numa linha própria).'
+          hint='Use a barra de ferramentas para negrito, subtítulo, listas, citação, link e imagem — ou digite direto: **negrito**, [link](url), ## subtítulo, "- " para lista, "> texto" para citação (com "> — Autor" numa linha própria, opcional).'
         >
-          <Textarea name="content_pt" rows={12} defaultValue={item?.content_pt} required />
+          <MarkdownEditor name="content_pt" defaultValue={item?.content_pt ?? ""} required />
         </Field>
         <Field label="Conteúdo (EN)">
-          <Textarea name="content_en" rows={12} defaultValue={item?.content_en ?? ""} />
+          <MarkdownEditor name="content_en" defaultValue={item?.content_en ?? ""} minHeight={280} />
         </Field>
         <Field label="Vídeo (URL do YouTube)" hint="Opcional — vira o visual principal do artigo, no lugar da imagem de capa. Mesmo assim, cadastre uma imagem de capa abaixo: ela é usada como miniatura ao compartilhar o link.">
           <Input name="video_url" defaultValue={item?.video_url ?? ""} placeholder="https://www.youtube.com/watch?v=..." />

@@ -1,6 +1,12 @@
 export function renderMarkdownLite(text: string): string {
   let html = text
     .replace(/^## (.+)$/gm, '<h2 style="font-size:1.5rem;font-weight:800;color:var(--site-text);margin:2rem 0 1rem">$1</h2>')
+    // Images must run before the link regex below — "![alt](url)" contains
+    // a "[alt](url)" substring that the link pattern would otherwise eat.
+    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_match, alt: string, url: string) => {
+      const caption = alt ? `<figcaption style="margin-top:0.625rem;font-size:0.8125rem;color:var(--site-muted);text-align:center">${alt}</figcaption>` : "";
+      return `<figure style="margin:2rem 0"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block" />${caption}</figure>`;
+    })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#4361EE;font-weight:600;text-decoration:underline">$1</a>')
     .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:700;color:var(--site-text)">$1</strong>');
 
@@ -42,7 +48,7 @@ export function renderMarkdownLite(text: string): string {
     .map((block) => {
       const trimmed = block.trim();
       if (!trimmed) return "";
-      if (/^<(h2|ul|ol|blockquote)/.test(trimmed)) return trimmed;
+      if (/^<(h2|ul|ol|blockquote|figure)/.test(trimmed)) return trimmed;
       return `<p style="margin:0 0 1.25rem">${trimmed}</p>`;
     })
     .join("");
@@ -56,6 +62,7 @@ export function stripMarkdownLite(text: string): string {
     .replace(/^>\s?/gm, "")
     .replace(/^##\s+/gm, "")
     .replace(/^[-\d]+\.?\s+/gm, "")
+    .replace(/!\[[^\]]*\]\([^)]+\)/g, "")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/\*\*(.+?)\*\*/g, "$1")
     .replace(/\n{2,}/g, ". ")

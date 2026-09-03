@@ -83,14 +83,29 @@ export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
   return <select {...props} style={{ ...fieldControlStyle, cursor: "pointer", ...props.style }} />;
 }
 
-export function FormShell({ title, backHref, children }: { title: string; backHref: string; children: ReactNode }) {
+export function FormShell({
+  title,
+  backHref,
+  children,
+  maxWidth = "640px",
+  action,
+}: {
+  title: string;
+  backHref: string;
+  children: ReactNode;
+  maxWidth?: string;
+  action?: ReactNode;
+}) {
   return (
-    <div style={{ maxWidth: "640px" }}>
-      <div style={{ marginBottom: "1.5rem" }}>
-        <Link href={backHref} style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>
-          &larr; Voltar
-        </Link>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--admin-text)", marginTop: "0.5rem" }}>{title}</h1>
+    <div style={{ maxWidth }}>
+      <div style={{ marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
+        <div>
+          <Link href={backHref} style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>
+            &larr; Voltar
+          </Link>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--admin-text)", marginTop: "0.5rem" }}>{title}</h1>
+        </div>
+        {action}
       </div>
       <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
         {children}

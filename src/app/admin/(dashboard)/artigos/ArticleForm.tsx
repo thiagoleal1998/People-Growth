@@ -2,7 +2,10 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { Eye } from "lucide-react";
 import { Field, Input, Textarea, Select, SubmitButton, FieldGrid } from "@/components/admin/ui";
+import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
+import { SeoPreview } from "@/components/admin/SeoPreview";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { upsertArticle } from "./actions";
 import type { Article, Category, Author } from "@/types/database.types";
@@ -14,6 +17,16 @@ const tabs = [
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
+
+function slugifyPreview(text: string): string {
+  return text
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
 
 export function ArticleForm({
   item,
@@ -28,16 +41,34 @@ export function ArticleForm({
 }) {
   const action = upsertArticle.bind(null, item?.id ?? null);
   const [active, setActive] = useState<TabId>("conteudo");
+  const [titlePt, setTitlePt] = useState(item?.title_pt ?? "");
+  const [excerptPt, setExcerptPt] = useState(item?.excerpt_pt ?? "");
+  const [seoTitlePt, setSeoTitlePt] = useState(item?.seo_title_pt ?? "");
+  const [seoDescPt, setSeoDescPt] = useState(item?.seo_desc_pt ?? "");
+  const [slug, setSlug] = useState(item?.slug ?? "");
+
+  const previewUrl = `peoplegrowth.com.br › mea-sententia › ${slug || slugifyPreview(titlePt) || "..."}`;
 
   return (
     <div style={{ maxWidth: "900px" }}>
-      <div style={{ marginBottom: "1.5rem" }}>
-        <Link href="/admin/artigos" style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>
-          &larr; Voltar
-        </Link>
-        <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--admin-text)", marginTop: "0.5rem" }}>
-          {item ? "Editar artigo" : "Novo artigo"}
-        </h1>
+      <div style={{ marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
+        <div>
+          <Link href="/admin/artigos" style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>
+            &larr; Voltar
+          </Link>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--admin-text)", marginTop: "0.5rem" }}>
+            {item ? "Editar artigo" : "Novo artigo"}
+          </h1>
+        </div>
+        {item && (
+          <Link
+            href={`/admin/artigos/${item.id}/preview`}
+            target="_blank"
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border-strong)", color: "var(--admin-text)", padding: "0.625rem 1.125rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none", flexShrink: 0 }}
+          >
+            <Eye size={16} /> Visualizar
+          </Link>
+        )}
       </div>
 
       <form action={action}>
@@ -67,14 +98,14 @@ export function ArticleForm({
         <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
           <div style={{ display: active === "conteudo" ? "block" : "none" }}>
             <Field label="Título (PT)">
-              <Input name="title_pt" defaultValue={item?.title_pt} required />
+              <Input name="title_pt" value={titlePt} onChange={(e) => setTitlePt(e.target.value)} required />
             </Field>
             <Field label="Título (EN)">
               <Input name="title_en" defaultValue={item?.title_en ?? ""} />
             </Field>
             <FieldGrid>
               <Field label="Linha fina / subtítulo (PT)" hint="Aparece nas listagens, cards de artigos e como descrição em buscadores — não é o Resumo em destaque abaixo.">
-                <Textarea name="excerpt_pt" rows={2} defaultValue={item?.excerpt_pt ?? ""} />
+                <Textarea name="excerpt_pt" rows={2} value={excerptPt} onChange={(e) => setExcerptPt(e.target.value)} />
               </Field>
               <Field label="Linha fina / subtítulo (EN)">
                 <Textarea name="excerpt_en" rows={2} defaultValue={item?.excerpt_en ?? ""} />
@@ -88,17 +119,17 @@ export function ArticleForm({
                 <Textarea name="summary_en" rows={3} defaultValue={item?.summary_en ?? ""} />
               </Field>
             </FieldGrid>
-            <FieldGrid>
-              <Field
-                label="Conteúdo (PT)"
-                hint='Suporta markdown simples: **negrito**, [link](url), ## subtítulo, listas com "- " ou "1. ", e citação em destaque com "> texto" (opcionalmente seguido de "> — Autor da frase" numa linha própria).'
-              >
-                <Textarea name="content_pt" rows={14} defaultValue={item?.content_pt} required />
-              </Field>
-              <Field label="Conteúdo (EN)">
-                <Textarea name="content_en" rows={14} defaultValue={item?.content_en ?? ""} />
-              </Field>
-            </FieldGrid>
+
+            <Field
+              label="Conteúdo (PT)"
+              hint='Use a barra de ferramentas para negrito, subtítulo, listas, citação, link e imagem — ou digite direto: **negrito**, [link](url), ## subtítulo, "- " para lista, "> texto" para citação (com "> — Autor" numa linha própria, opcional).'
+            >
+              <MarkdownEditor name="content_pt" defaultValue={item?.content_pt ?? ""} required />
+            </Field>
+            <Field label="Conteúdo (EN)">
+              <MarkdownEditor name="content_en" defaultValue={item?.content_en ?? ""} minHeight={280} />
+            </Field>
+
             <Field label="Vídeo (URL do YouTube)" hint="Opcional — vira o visual principal do artigo, no lugar da imagem de capa. Mesmo assim, cadastre uma imagem de capa na aba Detalhes: ela é usada como miniatura ao compartilhar o link.">
               <Input name="video_url" defaultValue={item?.video_url ?? ""} placeholder="https://www.youtube.com/watch?v=..." />
             </Field>
@@ -107,7 +138,7 @@ export function ArticleForm({
           <div style={{ display: active === "detalhes" ? "block" : "none" }}>
             <FieldGrid>
               <Field label="Slug" hint="Deixe em branco para gerar automaticamente">
-                <Input name="slug" defaultValue={item?.slug ?? ""} />
+                <Input name="slug" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={slugifyPreview(titlePt)} />
               </Field>
               <Field label="Status">
                 <Select name="status" defaultValue={item?.status ?? "draft"}>
@@ -163,12 +194,19 @@ export function ArticleForm({
           </div>
 
           <div style={{ display: active === "seo" ? "block" : "none" }}>
-            <Field label="SEO — título (PT)">
-              <Input name="seo_title_pt" defaultValue={item?.seo_title_pt ?? ""} />
+            <Field label="SEO — título (PT)" hint="Deixe em branco para usar o título do artigo.">
+              <Input name="seo_title_pt" value={seoTitlePt} onChange={(e) => setSeoTitlePt(e.target.value)} maxLength={70} />
             </Field>
-            <Field label="SEO — descrição (PT)">
-              <Textarea name="seo_desc_pt" rows={2} defaultValue={item?.seo_desc_pt ?? ""} />
+            <Field label="SEO — descrição (PT)" hint="Deixe em branco para usar a linha fina / subtítulo.">
+              <Textarea name="seo_desc_pt" rows={2} value={seoDescPt} onChange={(e) => setSeoDescPt(e.target.value)} maxLength={170} />
             </Field>
+
+            <div style={{ marginTop: "1.5rem" }}>
+              <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--admin-text-secondary)", marginBottom: "0.625rem" }}>
+                Como aparece no Google
+              </div>
+              <SeoPreview url={previewUrl} title={seoTitlePt || titlePt} description={seoDescPt || excerptPt} />
+            </div>
           </div>
         </div>
 
