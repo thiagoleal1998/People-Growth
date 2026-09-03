@@ -86,8 +86,10 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
         <div style={{ position: "absolute", left: "3rem", bottom: "1.5rem", color: "rgba(255,255,255,0.25)", fontSize: "0.75rem" }}>v{APP_VERSION}</div>
       </div>
 
-      <div style={{ flex: "1 1 50%", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f8fafc", padding: "1.5rem" }}>
-        <div style={{ width: "100%", maxWidth: "360px" }}>
+      <div style={{ flex: "1 1 50%", position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f8fafc", padding: "1.5rem" }}>
+        <div style={{ position: "absolute", width: "26rem", height: "26rem", borderRadius: "50%", background: "#4361EE", opacity: 0.06, filter: "blur(100px)", top: "-8rem", left: "-8rem", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", width: "20rem", height: "20rem", borderRadius: "50%", background: "#06D6A0", opacity: 0.06, filter: "blur(100px)", bottom: "-6rem", right: "-6rem", pointerEvents: "none" }} />
+        <div style={{ position: "relative", width: "100%", maxWidth: "360px" }}>
           <div className="login-mobile-logo" style={{ display: "none", marginBottom: "1.5rem" }}>
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
