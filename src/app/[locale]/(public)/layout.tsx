@@ -16,13 +16,14 @@ export default async function PublicLayout({
   const { data: configData } = await client
     .from("site_config")
     .select("key,value")
-    .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon"]);
+    .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email"]);
 
   const config = Object.fromEntries(((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""]));
   const logoUrl = config.logo_url || undefined;
   const weatherCity = config.weather_city_name || "São Paulo";
   const weatherLat = Number(config.weather_lat) || -23.5505;
   const weatherLon = Number(config.weather_lon) || -46.6333;
+  const contactEmail = config.contact_email || undefined;
 
   return (
     <>
@@ -32,7 +33,7 @@ export default async function PublicLayout({
         <CategoryNav />
         {children}
       </main>
-      <Footer logoUrl={logoUrl} />
+      <Footer logoUrl={logoUrl} contactEmail={contactEmail} />
       <CookieBanner />
       <style>{`
         @media (max-width: 768px) {

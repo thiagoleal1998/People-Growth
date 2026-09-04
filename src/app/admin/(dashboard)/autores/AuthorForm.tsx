@@ -123,7 +123,7 @@ export function AuthorForm({ item }: { item?: Author }) {
                 label="Trajetória / Marcos (PT)"
                 hint='Aparece na página "Sobre" da pessoa. Um marco por linha, no formato "Ano | Descrição". Ex: 2022 | Fundou a People & Growth'
               >
-                <Textarea name="milestones_pt" rows={5} defaultValue={item?.milestones_pt ?? ""} placeholder={"2022 | Fundou a People & Growth\n2024 | Fundou a Neuro Botics"} />
+                <Textarea name="milestones_pt" rows={5} defaultValue={item?.milestones_pt ?? ""} placeholder={"2022 | Fundou a People & Growth\n2024 | Expandiu a atuação para o mercado internacional"} />
               </Field>
               <Field label="Trajetória / Marcos (EN)" hint='Mesmo formato: "Year | Description".'>
                 <Textarea name="milestones_en" rows={5} defaultValue={item?.milestones_en ?? ""} />

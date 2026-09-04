@@ -13,7 +13,7 @@ const projects = [
   { icon: Bot, title: "Agente de Qualificação de Leads", description: "GPT personalizado que qualifica leads automaticamente com base em perguntas estratégicas e integra com CRM.", tags: ["GPT-4", "n8n", "HubSpot"], color: "#4361EE" },
   { icon: Zap, title: "Automação de Conteúdo", description: "Fluxo automatizado que gera, revisa e agenda conteúdo para redes sociais com base no calendário editorial.", tags: ["Make", "ChatGPT", "Buffer"], color: "#06D6A0" },
   { icon: Brain, title: "Análise de Dados com IA", description: "Agente que analisa planilhas de vendas e gera relatórios com insights e recomendações estratégicas.", tags: ["Python", "OpenAI", "Pandas"], color: "#FFB703" },
-  { icon: Cpu, title: "Neuro Botics — IA para Negócios", description: "Soluções completas de IA para empresas: agentes, automações, integração com sistemas legados e treinamento de times.", tags: ["Neuro Botics", "GPT-4", "LangChain", "n8n"], color: "#4361EE" },
+  { icon: Cpu, title: "IA para Negócios", description: "Soluções completas de IA para empresas: agentes, automações, integração com sistemas legados e treinamento de times.", tags: ["GPT-4", "LangChain", "n8n"], color: "#4361EE" },
 ];
 
 export default async function LaboratorioIAPage() {
@@ -65,10 +65,10 @@ export default async function LaboratorioIAPage() {
       <section className="section-padding" style={{ background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)", color: "white", textAlign: "center" }}>
         <div className="container-xl" style={{ maxWidth: "640px", margin: "0 auto" }}>
           <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, marginBottom: "1rem" }}>
-            Neuro Botics
+            IA aplicada a negócios reais
           </h2>
           <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.0625rem", lineHeight: 1.7, marginBottom: "2rem" }}>
-            A Neuro Botics é a empresa de tecnologia do ecossistema People &amp; Growth, especializada em soluções de IA para negócios. Desenvolvemos agentes, automações e integrações que aumentam a produtividade e criam vantagens competitivas reais.
+            A People &amp; Growth desenvolve agentes, automações e integrações de IA que aumentam a produtividade e criam vantagens competitivas reais para o seu negócio.
           </p>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/contato" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#4361EE", color: "white", padding: "0.875rem 1.75rem", borderRadius: "0.75rem", fontWeight: 700, boxShadow: "0 4px 24px -4px rgba(67,97,238,0.5)" }}>

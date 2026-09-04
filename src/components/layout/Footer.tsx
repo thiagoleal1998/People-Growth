@@ -4,7 +4,7 @@ import NextLink from "next/link";
 import { Linkedin, Mail, Instagram } from "lucide-react";
 import { ErrorReportButton } from "@/components/ErrorReportButton";
 
-export function Footer({ logoUrl }: { logoUrl?: string | null }) {
+export function Footer({ logoUrl, contactEmail }: { logoUrl?: string | null; contactEmail?: string }) {
   const t = useTranslations("footer");
   const nav = useTranslations("nav");
   const year = new Date().getFullYear();
@@ -58,13 +58,15 @@ export function Footer({ logoUrl }: { logoUrl?: string | null }) {
               >
                 <Linkedin size={20} />
               </a>
-              <a
-                href="mailto:contato.neurobotics@gmail.com"
-                aria-label="Email"
-                style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}
-              >
-                <Mail size={20} />
-              </a>
+              {contactEmail && (
+                <a
+                  href={`mailto:${contactEmail}`}
+                  aria-label="Email"
+                  style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}
+                >
+                  <Mail size={20} />
+                </a>
+              )}
               <a
                 href="https://instagram.com"
                 target="_blank"

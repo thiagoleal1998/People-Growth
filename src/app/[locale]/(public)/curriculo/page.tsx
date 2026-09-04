@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Download, GraduationCap, Briefcase, Award, BookOpen, Mic, Users } from "lucide-react";
+import { createClient } from "@/lib/supabase/server";
 
 export async function generateMetadata({
   params,
@@ -46,13 +47,6 @@ const experience = [
     period: "2022 – Atual",
     description: "Consultoria em Marketing, Growth e IA para empresas de médio e grande porte. Produção de conteúdo estratégico pela newsletter Mea Sententia. Desenvolvimento de treinamentos corporativos.",
     highlights: ["30+ empresas atendidas", "500+ alunos treinados", "100+ artigos publicados"],
-  },
-  {
-    role: "Co-fundador & Chief AI Officer",
-    company: "Neuro Botics",
-    period: "2024 – Atual",
-    description: "Desenvolvimento de soluções de IA e automação para negócios. Criação de agentes GPT personalizados. Integração de IA em processos de marketing e vendas.",
-    highlights: ["Agentes GPT para 10+ clientes", "Automações com n8n e Make", "IA integrada em CRM e marketing"],
   },
   {
     role: "Consultor em Marketing & Growth",
@@ -123,6 +117,10 @@ function Section({ icon: Icon, title, children, color = "#4361EE" }: {
 
 export default async function CurriculoPage() {
   const t = await getTranslations("resume");
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: configRow } = await (supabase as any).from("site_config").select("value").eq("key", "contact_email").maybeSingle();
+  const contactEmail = configRow?.value || "contato@peoplegrowth.com.br";
 
   return (
     <>
@@ -161,7 +159,7 @@ export default async function CurriculoPage() {
               Especialista em Marketing Digital, Growth e Inteligência Artificial
             </p>
             <p style={{ color: "rgba(255,255,255,0.5)", fontSize: "0.9rem", marginTop: "0.5rem" }}>
-              contato.neurobotics@gmail.com · LinkedIn: /in/thiagoleal98
+              {contactEmail} · LinkedIn: /in/thiagoleal98
             </p>
           </div>
 

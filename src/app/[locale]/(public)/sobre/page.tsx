@@ -228,12 +228,6 @@ export default async function SobrePage() {
                 color: "#4361EE",
               },
               {
-                name: "Neuro Botics",
-                description: "Empresa especializada em soluções de IA, automação e agentes inteligentes para negócios.",
-                icon: "🤖",
-                color: "#06D6A0",
-              },
-              {
                 name: "Mea Sententia",
                 description: "Coluna de opinião com perspectivas sobre negócios, sociedade e os temas que moldam o momento atual.",
                 icon: "✍️",
