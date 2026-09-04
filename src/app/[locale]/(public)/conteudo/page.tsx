@@ -106,7 +106,7 @@ export default async function MeaSententiePage() {
               return (
                 <Link
                   key={author.id}
-                  href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
+                  href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
                   style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none", width: "260px" }}
                 >
                   <div
@@ -163,7 +163,7 @@ export default async function MeaSententiePage() {
 
       <style>{`
         @media (max-width: 900px) {
-          .mea-sententia-grid { grid-template-columns: 1fr !important; }
+          .conteudo-grid { grid-template-columns: 1fr !important; }
         }
       `}</style>
     </>

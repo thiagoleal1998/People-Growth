@@ -90,7 +90,7 @@ export function Footer({ logoUrl, contactEmail }: { logoUrl?: string | null; con
                 { key: "about", href: "/sobre" as const },
                 { key: "services", href: "/servicos" as const },
                 { key: "portfolio", href: "/portfolio" as const },
-                { key: "newsletter", href: "/mea-sententia" as const },
+                { key: "newsletter", href: "/conteudo" as const },
                 { key: "media", href: "/na-midia" as const },
                 { key: "contact", href: "/contato" as const },
               ].map(({ key, href }) => (
@@ -129,7 +129,7 @@ export function Footer({ logoUrl, contactEmail }: { logoUrl?: string | null; con
             </h4>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
               {[
-                { label: "Mea Sententia", href: "/mea-sententia" as const },
+                { label: "Mea Sententia", href: "/conteudo" as const },
                 { label: "Recursos Gratuitos", href: "/recursos" as const },
                 { label: "Cursos", href: "/cursos" as const },
                 { label: "Laboratório IA", href: "/laboratorio-ia" as const },

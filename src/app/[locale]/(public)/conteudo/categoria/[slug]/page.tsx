@@ -47,7 +47,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
     <>
       <section style={{ background: "linear-gradient(135deg, #0d1b2a 0%, #1a1f3e 100%)", paddingTop: "6rem", paddingBottom: "3.5rem", color: "white" }}>
         <div className="container-xl" style={{ maxWidth: "720px" }}>
-          <Link href="/mea-sententia" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
+          <Link href="/conteudo" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
             <ArrowLeft size={16} /> Conteúdo
           </Link>
           <span
@@ -79,7 +79,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
               {articles.map((article) => (
                 <Link
                   key={article.id}
-                  href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+                  href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
                   style={{ display: "block", textDecoration: "none" }}
                   className="hover-card"
                 >

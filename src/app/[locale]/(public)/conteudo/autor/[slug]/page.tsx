@@ -67,7 +67,7 @@ export default async function AuthorPage({
       >
         <div className="container-xl" style={{ maxWidth: "720px" }}>
           <Link
-            href="/mea-sententia"
+            href="/conteudo"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -140,7 +140,7 @@ export default async function AuthorPage({
                 return (
                   <Link
                     key={article.id}
-                    href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+                    href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
                     style={{ display: "block", textDecoration: "none" }}
                     className="hover-card"
                   >

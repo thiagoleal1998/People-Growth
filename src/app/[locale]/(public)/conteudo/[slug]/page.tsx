@@ -117,13 +117,13 @@ export default async function ArticlePage({
     image: article.cover_image ? [article.cover_image] : undefined,
     datePublished: article.published_at ?? article.created_at,
     dateModified: article.updated_at ?? article.published_at ?? article.created_at,
-    author: author ? { "@type": "Person", name: author.name, url: `${siteUrl}/mea-sententia/autor/${author.slug}` } : undefined,
+    author: author ? { "@type": "Person", name: author.name, url: `${siteUrl}/conteudo/autor/${author.slug}` } : undefined,
     publisher: {
       "@type": "Organization",
       name: "People & Growth",
       logo: { "@type": "ImageObject", url: `${siteUrl}/favicon.ico` },
     },
-    mainEntityOfPage: { "@type": "WebPage", "@id": `${siteUrl}/mea-sententia/${article.slug}` },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${siteUrl}/conteudo/${article.slug}` },
   };
 
   return (
@@ -145,7 +145,7 @@ export default async function ArticlePage({
       >
         <div className="container-xl" style={{ maxWidth: "800px" }}>
           <Link
-            href="/mea-sententia"
+            href="/conteudo"
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -246,7 +246,7 @@ export default async function ArticlePage({
                   <div>
                     <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "0.9375rem" }}>{author.name}</div>
                     <Link
-                      href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
+                      href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
                       style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
                     >
                       Sobre {author.gender === "feminino" ? "a autora" : "o autor"} <ChevronRight size={14} />
@@ -294,7 +294,7 @@ export default async function ArticlePage({
             {/* Author */}
             {author && (
               <Link
-                href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
+                href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
                 className="hover-card"
                 style={{
                   marginTop: "2.5rem",
@@ -344,7 +344,7 @@ export default async function ArticlePage({
                   {related.map((r) => (
                     <Link
                       key={r.id}
-                      href={{ pathname: "/mea-sententia/[slug]", params: { slug: r.slug } }}
+                      href={{ pathname: "/conteudo/[slug]", params: { slug: r.slug } }}
                       className="hover-card"
                       style={{ display: "block", textDecoration: "none" }}
                     >

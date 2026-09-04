@@ -17,6 +17,20 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "6mb",
     },
   },
+  async redirects() {
+    // The "Mea Sententia" content section (news + opinion mixed together)
+    // moved from /mea-sententia to /conteudo — categories and author archives
+    // there mixed both formats, so nesting them under the opinion-column
+    // brand name was misleading. These keep old shared/indexed links working.
+    return [
+      { source: "/pt/mea-sententia/:path*", destination: "/pt/conteudo/:path*", permanent: true },
+      { source: "/en/mea-sententia/autor/:slug", destination: "/en/content/author/:slug", permanent: true },
+      { source: "/en/mea-sententia/colunistas", destination: "/en/content/columnists", permanent: true },
+      { source: "/en/mea-sententia/categoria/:slug", destination: "/en/content/category/:slug", permanent: true },
+      { source: "/en/mea-sententia/:slug", destination: "/en/content/:slug", permanent: true },
+      { source: "/en/mea-sententia", destination: "/en/content", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {

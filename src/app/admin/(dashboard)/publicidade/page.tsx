@@ -43,9 +43,9 @@ export default async function PublicidadePage({ searchParams }: { searchParams: 
     if (ad.target_mode === "specific") {
       const firstId = targetsByAd.get(ad.id)?.[0];
       const slug = firstId ? targetedArticleSlugs.get(firstId) : null;
-      if (slug) return `/pt/mea-sententia/${slug}`;
+      if (slug) return `/pt/conteudo/${slug}`;
     }
-    return latestArticleSlug ? `/pt/mea-sententia/${latestArticleSlug}` : null;
+    return latestArticleSlug ? `/pt/conteudo/${latestArticleSlug}` : null;
   }
 
   const statsByAd = new Map<string, { impressions: number; clicks: number }>();

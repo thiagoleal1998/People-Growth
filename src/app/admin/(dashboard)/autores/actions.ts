@@ -49,7 +49,7 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
   }
 
   revalidatePath("/admin/autores");
-  revalidatePath("/[locale]/mea-sententia", "page");
+  revalidatePath("/[locale]/conteudo", "page");
   revalidatePath("/[locale]/sobre", "page");
   revalidatePath("/[locale]/sobre/[slug]", "page");
   revalidatePath("/[locale]", "page");

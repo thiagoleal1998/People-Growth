@@ -153,7 +153,7 @@ export default async function FounderPage({
 
             {articleCount > 0 && (
               <Link
-                href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
+                href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",

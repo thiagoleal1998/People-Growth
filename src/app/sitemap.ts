@@ -9,7 +9,7 @@ const routes = [
   { path: "/curriculo", priority: 0.8 },
   { path: "/portfolio", priority: 0.8 },
   { path: "/servicos", priority: 0.9 },
-  { path: "/mea-sententia", priority: 0.9 },
+  { path: "/conteudo", priority: 0.9 },
   { path: "/cursos", priority: 0.7 },
   { path: "/laboratorio-ia", priority: 0.8 },
   { path: "/recursos", priority: 0.8 },
@@ -41,7 +41,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   type ArticleRow = { slug: string; updated_at: string; published_at: string | null };
   const articleEntries: MetadataRoute.Sitemap = ((data ?? []) as ArticleRow[]).flatMap((a) =>
     locales.map((locale) => ({
-      url: `${baseUrl}/${locale}/mea-sententia/${a.slug}`,
+      url: `${baseUrl}/${locale}/conteudo/${a.slug}`,
       lastModified: new Date(a.updated_at ?? a.published_at ?? Date.now()),
       changeFrequency: "monthly" as const,
       priority: 0.7,

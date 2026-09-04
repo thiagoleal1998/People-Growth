@@ -17,7 +17,7 @@ export async function updateCommentStatus(id: string, status: Comment["status"])
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "update", entityType: "comentário", entityLabel: `${comment?.name} → ${status}` });
   }
   revalidatePath("/admin/comentarios");
-  revalidatePath("/[locale]/mea-sententia/[slug]", "page");
+  revalidatePath("/[locale]/conteudo/[slug]", "page");
 }
 
 export async function deleteComment(id: string) {
@@ -31,5 +31,5 @@ export async function deleteComment(id: string) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "comentário", entityLabel: comment?.name });
   }
   revalidatePath("/admin/comentarios");
-  revalidatePath("/[locale]/mea-sententia/[slug]", "page");
+  revalidatePath("/[locale]/conteudo/[slug]", "page");
 }

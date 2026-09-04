@@ -29,7 +29,7 @@ export async function MostRead({ excludeId, limit = 5 }: { excludeId?: string; l
         {items.map((a, i) => (
           <li key={a.id}>
             <Link
-              href={{ pathname: "/mea-sententia/[slug]", params: { slug: a.slug } }}
+              href={{ pathname: "/conteudo/[slug]", params: { slug: a.slug } }}
               style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", textDecoration: "none" }}
             >
               <span style={{ fontWeight: 800, fontSize: "1.25rem", color: "rgba(67,97,238,0.35)", lineHeight: 1, flexShrink: 0 }}>{i + 1}</span>

@@ -164,7 +164,7 @@ export default async function HomePage() {
               {/* Main column */}
               <div>
                 <Link
-                  href={{ pathname: "/mea-sententia/[slug]", params: { slug: featured.slug } }}
+                  href={{ pathname: "/conteudo/[slug]", params: { slug: featured.slug } }}
                   style={{ display: "flex", textDecoration: "none", gap: "1rem", alignItems: "flex-start" }}
                   className="home-featured-link"
                 >
@@ -199,7 +199,7 @@ export default async function HomePage() {
                     {secondary.map((article) => (
                       <li key={article.id}>
                         <Link
-                          href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+                          href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
                           style={{ display: "flex", alignItems: "baseline", gap: "0.625rem", textDecoration: "none", color: "var(--site-text-secondary)", fontSize: "0.9375rem", fontWeight: 500 }}
                         >
                           <span style={{ width: "0.4375rem", height: "0.4375rem", backgroundColor: "#4361EE", flexShrink: 0 }} />
@@ -215,7 +215,7 @@ export default async function HomePage() {
                     {secondary.map((article) => (
                       <Link
                         key={article.id}
-                        href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+                        href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
                         style={{ display: "block", textDecoration: "none" }}
                         className="hover-card"
                       >
@@ -266,7 +266,7 @@ export default async function HomePage() {
                     {moreNews.map((article, i) => (
                       <Link
                         key={article.id}
-                        href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+                        href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
                         style={{
                           display: "flex",
                           gap: "1rem",
@@ -315,7 +315,7 @@ export default async function HomePage() {
                     ))}
                     {moreNews.length > 0 && (
                       <Link
-                        href="/mea-sententia"
+                        href="/conteudo"
                         className="hover-cta"
                         style={{
                           display: "flex",
@@ -467,7 +467,7 @@ export default async function HomePage() {
               return (
                 <Link
                   key={author.id}
-                  href={{ pathname: "/mea-sententia/autor/[slug]", params: { slug: author.slug } }}
+                  href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
                   className="columnist-hover"
                   style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none", width: "260px" }}
                 >
@@ -989,7 +989,7 @@ export default async function HomePage() {
               Agendar conversa <ArrowRight size={18} />
             </Link>
             <Link
-              href="/mea-sententia"
+              href="/conteudo"
               className="hover-cta"
               style={{
                 display: "inline-flex",

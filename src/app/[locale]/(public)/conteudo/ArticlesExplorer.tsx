@@ -18,7 +18,7 @@ function matches(article: Article, query: string) {
 function ArticleRow({ article, category }: { article: Article; category: Category | undefined }) {
   return (
     <Link
-      href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+      href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
       style={{ display: "block", textDecoration: "none" }}
       className="hover-card"
     >
@@ -111,7 +111,7 @@ export function ArticlesExplorer({
   }, [query, articles]);
 
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "3rem", alignItems: "start" }} className="mea-sententia-grid">
+    <div style={{ display: "grid", gridTemplateColumns: "1fr 300px", gap: "3rem", alignItems: "start" }} className="conteudo-grid">
       {/* Articles */}
       <div>
         {results ? (
@@ -138,7 +138,7 @@ export function ArticlesExplorer({
                   Destaque
                 </h2>
                 <Link
-                  href={{ pathname: "/mea-sententia/[slug]", params: { slug: featured.slug } }}
+                  href={{ pathname: "/conteudo/[slug]", params: { slug: featured.slug } }}
                   style={{ display: "block", textDecoration: "none" }}
                   className="hover-card"
                 >
@@ -281,7 +281,7 @@ export function ArticlesExplorer({
               {mostRead.map((article, i) => (
                 <Link
                   key={article.id}
-                  href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+                  href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
                   style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", textDecoration: "none" }}
                 >
                   <span style={{ fontWeight: 800, fontSize: "1.125rem", color: "var(--site-faint)", lineHeight: 1.3 }}>{i + 1}</span>

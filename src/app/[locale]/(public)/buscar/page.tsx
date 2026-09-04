@@ -53,7 +53,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           {results.map((article) => (
             <Link
               key={article.id}
-              href={{ pathname: "/mea-sententia/[slug]", params: { slug: article.slug } }}
+              href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
               className="hover-card"
               style={{
                 display: "flex",

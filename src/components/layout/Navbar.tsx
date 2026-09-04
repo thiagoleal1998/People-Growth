@@ -10,7 +10,7 @@ const navLinks = [
   { key: "home", href: "/" as const },
   { key: "about", href: "/sobre" as const },
   { key: "services", href: "/servicos" as const },
-  { key: "newsletter", href: "/mea-sententia" as const },
+  { key: "newsletter", href: "/conteudo" as const },
   { key: "portfolio", href: "/portfolio" as const },
   { key: "courses", href: "/cursos" as const },
   { key: "resources", href: "/recursos" as const },

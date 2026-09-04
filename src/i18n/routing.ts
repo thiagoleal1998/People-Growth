@@ -12,22 +12,22 @@ export const routing = defineRouting({
     "/portfolio/[slug]": { pt: "/portfolio/[slug]", en: "/portfolio/[slug]" },
     "/servicos": { pt: "/servicos", en: "/services" },
     "/servicos/[slug]": { pt: "/servicos/[slug]", en: "/services/[slug]" },
-    "/mea-sententia": { pt: "/mea-sententia", en: "/mea-sententia" },
-    "/mea-sententia/[slug]": {
-      pt: "/mea-sententia/[slug]",
-      en: "/mea-sententia/[slug]",
+    "/conteudo": { pt: "/conteudo", en: "/content" },
+    "/conteudo/[slug]": {
+      pt: "/conteudo/[slug]",
+      en: "/content/[slug]",
     },
-    "/mea-sententia/autor/[slug]": {
-      pt: "/mea-sententia/autor/[slug]",
-      en: "/mea-sententia/autor/[slug]",
+    "/conteudo/autor/[slug]": {
+      pt: "/conteudo/autor/[slug]",
+      en: "/content/author/[slug]",
     },
-    "/mea-sententia/colunistas": {
-      pt: "/mea-sententia/colunistas",
-      en: "/mea-sententia/colunistas",
+    "/conteudo/colunistas": {
+      pt: "/conteudo/colunistas",
+      en: "/content/columnists",
     },
-    "/mea-sententia/categoria/[slug]": {
-      pt: "/mea-sententia/categoria/[slug]",
-      en: "/mea-sententia/categoria/[slug]",
+    "/conteudo/categoria/[slug]": {
+      pt: "/conteudo/categoria/[slug]",
+      en: "/content/category/[slug]",
     },
     "/cursos": { pt: "/cursos", en: "/courses" },
     "/laboratorio-ia": { pt: "/laboratorio-ia", en: "/ai-lab" },

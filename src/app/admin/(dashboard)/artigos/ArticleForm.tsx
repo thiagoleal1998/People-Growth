@@ -51,7 +51,7 @@ export function ArticleForm({
   const [seoDescPt, setSeoDescPt] = useState(item?.seo_desc_pt ?? "");
   const [slug, setSlug] = useState(item?.slug ?? "");
 
-  const previewUrl = `peoplegrowth.com.br › mea-sententia › ${slug || slugifyPreview(titlePt) || "..."}`;
+  const previewUrl = `peoplegrowth.com.br › conteudo › ${slug || slugifyPreview(titlePt) || "..."}`;
 
   return (
     <div style={{ maxWidth: "900px" }}>

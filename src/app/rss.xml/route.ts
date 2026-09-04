@@ -24,8 +24,8 @@ export async function GET() {
       (a) => `
     <item>
       <title>${escapeXml(a.title_pt)}</title>
-      <link>${baseUrl}/pt/mea-sententia/${a.slug}</link>
-      <guid>${baseUrl}/pt/mea-sententia/${a.slug}</guid>
+      <link>${baseUrl}/pt/conteudo/${a.slug}</link>
+      <guid>${baseUrl}/pt/conteudo/${a.slug}</guid>
       <description>${escapeXml(a.excerpt_pt ?? "")}</description>
       <pubDate>${new Date(a.published_at ?? Date.now()).toUTCString()}</pubDate>
     </item>`
@@ -36,7 +36,7 @@ export async function GET() {
 <rss version="2.0">
   <channel>
     <title>People &amp; Growth — Mea Sententia</title>
-    <link>${baseUrl}/pt/mea-sententia</link>
+    <link>${baseUrl}/pt/conteudo</link>
     <description>Artigos e opiniões da People &amp; Growth.</description>
     <language>pt-BR</language>${items}
   </channel>

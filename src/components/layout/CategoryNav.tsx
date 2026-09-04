@@ -25,7 +25,7 @@ export async function CategoryNav() {
         {sorted.map((category) => (
           <Link
             key={category.id}
-            href={{ pathname: "/mea-sententia/categoria/[slug]", params: { slug: category.slug } }}
+            href={{ pathname: "/conteudo/categoria/[slug]", params: { slug: category.slug } }}
             style={{
               flexShrink: 0,
               fontSize: "0.8125rem",
@@ -41,7 +41,7 @@ export async function CategoryNav() {
           </Link>
         ))}
         <Link
-          href="/mea-sententia/colunistas"
+          href="/conteudo/colunistas"
           style={{
             flexShrink: 0,
             fontSize: "0.8125rem",
