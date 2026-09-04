@@ -1,7 +1,10 @@
 import { Flame } from "lucide-react";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
-import type { Article } from "@/types/database.types";
+import { articleHref } from "@/lib/article-url";
+import type { Article, Category } from "@/types/database.types";
+
+type Item = Pick<Article, "id" | "slug" | "title_pt" | "views" | "format"> & { categories: Pick<Category, "slug"> | null };
 
 export async function MostRead({ excludeId, limit = 5 }: { excludeId?: string; limit?: number }) {
   const supabase = await createClient();
@@ -9,12 +12,12 @@ export async function MostRead({ excludeId, limit = 5 }: { excludeId?: string; l
   const client = supabase as any;
   const { data } = await client
     .from("articles")
-    .select("id, slug, title_pt, views")
+    .select("id, slug, title_pt, views, format, categories(slug)")
     .eq("status", "published")
     .order("views", { ascending: false })
     .limit(limit + (excludeId ? 1 : 0));
 
-  let items = (data ?? []) as Pick<Article, "id" | "slug" | "title_pt" | "views">[];
+  let items = (data ?? []) as Item[];
   if (excludeId) items = items.filter((a) => a.id !== excludeId);
   items = items.slice(0, limit);
 
@@ -29,7 +32,7 @@ export async function MostRead({ excludeId, limit = 5 }: { excludeId?: string; l
         {items.map((a, i) => (
           <li key={a.id}>
             <Link
-              href={{ pathname: "/conteudo/[slug]", params: { slug: a.slug } }}
+              href={articleHref(a, a.categories?.slug)}
               style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", textDecoration: "none" }}
             >
               <span style={{ fontWeight: 800, fontSize: "1.25rem", color: "rgba(67,97,238,0.35)", lineHeight: 1, flexShrink: 0 }}>{i + 1}</span>

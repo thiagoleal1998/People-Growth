@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Clock, Calendar, ChevronRight, Linkedin, Instagram } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
@@ -13,15 +13,28 @@ import { ArticleBody } from "@/components/ArticleBody";
 import { createClient } from "@/lib/supabase/server";
 import { renderMarkdownLite, stripMarkdownLite } from "@/lib/markdown-lite";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
+import { articleHref, articlePath, FORMAT_SEGMENT, UNCATEGORIZED_SEGMENT } from "@/lib/article-url";
 import type { Article, Category, Author, Comment } from "@/types/database.types";
 
 export const revalidate = 300;
+
+// No loading.tsx for this route (or its [segment] ancestor) — this page
+// calls permanentRedirect() when the URL's format/category segments are
+// stale, and a loading.tsx anywhere in the ancestor chain silently
+// swallows that redirect in this Next.js version, serving a 200 with no
+// redirect instead. Confirmed by isolated reproduction.
+type ArticleWithCategory = Article & { categories: Pick<Category, "slug"> | null };
 
 async function getArticle(slug: string) {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const { data: article } = await client.from("articles").select("*").eq("slug", slug).eq("status", "published").single();
+  const { data: article } = await client
+    .from("articles")
+    .select("*, categories(slug)")
+    .eq("slug", slug)
+    .eq("status", "published")
+    .single();
   if (!article) return null;
 
   const [categoryRes, authorRes, commentsRes] = await Promise.all([
@@ -30,32 +43,32 @@ async function getArticle(slug: string) {
     client.from("comments").select("*").eq("article_id", article.id).eq("status", "approved").order("created_at", { ascending: false }),
   ]);
 
-  let related: Article[] = [];
+  let related: ArticleWithCategory[] = [];
   if (article.category_id) {
     const { data } = await client
       .from("articles")
-      .select("*")
+      .select("*, categories(slug)")
       .eq("status", "published")
       .eq("category_id", article.category_id)
       .neq("id", article.id)
       .order("published_at", { ascending: false })
       .limit(3);
-    related = (data ?? []) as Article[];
+    related = (data ?? []) as ArticleWithCategory[];
   }
   if (related.length < 3) {
     const { data } = await client
       .from("articles")
-      .select("*")
+      .select("*, categories(slug)")
       .eq("status", "published")
       .neq("id", article.id)
       .order("published_at", { ascending: false })
       .limit(3 + related.length);
-    const fill = ((data ?? []) as Article[]).filter((a) => !related.some((r) => r.id === a.id));
+    const fill = ((data ?? []) as ArticleWithCategory[]).filter((a) => !related.some((r) => r.id === a.id));
     related = [...related, ...fill].slice(0, 3);
   }
 
   return {
-    article: article as Article,
+    article: article as ArticleWithCategory,
     category: categoryRes.data as Category | null,
     author: authorRes.data as Author | null,
     comments: (commentsRes.data ?? []) as Comment[],
@@ -63,10 +76,16 @@ async function getArticle(slug: string) {
   };
 }
 
+// The dynamic segment is named "segment" (not "format") because the sibling
+// legacy-redirect route at /conteudo/[segment]/page.tsx uses a single [slug]
+// param there — Next.js requires sibling dynamic routes at the same
+// directory level to share one param name.
+type RouteParams = { slug: string; segment: string; category: string; locale: string };
+
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string; locale: string }>;
+  params: Promise<RouteParams>;
 }): Promise<Metadata> {
   const { slug } = await params;
   const result = await getArticle(slug);
@@ -99,16 +118,27 @@ export async function generateMetadata({
 export default async function ArticlePage({
   params,
 }: {
-  params: Promise<{ slug: string; locale: string }>;
+  params: Promise<RouteParams>;
 }) {
-  const { slug } = await params;
+  const { slug, segment: format, category, locale } = await params;
   const result = await getArticle(slug);
 
   if (!result) notFound();
 
-  const { article, category, author, comments, related } = result;
+  const { article, category: categoryRow, author, comments, related } = result;
+
+  // Self-healing canonical URL: if the format/category in the address bar
+  // doesn't match this article's actual data (stale link, category changed
+  // since, wrong format guessed), permanently redirect to the correct one
+  // instead of serving the same content at two different URLs.
+  const canonicalFormat = FORMAT_SEGMENT[article.format];
+  const canonicalCategory = article.categories?.slug || UNCATEGORIZED_SEGMENT;
+  if (format !== canonicalFormat || category !== canonicalCategory) {
+    permanentRedirect(articlePath(article, article.categories?.slug, locale === "en" ? "en" : "pt"));
+  }
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://peopleandgrowth.com.br";
+  const canonicalPath = articlePath(article, article.categories?.slug, "pt");
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -123,7 +153,7 @@ export default async function ArticlePage({
       name: "People & Growth",
       logo: { "@type": "ImageObject", url: `${siteUrl}/favicon.ico` },
     },
-    mainEntityOfPage: { "@type": "WebPage", "@id": `${siteUrl}/conteudo/${article.slug}` },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `${siteUrl}${canonicalPath}` },
   };
 
   return (
@@ -161,19 +191,19 @@ export default async function ArticlePage({
 
           <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
             <FormatTag format={article.format} />
-            {category && (
+            {categoryRow && (
               <span
                 style={{
                   display: "inline-block",
-                  backgroundColor: `${category.color ?? "#4361EE"}25`,
-                  color: category.color ?? "#4361EE",
+                  backgroundColor: `${categoryRow.color ?? "#4361EE"}25`,
+                  color: categoryRow.color ?? "#4361EE",
                   padding: "0.25rem 0.875rem",
                   borderRadius: "9999px",
                   fontSize: "0.8125rem",
                   fontWeight: 700,
                 }}
               >
-                {category.name_pt}
+                {categoryRow.name_pt}
               </span>
             )}
           </div>
@@ -344,7 +374,7 @@ export default async function ArticlePage({
                   {related.map((r) => (
                     <Link
                       key={r.id}
-                      href={{ pathname: "/conteudo/[slug]", params: { slug: r.slug } }}
+                      href={articleHref(r, r.categories?.slug)}
                       className="hover-card"
                       style={{ display: "block", textDecoration: "none" }}
                     >

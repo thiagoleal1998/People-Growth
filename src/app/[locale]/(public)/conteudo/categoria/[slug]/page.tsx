@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
 import { FormatTag } from "@/components/FormatTag";
 import { createClient } from "@/lib/supabase/server";
+import { articleHref } from "@/lib/article-url";
 import type { Article, Category } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -79,7 +80,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
               {articles.map((article) => (
                 <Link
                   key={article.id}
-                  href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
+                  href={articleHref(article, category.slug)}
                   style={{ display: "block", textDecoration: "none" }}
                   className="hover-card"
                 >

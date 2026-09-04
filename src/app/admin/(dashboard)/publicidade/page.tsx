@@ -4,8 +4,11 @@ import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteBu
 import { SavedToast } from "@/components/admin/SavedToast";
 import { AD_SLOT_DEFS } from "./ad-slots";
 import { deleteAd } from "./actions";
+import { articlePath } from "@/lib/article-url";
 import Link from "next/link";
-import type { Ad, AdEvent } from "@/types/database.types";
+import type { Ad, AdEvent, Article } from "@/types/database.types";
+
+type ArticleRef = Pick<Article, "id" | "slug" | "format"> & { categories: { slug: string } | null };
 
 export default async function PublicidadePage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   const { saved } = await searchParams;
@@ -18,12 +21,12 @@ export default async function PublicidadePage({ searchParams }: { searchParams: 
     client.from("ads").select("*").order("created_at", { ascending: false }),
     client.from("ad_events").select("ad_id, event_type").gte("created_at", since),
     client.from("ad_targets").select("ad_id, article_id"),
-    client.from("articles").select("slug").eq("status", "published").order("published_at", { ascending: false }).limit(1).maybeSingle(),
+    client.from("articles").select("slug, format, categories(slug)").eq("status", "published").order("published_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
 
   const ads = (adsData ?? []) as Ad[];
   const slotLabels = new Map<string, string>(AD_SLOT_DEFS.map((s) => [s.key, s.label]));
-  const latestArticleSlug = (latestArticleData as { slug: string } | null)?.slug ?? null;
+  const latestArticle = latestArticleData as Omit<ArticleRef, "id"> | null;
 
   const targetsByAd = new Map<string, string[]>();
   for (const t of (targetsData ?? []) as { ad_id: string; article_id: string }[]) {
@@ -31,21 +34,21 @@ export default async function PublicidadePage({ searchParams }: { searchParams: 
     list.push(t.article_id);
     targetsByAd.set(t.ad_id, list);
   }
-  let targetedArticleSlugs = new Map<string, string>();
+  let targetedArticlesById = new Map<string, ArticleRef>();
   const targetedIds = Array.from(new Set(Array.from(targetsByAd.values()).flat()));
   if (targetedIds.length > 0) {
-    const { data: targetedArticles } = await client.from("articles").select("id, slug").in("id", targetedIds);
-    targetedArticleSlugs = new Map(((targetedArticles ?? []) as { id: string; slug: string }[]).map((a) => [a.id, a.slug]));
+    const { data: targetedArticles } = await client.from("articles").select("id, slug, format, categories(slug)").in("id", targetedIds);
+    targetedArticlesById = new Map(((targetedArticles ?? []) as ArticleRef[]).map((a) => [a.id, a]));
   }
 
   function previewUrl(ad: Ad): string | null {
     if (ad.slot_key === "home-top") return "/pt";
     if (ad.target_mode === "specific") {
       const firstId = targetsByAd.get(ad.id)?.[0];
-      const slug = firstId ? targetedArticleSlugs.get(firstId) : null;
-      if (slug) return `/pt/conteudo/${slug}`;
+      const article = firstId ? targetedArticlesById.get(firstId) : null;
+      if (article) return articlePath(article, article.categories?.slug, "pt");
     }
-    return latestArticleSlug ? `/pt/conteudo/${latestArticleSlug}` : null;
+    return latestArticle ? articlePath(latestArticle, latestArticle.categories?.slug, "pt") : null;
   }
 
   const statsByAd = new Map<string, { impressions: number; clicks: number }>();

@@ -1,4 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
+import { articlePath } from "@/lib/article-url";
+import type { Article } from "@/types/database.types";
 
 export const revalidate = 300;
 
@@ -11,25 +13,26 @@ export async function GET() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any)
     .from("articles")
-    .select("title_pt, slug, excerpt_pt, published_at")
+    .select("title_pt, slug, format, excerpt_pt, published_at, categories(slug)")
     .eq("status", "published")
     .order("published_at", { ascending: false })
     .limit(30);
 
   const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://peopleandgrowth.com.br";
-  type FeedItem = { title_pt: string; slug: string; excerpt_pt: string | null; published_at: string | null };
+  type FeedItem = Pick<Article, "title_pt" | "slug" | "format" | "excerpt_pt" | "published_at"> & { categories: { slug: string } | null };
 
   const items = ((data ?? []) as FeedItem[])
-    .map(
-      (a) => `
+    .map((a) => {
+      const link = `${baseUrl}${articlePath(a, a.categories?.slug, "pt")}`;
+      return `
     <item>
       <title>${escapeXml(a.title_pt)}</title>
-      <link>${baseUrl}/pt/conteudo/${a.slug}</link>
-      <guid>${baseUrl}/pt/conteudo/${a.slug}</guid>
+      <link>${link}</link>
+      <guid>${link}</guid>
       <description>${escapeXml(a.excerpt_pt ?? "")}</description>
       <pubDate>${new Date(a.published_at ?? Date.now()).toUTCString()}</pubDate>
-    </item>`
-    )
+    </item>`;
+    })
     .join("");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>

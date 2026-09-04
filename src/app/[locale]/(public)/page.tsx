@@ -20,7 +20,10 @@ import { AdBanner } from "@/components/AdBanner";
 import { Reveal } from "@/components/Reveal";
 import { VideoFacade } from "@/components/VideoFacade";
 import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/youtube";
-import type { Article, Author, Testimonial, MediaItem } from "@/types/database.types";
+import { articleHref } from "@/lib/article-url";
+import type { Article, Author, Testimonial, MediaItem, Category } from "@/types/database.types";
+
+type ArticleWithCategory = Article & { categories: Pick<Category, "slug"> | null };
 
 const stats = [
   { labelKey: "statsYears", value: "7+" },
@@ -84,14 +87,14 @@ export default async function HomePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
   const [{ data: articlesData }, { data: authorsData }, { data: configData }, { data: testimonialsData }, { data: mediaData }] = await Promise.all([
-    client.from("articles").select("*").eq("status", "published").order("published_at", { ascending: false }),
+    client.from("articles").select("*, categories(slug)").eq("status", "published").order("published_at", { ascending: false }),
     client.from("authors").select("*").eq("status", "active").order("order"),
     client.from("site_config").select("*"),
     client.from("testimonials").select("*").eq("status", "active").order("order"),
     client.from("media_items").select("*").order("order").limit(5),
   ]);
 
-  const allArticles = (articlesData ?? []) as Article[];
+  const allArticles = (articlesData ?? []) as ArticleWithCategory[];
   const authors = (authorsData ?? []) as Author[];
   const founderFirstNames = authors.map((a) => a.name.split(" ")[0]);
   const founderNamesText =
@@ -164,7 +167,7 @@ export default async function HomePage() {
               {/* Main column */}
               <div>
                 <Link
-                  href={{ pathname: "/conteudo/[slug]", params: { slug: featured.slug } }}
+                  href={articleHref(featured, featured.categories?.slug)}
                   style={{ display: "flex", textDecoration: "none", gap: "1rem", alignItems: "flex-start" }}
                   className="home-featured-link"
                 >
@@ -199,7 +202,7 @@ export default async function HomePage() {
                     {secondary.map((article) => (
                       <li key={article.id}>
                         <Link
-                          href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
+                          href={articleHref(article, article.categories?.slug)}
                           style={{ display: "flex", alignItems: "baseline", gap: "0.625rem", textDecoration: "none", color: "var(--site-text-secondary)", fontSize: "0.9375rem", fontWeight: 500 }}
                         >
                           <span style={{ width: "0.4375rem", height: "0.4375rem", backgroundColor: "#4361EE", flexShrink: 0 }} />
@@ -215,7 +218,7 @@ export default async function HomePage() {
                     {secondary.map((article) => (
                       <Link
                         key={article.id}
-                        href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
+                        href={articleHref(article, article.categories?.slug)}
                         style={{ display: "block", textDecoration: "none" }}
                         className="hover-card"
                       >
@@ -266,7 +269,7 @@ export default async function HomePage() {
                     {moreNews.map((article, i) => (
                       <Link
                         key={article.id}
-                        href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
+                        href={articleHref(article, article.categories?.slug)}
                         style={{
                           display: "flex",
                           gap: "1rem",

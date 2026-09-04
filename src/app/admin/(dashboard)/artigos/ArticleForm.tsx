@@ -50,8 +50,12 @@ export function ArticleForm({
   const [seoTitlePt, setSeoTitlePt] = useState(item?.seo_title_pt ?? "");
   const [seoDescPt, setSeoDescPt] = useState(item?.seo_desc_pt ?? "");
   const [slug, setSlug] = useState(item?.slug ?? "");
+  const [format, setFormat] = useState<Article["format"]>(item?.format ?? "noticia");
+  const [categoryId, setCategoryId] = useState(item?.category_id ?? "");
 
-  const previewUrl = `peoplegrowth.com.br › conteudo › ${slug || slugifyPreview(titlePt) || "..."}`;
+  const formatSegment = format === "opiniao" ? "mea-sententia" : "noticia";
+  const categorySlug = categories.find((c) => c.id === categoryId)?.slug || "geral";
+  const previewUrl = `peoplegrowth.com.br › conteudo › ${formatSegment} › categoria › ${categorySlug} › ${slug || slugifyPreview(titlePt) || "..."}`;
 
   return (
     <div style={{ maxWidth: "900px" }}>
@@ -154,13 +158,13 @@ export function ArticleForm({
                 </Select>
               </Field>
               <Field label="Tipo de conteúdo" hint="Notícia: reportagem/atualidade. Opinião: aparece com a tag Mea Sententia.">
-                <Select name="format" defaultValue={item?.format ?? "noticia"}>
+                <Select name="format" value={format} onChange={(e) => setFormat(e.target.value as Article["format"])}>
                   <option value="noticia">Notícia</option>
                   <option value="opiniao">Opinião (Mea Sententia)</option>
                 </Select>
               </Field>
-              <Field label="Categoria">
-                <Select name="category_id" defaultValue={item?.category_id ?? ""}>
+              <Field label="Categoria" hint="Também define a URL do artigo (junto com o tipo de conteúdo acima).">
+                <Select name="category_id" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
                   <option value="">Sem categoria</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>{c.name_pt}</option>

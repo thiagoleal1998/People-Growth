@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { Search, ChevronRight } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
+import { articleHref } from "@/lib/article-url";
 import type { Article, Category, Tag } from "@/types/database.types";
 
 function matches(article: Article, query: string) {
@@ -18,7 +19,7 @@ function matches(article: Article, query: string) {
 function ArticleRow({ article, category }: { article: Article; category: Category | undefined }) {
   return (
     <Link
-      href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
+      href={articleHref(article, category?.slug)}
       style={{ display: "block", textDecoration: "none" }}
       className="hover-card"
     >
@@ -138,7 +139,7 @@ export function ArticlesExplorer({
                   Destaque
                 </h2>
                 <Link
-                  href={{ pathname: "/conteudo/[slug]", params: { slug: featured.slug } }}
+                  href={articleHref(featured, featured.category_id ? categoryById.get(featured.category_id)?.slug : undefined)}
                   style={{ display: "block", textDecoration: "none" }}
                   className="hover-card"
                 >
@@ -281,7 +282,7 @@ export function ArticlesExplorer({
               {mostRead.map((article, i) => (
                 <Link
                   key={article.id}
-                  href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
+                  href={articleHref(article, article.category_id ? categoryById.get(article.category_id)?.slug : undefined)}
                   style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", textDecoration: "none" }}
                 >
                   <span style={{ fontWeight: 800, fontSize: "1.125rem", color: "var(--site-faint)", lineHeight: 1.3 }}>{i + 1}</span>

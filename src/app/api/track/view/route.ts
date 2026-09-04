@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getClientIp, checkRateLimit } from "@/lib/rate-limit";
 
-const ARTICLE_PATH_RE = /^\/(pt\/conteudo|en\/content)\/(?!(?:autor|author)(?:\/|$))([^/]+)\/?$/;
+const ARTICLE_PATH_RE = /^\/(pt\/conteudo|en\/content)\/(?:noticia|mea-sententia)\/(?:categoria|category)\/[^/]+\/([^/]+)\/?$/;
 
 export async function POST(req: NextRequest) {
   try {

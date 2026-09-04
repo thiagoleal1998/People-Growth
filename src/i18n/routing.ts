@@ -17,6 +17,10 @@ export const routing = defineRouting({
       pt: "/conteudo/[slug]",
       en: "/content/[slug]",
     },
+    "/conteudo/[format]/categoria/[category]/[slug]": {
+      pt: "/conteudo/[format]/categoria/[category]/[slug]",
+      en: "/content/[format]/category/[category]/[slug]",
+    },
     "/conteudo/autor/[slug]": {
       pt: "/conteudo/autor/[slug]",
       en: "/content/author/[slug]",

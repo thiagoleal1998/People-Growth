@@ -2,7 +2,10 @@ import type { Metadata } from "next";
 import { Link } from "@/i18n/navigation";
 import { Search, Calendar } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import type { Article } from "@/types/database.types";
+import { articleHref } from "@/lib/article-url";
+import type { Article, Category } from "@/types/database.types";
+
+type ArticleWithCategory = Article & { categories: Pick<Category, "slug"> | null };
 
 export async function generateMetadata({ searchParams }: { searchParams: Promise<{ q?: string }> }): Promise<Metadata> {
   const { q } = await searchParams;
@@ -13,19 +16,19 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const { q } = await searchParams;
   const query = (q ?? "").trim();
 
-  let results: Article[] = [];
+  let results: ArticleWithCategory[] = [];
   if (query) {
     const supabase = await createClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const client = supabase as any;
     const { data } = await client
       .from("articles")
-      .select("*")
+      .select("*, categories(slug)")
       .eq("status", "published")
       .or(`title_pt.ilike.%${query}%,excerpt_pt.ilike.%${query}%,content_pt.ilike.%${query}%`)
       .order("published_at", { ascending: false })
       .limit(30);
-    results = (data ?? []) as Article[];
+    results = (data ?? []) as ArticleWithCategory[];
   }
 
   return (
@@ -53,7 +56,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
           {results.map((article) => (
             <Link
               key={article.id}
-              href={{ pathname: "/conteudo/[slug]", params: { slug: article.slug } }}
+              href={articleHref(article, article.categories?.slug)}
               className="hover-card"
               style={{
                 display: "flex",
