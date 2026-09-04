@@ -158,11 +158,8 @@ export function Footer({ logoUrl }: { logoUrl?: string | null }) {
             © {year} People &amp; Growth. {t("rights")}
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
-            <Link href="/" style={{ fontSize: "0.8125rem" }}>
+            <Link href="/normas-de-seguranca-e-privacidade" style={{ fontSize: "0.8125rem" }}>
               {t("privacy")}
-            </Link>
-            <Link href="/" style={{ fontSize: "0.8125rem" }}>
-              {t("terms")}
             </Link>
             <Link href="/direitos-autorais" style={{ fontSize: "0.8125rem" }}>
               Aviso de Direitos Autorais
