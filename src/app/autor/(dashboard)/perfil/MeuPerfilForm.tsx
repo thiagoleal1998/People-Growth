@@ -36,7 +36,7 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
               style={{ width: "4rem", height: "4rem", borderRadius: "50%", objectFit: "cover", display: "block", marginBottom: "0.625rem" }}
             />
           )}
-          <input type="file" name="photo_file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={handlePhotoChange} />
+          <input className="admin-file-input" type="file" name="photo_file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={handlePhotoChange} />
           <ErrorBanner message={photoError} />
         </Field>
 

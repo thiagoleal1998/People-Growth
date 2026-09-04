@@ -29,6 +29,11 @@ function slugifyPreview(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
+function toDatetimeLocalValue(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 export function ArticleForm({
   item,
   categories,
@@ -49,6 +54,13 @@ export function ArticleForm({
   const [seoTitlePt, setSeoTitlePt] = useState(item?.seo_title_pt ?? "");
   const [seoDescPt, setSeoDescPt] = useState(item?.seo_desc_pt ?? "");
   const [slug, setSlug] = useState(item?.slug ?? "");
+  // Same local-picker + hidden-ISO-field trick as the author form: computed
+  // as a lazy initial state (not an effect) so it converts using the
+  // browser's own timezone as soon as it renders, instead of the server's.
+  const [scheduledLocal, setScheduledLocal] = useState(() =>
+    item?.scheduled_for ? toDatetimeLocalValue(new Date(item.scheduled_for)) : ""
+  );
+  const [scheduledIso, setScheduledIso] = useState(item?.scheduled_for ?? "");
 
   const previewUrl = `peoplegrowth.com.br › mea-sententia › ${slug || slugifyPreview(titlePt) || "..."}`;
 
@@ -148,6 +160,7 @@ export function ArticleForm({
                 <Select name="status" defaultValue={item?.status ?? "draft"}>
                   <option value="draft">Rascunho</option>
                   <option value="pending">Pendente (aguardando revisão)</option>
+                  <option value="scheduled">Agendado (publica sozinho na data)</option>
                   <option value="published">Publicado</option>
                 </Select>
               </Field>
@@ -173,6 +186,17 @@ export function ArticleForm({
                   ))}
                 </Select>
               </Field>
+              <Field label="Data de publicação agendada" hint='Usada quando o status acima é "Agendado" — o artigo vai ao ar sozinho a partir dessa data.'>
+                <Input
+                  type="datetime-local"
+                  value={scheduledLocal}
+                  onChange={(e) => {
+                    setScheduledLocal(e.target.value);
+                    setScheduledIso(e.target.value ? new Date(e.target.value).toISOString() : "");
+                  }}
+                />
+                <input type="hidden" name="scheduled_for" value={scheduledIso} />
+              </Field>
             </FieldGrid>
             <Field label="Imagem de capa" hint="PNG, JPG ou WEBP — convertida automaticamente para WebP e comprimida para menos de 1MB.">
               {item?.cover_image && (
@@ -183,7 +207,7 @@ export function ArticleForm({
                   style={{ maxHeight: "6rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border)" }}
                 />
               )}
-              <input type="file" name="cover_image_file" accept="image/png,image/jpeg,image/webp" />
+              <input className="admin-file-input" type="file" name="cover_image_file" accept="image/png,image/jpeg,image/webp" />
               <input type="hidden" name="current_cover_image" value={item?.cover_image ?? ""} />
               <ErrorBanner message={imageError} />
             </Field>

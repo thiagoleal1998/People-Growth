@@ -56,6 +56,28 @@
   --admin-faint: #6b7688;
 }
 
+.admin-file-input {
+  font-size: 0.8125rem;
+  color: var(--admin-text-secondary);
+}
+
+.admin-file-input::file-selector-button {
+  margin-right: 0.75rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  border: 1px solid var(--admin-border-strong);
+  background: var(--admin-surface-alt);
+  color: var(--admin-text);
+  font-weight: 700;
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.admin-file-input::file-selector-button:hover {
+  background: var(--admin-border-strong);
+}
+
 .admin-scroll {
   scrollbar-width: thin;
   scrollbar-color: rgba(67, 97, 238, 0.35) transparent;

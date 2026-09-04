@@ -58,7 +58,7 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
                       style={{ height: "2.5rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.25rem" }}
                     />
                   )}
-                  <input type="file" name="logo_file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" />
+                  <input className="admin-file-input" type="file" name="logo_file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" />
                   <ErrorBanner message={logoError} />
                 </Field>
 
@@ -71,7 +71,7 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
                       style={{ height: "2rem", width: "2rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.25rem" }}
                     />
                   )}
-                  <input type="file" name="favicon_file" accept="image/png,image/x-icon,image/svg+xml" />
+                  <input className="admin-file-input" type="file" name="favicon_file" accept="image/png,image/x-icon,image/svg+xml" />
                   <ErrorBanner message={faviconError} />
                 </Field>
               </FieldGrid>

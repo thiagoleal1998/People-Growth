@@ -22,9 +22,10 @@ type ArticleRow = {
   summary_pt: string | null;
   summary_en: string | null;
   category_id: string | null;
-  status: "draft" | "pending" | "published";
+  status: "draft" | "pending" | "scheduled" | "published";
   format: "noticia" | "opiniao";
   published_at: string | null;
+  scheduled_for: string | null;
   author_id: string | null;
   views: number;
   read_time: number | null;

@@ -4,12 +4,13 @@ import { useState } from "react";
 import Link from "next/link";
 import { Edit, Check } from "lucide-react";
 import { Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
-import { deleteArticle, publishArticle } from "./actions";
+import { deleteArticle, publishArticle, approveAndSchedule } from "./actions";
 import type { Article } from "@/types/database.types";
 
 const statusConfig: Record<Article["status"], { label: string; tone: "success" | "warning" | "neutral" }> = {
   draft: { label: "Rascunho", tone: "neutral" },
   pending: { label: "Pendente", tone: "warning" },
+  scheduled: { label: "Agendado", tone: "warning" },
   published: { label: "Publicado", tone: "success" },
 };
 
@@ -17,11 +18,16 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR");
 }
 
+function formatDateTime(iso: string) {
+  return new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
 const tabs = [
   { id: "published", label: "Publicados" },
   { id: "mine", label: "Meus artigos" },
   { id: "draft", label: "Rascunhos" },
   { id: "pending", label: "Aguardando aprovação" },
+  { id: "scheduled", label: "Agendados" },
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -33,6 +39,7 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
     if (active === "published") return a.status === "published";
     if (active === "draft") return a.status === "draft";
     if (active === "pending") return a.status === "pending";
+    if (active === "scheduled") return a.status === "scheduled";
     return currentAuthorId != null && a.author_id === currentAuthorId;
   });
 
@@ -41,6 +48,7 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
     mine: currentAuthorId ? articles.filter((a) => a.author_id === currentAuthorId).length : 0,
     draft: articles.filter((a) => a.status === "draft").length,
     pending: articles.filter((a) => a.status === "pending").length,
+    scheduled: articles.filter((a) => a.status === "scheduled").length,
   };
 
   return (
@@ -92,19 +100,36 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <Badge tone={statusConfig[a.status].tone}>{statusConfig[a.status].label}</Badge>
+                    {(a.status === "pending" || a.status === "scheduled") && a.scheduled_for && (
+                      <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.25rem" }}>
+                        {a.status === "scheduled" ? "Vai ao ar em " : "Data pedida: "}
+                        {formatDateTime(a.scheduled_for)}
+                      </div>
+                    )}
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.875rem" }}>{a.views.toLocaleString("pt-BR")}</td>
                   <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem" }}>{formatDate(a.created_at)}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                      {a.status === "pending" && (
+                      {a.status === "pending" && a.scheduled_for && (
+                        <form action={approveAndSchedule.bind(null, a.id)}>
+                          <button
+                            type="submit"
+                            title="Aprovar e agendar para a data pedida"
+                            style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.5rem", color: "#b45309", backgroundColor: "rgba(217,119,6,0.1)", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 700 }}
+                          >
+                            <Check size={13} /> Aprovar e agendar
+                          </button>
+                        </form>
+                      )}
+                      {(a.status === "pending" || a.status === "scheduled") && (
                         <form action={publishArticle.bind(null, a.id)}>
                           <button
                             type="submit"
-                            title="Aprovar e publicar"
+                            title="Publicar agora"
                             style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.5rem", color: "#04a87d", backgroundColor: "rgba(6,214,160,0.1)", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 700 }}
                           >
-                            <Check size={13} /> Aprovar
+                            <Check size={13} /> {a.status === "scheduled" ? "Publicar agora" : "Aprovar"}
                           </button>
                         </form>
                       )}

@@ -10,6 +10,7 @@ import type { Article } from "@/types/database.types";
 const statusConfig: Record<Article["status"], { label: string; tone: "success" | "warning" | "neutral" }> = {
   draft: { label: "Rascunho", tone: "neutral" },
   pending: { label: "Em revisão", tone: "warning" },
+  scheduled: { label: "Agendado", tone: "warning" },
   published: { label: "Publicado", tone: "success" },
 };
 
@@ -91,6 +92,12 @@ export default async function AutorHomePage({ searchParams }: { searchParams: Pr
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <Badge tone={statusConfig[a.status].tone}>{statusConfig[a.status].label}</Badge>
+                    {a.scheduled_for && (a.status === "pending" || a.status === "scheduled") && (
+                      <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "0.25rem" }}>
+                        {a.status === "scheduled" ? "Vai ao ar em " : "Data pedida: "}
+                        {new Date(a.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                      </div>
+                    )}
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem", color: "#475569", fontSize: "0.875rem" }}>{a.views.toLocaleString("pt-BR")}</td>
                   <td style={{ padding: "0.875rem 1.25rem", color: "#475569", fontSize: "0.875rem" }}>{commentCounts.get(a.id) ?? 0}</td>
@@ -99,7 +106,7 @@ export default async function AutorHomePage({ searchParams }: { searchParams: Pr
                     <div style={{ display: "flex", gap: "0.5rem" }}>
                       <Link href={`/autor/artigos/${a.id}/estatisticas`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Estatísticas"><BarChart3 size={15} /></Link>
                       <Link href={`/autor/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
-                      {a.status !== "published" && (
+                      {a.status !== "published" && a.status !== "scheduled" && (
                         <ConfirmDeleteButton confirmText={`Excluir o artigo "${a.title_pt}"?`} onDelete={deleteOwnArticle.bind(null, a.id)} />
                       )}
                     </div>

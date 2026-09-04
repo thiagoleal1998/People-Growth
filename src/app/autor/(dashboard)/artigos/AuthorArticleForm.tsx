@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
 import { Eye } from "lucide-react";
 import { FormShell, Field, Input, Textarea, Select, SubmitButton } from "@/components/admin/ui";
@@ -9,8 +10,22 @@ import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { upsertOwnArticle } from "./actions";
 import type { Article, Category } from "@/types/database.types";
 
+function toDatetimeLocalValue(date: Date): string {
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
 export function AuthorArticleForm({ item, categories, imageError, saved }: { item?: Article; categories: Category[]; imageError?: string; saved?: boolean }) {
   const action = upsertOwnArticle.bind(null, item?.id ?? null);
+  // The visible field is a plain datetime-local picker (no timezone info);
+  // we convert it to a real ISO instant client-side, in the browser's own
+  // timezone, and submit that through a hidden field instead. Computed as a
+  // lazy initial state (not an effect) so it uses the browser's timezone as
+  // soon as it renders, instead of the server's.
+  const [scheduledLocal, setScheduledLocal] = useState(() =>
+    item?.scheduled_for ? toDatetimeLocalValue(new Date(item.scheduled_for)) : ""
+  );
+  const [scheduledIso, setScheduledIso] = useState(item?.scheduled_for ?? "");
 
   return (
     <>
@@ -88,7 +103,7 @@ export function AuthorArticleForm({ item, categories, imageError, saved }: { ite
               style={{ maxHeight: "6rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.375rem", border: "1px solid #e2e8f0" }}
             />
           )}
-          <input type="file" name="cover_image_file" accept="image/png,image/jpeg,image/webp" />
+          <input className="admin-file-input" type="file" name="cover_image_file" accept="image/png,image/jpeg,image/webp" />
           <input type="hidden" name="current_cover_image" value={item?.cover_image ?? ""} />
           <ErrorBanner message={imageError} />
         </Field>
@@ -97,6 +112,20 @@ export function AuthorArticleForm({ item, categories, imageError, saved }: { ite
         </Field>
         <Field label="Crédito da imagem" hint="Fotógrafo ou fonte da imagem.">
           <Input name="cover_image_credit" defaultValue={item?.cover_image_credit ?? ""} />
+        </Field>
+        <Field
+          label="Data desejada de publicação"
+          hint="Opcional. Mesmo com uma data marcada, o artigo só vai ao ar depois que um admin aprovar — a data só entra em vigor a partir da aprovação."
+        >
+          <Input
+            type="datetime-local"
+            value={scheduledLocal}
+            onChange={(e) => {
+              setScheduledLocal(e.target.value);
+              setScheduledIso(e.target.value ? new Date(e.target.value).toISOString() : "");
+            }}
+          />
+          <input type="hidden" name="scheduled_for" value={scheduledIso} />
         </Field>
         <Field
           label="Status"

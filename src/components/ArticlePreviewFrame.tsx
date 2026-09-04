@@ -8,6 +8,7 @@ import type { Article, Category, Author } from "@/types/database.types";
 const statusLabel: Record<Article["status"], string> = {
   draft: "Rascunho",
   pending: "Aguardando aprovação",
+  scheduled: "Agendado",
   published: "Publicado",
 };
 

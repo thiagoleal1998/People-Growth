@@ -4,12 +4,14 @@ import { CookieBanner } from "@/components/layout/CookieBanner";
 import { CategoryNav } from "@/components/layout/CategoryNav";
 import { UtilityBar } from "@/components/layout/UtilityBar";
 import { createClient } from "@/lib/supabase/server";
+import { publishDueScheduledArticles } from "@/lib/publish-scheduled";
 
 export default async function PublicLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  await publishDueScheduledArticles();
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;

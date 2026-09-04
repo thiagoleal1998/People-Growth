@@ -21,6 +21,7 @@ export async function upsertArticle(id: string | null, formData: FormData) {
   const categoryId = String(formData.get("category_id") ?? "");
   const authorId = String(formData.get("author_id") ?? "");
   const format = (String(formData.get("format") ?? "noticia")) as Article["format"];
+  const scheduledFor = String(formData.get("scheduled_for") ?? "").trim() || null;
 
   const payload: Omit<Article, "id" | "created_at" | "updated_at" | "views"> = {
     title_pt,
@@ -40,6 +41,7 @@ export async function upsertArticle(id: string | null, formData: FormData) {
     format,
     status,
     published_at: status === "published" ? new Date().toISOString() : null,
+    scheduled_for: scheduledFor,
     author_id: authorId || null,
     read_time: null,
     seo_title_pt: String(formData.get("seo_title_pt") ?? "") || null,
@@ -100,6 +102,20 @@ export async function publishArticle(id: string) {
   }
   revalidatePath("/admin/artigos");
   revalidatePath("/[locale]", "page");
+}
+
+export async function approveAndSchedule(id: string) {
+  const supabase = await createClient();
+  const profile = await getCurrentProfile();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { data: article } = await client.from("articles").select("title_pt, scheduled_for").eq("id", id).single();
+  if (!article?.scheduled_for) return;
+  await client.from("articles").update({ status: "scheduled" }).eq("id", id);
+  if (profile) {
+    await logActivity({ userId: profile.id, userEmail: profile.email, action: "publish", entityType: "artigo", entityLabel: `${article.title_pt} (agendado)` });
+  }
+  revalidatePath("/admin/artigos");
 }
 
 export async function deleteArticle(id: string) {

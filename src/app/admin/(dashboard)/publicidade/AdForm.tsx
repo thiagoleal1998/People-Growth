@@ -81,7 +81,7 @@ export function AdForm({
                 style={{ maxHeight: "6rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border)" }}
               />
             )}
-            <input type="file" name="image_file" accept="image/png,image/jpeg,image/webp" />
+            <input className="admin-file-input" type="file" name="image_file" accept="image/png,image/jpeg,image/webp" />
             <ErrorBanner message={imageError} />
           </Field>
 

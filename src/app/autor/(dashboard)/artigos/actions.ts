@@ -24,6 +24,7 @@ export async function upsertOwnArticle(id: string | null, formData: FormData) {
   // Authors can only save as draft or submit for review — never publish directly.
   const status: Article["status"] = requestedStatus === "pending" ? "pending" : "draft";
   const format = (String(formData.get("format") ?? "opiniao")) as Article["format"];
+  const scheduledFor = String(formData.get("scheduled_for") ?? "").trim() || null;
 
   const payload = {
     title_pt,
@@ -42,6 +43,7 @@ export async function upsertOwnArticle(id: string | null, formData: FormData) {
     category_id: String(formData.get("category_id") ?? "") || null,
     format,
     status,
+    scheduled_for: scheduledFor,
     author_id: profile.author_id,
   };
 

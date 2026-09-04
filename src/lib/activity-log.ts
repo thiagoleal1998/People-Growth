@@ -46,6 +46,7 @@ export const ARTICLE_TRACKED_FIELDS: { key: string; label: string }[] = [
   { key: "cover_image_credit", label: "Crédito da imagem" },
   { key: "status", label: "Status" },
   { key: "format", label: "Tipo de conteúdo" },
+  { key: "scheduled_for", label: "Data agendada" },
 ];
 
 /** Compares the tracked fields of an old row against a new payload and
