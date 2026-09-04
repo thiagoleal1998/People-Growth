@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Eye } from "lucide-react";
 import { Field, Input, Textarea, Select, SubmitButton, FieldGrid } from "@/components/admin/ui";
 import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
+import { DateTimePicker } from "@/components/admin/DateTimePicker";
 import { SeoPreview } from "@/components/admin/SeoPreview";
 import { SavedToast } from "@/components/admin/SavedToast";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
@@ -29,11 +30,6 @@ function slugifyPreview(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-function toDatetimeLocalValue(date: Date): string {
-  const pad = (n: number) => String(n).padStart(2, "0");
-  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
-}
-
 export function ArticleForm({
   item,
   categories,
@@ -54,13 +50,6 @@ export function ArticleForm({
   const [seoTitlePt, setSeoTitlePt] = useState(item?.seo_title_pt ?? "");
   const [seoDescPt, setSeoDescPt] = useState(item?.seo_desc_pt ?? "");
   const [slug, setSlug] = useState(item?.slug ?? "");
-  // Same local-picker + hidden-ISO-field trick as the author form: computed
-  // as a lazy initial state (not an effect) so it converts using the
-  // browser's own timezone as soon as it renders, instead of the server's.
-  const [scheduledLocal, setScheduledLocal] = useState(() =>
-    item?.scheduled_for ? toDatetimeLocalValue(new Date(item.scheduled_for)) : ""
-  );
-  const [scheduledIso, setScheduledIso] = useState(item?.scheduled_for ?? "");
 
   const previewUrl = `peoplegrowth.com.br › mea-sententia › ${slug || slugifyPreview(titlePt) || "..."}`;
 
@@ -187,15 +176,7 @@ export function ArticleForm({
                 </Select>
               </Field>
               <Field label="Data de publicação agendada" hint='Usada quando o status acima é "Agendado" — o artigo vai ao ar sozinho a partir dessa data.'>
-                <Input
-                  type="datetime-local"
-                  value={scheduledLocal}
-                  onChange={(e) => {
-                    setScheduledLocal(e.target.value);
-                    setScheduledIso(e.target.value ? new Date(e.target.value).toISOString() : "");
-                  }}
-                />
-                <input type="hidden" name="scheduled_for" value={scheduledIso} />
+                <DateTimePicker name="scheduled_for" defaultValue={item?.scheduled_for} />
               </Field>
             </FieldGrid>
             <Field label="Imagem de capa" hint="PNG, JPG ou WEBP — convertida automaticamente para WebP e comprimida para menos de 1MB.">
