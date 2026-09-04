@@ -160,42 +160,6 @@
 }
 
 @layer utilities {
-  .text-balance {
-    text-wrap: balance;
-  }
-
-  .bg-navy {
-    background-color: var(--color-navy);
-  }
-
-  .bg-brand {
-    background-color: var(--color-brand);
-  }
-
-  .bg-growth {
-    background-color: var(--color-growth);
-  }
-
-  .text-brand {
-    color: var(--color-brand);
-  }
-
-  .text-growth {
-    color: var(--color-growth);
-  }
-
-  .text-amber {
-    color: var(--color-amber);
-  }
-
-  .gradient-brand {
-    background: linear-gradient(135deg, var(--color-brand) 0%, var(--color-growth) 100%);
-  }
-
-  .gradient-hero {
-    background: linear-gradient(135deg, var(--color-navy) 0%, var(--color-navy-light) 50%, #1a1f3e 100%);
-  }
-
   .section-padding {
     padding-top: 5rem;
     padding-bottom: 5rem;
