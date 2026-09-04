@@ -6,7 +6,7 @@ import slugify from "slugify";
 import { createClient } from "@/lib/supabase/server";
 import { uploadPublicImage } from "@/lib/supabase/storage";
 import { getCurrentProfile } from "@/lib/auth/profile";
-import { logActivity } from "@/lib/activity-log";
+import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
 import type { Article } from "@/types/database.types";
 
 export async function upsertArticle(id: string | null, formData: FormData) {
@@ -52,7 +52,10 @@ export async function upsertArticle(id: string | null, formData: FormData) {
   const client = supabase as any;
   let articleId = id;
   const isNew = !articleId;
+  let oldArticle: Article | null = null;
   if (articleId) {
+    const { data } = await client.from("articles").select("*").eq("id", articleId).single();
+    oldArticle = data as Article | null;
     // Only overwrite published_at when transitioning into "published"; keep existing otherwise.
     const { published_at: _publishedAt, ...updatePayload } = payload;
     const finalPayload = status === "published" ? payload : updatePayload;
@@ -63,12 +66,14 @@ export async function upsertArticle(id: string | null, formData: FormData) {
   }
 
   if (profile) {
+    const changes = diffFields(oldArticle, payload, ARTICLE_TRACKED_FIELDS);
     await logActivity({
       userId: profile.id,
       userEmail: profile.email,
       action: isNew ? "create" : "update",
       entityType: "artigo",
       entityLabel: title_pt,
+      details: changes,
     });
   }
 

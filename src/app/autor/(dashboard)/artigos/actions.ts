@@ -6,7 +6,7 @@ import slugify from "slugify";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { uploadPublicImage } from "@/lib/supabase/storage";
-import { logActivity } from "@/lib/activity-log";
+import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
 import type { Article } from "@/types/database.types";
 
 export async function upsertOwnArticle(id: string | null, formData: FormData) {
@@ -49,7 +49,10 @@ export async function upsertOwnArticle(id: string | null, formData: FormData) {
   const client = supabase as any;
   let articleId = id;
   const isNew = !articleId;
+  let oldArticle: Article | null = null;
   if (articleId) {
+    const { data } = await client.from("articles").select("*").eq("id", articleId).single();
+    oldArticle = data as Article | null;
     await client.from("articles").update(payload).eq("id", articleId).eq("author_id", profile.author_id);
   } else {
     const { data } = await client.from("articles").insert(payload).select("id").single();
@@ -62,6 +65,7 @@ export async function upsertOwnArticle(id: string | null, formData: FormData) {
     action: isNew ? "create" : "update",
     entityType: "artigo",
     entityLabel: title_pt,
+    details: diffFields(oldArticle, payload, ARTICLE_TRACKED_FIELDS),
   });
 
   revalidatePath("/autor");

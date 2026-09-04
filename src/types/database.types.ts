@@ -204,6 +204,7 @@ type ActivityLogRow = {
   action: string;
   entity_type: string;
   entity_label: string | null;
+  details: { field: string; before: string; after: string }[] | null;
   created_at: string;
 };
 

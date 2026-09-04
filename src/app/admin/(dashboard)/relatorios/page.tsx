@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { diffWords } from "diff";
 import { Eye, Users, MousePointerClick, Percent, X, ThumbsUp, MessageCircle, Flag, MoveDown } from "lucide-react";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
@@ -26,6 +27,26 @@ const ACTIVITY_ACTION_LABELS: Record<string, { label: string; color: string }> =
   login: { label: "Entrou", color: "#FFB703" },
   logout: { label: "Saiu", color: "var(--admin-faint)" },
 };
+
+function renderWordDiff(before: string, after: string) {
+  return diffWords(before, after).map((part, i) => {
+    if (part.added) {
+      return (
+        <ins key={i} style={{ backgroundColor: "rgba(6,214,160,0.18)", color: "#04a87d", textDecoration: "none", fontWeight: 700, borderRadius: "0.1875rem", padding: "0 0.125rem" }}>
+          {part.value}
+        </ins>
+      );
+    }
+    if (part.removed) {
+      return (
+        <del key={i} style={{ backgroundColor: "rgba(220,38,38,0.1)", color: "#dc2626", borderRadius: "0.1875rem", padding: "0 0.125rem" }}>
+          {part.value}
+        </del>
+      );
+    }
+    return <span key={i}>{part.value}</span>;
+  });
+}
 
 function StatCard({ icon: Icon, label, value, color }: { icon: typeof Eye; label: string; value: string; color: string }) {
   return (
@@ -514,8 +535,37 @@ export default async function RelatoriosPage({
                           <span style={{ fontSize: "0.75rem", fontWeight: 700, color: actionInfo.color }}>{actionInfo.label}</span>
                         </td>
                         <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.8125rem", textTransform: "capitalize" }}>{log.entity_type}</td>
-                        <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem", maxWidth: "360px", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                          {log.entity_label ?? "—"}
+                        <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem", maxWidth: "420px" }}>
+                          {log.details && log.details.length > 0 ? (
+                            <details>
+                              <summary
+                                style={{
+                                  cursor: "pointer",
+                                  color: "#4361EE",
+                                  fontWeight: 600,
+                                  overflow: "hidden",
+                                  textOverflow: "ellipsis",
+                                  whiteSpace: "nowrap",
+                                }}
+                              >
+                                {log.entity_label ?? `${log.details.length} campo${log.details.length === 1 ? "" : "s"} alterado${log.details.length === 1 ? "" : "s"}`}
+                              </summary>
+                              <div style={{ marginTop: "0.625rem", display: "flex", flexDirection: "column", gap: "0.75rem" }}>
+                                {log.details.map((d, i) => (
+                                  <div key={i}>
+                                    <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.03em", marginBottom: "0.25rem" }}>
+                                      {d.field}
+                                    </div>
+                                    <div style={{ fontSize: "0.8125rem", lineHeight: 1.6, color: "var(--admin-text-secondary)", whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+                                      {renderWordDiff(d.before, d.after)}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </details>
+                          ) : (
+                            <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>{log.entity_label ?? "—"}</span>
+                          )}
                         </td>
                       </tr>
                     );
