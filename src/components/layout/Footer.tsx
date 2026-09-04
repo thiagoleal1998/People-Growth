@@ -161,6 +161,9 @@ export function Footer({ logoUrl }: { logoUrl?: string | null }) {
             <Link href="/normas-de-seguranca-e-privacidade" style={{ fontSize: "0.8125rem" }}>
               {t("privacy")}
             </Link>
+            <Link href="/termos-de-uso" style={{ fontSize: "0.8125rem" }}>
+              {t("terms")}
+            </Link>
             <Link href="/direitos-autorais" style={{ fontSize: "0.8125rem" }}>
               Aviso de Direitos Autorais
             </Link>

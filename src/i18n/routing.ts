@@ -40,6 +40,7 @@ export const routing = defineRouting({
     "/direitos-autorais": { pt: "/direitos-autorais", en: "/copyright-notice" },
     "/comentarios": { pt: "/comentarios", en: "/comment-guidelines" },
     "/normas-de-seguranca-e-privacidade": { pt: "/normas-de-seguranca-e-privacidade", en: "/security-privacy-standards" },
+    "/termos-de-uso": { pt: "/termos-de-uso", en: "/terms-of-use" },
     "/buscar": { pt: "/buscar", en: "/search" },
   },
 });
