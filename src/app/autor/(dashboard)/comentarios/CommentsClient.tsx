@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Trash2, Flag, CornerDownRight } from "lucide-react";
 import type { Comment } from "@/types/database.types";
+import { RejectCommentModal } from "@/components/admin/RejectCommentModal";
 import { updateCommentStatus, deleteComment } from "./actions";
 
 const statusConfig: Record<Comment["status"], { label: string; color: string; bg: string }> = {
@@ -22,8 +23,18 @@ export function CommentsClient({
   comments: Comment[];
   articleTitles: Record<string, string>;
 }) {
-  const [, startTransition] = useTransition();
+  const [pending, startTransition] = useTransition();
   const [items, setItems] = useState(comments);
+  const [rejectingId, setRejectingId] = useState<string | null>(null);
+  const rejecting = items.find((i) => i.id === rejectingId) ?? null;
+
+  function confirmReject(reason: string) {
+    if (!rejectingId) return;
+    const id = rejectingId;
+    setItems((prev) => prev.map((i) => (i.id === id ? { ...i, status: "rejected", rejection_reason: reason || null } : i)));
+    startTransition(() => updateCommentStatus(id, "rejected", reason));
+    setRejectingId(null);
+  }
 
   return (
     <div style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid #f1f5f9", overflow: "hidden" }}>
@@ -75,10 +86,7 @@ export function CommentsClient({
                         onChange={(e) => {
                           const status = e.target.value as Comment["status"];
                           if (status === "rejected") {
-                            const reason = window.prompt("Motivo da rejeição (opcional — fica só na moderação, não aparece pro público):", "");
-                            if (reason === null) return; // cancelado, mantém o status atual
-                            setItems((prev) => prev.map((i) => (i.id === c.id ? { ...i, status, rejection_reason: reason || null } : i)));
-                            startTransition(() => updateCommentStatus(c.id, status, reason));
+                            setRejectingId(c.id);
                             return;
                           }
                           setItems((prev) => prev.map((i) => (i.id === c.id ? { ...i, status, rejection_reason: null } : i)));
@@ -117,6 +125,14 @@ export function CommentsClient({
             </tbody>
           </table>
         </div>
+      )}
+      {rejecting && (
+        <RejectCommentModal
+          commenterName={rejecting.name}
+          pending={pending}
+          onCancel={() => setRejectingId(null)}
+          onConfirm={confirmReject}
+        />
       )}
     </div>
   );
