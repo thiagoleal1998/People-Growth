@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Sun, Moon } from "lucide-react";
 
-export function ThemeToggle() {
+export function ThemeToggle({ compact = false }: { compact?: boolean }) {
   const [isDark, setIsDark] = useState(false);
 
   useEffect(() => {
@@ -19,6 +19,30 @@ export function ThemeToggle() {
     } catch {
       /* no-op */
     }
+  }
+
+  if (compact) {
+    return (
+      <button
+        onClick={toggle}
+        title={isDark ? "Modo claro" : "Modo escuro"}
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "2rem",
+          height: "2rem",
+          borderRadius: "0.5rem",
+          color: "rgba(255,255,255,0.55)",
+          background: "none",
+          border: "none",
+          cursor: "pointer",
+          flexShrink: 0,
+        }}
+      >
+        {isDark ? <Sun size={17} /> : <Moon size={17} />}
+      </button>
+    );
   }
 
   return (

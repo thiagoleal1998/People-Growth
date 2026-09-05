@@ -100,14 +100,17 @@ export function AdminSidebar({
     >
       {/* Logo */}
       <div style={{ padding: "1.5rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
-        {logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={logoUrl} alt="People & Growth" style={{ height: "2.25rem", width: "auto", display: "block" }} />
-        ) : (
-          <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            People & Growth
-          </div>
-        )}
+        <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.5rem" }}>
+          {logoUrl ? (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={logoUrl} alt="People & Growth" style={{ height: "2.25rem", width: "auto", display: "block" }} />
+          ) : (
+            <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              People & Growth
+            </div>
+          )}
+          <ThemeToggle compact />
+        </div>
         <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.375rem" }}>Painel Admin</div>
       </div>
 
@@ -174,16 +177,15 @@ export function AdminSidebar({
               background: userPhoto ? `url(${userPhoto}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
             }}
           />
-          <div style={{ fontSize: "0.8125rem", fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          <div style={{ fontSize: "0.8125rem", fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>
             {userName}
           </div>
+          <NotificationBell compact />
         </div>
       )}
 
       {/* Footer */}
       <div style={{ padding: "1rem 0.75rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-        <NotificationBell />
-        <ThemeToggle />
         <Link
           href="/autor"
           target="_blank"

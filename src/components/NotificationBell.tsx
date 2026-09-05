@@ -10,7 +10,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleString("pt-BR");
 }
 
-export function NotificationBell() {
+export function NotificationBell({ compact = false }: { compact?: boolean }) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
@@ -79,55 +79,83 @@ export function NotificationBell() {
     fetch("/api/notifications", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ all: true }) }).catch(() => {});
   }
 
+  const bellIcon = (
+    <span style={{ position: "relative", display: "flex" }}>
+      <Bell size={17} />
+      {unreadCount > 0 && (
+        <span
+          style={{
+            position: "absolute",
+            top: "-0.25rem",
+            right: "-0.3rem",
+            backgroundColor: "#dc2626",
+            color: "white",
+            fontSize: "0.5625rem",
+            fontWeight: 800,
+            minWidth: "0.9rem",
+            height: "0.9rem",
+            borderRadius: "9999px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "0 0.2rem",
+          }}
+        >
+          {unreadCount > 9 ? "9+" : unreadCount}
+        </span>
+      )}
+    </span>
+  );
+
   return (
     <div style={{ position: "relative" }}>
-      <button
-        ref={buttonRef}
-        type="button"
-        onClick={toggleOpen}
-        style={{
-          display: "flex",
-          alignItems: "center",
-          gap: "0.75rem",
-          padding: "0.625rem 0.875rem",
-          borderRadius: "0.5rem",
-          fontSize: "0.875rem",
-          fontWeight: 500,
-          color: "rgba(255,255,255,0.7)",
-          background: open ? "rgba(255,255,255,0.06)" : "none",
-          border: "none",
-          cursor: "pointer",
-          width: "100%",
-          textAlign: "left",
-        }}
-      >
-        <span style={{ position: "relative", display: "flex" }}>
-          <Bell size={17} />
-          {unreadCount > 0 && (
-            <span
-              style={{
-                position: "absolute",
-                top: "-0.25rem",
-                right: "-0.3rem",
-                backgroundColor: "#dc2626",
-                color: "white",
-                fontSize: "0.5625rem",
-                fontWeight: 800,
-                minWidth: "0.9rem",
-                height: "0.9rem",
-                borderRadius: "9999px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                padding: "0 0.2rem",
-              }}
-            >
-              {unreadCount > 9 ? "9+" : unreadCount}
-            </span>
-          )}
-        </span>
-        Notificações
-      </button>
+      {compact ? (
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={toggleOpen}
+          title="Notificações"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "2rem",
+            height: "2rem",
+            borderRadius: "0.5rem",
+            color: "rgba(255,255,255,0.7)",
+            background: open ? "rgba(255,255,255,0.06)" : "none",
+            border: "none",
+            cursor: "pointer",
+            flexShrink: 0,
+          }}
+        >
+          {bellIcon}
+        </button>
+      ) : (
+        <button
+          ref={buttonRef}
+          type="button"
+          onClick={toggleOpen}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.75rem",
+            padding: "0.625rem 0.875rem",
+            borderRadius: "0.5rem",
+            fontSize: "0.875rem",
+            fontWeight: 500,
+            color: "rgba(255,255,255,0.7)",
+            background: open ? "rgba(255,255,255,0.06)" : "none",
+            border: "none",
+            cursor: "pointer",
+            width: "100%",
+            textAlign: "left",
+          }}
+        >
+          {bellIcon}
+          Notificações
+        </button>
+      )}
 
       {open && panelPos && createPortal(
         <div
