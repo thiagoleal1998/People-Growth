@@ -43,14 +43,13 @@ export function CommentsClient({
           Nenhum comentário nos seus artigos ainda.
         </div>
       ) : (
-        <div style={{ overflowX: "auto" }}>
+        <div>
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "#f8fafc" }}>
-                {["Artigo", "Comentário", "Nome", "Denúncias", "Status", "Data"].map((h) => (
+                {["Artigo", "Comentário", "Nome", "Denúncias", "Status", "Data", ""].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
-                <th style={{ padding: "0.75rem 1.25rem", position: "sticky", right: 0, backgroundColor: "#f8fafc" }} />
               </tr>
             </thead>
             <tbody>
@@ -114,7 +113,7 @@ export function CommentsClient({
                       )}
                     </td>
                     <td style={{ padding: "0.875rem 1.25rem", color: "#94a3b8", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>{formatDate(c.created_at)}</td>
-                    <td style={{ padding: "0.875rem 1.25rem", position: "sticky", right: 0, backgroundColor: "white", boxShadow: "-6px 0 8px -6px rgba(0,0,0,0.15)" }}>
+                    <td style={{ padding: "0.875rem 1.25rem" }}>
                       <button
                         onClick={() => {
                           if (confirm(`Excluir o comentário de ${c.name}?`)) {
