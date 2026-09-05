@@ -2,16 +2,43 @@
 
 import Link from "next/link";
 import { useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
-import { Trash2, Loader2 } from "lucide-react";
+import { Trash2, Loader2, RefreshCw } from "lucide-react";
 import type { ReactNode } from "react";
 
 export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
+  const router = useRouter();
+  const [refreshing, startTransition] = useTransition();
+
   return (
     <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1.75rem", flexWrap: "wrap", gap: "1rem" }}>
-      <div>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--admin-text)" }}>{title}</h1>
-        {subtitle && <p style={{ color: "var(--admin-muted)", fontSize: "0.9375rem" }}>{subtitle}</p>}
+      <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+        <div>
+          <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--admin-text)" }}>{title}</h1>
+          {subtitle && <p style={{ color: "var(--admin-muted)", fontSize: "0.9375rem" }}>{subtitle}</p>}
+        </div>
+        <button
+          type="button"
+          onClick={() => startTransition(() => router.refresh())}
+          disabled={refreshing}
+          title="Atualizar esta página"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            width: "2rem",
+            height: "2rem",
+            borderRadius: "0.5rem",
+            border: "1px solid var(--admin-border-strong)",
+            backgroundColor: "var(--admin-surface)",
+            color: "var(--admin-muted)",
+            cursor: refreshing ? "default" : "pointer",
+            flexShrink: 0,
+          }}
+        >
+          <RefreshCw size={15} className={refreshing ? "admin-spin" : undefined} />
+        </button>
       </div>
       {action}
     </div>
