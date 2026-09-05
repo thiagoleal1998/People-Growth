@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Trash2, Flag, CornerDownRight } from "lucide-react";
+import { Trash2, Flag, CornerDownRight, ChevronRight } from "lucide-react";
 import type { Comment } from "@/types/database.types";
 import { RejectCommentModal } from "@/components/admin/RejectCommentModal";
 import { updateCommentStatus, deleteComment } from "./actions";
@@ -47,9 +47,10 @@ export function CommentsClient({
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "#f8fafc" }}>
-                {["Artigo", "Comentário", "Nome", "Denúncias", "Status", "Data", ""].map((h) => (
+                {["Artigo", "Comentário", "Nome", "Denúncias", "Status", "Data"].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
+                <th style={{ padding: "0.75rem 1.25rem", position: "sticky", right: 0, backgroundColor: "#f8fafc" }} />
               </tr>
             </thead>
             <tbody>
@@ -57,20 +58,28 @@ export function CommentsClient({
                 const s = statusConfig[c.status];
                 return (
                   <tr key={c.id} style={{ borderTop: "1px solid #f1f5f9" }}>
-                    <td style={{ padding: "0.875rem 1.25rem", color: "#0d1b2a", fontSize: "0.8125rem", maxWidth: "200px" }}>
+                    <td style={{ padding: "0.875rem 1.25rem", color: "#0d1b2a", fontSize: "0.8125rem", maxWidth: "160px" }}>
                       <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                         {articleTitles[c.article_id] ?? "—"}
                       </div>
                     </td>
-                    <td style={{ padding: "0.875rem 1.25rem", color: "#475569", fontSize: "0.875rem", maxWidth: "360px" }}>
+                    <td style={{ padding: "0.875rem 1.25rem", color: "#475569", fontSize: "0.875rem", maxWidth: "280px" }}>
                       {c.parent_id && (
                         <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "#94a3b8", fontSize: "0.75rem", fontWeight: 600, marginBottom: "0.25rem" }}>
                           <CornerDownRight size={11} /> resposta
                         </span>
                       )}
-                      <div>{c.body}</div>
+                      <details className="comment-details">
+                        <summary style={{ display: "flex", alignItems: "flex-start", gap: "0.375rem" }}>
+                          <ChevronRight size={13} className="comment-chevron" style={{ marginTop: "0.1875rem", color: "#94a3b8" }} />
+                          <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", display: "block" }}>{c.body}</span>
+                        </summary>
+                        <div style={{ marginTop: "0.375rem", paddingLeft: "1.25rem", whiteSpace: "pre-wrap" }}>{c.body}</div>
+                      </details>
                     </td>
-                    <td style={{ padding: "0.875rem 1.25rem", color: "#0d1b2a", fontSize: "0.875rem", fontWeight: 600 }}>{c.name}</td>
+                    <td style={{ padding: "0.875rem 1.25rem", color: "#0d1b2a", fontSize: "0.875rem", fontWeight: 600, maxWidth: "140px" }}>
+                      <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{c.name}</div>
+                    </td>
                     <td style={{ padding: "0.875rem 1.25rem" }}>
                       {c.reports > 0 ? (
                         <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "#dc2626", backgroundColor: "rgba(239,68,68,0.1)", padding: "0.2rem 0.5rem", borderRadius: "0.375rem", fontSize: "0.75rem", fontWeight: 700 }}>
@@ -105,7 +114,7 @@ export function CommentsClient({
                       )}
                     </td>
                     <td style={{ padding: "0.875rem 1.25rem", color: "#94a3b8", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>{formatDate(c.created_at)}</td>
-                    <td style={{ padding: "0.875rem 1.25rem" }}>
+                    <td style={{ padding: "0.875rem 1.25rem", position: "sticky", right: 0, backgroundColor: "white", boxShadow: "-6px 0 8px -6px rgba(0,0,0,0.15)" }}>
                       <button
                         onClick={() => {
                           if (confirm(`Excluir o comentário de ${c.name}?`)) {

@@ -78,6 +78,25 @@
   background: var(--admin-border-strong);
 }
 
+.comment-details summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.comment-details summary::-webkit-details-marker,
+.comment-details summary::marker {
+  display: none;
+}
+
+.comment-details summary .comment-chevron {
+  flex-shrink: 0;
+  transition: transform 0.15s;
+}
+
+.comment-details[open] summary .comment-chevron {
+  transform: rotate(90deg);
+}
+
 .admin-scroll {
   scrollbar-width: thin;
   scrollbar-color: rgba(67, 97, 238, 0.35) transparent;
