@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { APP_VERSION } from "@/lib/version";
+import { NotificationBell } from "@/components/NotificationBell";
 import { ThemeToggle } from "./ThemeToggle";
 import {
   LayoutDashboard,
@@ -181,6 +182,7 @@ export function AdminSidebar({
 
       {/* Footer */}
       <div style={{ padding: "1rem 0.75rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <NotificationBell />
         <ThemeToggle />
         <Link
           href="/autor"

@@ -1,10 +1,17 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile } from "@/lib/auth/profile";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { getCurrentProfile, resolveActorName } from "@/lib/auth/profile";
 import { logActivity } from "@/lib/activity-log";
+import { formatTicketId } from "@/lib/display-id";
 import type { ErrorReport, InternalTicket } from "@/types/database.types";
+
+const STATUS_LABEL: Record<InternalTicket["status"], string> = {
+  open: "Aberto",
+  in_progress: "Em andamento",
+  resolved: "Resolvido",
+};
 
 export async function updateErrorReportStatus(id: string, status: ErrorReport["status"]) {
   const supabase = await createClient();
@@ -32,18 +39,12 @@ export async function deleteErrorReport(id: string) {
   revalidatePath("/admin/chamados");
 }
 
-export async function createInternalTicket(data: { type: InternalTicket["type"]; title: string; description: string }) {
+export async function createInternalTicket(data: { type: InternalTicket["type"]; title: string; description: string; page?: string }) {
   const profile = await getCurrentProfile();
   if (!profile) throw new Error("Não autenticado");
 
+  const createdByName = await resolveActorName(profile);
   const supabase = await createClient();
-  let createdByName = profile.email;
-  if (profile.author_id) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: author } = await (supabase as any).from("authors").select("name").eq("id", profile.author_id).single();
-    if (author?.name) createdByName = author.name;
-  }
-
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: created, error } = await (supabase as any)
     .from("internal_tickets")
@@ -54,6 +55,7 @@ export async function createInternalTicket(data: { type: InternalTicket["type"];
       type: data.type,
       title: data.title,
       description: data.description,
+      page_path: data.page || null,
     })
     .select()
     .single();
@@ -67,19 +69,111 @@ export async function createInternalTicket(data: { type: InternalTicket["type"];
   return created as InternalTicket;
 }
 
-export async function updateInternalTicket(id: string, data: { status: InternalTicket["status"]; admin_response: string }) {
+export async function updateTicketStatus(id: string, status: InternalTicket["status"]) {
   const supabase = await createClient();
   const actor = await getCurrentProfile();
+  if (!actor) throw new Error("Não autenticado");
+  const actorName = await resolveActorName(actor);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const { data: ticket } = await client.from("internal_tickets").select("title").eq("id", id).single();
-  await client
-    .from("internal_tickets")
-    .update({ status: data.status, admin_response: data.admin_response || null, updated_at: new Date().toISOString() })
-    .eq("id", id);
-  if (actor) {
-    await logActivity({ userId: actor.id, userEmail: actor.email, action: "update", entityType: "chamado interno", entityLabel: `${ticket?.title} → ${data.status}` });
+
+  const { data: ticket } = await client.from("internal_tickets").select("title, status").eq("id", id).single();
+  if (!ticket) return;
+
+  await client.from("internal_tickets").update({ status, updated_at: new Date().toISOString() }).eq("id", id);
+
+  if (ticket.status !== status) {
+    await client.from("ticket_events").insert({
+      ticket_id: id,
+      event_type: "status_changed",
+      actor_name: actorName,
+      detail: `Status alterado de "${STATUS_LABEL[ticket.status as InternalTicket["status"]]}" para "${STATUS_LABEL[status]}"`,
+    });
   }
+
+  await logActivity({ userId: actor.id, userEmail: actor.email, action: "update", entityType: "chamado interno", entityLabel: `${ticket.title} → ${status}` });
+  revalidatePath("/admin/chamados");
+  revalidatePath("/autor/chamados");
+}
+
+export async function assignTicket(id: string, userId: string | null) {
+  const supabase = await createClient();
+  const actor = await getCurrentProfile();
+  if (!actor) throw new Error("Não autenticado");
+  const actorName = await resolveActorName(actor);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+
+  // user_profiles only has a "read own row" RLS policy — reading someone
+  // else's profile to resolve their name needs the admin client.
+  let assigneeName = "ninguém";
+  if (userId) {
+    const admin = await createAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: assigneeProfile } = await (admin as any).from("user_profiles").select("*").eq("id", userId).single();
+    if (assigneeProfile) assigneeName = await resolveActorName(assigneeProfile);
+  }
+
+  await client.from("internal_tickets").update({ assigned_to: userId, assigned_to_name: userId ? assigneeName : null, updated_at: new Date().toISOString() }).eq("id", id);
+  await client.from("ticket_events").insert({
+    ticket_id: id,
+    event_type: "assigned",
+    actor_name: actorName,
+    detail: userId ? `Atribuído a ${assigneeName}` : "Atribuição removida",
+  });
+
+  revalidatePath("/admin/chamados");
+  revalidatePath("/autor/chamados");
+}
+
+export async function notifyTicketMember(id: string) {
+  const supabase = await createClient();
+  const actor = await getCurrentProfile();
+  if (!actor) throw new Error("Não autenticado");
+  const actorName = await resolveActorName(actor);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+
+  const { data: ticket } = await client.from("internal_tickets").select("ticket_number, title, assigned_to").eq("id", id).single();
+  if (!ticket?.assigned_to) return;
+
+  // Same reasoning as assignTicket above — needs the admin client.
+  const admin = await createAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: assigneeProfile } = await (admin as any).from("user_profiles").select("*").eq("id", ticket.assigned_to).single();
+  if (!assigneeProfile) return;
+  const assigneeName = await resolveActorName(assigneeProfile);
+
+  const ticketCode = formatTicketId(ticket.ticket_number);
+  await client.from("notifications").insert({
+    user_id: ticket.assigned_to,
+    title: `Você foi notificado no chamado ${ticketCode}`,
+    body: ticket.title,
+    link: assigneeProfile.role === "admin" ? "/admin/chamados" : "/autor/chamados",
+  });
+  await client.from("ticket_events").insert({
+    ticket_id: id,
+    event_type: "notified",
+    actor_name: actorName,
+    detail: `Notificou ${assigneeName}`,
+  });
+
+  revalidatePath("/admin/chamados");
+  revalidatePath("/autor/chamados");
+}
+
+export async function addTicketComment(id: string, body: string) {
+  const profile = await getCurrentProfile();
+  if (!profile) throw new Error("Não autenticado");
+  const authorName = await resolveActorName(profile);
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase as any).from("ticket_comments").insert({
+    ticket_id: id,
+    author_id: profile.id,
+    author_name: authorName,
+    body,
+  });
   revalidatePath("/admin/chamados");
   revalidatePath("/autor/chamados");
 }

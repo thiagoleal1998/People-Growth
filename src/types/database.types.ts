@@ -195,6 +195,7 @@ type UserProfileRow = {
   role: "admin" | "author";
   author_id: string | null;
   last_seen_at: string | null;
+  display_id: number;
   created_at: string;
 };
 
@@ -219,6 +220,7 @@ type PasswordResetRequestRow = {
 
 type InternalTicketRow = {
   id: string;
+  ticket_number: number;
   created_by: string | null;
   created_by_name: string;
   created_by_role: "admin" | "author";
@@ -227,8 +229,39 @@ type InternalTicketRow = {
   description: string;
   status: "open" | "in_progress" | "resolved";
   admin_response: string | null;
+  assigned_to: string | null;
+  assigned_to_name: string | null;
+  page_path: string | null;
   created_at: string;
   updated_at: string;
+};
+
+type TicketEventRow = {
+  id: string;
+  ticket_id: string;
+  event_type: "assigned" | "status_changed" | "notified";
+  actor_name: string;
+  detail: string;
+  created_at: string;
+};
+
+type TicketCommentRow = {
+  id: string;
+  ticket_id: string;
+  author_id: string | null;
+  author_name: string;
+  body: string;
+  created_at: string;
+};
+
+type NotificationRow = {
+  id: string;
+  user_id: string;
+  title: string;
+  body: string | null;
+  link: string | null;
+  read: boolean;
+  created_at: string;
 };
 
 type CommentRow = {
@@ -347,8 +380,11 @@ export type Database = {
       site_config: { Row: SiteConfigRow; Insert: Omit<SiteConfigRow, "updated_at">; Update: Partial<Omit<SiteConfigRow, "updated_at">>; Relationships: [] };
       authors: { Row: AuthorRow; Insert: Omit<AuthorRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AuthorRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       error_reports: { Row: ErrorReportRow; Insert: Omit<ErrorReportRow, "id" | "created_at">; Update: Partial<Omit<ErrorReportRow, "id" | "created_at">>; Relationships: [] };
-      user_profiles: { Row: UserProfileRow; Insert: Omit<UserProfileRow, "created_at">; Update: Partial<Omit<UserProfileRow, "id" | "created_at">>; Relationships: [] };
-      internal_tickets: { Row: InternalTicketRow; Insert: Omit<InternalTicketRow, "id" | "created_at" | "updated_at" | "status" | "admin_response">; Update: Partial<Omit<InternalTicketRow, "id" | "created_at">>; Relationships: [] };
+      user_profiles: { Row: UserProfileRow; Insert: Omit<UserProfileRow, "created_at" | "display_id">; Update: Partial<Omit<UserProfileRow, "id" | "created_at" | "display_id">>; Relationships: [] };
+      internal_tickets: { Row: InternalTicketRow; Insert: Omit<InternalTicketRow, "id" | "ticket_number" | "created_at" | "updated_at" | "status" | "admin_response" | "assigned_to" | "assigned_to_name">; Update: Partial<Omit<InternalTicketRow, "id" | "ticket_number" | "created_at">>; Relationships: [] };
+      ticket_events: { Row: TicketEventRow; Insert: Omit<TicketEventRow, "id" | "created_at">; Update: Partial<Omit<TicketEventRow, "id" | "created_at">>; Relationships: [] };
+      ticket_comments: { Row: TicketCommentRow; Insert: Omit<TicketCommentRow, "id" | "created_at">; Update: Partial<Omit<TicketCommentRow, "id" | "created_at">>; Relationships: [] };
+      notifications: { Row: NotificationRow; Insert: Omit<NotificationRow, "id" | "created_at" | "read">; Update: Partial<Omit<NotificationRow, "id" | "created_at">>; Relationships: [] };
       password_reset_requests: { Row: PasswordResetRequestRow; Insert: Omit<PasswordResetRequestRow, "id" | "created_at" | "status" | "resolved_at">; Update: Partial<Omit<PasswordResetRequestRow, "id" | "created_at">>; Relationships: [] };
       activity_log: { Row: ActivityLogRow; Insert: Omit<ActivityLogRow, "id" | "created_at">; Update: Partial<Omit<ActivityLogRow, "id" | "created_at">>; Relationships: [] };
       comments: { Row: CommentRow; Insert: Omit<CommentRow, "id" | "created_at" | "likes" | "reports" | "rejection_reason">; Update: Partial<Omit<CommentRow, "id" | "created_at">>; Relationships: [] };
@@ -380,6 +416,9 @@ export type Author = AuthorRow;
 export type ErrorReport = ErrorReportRow;
 export type UserProfile = UserProfileRow;
 export type InternalTicket = InternalTicketRow;
+export type TicketEvent = TicketEventRow;
+export type TicketComment = TicketCommentRow;
+export type Notification = NotificationRow;
 export type PasswordResetRequest = PasswordResetRequestRow;
 export type ActivityLog = ActivityLogRow;
 export type Comment = CommentRow;

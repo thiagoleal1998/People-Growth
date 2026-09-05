@@ -3,7 +3,8 @@
 import { useState } from "react";
 import { ErrorReportsClient } from "./ErrorReportsClient";
 import { InternalTicketsClient } from "@/components/tickets/InternalTicketsClient";
-import { createInternalTicket, updateInternalTicket, deleteInternalTicket } from "./actions";
+import type { Member } from "@/components/tickets/TicketModal";
+import { createInternalTicket, updateTicketStatus, assignTicket, notifyTicketMember, addTicketComment, deleteInternalTicket } from "./actions";
 import type { ErrorReport, InternalTicket } from "@/types/database.types";
 
 const tabs = [
@@ -13,7 +14,7 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]["id"];
 
-export function ChamadosTabs({ reports, tickets }: { reports: ErrorReport[]; tickets: InternalTicket[] }) {
+export function ChamadosTabs({ reports, tickets, members }: { reports: ErrorReport[]; tickets: InternalTicket[]; members: Member[] }) {
   const [active, setActive] = useState<TabId>("erros");
 
   const counts: Record<TabId, number> = {
@@ -73,8 +74,12 @@ export function ChamadosTabs({ reports, tickets }: { reports: ErrorReport[]; tic
         <InternalTicketsClient
           tickets={tickets}
           canManage
+          members={members}
           createAction={createInternalTicket}
-          updateAction={updateInternalTicket}
+          updateStatusAction={updateTicketStatus}
+          assignAction={assignTicket}
+          notifyAction={notifyTicketMember}
+          commentAction={addTicketComment}
           deleteAction={deleteInternalTicket}
         />
       )}

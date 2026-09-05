@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Trash2 } from "lucide-react";
 import type { UserProfile, Author } from "@/types/database.types";
+import { formatUserId } from "@/lib/display-id";
 import { updateUserRole, updateUserAuthorLink, deleteUser } from "./actions";
 
 export function UsersClient({ users, authors }: { users: UserProfile[]; authors: Author[] }) {
@@ -21,7 +22,7 @@ export function UsersClient({ users, authors }: { users: UserProfile[]; authors:
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                {["E-mail", "Papel", "Vinculado ao autor", ""].map((h) => (
+                {["ID", "E-mail", "Papel", "Vinculado ao autor", ""].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -29,6 +30,7 @@ export function UsersClient({ users, authors }: { users: UserProfile[]; authors:
             <tbody>
               {items.map((u) => (
                 <tr key={u.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
+                  <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem", fontWeight: 700, whiteSpace: "nowrap" }}>{formatUserId(u.display_id)}</td>
                   <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.875rem" }}>{u.email}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <select

@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/admin/ui";
 import { InternalTicketsClient } from "@/components/tickets/InternalTicketsClient";
-import { createInternalTicket } from "./actions";
+import { createInternalTicket, addTicketComment } from "./actions";
 import type { InternalTicket } from "@/types/database.types";
 
 export default async function ChamadosAutorPage() {
@@ -16,7 +16,7 @@ export default async function ChamadosAutorPage() {
         title="Chamados"
         subtitle="Reporte um erro que você encontrou ou sugira uma melhoria para o site e o painel"
       />
-      <InternalTicketsClient tickets={tickets} canManage={false} createAction={createInternalTicket} />
+      <InternalTicketsClient tickets={tickets} canManage={false} createAction={createInternalTicket} commentAction={addTicketComment} />
     </div>
   );
 }
