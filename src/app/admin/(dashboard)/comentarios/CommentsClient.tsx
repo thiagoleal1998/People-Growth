@@ -72,10 +72,17 @@ export function CommentsClient({
                     </td>
                     <td style={{ padding: "0.875rem 1.25rem" }}>
                       <select
-                        defaultValue={c.status}
+                        value={c.status}
                         onChange={(e) => {
                           const status = e.target.value as Comment["status"];
-                          setItems((prev) => prev.map((i) => (i.id === c.id ? { ...i, status } : i)));
+                          if (status === "rejected") {
+                            const reason = window.prompt("Motivo da rejeição (opcional — fica só na moderação, não aparece pro público):", "");
+                            if (reason === null) return; // cancelled, keep current status
+                            setItems((prev) => prev.map((i) => (i.id === c.id ? { ...i, status, rejection_reason: reason || null } : i)));
+                            startTransition(() => updateCommentStatus(c.id, status, reason));
+                            return;
+                          }
+                          setItems((prev) => prev.map((i) => (i.id === c.id ? { ...i, status, rejection_reason: null } : i)));
                           startTransition(() => updateCommentStatus(c.id, status));
                         }}
                         style={{ backgroundColor: s.bg, color: s.color, padding: "0.2rem 0.5rem", borderRadius: "0.375rem", fontSize: "0.75rem", fontWeight: 700, border: "none", cursor: "pointer" }}
@@ -84,6 +91,11 @@ export function CommentsClient({
                           <option key={key} value={key}>{cfg.label}</option>
                         ))}
                       </select>
+                      {c.status === "rejected" && c.rejection_reason && (
+                        <div style={{ marginTop: "0.375rem", fontSize: "0.75rem", color: "var(--admin-faint)", maxWidth: "180px" }} title={c.rejection_reason}>
+                          {c.rejection_reason}
+                        </div>
+                      )}
                     </td>
                     <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>{formatDate(c.created_at)}</td>
                     <td style={{ padding: "0.875rem 1.25rem" }}>

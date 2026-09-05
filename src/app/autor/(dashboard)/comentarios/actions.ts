@@ -8,10 +8,11 @@ import type { Comment } from "@/types/database.types";
 // articles — an author trying to touch someone else's comment is a silent
 // no-op, not an error.
 
-export async function updateCommentStatus(id: string, status: Comment["status"]) {
+export async function updateCommentStatus(id: string, status: Comment["status"], reason?: string | null) {
   const supabase = await createClient();
+  const rejection_reason = status === "rejected" ? (reason || null) : null;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any).from("comments").update({ status }).eq("id", id);
+  await (supabase as any).from("comments").update({ status, rejection_reason }).eq("id", id);
   revalidatePath("/autor/comentarios");
   revalidatePath("/[locale]/conteudo/[slug]", "page");
 }

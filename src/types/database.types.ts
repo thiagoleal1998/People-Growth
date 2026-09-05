@@ -241,6 +241,7 @@ type CommentRow = {
   likes: number;
   reports: number;
   status: "pending" | "approved" | "rejected";
+  rejection_reason: string | null;
   created_at: string;
 };
 
@@ -350,7 +351,7 @@ export type Database = {
       internal_tickets: { Row: InternalTicketRow; Insert: Omit<InternalTicketRow, "id" | "created_at" | "updated_at" | "status" | "admin_response">; Update: Partial<Omit<InternalTicketRow, "id" | "created_at">>; Relationships: [] };
       password_reset_requests: { Row: PasswordResetRequestRow; Insert: Omit<PasswordResetRequestRow, "id" | "created_at" | "status" | "resolved_at">; Update: Partial<Omit<PasswordResetRequestRow, "id" | "created_at">>; Relationships: [] };
       activity_log: { Row: ActivityLogRow; Insert: Omit<ActivityLogRow, "id" | "created_at">; Update: Partial<Omit<ActivityLogRow, "id" | "created_at">>; Relationships: [] };
-      comments: { Row: CommentRow; Insert: Omit<CommentRow, "id" | "created_at" | "likes" | "reports">; Update: Partial<Omit<CommentRow, "id" | "created_at">>; Relationships: [] };
+      comments: { Row: CommentRow; Insert: Omit<CommentRow, "id" | "created_at" | "likes" | "reports" | "rejection_reason">; Update: Partial<Omit<CommentRow, "id" | "created_at">>; Relationships: [] };
       institutional_pages: { Row: InstitutionalPageRow; Insert: Omit<InstitutionalPageRow, "updated_at">; Update: Partial<Omit<InstitutionalPageRow, "slug" | "updated_at">>; Relationships: [] };
       page_views: { Row: PageViewRow; Insert: Omit<PageViewRow, "id" | "created_at">; Update: Partial<Omit<PageViewRow, "id" | "created_at">>; Relationships: [] };
       ad_slots: { Row: AdSlotRow; Insert: Omit<AdSlotRow, "updated_at">; Update: Partial<Omit<AdSlotRow, "key" | "updated_at">>; Relationships: [] };
