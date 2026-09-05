@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
 import type { Notification } from "@/types/database.types";
@@ -14,7 +15,9 @@ export function NotificationBell() {
   const [open, setOpen] = useState(false);
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
-  const boxRef = useRef<HTMLDivElement>(null);
+  const [panelPos, setPanelPos] = useState<{ left: number; bottom: number } | null>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -43,11 +46,22 @@ export function NotificationBell() {
 
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
-      if (boxRef.current && !boxRef.current.contains(e.target as Node)) setOpen(false);
+      const target = e.target as Node;
+      if (buttonRef.current?.contains(target)) return;
+      if (panelRef.current?.contains(target)) return;
+      setOpen(false);
     }
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  function toggleOpen() {
+    if (!open && buttonRef.current) {
+      const rect = buttonRef.current.getBoundingClientRect();
+      setPanelPos({ left: rect.left, bottom: window.innerHeight - rect.top + 8 });
+    }
+    setOpen((v) => !v);
+  }
 
   async function handleOpenNotification(n: Notification) {
     if (!n.read) {
@@ -66,10 +80,11 @@ export function NotificationBell() {
   }
 
   return (
-    <div ref={boxRef} style={{ position: "relative" }}>
+    <div style={{ position: "relative" }}>
       <button
+        ref={buttonRef}
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={toggleOpen}
         style={{
           display: "flex",
           alignItems: "center",
@@ -114,12 +129,13 @@ export function NotificationBell() {
         Notificações
       </button>
 
-      {open && (
+      {open && panelPos && createPortal(
         <div
+          ref={panelRef}
           style={{
-            position: "absolute",
-            bottom: "calc(100% + 0.5rem)",
-            left: 0,
+            position: "fixed",
+            bottom: `${panelPos.bottom}px`,
+            left: `${panelPos.left}px`,
             width: "320px",
             maxWidth: "90vw",
             backgroundColor: "var(--admin-surface)",
@@ -180,7 +196,8 @@ export function NotificationBell() {
               ))
             )}
           </div>
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );
