@@ -112,6 +112,9 @@ export function MarkdownEditor({
           borderRadius: "0.5rem 0.5rem 0 0",
           backgroundColor: "var(--admin-surface-alt)",
           flexWrap: "wrap",
+          position: "sticky",
+          top: 0,
+          zIndex: 5,
         }}
       >
         <button type="button" title="Negrito" onClick={() => editor.chain().focus().toggleBold().run()} style={activeStyle(editor.isActive("bold"))}>
