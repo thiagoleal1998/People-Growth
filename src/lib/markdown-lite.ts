@@ -4,12 +4,14 @@ export function renderMarkdownLite(text: string): string {
     .replace(/^## (.+)$/gm, '<h2 style="font-size:1.5rem;font-weight:800;color:var(--site-text);margin:2rem 0 1rem">$1</h2>')
     // Images must run before the link regex below — "![alt](url)" contains
     // a "[alt](url)" substring that the link pattern would otherwise eat.
-    // An optional quoted title — "![alt](url "credit")" — carries the
-    // credit/source line, same convention as standard markdown image titles.
-    .replace(/!\[([^\]]*)\]\(([^)]+?)(?:\s+"([^"]*)")?\)/g, (_match, alt: string, url: string, credit: string | undefined) => {
+    // Two optional quoted slots after the url — "![alt](url "credito" "fonte")"
+    // — carry the credit and source lines shown under the image. A single
+    // quoted slot is the older format (credit only), kept for old articles.
+    .replace(/!\[([^\]]*)\]\(([^)]+?)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g, (_match, alt: string, url: string, credit: string | undefined, source: string | undefined) => {
       const captionLine = alt ? `<span style="display:block">${alt}</span>` : "";
-      const creditLine = credit ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Fonte: ${credit}</span>` : "";
-      const figcaption = alt || credit ? `<figcaption style="margin-top:0.625rem;font-size:0.8125rem;color:var(--site-muted);text-align:center">${captionLine}${creditLine}</figcaption>` : "";
+      const creditLine = credit ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Créditos: ${credit}</span>` : "";
+      const sourceLine = source ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Fonte: ${source}</span>` : "";
+      const figcaption = alt || credit || source ? `<figcaption style="margin-top:0.625rem;font-size:0.8125rem;color:var(--site-muted);text-align:center">${captionLine}${creditLine}${sourceLine}</figcaption>` : "";
       return `<figure style="margin:2rem 0"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block" />${figcaption}</figure>`;
     })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#4361EE;font-weight:600;text-decoration:underline">$1</a>')

@@ -15,8 +15,10 @@ export function markdownLiteToEditorHtml(text: string): string {
   let html = text
     .replace(/^### (.+)$/gm, "<h3>$1</h3>")
     .replace(/^## (.+)$/gm, "<h2>$1</h2>")
-    .replace(/!\[([^\]]*)\]\(([^)]+?)(?:\s+"([^"]*)")?\)/g, (_match, alt: string, src: string, credit?: string) => {
-      return `<img src="${src}" alt="${alt}"${credit ? ` title="${credit}"` : ""} />`;
+    .replace(/!\[([^\]]*)\]\(([^)]+?)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g, (_match, alt: string, src: string, credit?: string, source?: string) => {
+      const creditAttr = credit ? ` data-credit="${credit}"` : "";
+      const sourceAttr = source ? ` data-source="${source}"` : "";
+      return `<img src="${src}" alt="${alt}"${creditAttr}${sourceAttr} />`;
     })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
@@ -52,13 +54,16 @@ export function markdownLiteToEditorHtml(text: string): string {
 
 // TipTap's editor.getHTML() -> stored markdown-lite text. Client-only
 // (DOMParser); the editor itself only ever runs client-side anyway.
-// The image's title attribute carries the credit/source, serialized as a
-// standard markdown image title: "![alt](src "credit")".
+// Credit/source live in data-credit/data-source (not the native "title"
+// attribute) so the browser never shows its own hover tooltip over the
+// image — see the custom Image extension in MarkdownEditor.tsx.
 function serializeImage(el: HTMLElement): string {
   const alt = el.getAttribute("alt") ?? "";
   const src = el.getAttribute("src") ?? "";
-  const credit = el.getAttribute("title") ?? "";
-  return `![${alt}](${src}${credit ? ` "${credit}"` : ""})`;
+  const credit = el.getAttribute("data-credit") ?? "";
+  const source = el.getAttribute("data-source") ?? "";
+  const suffix = credit || source ? ` "${credit}" "${source}"` : "";
+  return `![${alt}](${src}${suffix})`;
 }
 
 export function editorHtmlToMarkdownLite(html: string): string {
