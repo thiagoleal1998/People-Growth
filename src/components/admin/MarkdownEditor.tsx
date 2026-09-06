@@ -3,10 +3,38 @@
 import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
+import { Fragment, Slice } from "@tiptap/pm/model";
+import type { EditorView } from "@tiptap/pm/view";
 import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Loader2 } from "lucide-react";
 import { markdownLiteToEditorHtml, editorHtmlToMarkdownLite } from "@/lib/markdown-lite-editor";
 import { promptDialog, alertDialog } from "./dialog-store";
 import { ImageWithCredit } from "./tiptap-image-with-credit";
+
+// A pasted multi-paragraph block often arrives with an HTML clipboard
+// flavor whose source markup (divs, spans, styled runs from Word/Docs/chat
+// apps) doesn't map cleanly onto our schema's <p> tags, so ProseMirror's
+// default HTML paste handling can merge everything into one paragraph.
+// Reading the plain-text flavor ourselves and splitting on blank/newline
+// boundaries — exactly how a person visually reads "one line = one
+// paragraph" — sidesteps that entirely. Single-line pastes (the common
+// "paste a word/phrase mid-sentence" case) are left to the default handler
+// so normal inline paste behavior isn't disturbed.
+function handleMultiParagraphPaste(view: EditorView, event: ClipboardEvent): boolean {
+  const text = event.clipboardData?.getData("text/plain");
+  if (!text || !text.includes("\n")) return false;
+  const blocks = text
+    .split(/(?:\r\n?|\n)+/)
+    .map((b) => b.trim())
+    .filter(Boolean);
+  if (blocks.length <= 1) return false;
+
+  const { state, dispatch } = view;
+  const paragraphType = state.schema.nodes.paragraph;
+  const nodes = blocks.map((b) => paragraphType.create(null, state.schema.text(b)));
+  const slice = new Slice(Fragment.from(nodes), 0, 0);
+  dispatch(state.tr.replaceSelection(slice).scrollIntoView());
+  return true;
+}
 
 const toolButtonStyle = {
   display: "flex",
@@ -55,6 +83,7 @@ export function MarkdownEditor({
         style: `min-height:${minHeight}px`,
         class: "tiptap-content",
       },
+      handlePaste: handleMultiParagraphPaste,
     },
   });
 
