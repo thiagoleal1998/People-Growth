@@ -38,9 +38,11 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
 
   const title_pt = String(formData.get("title_pt") ?? "");
   const slugInput = String(formData.get("slug") ?? "").trim();
+  const intent = String(formData.get("intent") ?? "");
   const requestedStatus = String(formData.get("status") ?? "draft");
   // Authors can only save as draft or submit for review — never publish directly.
-  const status: Article["status"] = requestedStatus === "pending" ? "pending" : "draft";
+  // "Salvar rascunho" always forces draft, ignoring the Status dropdown.
+  const status: Article["status"] = intent === "draft" ? "draft" : requestedStatus === "pending" ? "pending" : "draft";
   const format = (String(formData.get("format") ?? "opiniao")) as Article["format"];
   const scheduledFor = String(formData.get("scheduled_for") ?? "").trim() || null;
 

@@ -36,7 +36,10 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
 
   const title_pt = String(formData.get("title_pt") ?? "");
   const slugInput = String(formData.get("slug") ?? "").trim();
-  const status = (String(formData.get("status") ?? "draft")) as Article["status"];
+  const intent = String(formData.get("intent") ?? "");
+  // "Salvar rascunho" always forces draft, ignoring whatever the Status
+  // dropdown is set to — a quick way to stash work without touching status.
+  const status = (intent === "draft" ? "draft" : String(formData.get("status") ?? "draft")) as Article["status"];
   const categoryId = String(formData.get("category_id") ?? "");
   const authorId = String(formData.get("author_id") ?? "");
   const format = (String(formData.get("format") ?? "noticia")) as Article["format"];

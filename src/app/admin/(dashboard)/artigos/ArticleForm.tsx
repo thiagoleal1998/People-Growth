@@ -227,8 +227,11 @@ export function ArticleForm({
 
         <ErrorBanner message={saveError} label="Não foi possível salvar o artigo" />
 
-        <div style={{ marginTop: "1.5rem" }}>
+        <div style={{ marginTop: "1.5rem", display: "flex", gap: "0.75rem" }}>
           <SubmitButton>{item ? "Salvar alterações" : "Criar artigo"}</SubmitButton>
+          <SubmitButton name="intent" value="draft" variant="secondary" pendingText="Salvando rascunho...">
+            Salvar rascunho
+          </SubmitButton>
         </div>
       </form>
     </div>

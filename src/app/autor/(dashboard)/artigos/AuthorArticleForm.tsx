@@ -115,7 +115,12 @@ export function AuthorArticleForm({ item, categories, imageError, saveError, sav
           </Select>
         </Field>
         <ErrorBanner message={saveError} label="Não foi possível salvar o artigo" />
-        <SubmitButton>{item ? "Salvar alterações" : "Criar artigo"}</SubmitButton>
+        <div style={{ display: "flex", gap: "0.75rem" }}>
+          <SubmitButton>{item ? "Salvar alterações" : "Criar artigo"}</SubmitButton>
+          <SubmitButton name="intent" value="draft" variant="secondary" pendingText="Salvando rascunho...">
+            Salvar rascunho
+          </SubmitButton>
+        </div>
       </form>
     </FormShell>
     </>

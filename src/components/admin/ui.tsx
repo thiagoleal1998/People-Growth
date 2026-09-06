@@ -141,23 +141,38 @@ export function FormShell({
   );
 }
 
-export function SubmitButton({ children, pendingText = "Salvando..." }: { children: ReactNode; pendingText?: string }) {
+export function SubmitButton({
+  children,
+  pendingText = "Salvando...",
+  name,
+  value,
+  variant = "primary",
+}: {
+  children: ReactNode;
+  pendingText?: string;
+  name?: string;
+  value?: string;
+  variant?: "primary" | "secondary";
+}) {
   const { pending } = useFormStatus();
+  const isSecondary = variant === "secondary";
   return (
     <button
       type="submit"
+      name={name}
+      value={value}
       disabled={pending}
       style={{
         display: "inline-flex",
         alignItems: "center",
         gap: "0.5rem",
-        backgroundColor: "#4361EE",
-        color: "white",
+        backgroundColor: isSecondary ? "var(--admin-surface-alt)" : "#4361EE",
+        color: isSecondary ? "var(--admin-text)" : "white",
         padding: "0.75rem 1.5rem",
         borderRadius: "0.625rem",
         fontWeight: 700,
         fontSize: "0.9rem",
-        border: "none",
+        border: isSecondary ? "1px solid var(--admin-border-strong)" : "none",
         cursor: pending ? "default" : "pointer",
         opacity: pending ? 0.7 : 1,
       }}
