@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import NextTopLoader from "nextjs-toploader";
 import { createClient } from "@/lib/supabase/server";
+import { DialogHost } from "@/components/admin/DialogHost";
 import "../globals.css";
 
 export async function generateMetadata(): Promise<Metadata> {
@@ -22,6 +23,7 @@ export default function AuthorRootLayout({ children }: { children: React.ReactNo
       <body style={{ margin: 0, fontFamily: "system-ui, sans-serif", backgroundColor: "#f0f4f8" }}>
         <NextTopLoader color="#4361EE" height={3} showSpinner={false} />
         {children}
+        <DialogHost />
         <style>{`
           @keyframes admin-spin { to { transform: rotate(360deg); } }
           .admin-spin { animation: admin-spin 0.7s linear infinite; }

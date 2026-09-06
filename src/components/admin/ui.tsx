@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
 import { Trash2, Loader2, RefreshCw } from "lucide-react";
 import type { ReactNode } from "react";
+import { confirmDialog } from "./dialog-store";
 
 export function PageHeader({ title, subtitle, action }: { title: string; subtitle?: string; action?: ReactNode }) {
   const router = useRouter();
@@ -188,8 +189,8 @@ export function ConfirmDeleteButton({ confirmText, onDelete }: { confirmText: st
   return (
     <button
       disabled={pending}
-      onClick={() => {
-        if (confirm(confirmText)) startTransition(onDelete);
+      onClick={async () => {
+        if (await confirmDialog(confirmText, { danger: true, confirmText: "Excluir" })) startTransition(onDelete);
       }}
       style={{ padding: "0.375rem", color: "#ef4444", background: "none", border: "none", cursor: pending ? "default" : "pointer", borderRadius: "0.375rem", opacity: pending ? 0.5 : 1 }}
       title="Excluir"

@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Search, Trash2 } from "lucide-react";
 import type { Database } from "@/types/database.types";
+import { confirmDialog } from "@/components/admin/dialog-store";
 import { updateSubStatus, deleteSub } from "./actions";
 
 type Sub = Database["public"]["Tables"]["newsletter_subs"]["Row"];
@@ -69,7 +70,7 @@ export function NewsletterClient({ subs }: { subs: Sub[] }) {
                     <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>{formatDate(sub.subscribed_at)}</td>
                     <td style={{ padding: "0.875rem 1.25rem" }}>
                       <button
-                        onClick={() => { if (confirm(`Remover ${sub.email}?`)) startTransition(() => deleteSub(sub.id)); }}
+                        onClick={async () => { if (await confirmDialog(`Remover ${sub.email}?`, { danger: true, confirmText: "Remover" })) startTransition(() => deleteSub(sub.id)); }}
                         style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}
                         title="Remover"
                       >

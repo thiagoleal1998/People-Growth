@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Plus, Trash2, X, Lightbulb, Bug } from "lucide-react";
 import { Field, Input, Select } from "@/components/admin/ui";
 import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
+import { confirmDialog } from "@/components/admin/dialog-store";
 import { formatTicketId } from "@/lib/display-id";
 import { TicketModal, type Member } from "./TicketModal";
 import type { InternalTicket } from "@/types/database.types";
@@ -138,8 +139,8 @@ export function InternalTicketsClient({
                 </div>
                 {canManage && deleteAction && (
                   <button
-                    onClick={() => {
-                      if (confirm("Excluir este chamado?")) {
+                    onClick={async () => {
+                      if (await confirmDialog("Excluir este chamado?", { danger: true, confirmText: "Excluir" })) {
                         setItems((prev) => prev.filter((it) => it.id !== ticket.id));
                         startTransition(() => deleteAction(ticket.id));
                       }

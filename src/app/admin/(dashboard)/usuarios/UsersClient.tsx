@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Trash2 } from "lucide-react";
 import type { UserProfile, Author } from "@/types/database.types";
 import { formatUserId } from "@/lib/display-id";
+import { confirmDialog } from "@/components/admin/dialog-store";
 import { updateUserRole, updateUserAuthorLink, deleteUser } from "./actions";
 
 export function UsersClient({ users, authors }: { users: UserProfile[]; authors: Author[] }) {
@@ -76,8 +77,8 @@ export function UsersClient({ users, authors }: { users: UserProfile[]; authors:
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <button
-                      onClick={() => {
-                        if (confirm(`Remover o acesso de ${u.email}? A pessoa não conseguirá mais entrar.`)) {
+                      onClick={async () => {
+                        if (await confirmDialog(`Remover o acesso de ${u.email}? A pessoa não conseguirá mais entrar.`, { danger: true, confirmText: "Remover" })) {
                           setItems((prev) => prev.filter((i) => i.id !== u.id));
                           startTransition(() => deleteUser(u.id));
                         }

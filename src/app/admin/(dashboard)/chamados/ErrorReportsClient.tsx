@@ -3,6 +3,7 @@
 import { useState, useTransition } from "react";
 import { Trash2 } from "lucide-react";
 import type { ErrorReport } from "@/types/database.types";
+import { confirmDialog } from "@/components/admin/dialog-store";
 import { updateErrorReportStatus, deleteErrorReport } from "./actions";
 
 const statusConfig: Record<ErrorReport["status"], { label: string; color: string; bg: string }> = {
@@ -65,8 +66,8 @@ export function ErrorReportsClient({ reports }: { reports: ErrorReport[] }) {
                     <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>{formatDate(report.created_at)}</td>
                     <td style={{ padding: "0.875rem 1.25rem" }}>
                       <button
-                        onClick={() => {
-                          if (confirm("Excluir este erro reportado?")) {
+                        onClick={async () => {
+                          if (await confirmDialog("Excluir este erro reportado?", { danger: true, confirmText: "Excluir" })) {
                             setItems((prev) => prev.filter((r) => r.id !== report.id));
                             startTransition(() => deleteErrorReport(report.id));
                           }

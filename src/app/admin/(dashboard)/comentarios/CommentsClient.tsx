@@ -4,6 +4,7 @@ import { useState, useTransition } from "react";
 import { Trash2, Flag, CornerDownRight, ChevronRight } from "lucide-react";
 import type { Comment } from "@/types/database.types";
 import { RejectCommentModal } from "@/components/admin/RejectCommentModal";
+import { confirmDialog } from "@/components/admin/dialog-store";
 import { updateCommentStatus, deleteComment } from "./actions";
 
 const statusConfig: Record<Comment["status"], { label: string; color: string; bg: string }> = {
@@ -116,8 +117,8 @@ export function CommentsClient({
                     <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>{formatDate(c.created_at)}</td>
                     <td style={{ padding: "0.875rem 1.25rem" }}>
                       <button
-                        onClick={() => {
-                          if (confirm(`Excluir o comentário de ${c.name}?`)) {
+                        onClick={async () => {
+                          if (await confirmDialog(`Excluir o comentário de ${c.name}?`, { danger: true, confirmText: "Excluir" })) {
                             setItems((prev) => prev.filter((i) => i.id !== c.id));
                             startTransition(() => deleteComment(c.id));
                           }

@@ -6,6 +6,7 @@ import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
 import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Loader2 } from "lucide-react";
 import { markdownLiteToEditorHtml, editorHtmlToMarkdownLite } from "@/lib/markdown-lite-editor";
+import { promptDialog, alertDialog } from "./dialog-store";
 
 const toolButtonStyle = {
   display: "flex",
@@ -57,9 +58,9 @@ export function MarkdownEditor({
     },
   });
 
-  function insertLink(editor: Editor) {
+  async function insertLink(editor: Editor) {
     const previousUrl = editor.getAttributes("link").href as string | undefined;
-    const url = window.prompt("URL do link:", previousUrl ?? "");
+    const url = await promptDialog("URL do link:", previousUrl ?? "");
     if (url === null) return;
     if (url === "") {
       editor.chain().focus().extendMarkRange("link").unsetLink().run();
@@ -76,12 +77,12 @@ export function MarkdownEditor({
     editor.chain().focus().setImage({ src: url, alt: caption, title: credit || undefined }).run();
   }
 
-  function handleImageUrlInsert() {
+  async function handleImageUrlInsert() {
     if (!editor) return;
-    const url = window.prompt("URL da imagem (link para uma imagem já publicada em outro lugar):", "");
+    const url = await promptDialog("URL da imagem (link para uma imagem já publicada em outro lugar):");
     if (!url || !url.trim()) return;
-    const caption = window.prompt("Legenda da imagem (opcional, aparece embaixo dela):", "") ?? "";
-    const credit = window.prompt("Crédito / fonte da imagem (opcional, aparece abaixo da legenda):", "") ?? "";
+    const caption = (await promptDialog("Legenda da imagem (opcional, aparece embaixo dela):")) ?? "";
+    const credit = (await promptDialog("Crédito / fonte da imagem (opcional, aparece abaixo da legenda):")) ?? "";
     insertImageMarkdown(editor, url.trim(), caption, credit);
   }
 
@@ -97,11 +98,11 @@ export function MarkdownEditor({
       const res = await fetch("/api/admin/upload-content-image", { method: "POST", body: formData });
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error ?? "Falha no upload.");
-      const caption = window.prompt("Legenda da imagem (opcional, aparece embaixo dela):", "") ?? "";
-      const credit = window.prompt("Crédito / fonte da imagem (opcional, aparece abaixo da legenda):", "") ?? "";
+      const caption = (await promptDialog("Legenda da imagem (opcional, aparece embaixo dela):")) ?? "";
+      const credit = (await promptDialog("Crédito / fonte da imagem (opcional, aparece abaixo da legenda):")) ?? "";
       insertImageMarkdown(editor, data.url, caption, credit);
     } catch (err) {
-      alert(err instanceof Error ? err.message : "Erro ao enviar a imagem.");
+      await alertDialog(err instanceof Error ? err.message : "Erro ao enviar a imagem.");
     } finally {
       setUploading(false);
     }

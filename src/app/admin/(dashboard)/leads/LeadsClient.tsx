@@ -3,6 +3,7 @@
 import { Fragment, useState, useTransition } from "react";
 import { Search, Trash2, ChevronDown, ChevronUp } from "lucide-react";
 import type { Database } from "@/types/database.types";
+import { confirmDialog } from "@/components/admin/dialog-store";
 import { updateLeadStatus, updateLeadNotes, deleteLead } from "./actions";
 
 type Lead = Database["public"]["Tables"]["leads"]["Row"];
@@ -89,8 +90,8 @@ export function LeadsClient({ leads }: { leads: Lead[] }) {
                         </td>
                         <td style={{ padding: "0.875rem 1.25rem" }}>
                           <button
-                            onClick={() => {
-                              if (confirm(`Excluir o lead de ${lead.name}?`)) startTransition(() => deleteLead(lead.id));
+                            onClick={async () => {
+                              if (await confirmDialog(`Excluir o lead de ${lead.name}?`, { danger: true, confirmText: "Excluir" })) startTransition(() => deleteLead(lead.id));
                             }}
                             style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}
                             title="Excluir"
