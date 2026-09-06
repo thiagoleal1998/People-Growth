@@ -10,6 +10,25 @@ import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-
 import type { Article } from "@/types/database.types";
 
 export async function upsertArticle(id: string | null, formData: FormData) {
+  let articleIdForErrorRedirect = id;
+  try {
+    await upsertArticleInner(id, formData);
+  } catch (err) {
+    // Anything unexpected (a thrown exception, not just a Supabase {error})
+    // used to bubble up as Next's generic "server error" page with no way
+    // to tell what actually happened — surface it on the form instead.
+    if (isRedirectError(err)) throw err; // redirect() itself throws — let it through
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("upsertArticle failed:", err);
+    redirect(`/admin/artigos/${articleIdForErrorRedirect ?? "novo"}?saveError=${encodeURIComponent(message)}`);
+  }
+}
+
+function isRedirectError(err: unknown): boolean {
+  return typeof err === "object" && err !== null && "digest" in err && typeof (err as { digest?: unknown }).digest === "string" && (err as { digest: string }).digest.startsWith("NEXT_REDIRECT");
+}
+
+async function upsertArticleInner(id: string | null, formData: FormData) {
   const supabase = await createClient();
   const profile = await getCurrentProfile();
 
@@ -62,8 +81,13 @@ export async function upsertArticle(id: string | null, formData: FormData) {
     // Only overwrite published_at when transitioning into "published"; keep existing otherwise.
     const { published_at: _publishedAt, ...updatePayload } = payload;
     const finalPayload = status === "published" ? payload : updatePayload;
-    const { error } = await client.from("articles").update(finalPayload).eq("id", articleId);
+    // .select() after update is required to actually prove a row was
+    // written — RLS silently returns success with zero rows (no error at
+    // all) when the policy blocks the write, which looks identical to a
+    // real save unless you check that a row actually came back.
+    const { data: updated, error } = await client.from("articles").update(finalPayload).eq("id", articleId).select("id");
     if (error) saveError = error.message;
+    else if (!updated || updated.length === 0) saveError = "A alteração não foi salva — sem permissão para editar este artigo.";
   } else {
     const { data, error } = await client.from("articles").insert(payload).select("id").single();
     if (error) saveError = error.message;

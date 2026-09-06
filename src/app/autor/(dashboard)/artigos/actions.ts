@@ -10,6 +10,24 @@ import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-
 import type { Article } from "@/types/database.types";
 
 export async function upsertOwnArticle(id: string | null, formData: FormData) {
+  try {
+    await upsertOwnArticleInner(id, formData);
+  } catch (err) {
+    // Anything unexpected (a thrown exception, not just a Supabase {error})
+    // used to bubble up as Next's generic "server error" page with no way
+    // to tell what actually happened — surface it on the form instead.
+    if (isRedirectError(err)) throw err; // redirect() itself throws — let it through
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("upsertOwnArticle failed:", err);
+    redirect(`/autor/artigos/${id ?? "novo"}?saveError=${encodeURIComponent(message)}`);
+  }
+}
+
+function isRedirectError(err: unknown): boolean {
+  return typeof err === "object" && err !== null && "digest" in err && typeof (err as { digest?: unknown }).digest === "string" && (err as { digest: string }).digest.startsWith("NEXT_REDIRECT");
+}
+
+async function upsertOwnArticleInner(id: string | null, formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile?.author_id) {
     redirect("/autor?error=" + encodeURIComponent("Seu login ainda não está vinculado a um perfil de autor. Peça a um admin para vincular."));
@@ -56,8 +74,13 @@ export async function upsertOwnArticle(id: string | null, formData: FormData) {
   if (articleId) {
     const { data } = await client.from("articles").select("*").eq("id", articleId).single();
     oldArticle = data as Article | null;
-    const { error } = await client.from("articles").update(payload).eq("id", articleId).eq("author_id", profile.author_id);
+    // .select() after update is required to actually prove a row was
+    // written — RLS silently returns success with zero rows (no error at
+    // all) when the policy blocks the write, which looks identical to a
+    // real save unless you check that a row actually came back.
+    const { data: updated, error } = await client.from("articles").update(payload).eq("id", articleId).eq("author_id", profile.author_id).select("id");
     if (error) saveError = error.message;
+    else if (!updated || updated.length === 0) saveError = "A alteração não foi salva — este artigo pode não estar mais vinculado à sua conta.";
   } else {
     const { data, error } = await client.from("articles").insert(payload).select("id").single();
     if (error) saveError = error.message;
