@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Image from "@tiptap/extension-image";
-import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, Loader2 } from "lucide-react";
+import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Loader2 } from "lucide-react";
 import { markdownLiteToEditorHtml, editorHtmlToMarkdownLite } from "@/lib/markdown-lite-editor";
 
 const toolButtonStyle = {
@@ -74,6 +74,15 @@ export function MarkdownEditor({
 
   function insertImageMarkdown(editor: Editor, url: string, caption: string, credit: string) {
     editor.chain().focus().setImage({ src: url, alt: caption, title: credit || undefined }).run();
+  }
+
+  function handleImageUrlInsert() {
+    if (!editor) return;
+    const url = window.prompt("URL da imagem (link para uma imagem já publicada em outro lugar):", "");
+    if (!url || !url.trim()) return;
+    const caption = window.prompt("Legenda da imagem (opcional, aparece embaixo dela):", "") ?? "";
+    const credit = window.prompt("Crédito / fonte da imagem (opcional, aparece abaixo da legenda):", "") ?? "";
+    insertImageMarkdown(editor, url.trim(), caption, credit);
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -165,6 +174,14 @@ export function MarkdownEditor({
           style={{ ...toolButtonStyle, cursor: uploading ? "default" : "pointer" }}
         >
           {uploading ? <Loader2 size={16} className="admin-spin" /> : <ImagePlus size={16} />}
+        </button>
+        <button
+          type="button"
+          title="Inserir imagem por link (URL) — não ocupa espaço no site"
+          onClick={handleImageUrlInsert}
+          style={toolButtonStyle}
+        >
+          <ExternalLink size={16} />
         </button>
         <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} style={{ display: "none" }} />
       </div>

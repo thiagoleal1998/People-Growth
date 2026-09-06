@@ -56,7 +56,7 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
     excerpt_en: String(formData.get("excerpt_en") ?? "") || null,
     summary_pt: String(formData.get("summary_pt") ?? "") || null,
     summary_en: String(formData.get("summary_en") ?? "") || null,
-    cover_image: coverImageUrl || String(formData.get("current_cover_image") ?? "") || null,
+    cover_image: coverImageUrl || String(formData.get("cover_image_url") ?? "").trim() || String(formData.get("current_cover_image") ?? "") || null,
     cover_image_caption: String(formData.get("cover_image_caption") ?? "") || null,
     cover_image_credit: String(formData.get("cover_image_credit") ?? "") || null,
     video_url: String(formData.get("video_url") ?? "").trim() || null,

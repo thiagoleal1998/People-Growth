@@ -93,6 +93,9 @@ export function AuthorArticleForm({ item, categories, imageError, saveError, sav
           <input type="hidden" name="current_cover_image" value={item?.cover_image ?? ""} />
           <ErrorBanner message={imageError} />
         </Field>
+        <Field label="...ou URL da imagem" hint="Alternativa ao envio de arquivo acima — cole o link de uma imagem já publicada em outro lugar, para não usar espaço de armazenamento do site. Se os dois campos forem preenchidos, o arquivo enviado tem prioridade.">
+          <Input name="cover_image_url" placeholder="https://..." />
+        </Field>
         <Field label="Legenda da imagem" hint="Descrição curta exibida junto da foto no início do artigo.">
           <Input name="cover_image_caption" defaultValue={item?.cover_image_caption ?? ""} />
         </Field>
