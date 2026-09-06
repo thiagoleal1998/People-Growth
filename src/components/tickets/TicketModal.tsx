@@ -49,18 +49,50 @@ export function TicketModal({
   canManage: boolean;
   members: Member[];
   onClose: () => void;
-  onUpdateStatus?: (status: InternalTicket["status"]) => void;
-  onAssign?: (userId: string | null) => void;
-  onNotify?: () => void;
+  onUpdateStatus?: (status: InternalTicket["status"]) => Promise<void>;
+  onAssign?: (userId: string | null) => Promise<void>;
+  onNotify?: () => Promise<void>;
   onComment: (body: string) => Promise<void>;
 }) {
   const [events, setEvents] = useState<TicketEvent[]>([]);
   const [comments, setComments] = useState<TicketComment[]>([]);
   const [loading, setLoading] = useState(true);
   const [editorKey, setEditorKey] = useState(0);
+  const [notifying, setNotifying] = useState(false);
   const [sending, startSending] = useTransition();
   const t = typeConfig[ticket.type];
   const TypeIcon = t.icon;
+
+  function pushEvent(event_type: TicketEvent["event_type"], detail: string) {
+    setEvents((prev) => [
+      ...prev,
+      { id: `temp-${Date.now()}`, ticket_id: ticket.id, event_type, actor_name: "Você", detail, created_at: new Date().toISOString() },
+    ]);
+  }
+
+  function handleUpdateStatus(status: InternalTicket["status"]) {
+    if (!onUpdateStatus || status === ticket.status) return;
+    pushEvent("status_changed", `Status alterado de "${statusConfig[ticket.status].label}" para "${statusConfig[status].label}"`);
+    onUpdateStatus(status);
+  }
+
+  function handleAssign(userId: string | null) {
+    if (!onAssign) return;
+    const name = userId ? members.find((m) => m.id === userId)?.name ?? "alguém" : null;
+    pushEvent("assigned", userId ? `Atribuído a ${name}` : "Atribuição removida");
+    onAssign(userId);
+  }
+
+  async function handleNotify() {
+    if (!onNotify) return;
+    setNotifying(true);
+    try {
+      await onNotify();
+      pushEvent("notified", `Notificou ${ticket.assigned_to_name ?? "o responsável"}`);
+    } finally {
+      setNotifying(false);
+    }
+  }
 
   useEffect(() => {
     let cancelled = false;
@@ -178,7 +210,7 @@ export function TicketModal({
               {canManage && onUpdateStatus ? (
                 <select
                   value={ticket.status}
-                  onChange={(e) => onUpdateStatus(e.target.value as InternalTicket["status"])}
+                  onChange={(e) => handleUpdateStatus(e.target.value as InternalTicket["status"])}
                   style={{ backgroundColor: statusConfig[ticket.status].bg, color: statusConfig[ticket.status].color, padding: "0.3rem 0.625rem", borderRadius: "0.375rem", fontSize: "0.8125rem", fontWeight: 700, border: "none", cursor: "pointer" }}
                 >
                   {Object.entries(statusConfig).map(([key, cfg]) => (
@@ -195,7 +227,7 @@ export function TicketModal({
               {canManage && onAssign ? (
                 <select
                   value={ticket.assigned_to ?? ""}
-                  onChange={(e) => onAssign(e.target.value || null)}
+                  onChange={(e) => handleAssign(e.target.value || null)}
                   style={{ padding: "0.3rem 0.625rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.8125rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)", cursor: "pointer" }}
                 >
                   <option value="">— ninguém —</option>
@@ -211,8 +243,8 @@ export function TicketModal({
             {canManage && onNotify && (
               <button
                 type="button"
-                onClick={onNotify}
-                disabled={!ticket.assigned_to}
+                onClick={handleNotify}
+                disabled={!ticket.assigned_to || notifying}
                 title={ticket.assigned_to ? "Avisar o responsável pelo painel" : "Defina um responsável primeiro"}
                 style={{
                   display: "inline-flex",
@@ -225,10 +257,11 @@ export function TicketModal({
                   color: ticket.assigned_to ? "var(--admin-text)" : "var(--admin-faint)",
                   fontSize: "0.8125rem",
                   fontWeight: 600,
-                  cursor: ticket.assigned_to ? "pointer" : "default",
+                  cursor: ticket.assigned_to && !notifying ? "pointer" : "default",
+                  opacity: notifying ? 0.7 : 1,
                 }}
               >
-                <BellRing size={14} /> Notificar membro
+                <BellRing size={14} className={notifying ? "admin-spin" : undefined} /> {notifying ? "Notificando..." : "Notificar membro"}
               </button>
             )}
           </div>

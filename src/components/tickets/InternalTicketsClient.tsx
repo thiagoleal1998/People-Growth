@@ -164,24 +164,24 @@ export function InternalTicketsClient({
           onClose={() => setOpenId(null)}
           onUpdateStatus={
             canManage && updateStatusAction
-              ? (status) => {
+              ? async (status) => {
                   setItems((prev) => prev.map((it) => (it.id === openTicket.id ? { ...it, status } : it)));
-                  startTransition(() => updateStatusAction(openTicket.id, status));
+                  await updateStatusAction(openTicket.id, status);
                 }
               : undefined
           }
           onAssign={
             canManage && assignAction
-              ? (userId) => {
+              ? async (userId) => {
                   const name = userId ? members.find((m) => m.id === userId)?.name ?? null : null;
                   setItems((prev) => prev.map((it) => (it.id === openTicket.id ? { ...it, assigned_to: userId, assigned_to_name: name } : it)));
-                  startTransition(() => assignAction(openTicket.id, userId));
+                  await assignAction(openTicket.id, userId);
                 }
               : undefined
           }
           onNotify={
             canManage && notifyAction
-              ? () => startTransition(() => notifyAction(openTicket.id))
+              ? () => notifyAction(openTicket.id)
               : undefined
           }
           onComment={(body) => commentAction(openTicket.id, body)}
