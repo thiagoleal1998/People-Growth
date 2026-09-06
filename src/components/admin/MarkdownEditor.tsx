@@ -72,8 +72,8 @@ export function MarkdownEditor({
     }
   }
 
-  function insertImageMarkdown(editor: Editor, url: string, caption: string) {
-    editor.chain().focus().setImage({ src: url, alt: caption }).run();
+  function insertImageMarkdown(editor: Editor, url: string, caption: string, credit: string) {
+    editor.chain().focus().setImage({ src: url, alt: caption, title: credit || undefined }).run();
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -89,7 +89,8 @@ export function MarkdownEditor({
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error ?? "Falha no upload.");
       const caption = window.prompt("Legenda da imagem (opcional, aparece embaixo dela):", "") ?? "";
-      insertImageMarkdown(editor, data.url, caption);
+      const credit = window.prompt("Crédito / fonte da imagem (opcional, aparece abaixo da legenda):", "") ?? "";
+      insertImageMarkdown(editor, data.url, caption, credit);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Erro ao enviar a imagem.");
     } finally {

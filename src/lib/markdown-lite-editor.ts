@@ -15,7 +15,9 @@ export function markdownLiteToEditorHtml(text: string): string {
   let html = text
     .replace(/^### (.+)$/gm, "<h3>$1</h3>")
     .replace(/^## (.+)$/gm, "<h2>$1</h2>")
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, '<img src="$2" alt="$1" />')
+    .replace(/!\[([^\]]*)\]\(([^)]+?)(?:\s+"([^"]*)")?\)/g, (_match, alt: string, src: string, credit?: string) => {
+      return `<img src="${src}" alt="${alt}"${credit ? ` title="${credit}"` : ""} />`;
+    })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\+\+(.+?)\+\+/g, "<u>$1</u>")
@@ -50,6 +52,15 @@ export function markdownLiteToEditorHtml(text: string): string {
 
 // TipTap's editor.getHTML() -> stored markdown-lite text. Client-only
 // (DOMParser); the editor itself only ever runs client-side anyway.
+// The image's title attribute carries the credit/source, serialized as a
+// standard markdown image title: "![alt](src "credit")".
+function serializeImage(el: HTMLElement): string {
+  const alt = el.getAttribute("alt") ?? "";
+  const src = el.getAttribute("src") ?? "";
+  const credit = el.getAttribute("title") ?? "";
+  return `![${alt}](${src}${credit ? ` "${credit}"` : ""})`;
+}
+
 export function editorHtmlToMarkdownLite(html: string): string {
   const doc = new DOMParser().parseFromString(html, "text/html");
 
@@ -70,7 +81,7 @@ export function editorHtmlToMarkdownLite(html: string): string {
       case "a":
         return `[${inner()}](${el.getAttribute("href") ?? ""})`;
       case "img":
-        return `![${el.getAttribute("alt") ?? ""}](${el.getAttribute("src") ?? ""})`;
+        return serializeImage(el);
       case "br":
         return "\n";
       default:
@@ -92,7 +103,7 @@ export function editorHtmlToMarkdownLite(html: string): string {
       case "h3":
         return `### ${renderChildrenInline(el)}`;
       case "img":
-        return `![${el.getAttribute("alt") ?? ""}](${el.getAttribute("src") ?? ""})`;
+        return serializeImage(el);
       case "ul":
         return Array.from(el.children).map((li) => `- ${renderChildrenInline(li)}`).join("\n");
       case "ol":

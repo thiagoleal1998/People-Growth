@@ -4,9 +4,13 @@ export function renderMarkdownLite(text: string): string {
     .replace(/^## (.+)$/gm, '<h2 style="font-size:1.5rem;font-weight:800;color:var(--site-text);margin:2rem 0 1rem">$1</h2>')
     // Images must run before the link regex below — "![alt](url)" contains
     // a "[alt](url)" substring that the link pattern would otherwise eat.
-    .replace(/!\[([^\]]*)\]\(([^)]+)\)/g, (_match, alt: string, url: string) => {
-      const caption = alt ? `<figcaption style="margin-top:0.625rem;font-size:0.8125rem;color:var(--site-muted);text-align:center">${alt}</figcaption>` : "";
-      return `<figure style="margin:2rem 0"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block" />${caption}</figure>`;
+    // An optional quoted title — "![alt](url "credit")" — carries the
+    // credit/source line, same convention as standard markdown image titles.
+    .replace(/!\[([^\]]*)\]\(([^)]+?)(?:\s+"([^"]*)")?\)/g, (_match, alt: string, url: string, credit: string | undefined) => {
+      const captionLine = alt ? `<span style="display:block">${alt}</span>` : "";
+      const creditLine = credit ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Fonte: ${credit}</span>` : "";
+      const figcaption = alt || credit ? `<figcaption style="margin-top:0.625rem;font-size:0.8125rem;color:var(--site-muted);text-align:center">${captionLine}${creditLine}</figcaption>` : "";
+      return `<figure style="margin:2rem 0"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block" />${figcaption}</figure>`;
     })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#4361EE;font-weight:600;text-decoration:underline">$1</a>')
     .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:700;color:var(--site-text)">$1</strong>')
