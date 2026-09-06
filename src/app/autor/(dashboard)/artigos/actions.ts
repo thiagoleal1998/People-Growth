@@ -52,13 +52,22 @@ export async function upsertOwnArticle(id: string | null, formData: FormData) {
   let articleId = id;
   const isNew = !articleId;
   let oldArticle: Article | null = null;
+  let saveError: string | null = null;
   if (articleId) {
     const { data } = await client.from("articles").select("*").eq("id", articleId).single();
     oldArticle = data as Article | null;
-    await client.from("articles").update(payload).eq("id", articleId).eq("author_id", profile.author_id);
+    const { error } = await client.from("articles").update(payload).eq("id", articleId).eq("author_id", profile.author_id);
+    if (error) saveError = error.message;
   } else {
-    const { data } = await client.from("articles").insert(payload).select("id").single();
+    const { data, error } = await client.from("articles").insert(payload).select("id").single();
+    if (error) saveError = error.message;
     articleId = data?.id ?? null;
+  }
+
+  // A failed write (e.g. a duplicate slug) must never look like a success —
+  // this used to redirect to ?saved=1 unconditionally regardless of error.
+  if (saveError) {
+    redirect(`/autor/artigos/${articleId ?? "novo"}?saveError=${encodeURIComponent(saveError)}`);
   }
 
   await logActivity({

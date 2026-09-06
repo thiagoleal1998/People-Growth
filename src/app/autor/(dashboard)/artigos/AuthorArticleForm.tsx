@@ -10,7 +10,7 @@ import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { upsertOwnArticle } from "./actions";
 import type { Article, Category } from "@/types/database.types";
 
-export function AuthorArticleForm({ item, categories, imageError, saved }: { item?: Article; categories: Category[]; imageError?: string; saved?: boolean }) {
+export function AuthorArticleForm({ item, categories, imageError, saveError, saved }: { item?: Article; categories: Category[]; imageError?: string; saveError?: string; saved?: boolean }) {
   const action = upsertOwnArticle.bind(null, item?.id ?? null);
 
   return (
@@ -114,6 +114,7 @@ export function AuthorArticleForm({ item, categories, imageError, saved }: { ite
             <option value="pending">Enviar para revisão</option>
           </Select>
         </Field>
+        <ErrorBanner message={saveError} label="Não foi possível salvar o artigo" />
         <SubmitButton>{item ? "Salvar alterações" : "Criar artigo"}</SubmitButton>
       </form>
     </FormShell>

@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { X } from "lucide-react";
 
-export function ErrorBanner({ message }: { message?: string }) {
+export function ErrorBanner({ message, label = "Não foi possível enviar a imagem" }: { message?: string; label?: string }) {
   const [dismissed, setDismissed] = useState(false);
   const [captured] = useState(message);
 
@@ -25,7 +25,7 @@ export function ErrorBanner({ message }: { message?: string }) {
         marginTop: "0.5rem",
       }}
     >
-      <span>Não foi possível enviar a imagem: {captured}</span>
+      <span>{label}: {captured}</span>
       <button
         onClick={() => setDismissed(true)}
         style={{ background: "none", border: "none", color: "#b91c1c", cursor: "pointer", flexShrink: 0, padding: 0 }}

@@ -2,7 +2,12 @@ import { createClient } from "@/lib/supabase/server";
 import { ArticleForm } from "../ArticleForm";
 import type { Category, Author } from "@/types/database.types";
 
-export default async function NovoArtigoPage() {
+export default async function NovoArtigoPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saveError?: string }>;
+}) {
+  const { saveError } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
@@ -11,5 +16,5 @@ export default async function NovoArtigoPage() {
     client.from("authors").select("*").order("name"),
   ]);
 
-  return <ArticleForm categories={(categoriesData ?? []) as Category[]} authors={(authorsData ?? []) as Author[]} />;
+  return <ArticleForm categories={(categoriesData ?? []) as Category[]} authors={(authorsData ?? []) as Author[]} saveError={saveError} />;
 }

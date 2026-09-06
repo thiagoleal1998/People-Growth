@@ -35,12 +35,14 @@ export function ArticleForm({
   categories,
   authors,
   imageError,
+  saveError,
   saved,
 }: {
   item?: Article;
   categories: Category[];
   authors: Author[];
   imageError?: string;
+  saveError?: string;
   saved?: boolean;
 }) {
   const action = upsertArticle.bind(null, item?.id ?? null);
@@ -222,6 +224,8 @@ export function ArticleForm({
             </div>
           </div>
         </div>
+
+        <ErrorBanner message={saveError} label="Não foi possível salvar o artigo" />
 
         <div style={{ marginTop: "1.5rem" }}>
           <SubmitButton>{item ? "Salvar alterações" : "Criar artigo"}</SubmitButton>

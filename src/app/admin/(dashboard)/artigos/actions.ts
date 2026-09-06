@@ -55,16 +55,25 @@ export async function upsertArticle(id: string | null, formData: FormData) {
   let articleId = id;
   const isNew = !articleId;
   let oldArticle: Article | null = null;
+  let saveError: string | null = null;
   if (articleId) {
     const { data } = await client.from("articles").select("*").eq("id", articleId).single();
     oldArticle = data as Article | null;
     // Only overwrite published_at when transitioning into "published"; keep existing otherwise.
     const { published_at: _publishedAt, ...updatePayload } = payload;
     const finalPayload = status === "published" ? payload : updatePayload;
-    await client.from("articles").update(finalPayload).eq("id", articleId);
+    const { error } = await client.from("articles").update(finalPayload).eq("id", articleId);
+    if (error) saveError = error.message;
   } else {
-    const { data } = await client.from("articles").insert(payload).select("id").single();
+    const { data, error } = await client.from("articles").insert(payload).select("id").single();
+    if (error) saveError = error.message;
     articleId = data?.id ?? null;
+  }
+
+  // A failed write (e.g. a duplicate slug) must never look like a success —
+  // this used to redirect to ?saved=1 unconditionally regardless of error.
+  if (saveError) {
+    redirect(`/admin/artigos/${articleId ?? "novo"}?saveError=${encodeURIComponent(saveError)}`);
   }
 
   if (profile) {

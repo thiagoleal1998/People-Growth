@@ -8,10 +8,10 @@ export default async function EditarArtigoPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ imageError?: string; saved?: string }>;
+  searchParams: Promise<{ imageError?: string; saveError?: string; saved?: string }>;
 }) {
   const { id } = await params;
-  const { imageError, saved } = await searchParams;
+  const { imageError, saveError, saved } = await searchParams;
   const supabase = await createClient();
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -30,6 +30,7 @@ export default async function EditarArtigoPage({
       categories={(categoriesData ?? []) as Category[]}
       authors={(authorsData ?? []) as Author[]}
       imageError={imageError}
+      saveError={saveError}
       saved={saved === "1"}
     />
   );
