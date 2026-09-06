@@ -2,7 +2,8 @@
 
 import { useState, useTransition } from "react";
 import { Plus, Trash2, X, Lightbulb, Bug } from "lucide-react";
-import { Field, Input, Textarea, Select } from "@/components/admin/ui";
+import { Field, Input, Select } from "@/components/admin/ui";
+import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
 import { formatTicketId } from "@/lib/display-id";
 import { TicketModal, type Member } from "./TicketModal";
 import type { InternalTicket } from "@/types/database.types";
@@ -91,7 +92,7 @@ export function InternalTicketsClient({
             <Input name="title" required maxLength={150} />
           </Field>
           <Field label="Descrição" hint="Explique com detalhes: o que aconteceu (ou o que você gostaria), em qual página, e como reproduzir o problema, se for um erro.">
-            <Textarea name="description" rows={4} required />
+            <MarkdownEditor name="description" defaultValue="" minHeight={140} required />
           </Field>
           <button
             type="submit"

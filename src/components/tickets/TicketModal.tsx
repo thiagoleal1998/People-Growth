@@ -161,9 +161,10 @@ export function TicketModal({
 
         {/* Scrollable body */}
         <div className="admin-scroll" style={{ padding: "1.25rem 1.5rem", overflowY: "auto", flex: 1 }}>
-          <div style={{ backgroundColor: "var(--admin-surface-alt)", borderRadius: "0.625rem", padding: "1rem 1.125rem", fontSize: "0.875rem", lineHeight: 1.6, whiteSpace: "pre-wrap" }}>
-            {ticket.description}
-          </div>
+          <div
+            style={{ backgroundColor: "var(--admin-surface-alt)", borderRadius: "0.625rem", padding: "1rem 1.125rem", fontSize: "0.875rem", lineHeight: 1.6 }}
+            dangerouslySetInnerHTML={{ __html: renderMarkdownLite(ticket.description) }}
+          />
 
           <div style={{ display: "flex", gap: "1rem", marginTop: "0.75rem", fontSize: "0.75rem", color: "var(--admin-faint)", flexWrap: "wrap" }}>
             {ticket.page_path && <span>Página: {ticket.page_path}</span>}
