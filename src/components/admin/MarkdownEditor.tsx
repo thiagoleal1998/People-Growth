@@ -1,7 +1,7 @@
 "use client";
 
 import { useRef, useState } from "react";
-import { Bold, Heading2, Link2, List, ListOrdered, Quote, ImagePlus, Loader2 } from "lucide-react";
+import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, Loader2 } from "lucide-react";
 
 const fieldControlStyle = {
   width: "100%",
@@ -106,6 +106,21 @@ export function MarkdownEditor({
     });
   }
 
+  // Deprecated but still functional in every major browser for plain
+  // textareas — it operates on the browser's own native undo stack, the
+  // same one Ctrl+Z already uses, so there's no separate history to keep
+  // in sync with React state. Falls back to a harmless no-op otherwise;
+  // native Ctrl+Z/Ctrl+Y keep working either way.
+  function undo() {
+    textareaRef.current?.focus();
+    document.execCommand("undo");
+  }
+
+  function redo() {
+    textareaRef.current?.focus();
+    document.execCommand("redo");
+  }
+
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -145,18 +160,38 @@ export function MarkdownEditor({
         <button type="button" title="Negrito" onClick={() => wrapSelection("**", "texto em negrito")} style={toolButtonStyle}>
           <Bold size={16} />
         </button>
+        <button type="button" title="Itálico" onClick={() => wrapSelection("_", "texto em itálico")} style={toolButtonStyle}>
+          <Italic size={16} />
+        </button>
+        <button type="button" title="Sublinhado" onClick={() => wrapSelection("++", "texto sublinhado")} style={toolButtonStyle}>
+          <Underline size={16} />
+        </button>
+        <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
         <button type="button" title="Subtítulo" onClick={() => prefixLines("## ")} style={toolButtonStyle}>
           <Heading2 size={16} />
         </button>
-        <button type="button" title="Citação em destaque" onClick={() => prefixLines("> ")} style={toolButtonStyle}>
-          <Quote size={16} />
+        <button type="button" title="Subtítulo pequeno" onClick={() => prefixLines("### ")} style={toolButtonStyle}>
+          <Heading3 size={16} />
         </button>
+        <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
         <button type="button" title="Lista" onClick={() => prefixLines("- ")} style={toolButtonStyle}>
           <List size={16} />
         </button>
         <button type="button" title="Lista numerada" onClick={() => prefixLines("1. ")} style={toolButtonStyle}>
           <ListOrdered size={16} />
         </button>
+        <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
+        <button type="button" title="Citação em destaque" onClick={() => prefixLines("> ")} style={toolButtonStyle}>
+          <Quote size={16} />
+        </button>
+        <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
+        <button type="button" title="Desfazer" onClick={undo} style={toolButtonStyle}>
+          <Undo2 size={16} />
+        </button>
+        <button type="button" title="Refazer" onClick={redo} style={toolButtonStyle}>
+          <Redo2 size={16} />
+        </button>
+        <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
         <button type="button" title="Link" onClick={insertLink} style={toolButtonStyle}>
           <Link2 size={16} />
         </button>

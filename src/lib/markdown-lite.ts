@@ -1,5 +1,6 @@
 export function renderMarkdownLite(text: string): string {
   let html = text
+    .replace(/^### (.+)$/gm, '<h3 style="font-size:1.25rem;font-weight:800;color:var(--site-text);margin:1.75rem 0 0.875rem">$1</h3>')
     .replace(/^## (.+)$/gm, '<h2 style="font-size:1.5rem;font-weight:800;color:var(--site-text);margin:2rem 0 1rem">$1</h2>')
     // Images must run before the link regex below — "![alt](url)" contains
     // a "[alt](url)" substring that the link pattern would otherwise eat.
@@ -8,7 +9,12 @@ export function renderMarkdownLite(text: string): string {
       return `<figure style="margin:2rem 0"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block" />${caption}</figure>`;
     })
     .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#4361EE;font-weight:600;text-decoration:underline">$1</a>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:700;color:var(--site-text)">$1</strong>');
+    .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:700;color:var(--site-text)">$1</strong>')
+    // Underline has no standard markdown syntax, so it uses its own marker.
+    // Both this and italic run after bold, so a lone "_" or "+" left over
+    // from bold's "**" never gets misread as one of these.
+    .replace(/\+\+(.+?)\+\+/g, "<u>$1</u>")
+    .replace(/_(.+?)_/g, "<em>$1</em>");
 
   // Consecutive "> …" lines become a pull-quote. A trailing "— Attribution"
   // line is pulled out and shown smaller, under the quote itself.
@@ -48,7 +54,7 @@ export function renderMarkdownLite(text: string): string {
     .map((block) => {
       const trimmed = block.trim();
       if (!trimmed) return "";
-      if (/^<(h2|ul|ol|blockquote|figure)/.test(trimmed)) return trimmed;
+      if (/^<(h2|h3|ul|ol|blockquote|figure)/.test(trimmed)) return trimmed;
       return `<p style="margin:0 0 1.25rem">${trimmed}</p>`;
     })
     .join("");
@@ -60,11 +66,13 @@ export function stripMarkdownLite(text: string): string {
   return text
     .replace(/^>\s?—\s+.+$/gm, "")
     .replace(/^>\s?/gm, "")
-    .replace(/^##\s+/gm, "")
+    .replace(/^#{2,3}\s+/gm, "")
     .replace(/^[-\d]+\.?\s+/gm, "")
     .replace(/!\[[^\]]*\]\([^)]+\)/g, "")
     .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
     .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/\+\+(.+?)\+\+/g, "$1")
+    .replace(/_(.+?)_/g, "$1")
     .replace(/\n{2,}/g, ". ")
     .replace(/\n/g, " ")
     .trim();
