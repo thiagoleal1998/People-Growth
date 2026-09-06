@@ -70,7 +70,12 @@ export function editorHtmlToMarkdownLite(html: string): string {
   const doc = new DOMParser().parseFromString(html, "text/html");
 
   function renderInline(node: ChildNode): string {
-    if (node.nodeType === Node.TEXT_NODE) return node.textContent ?? "";
+    // A raw embedded newline (e.g. from a plain-text paste that the browser
+    // didn't split into separate <p> tags) has no "soft break" meaning in
+    // this dialect — "\n\n+" is the only paragraph boundary it recognizes,
+    // so a lone "\n" left as-is silently collapses to a space when rendered.
+    // Promoting it to a full paragraph break is the only lossless mapping.
+    if (node.nodeType === Node.TEXT_NODE) return (node.textContent ?? "").replace(/\n/g, "\n\n");
     if (node.nodeType !== Node.ELEMENT_NODE) return "";
     const el = node as HTMLElement;
     const inner = () => Array.from(el.childNodes).map(renderInline).join("");
@@ -88,7 +93,8 @@ export function editorHtmlToMarkdownLite(html: string): string {
       case "img":
         return serializeImage(el);
       case "br":
-        return "\n";
+        // Same reasoning as the text-node case above.
+        return "\n\n";
       default:
         return inner();
     }
