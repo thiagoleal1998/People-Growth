@@ -1,22 +1,11 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useEditor, EditorContent, type Editor } from "@tiptap/react";
+import StarterKit from "@tiptap/starter-kit";
+import Image from "@tiptap/extension-image";
 import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, Loader2 } from "lucide-react";
-
-const fieldControlStyle = {
-  width: "100%",
-  padding: "0.875rem 1rem",
-  borderRadius: "0 0 0.5rem 0.5rem",
-  border: "1px solid var(--admin-border-strong)",
-  borderTop: "none",
-  fontSize: "0.95rem",
-  lineHeight: 1.6,
-  boxSizing: "border-box" as const,
-  fontFamily: "inherit",
-  backgroundColor: "var(--admin-surface)",
-  color: "var(--admin-text)",
-  resize: "vertical" as const,
-};
+import { markdownLiteToEditorHtml, editorHtmlToMarkdownLite } from "@/lib/markdown-lite-editor";
 
 const toolButtonStyle = {
   display: "flex",
@@ -31,100 +20,66 @@ const toolButtonStyle = {
   cursor: "pointer",
 };
 
+function activeStyle(active: boolean) {
+  return active
+    ? { ...toolButtonStyle, backgroundColor: "rgba(67,97,238,0.12)", color: "#4361EE" }
+    : toolButtonStyle;
+}
+
 export function MarkdownEditor({
   name,
   defaultValue,
   minHeight = 420,
-  required,
 }: {
   name: string;
   defaultValue: string;
   minHeight?: number;
-  required?: boolean;
 }) {
-  const [value, setValue] = useState(defaultValue);
+  const [serialized, setSerialized] = useState(defaultValue);
   const [uploading, setUploading] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  function applyAtSelection(transform: (selected: string, before: string, after: string) => { text: string; selectFrom: number; selectTo: number }) {
-    const el = textareaRef.current;
-    if (!el) return;
-    const start = el.selectionStart;
-    const end = el.selectionEnd;
-    const before = value.slice(0, start);
-    const selected = value.slice(start, end);
-    const after = value.slice(end);
-    const { text, selectFrom, selectTo } = transform(selected, before, after);
-    setValue(text);
-    requestAnimationFrame(() => {
-      el.focus();
-      el.setSelectionRange(selectFrom, selectTo);
-    });
+  const editor = useEditor({
+    extensions: [
+      StarterKit.configure({ heading: { levels: [2, 3] } }),
+      Image,
+    ],
+    content: markdownLiteToEditorHtml(defaultValue),
+    immediatelyRender: false,
+    onUpdate: ({ editor }) => {
+      setSerialized(editorHtmlToMarkdownLite(editor.getHTML()));
+    },
+    editorProps: {
+      attributes: {
+        style: `min-height:${minHeight}px`,
+        class: "tiptap-content",
+      },
+    },
+  });
+
+  function insertLink(editor: Editor) {
+    const previousUrl = editor.getAttributes("link").href as string | undefined;
+    const url = window.prompt("URL do link:", previousUrl ?? "");
+    if (url === null) return;
+    if (url === "") {
+      editor.chain().focus().extendMarkRange("link").unsetLink().run();
+      return;
+    }
+    if (editor.state.selection.empty) {
+      editor.chain().focus().insertContent(`<a href="${url}">${url}</a>`).run();
+    } else {
+      editor.chain().focus().extendMarkRange("link").setLink({ href: url }).run();
+    }
   }
 
-  function wrapSelection(marker: string, placeholder: string) {
-    applyAtSelection((selected, before, after) => {
-      const content = selected || placeholder;
-      const text = `${before}${marker}${content}${marker}${after}`;
-      return { text, selectFrom: before.length + marker.length, selectTo: before.length + marker.length + content.length };
-    });
-  }
-
-  function prefixLines(prefix: string) {
-    applyAtSelection((selected, before, after) => {
-      const lineStart = before.lastIndexOf("\n") + 1;
-      const linePrefix = before.slice(0, lineStart);
-      const currentLineAndSelection = before.slice(lineStart) + selected;
-      const prefixed = currentLineAndSelection
-        .split("\n")
-        .map((line) => (line.startsWith(prefix) ? line : `${prefix}${line}`))
-        .join("\n");
-      const text = `${linePrefix}${prefixed}${after}`;
-      return { text, selectFrom: linePrefix.length, selectTo: linePrefix.length + prefixed.length };
-    });
-  }
-
-  function insertLink() {
-    const el = textareaRef.current;
-    const selected = el ? value.slice(el.selectionStart, el.selectionEnd) : "";
-    const url = window.prompt("URL do link:");
-    if (!url) return;
-    applyAtSelection((sel, before, after) => {
-      const label = sel || selected || "texto do link";
-      const text = `${before}[${label}](${url})${after}`;
-      return { text, selectFrom: before.length + 1, selectTo: before.length + 1 + label.length };
-    });
-  }
-
-  function insertImageMarkdown(url: string, caption: string) {
-    applyAtSelection((_sel, before, after) => {
-      const needsLeadingBreak = before.length > 0 && !before.endsWith("\n\n");
-      const insertion = `${needsLeadingBreak ? "\n\n" : ""}![${caption}](${url})\n\n`;
-      const text = `${before}${insertion}${after}`;
-      return { text, selectFrom: text.length - after.length, selectTo: text.length - after.length };
-    });
-  }
-
-  // Deprecated but still functional in every major browser for plain
-  // textareas — it operates on the browser's own native undo stack, the
-  // same one Ctrl+Z already uses, so there's no separate history to keep
-  // in sync with React state. Falls back to a harmless no-op otherwise;
-  // native Ctrl+Z/Ctrl+Y keep working either way.
-  function undo() {
-    textareaRef.current?.focus();
-    document.execCommand("undo");
-  }
-
-  function redo() {
-    textareaRef.current?.focus();
-    document.execCommand("redo");
+  function insertImageMarkdown(editor: Editor, url: string, caption: string) {
+    editor.chain().focus().setImage({ src: url, alt: caption }).run();
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
-    if (!file) return;
+    if (!file || !editor) return;
 
     setUploading(true);
     try {
@@ -134,13 +89,15 @@ export function MarkdownEditor({
       const data = await res.json();
       if (!res.ok || !data.url) throw new Error(data.error ?? "Falha no upload.");
       const caption = window.prompt("Legenda da imagem (opcional, aparece embaixo dela):", "") ?? "";
-      insertImageMarkdown(data.url, caption);
+      insertImageMarkdown(editor, data.url, caption);
     } catch (err) {
       alert(err instanceof Error ? err.message : "Erro ao enviar a imagem.");
     } finally {
       setUploading(false);
     }
   }
+
+  if (!editor) return null;
 
   return (
     <div>
@@ -157,42 +114,42 @@ export function MarkdownEditor({
           flexWrap: "wrap",
         }}
       >
-        <button type="button" title="Negrito" onClick={() => wrapSelection("**", "texto em negrito")} style={toolButtonStyle}>
+        <button type="button" title="Negrito" onClick={() => editor.chain().focus().toggleBold().run()} style={activeStyle(editor.isActive("bold"))}>
           <Bold size={16} />
         </button>
-        <button type="button" title="Itálico" onClick={() => wrapSelection("_", "texto em itálico")} style={toolButtonStyle}>
+        <button type="button" title="Itálico" onClick={() => editor.chain().focus().toggleItalic().run()} style={activeStyle(editor.isActive("italic"))}>
           <Italic size={16} />
         </button>
-        <button type="button" title="Sublinhado" onClick={() => wrapSelection("++", "texto sublinhado")} style={toolButtonStyle}>
+        <button type="button" title="Sublinhado" onClick={() => editor.chain().focus().toggleUnderline().run()} style={activeStyle(editor.isActive("underline"))}>
           <Underline size={16} />
         </button>
         <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
-        <button type="button" title="Subtítulo" onClick={() => prefixLines("## ")} style={toolButtonStyle}>
+        <button type="button" title="Subtítulo" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} style={activeStyle(editor.isActive("heading", { level: 2 }))}>
           <Heading2 size={16} />
         </button>
-        <button type="button" title="Subtítulo pequeno" onClick={() => prefixLines("### ")} style={toolButtonStyle}>
+        <button type="button" title="Subtítulo pequeno" onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()} style={activeStyle(editor.isActive("heading", { level: 3 }))}>
           <Heading3 size={16} />
         </button>
         <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
-        <button type="button" title="Lista" onClick={() => prefixLines("- ")} style={toolButtonStyle}>
+        <button type="button" title="Lista" onClick={() => editor.chain().focus().toggleBulletList().run()} style={activeStyle(editor.isActive("bulletList"))}>
           <List size={16} />
         </button>
-        <button type="button" title="Lista numerada" onClick={() => prefixLines("1. ")} style={toolButtonStyle}>
+        <button type="button" title="Lista numerada" onClick={() => editor.chain().focus().toggleOrderedList().run()} style={activeStyle(editor.isActive("orderedList"))}>
           <ListOrdered size={16} />
         </button>
         <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
-        <button type="button" title="Citação em destaque" onClick={() => prefixLines("> ")} style={toolButtonStyle}>
+        <button type="button" title="Citação em destaque" onClick={() => editor.chain().focus().toggleBlockquote().run()} style={activeStyle(editor.isActive("blockquote"))}>
           <Quote size={16} />
         </button>
         <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
-        <button type="button" title="Desfazer" onClick={undo} style={toolButtonStyle}>
+        <button type="button" title="Desfazer" onClick={() => editor.chain().focus().undo().run()} style={toolButtonStyle}>
           <Undo2 size={16} />
         </button>
-        <button type="button" title="Refazer" onClick={redo} style={toolButtonStyle}>
+        <button type="button" title="Refazer" onClick={() => editor.chain().focus().redo().run()} style={toolButtonStyle}>
           <Redo2 size={16} />
         </button>
         <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
-        <button type="button" title="Link" onClick={insertLink} style={toolButtonStyle}>
+        <button type="button" title="Link" onClick={() => insertLink(editor)} style={activeStyle(editor.isActive("link"))}>
           <Link2 size={16} />
         </button>
         <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
@@ -207,14 +164,17 @@ export function MarkdownEditor({
         </button>
         <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} style={{ display: "none" }} />
       </div>
-      <textarea
-        ref={textareaRef}
-        name={name}
-        value={value}
-        onChange={(e) => setValue(e.target.value)}
-        required={required}
-        style={{ ...fieldControlStyle, minHeight: `${minHeight}px` }}
-      />
+      <div
+        style={{
+          border: "1px solid var(--admin-border-strong)",
+          borderRadius: "0 0 0.5rem 0.5rem",
+          backgroundColor: "var(--admin-surface)",
+          padding: "0.875rem 1rem",
+        }}
+      >
+        <EditorContent editor={editor} />
+      </div>
+      <input type="hidden" name={name} value={serialized} />
     </div>
   );
 }

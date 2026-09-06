@@ -92,7 +92,7 @@ export function InternalTicketsClient({
             <Input name="title" required maxLength={150} />
           </Field>
           <Field label="Descrição" hint="Explique com detalhes: o que aconteceu (ou o que você gostaria), em qual página, e como reproduzir o problema, se for um erro.">
-            <MarkdownEditor name="description" defaultValue="" minHeight={140} required />
+            <MarkdownEditor name="description" defaultValue="" minHeight={140} />
           </Field>
           <button
             type="submit"

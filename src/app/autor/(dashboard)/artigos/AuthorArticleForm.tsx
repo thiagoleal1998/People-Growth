@@ -72,7 +72,7 @@ export function AuthorArticleForm({ item, categories, imageError, saved }: { ite
           label="Conteúdo (PT)"
           hint='Use a barra de ferramentas para negrito, itálico, sublinhado, subtítulos, listas, citação, link e imagem — ou digite direto: **negrito**, _itálico_, ++sublinhado++, [link](url), ## subtítulo, ### subtítulo pequeno, "- " para lista, "> texto" para citação (com "> — Autor" numa linha própria, opcional).'
         >
-          <MarkdownEditor name="content_pt" defaultValue={item?.content_pt ?? ""} required />
+          <MarkdownEditor name="content_pt" defaultValue={item?.content_pt ?? ""} />
         </Field>
         <Field label="Conteúdo (EN)">
           <MarkdownEditor name="content_en" defaultValue={item?.content_en ?? ""} minHeight={280} />
