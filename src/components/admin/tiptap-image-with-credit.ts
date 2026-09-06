@@ -36,11 +36,17 @@ export const ImageWithCredit = Image.extend({
       img.style.cssText = "width:100%;border-radius:0.5rem;display:block";
       figure.appendChild(img);
 
+      const alt = node.attrs.alt as string | null;
       const credit = node.attrs.credit as string | null;
       const source = node.attrs.source as string | null;
-      if (credit || source) {
+      if (alt || credit || source) {
         const figcaption = document.createElement("figcaption");
         figcaption.style.cssText = "margin-top:0.5rem;font-size:0.8rem;color:var(--admin-muted);line-height:1.6";
+        if (alt) {
+          const line = document.createElement("div");
+          line.textContent = alt;
+          figcaption.appendChild(line);
+        }
         if (credit) {
           const line = document.createElement("div");
           line.textContent = `Créditos: ${credit}`;
