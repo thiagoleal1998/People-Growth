@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { Eye, Languages, Loader2 } from "lucide-react";
+import { Eye, Languages, Sparkles, Loader2 } from "lucide-react";
 import { FormShell, Field, Input, Textarea, Select, SubmitButton } from "@/components/admin/ui";
 import { MarkdownEditor, type MarkdownEditorHandle } from "@/components/admin/MarkdownEditor";
 import { DateTimePicker } from "@/components/admin/DateTimePicker";
@@ -21,8 +21,33 @@ export function AuthorArticleForm({ item, categories, imageError, saveError, sav
   const [excerptEn, setExcerptEn] = useState(item?.excerpt_en ?? "");
   const [summaryEn, setSummaryEn] = useState(item?.summary_en ?? "");
   const [translating, setTranslating] = useState(false);
+  const [generatingExcerpt, setGeneratingExcerpt] = useState(false);
   const contentPtRef = useRef<MarkdownEditorHandle>(null);
   const contentEnRef = useRef<MarkdownEditorHandle>(null);
+
+  async function handleGenerateExcerpt() {
+    const content = contentPtRef.current?.getContent() ?? "";
+    if (!content.trim()) {
+      await alertDialog("Escreva o conteúdo em português antes de gerar a linha fina e o resumo.");
+      return;
+    }
+    setGeneratingExcerpt(true);
+    try {
+      const res = await fetch("/api/admin/generate-excerpt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title_pt: titlePt, content_pt: content }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Falha ao gerar a linha fina e o resumo.");
+      setExcerptPt(data.excerpt_pt);
+      setSummaryPt(data.summary_pt);
+    } catch (err) {
+      await alertDialog(err instanceof Error ? err.message : "Erro ao gerar a linha fina e o resumo.");
+    } finally {
+      setGeneratingExcerpt(false);
+    }
+  }
 
   async function handleTranslate() {
     if (!titlePt.trim() && !contentPtRef.current?.getContent().trim()) {
@@ -97,6 +122,34 @@ export function AuthorArticleForm({ item, categories, imageError, saveError, sav
             ))}
           </Select>
         </Field>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "0 0 1.25rem" }}>
+          <button
+            type="button"
+            onClick={handleGenerateExcerpt}
+            disabled={generatingExcerpt}
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              backgroundColor: "var(--admin-surface-alt)",
+              border: "1px solid var(--admin-border-strong)",
+              color: "var(--admin-text)",
+              padding: "0.625rem 1.125rem",
+              borderRadius: "0.625rem",
+              fontWeight: 700,
+              fontSize: "0.875rem",
+              cursor: generatingExcerpt ? "default" : "pointer",
+              opacity: generatingExcerpt ? 0.7 : 1,
+            }}
+          >
+            {generatingExcerpt ? <Loader2 size={16} className="admin-spin" /> : <Sparkles size={16} />}
+            {generatingExcerpt ? "Gerando..." : "Gerar linha fina e resumo (PT)"}
+          </button>
+          <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+            Usa o Conteúdo (PT) escrito abaixo para preencher os dois campos PT a seguir — sobrescreve o que já estiver neles.
+          </span>
+        </div>
+
         <Field label="Linha fina / subtítulo (PT)" hint="Aparece nas listagens e cards de artigos — não é o Resumo em destaque abaixo.">
           <Textarea name="excerpt_pt" rows={2} value={excerptPt} onChange={(e) => setExcerptPt(e.target.value)} />
         </Field>

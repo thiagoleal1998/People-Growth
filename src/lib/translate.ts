@@ -6,7 +6,7 @@
 // counts (paragraph blocks, image/link markers) are checked after the call
 // so a mangled translation is caught instead of silently saved.
 
-const MODEL = "gemini-flash-latest";
+import { callGeminiJson } from "./gemini-client";
 
 export type ArticleTranslationInput = {
   title_pt: string;
@@ -64,78 +64,21 @@ function structuralFingerprint(content: string): { paragraphs: number; images: n
   };
 }
 
-const MAX_ATTEMPTS = 3;
-
-function sleep(ms: number): Promise<void> {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
-
-// The flash-tier model occasionally returns 503 "high demand" under normal
-// use — a transient overload, not a real failure — so a couple of retries
-// with backoff avoids surfacing a spurious error for something that
-// succeeds a few seconds later.
-async function callGemini(apiKey: string, body: string): Promise<Response> {
-  let lastRes: Response | null = null;
-  for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt++) {
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${apiKey}`;
-    const res = await fetch(url, { method: "POST", headers: { "Content-Type": "application/json" }, body });
-    if (res.ok || res.status !== 503) return res;
-    lastRes = res;
-    if (attempt < MAX_ATTEMPTS) await sleep(1000 * 2 ** (attempt - 1));
-  }
-  return lastRes!;
-}
-
 export async function translateArticleToEnglish(input: ArticleTranslationInput): Promise<ArticleTranslationOutput> {
-  const apiKey = process.env.GEMINI_API_KEY;
-  if (!apiKey) {
-    throw new Error("Tradução automática não está configurada (GEMINI_API_KEY ausente).");
-  }
-
-  const res = await callGemini(
-    apiKey,
-    JSON.stringify({
-      contents: [{ parts: [{ text: buildPrompt(input) }] }],
-      generationConfig: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: "OBJECT",
-          properties: {
-            title_en: { type: "STRING" },
-            excerpt_en: { type: "STRING" },
-            summary_en: { type: "STRING" },
-            content_en: { type: "STRING" },
-          },
-          required: ["title_en", "excerpt_en", "summary_en", "content_en"],
-        },
+  const parsed = await callGeminiJson<ArticleTranslationOutput>(
+    buildPrompt(input),
+    {
+      type: "OBJECT",
+      properties: {
+        title_en: { type: "STRING" },
+        excerpt_en: { type: "STRING" },
+        summary_en: { type: "STRING" },
+        content_en: { type: "STRING" },
       },
-    })
+      required: ["title_en", "excerpt_en", "summary_en", "content_en"],
+    },
+    "Tradução automática"
   );
-
-  if (!res.ok) {
-    const errText = await res.text();
-    console.error("Gemini translation request failed:", res.status, errText);
-    throw new Error(
-      res.status === 503
-        ? "O serviço de tradução está sobrecarregado no momento. Tente de novo em alguns instantes."
-        : "Falha ao chamar o serviço de tradução. Tente novamente."
-    );
-  }
-
-  const data = await res.json();
-  const text = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-  if (!text) {
-    console.error("Gemini translation returned no text:", JSON.stringify(data).slice(0, 500));
-    throw new Error("O serviço de tradução não retornou nenhum conteúdo.");
-  }
-
-  let parsed: ArticleTranslationOutput;
-  try {
-    parsed = JSON.parse(text);
-  } catch (err) {
-    console.error("Gemini translation returned invalid JSON:", text.slice(0, 500), err);
-    throw new Error("A tradução veio em um formato inesperado. Tente novamente.");
-  }
 
   if (!parsed.title_en || !parsed.content_en) {
     throw new Error("A tradução veio incompleta. Tente novamente.");
