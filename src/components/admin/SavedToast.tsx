@@ -1,24 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { CheckCircle2 } from "lucide-react";
 
 export function SavedToast({ show }: { show: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
-  const [visible, setVisible] = useState(false);
 
+  // The toast's visibility is just `show` directly — no separate local
+  // state to keep in sync with it. The previous version stripped "?saved=1"
+  // from the URL immediately, which flipped `show` back to false well
+  // before the 3s mark; a cleanup tied to that dependency change ended up
+  // cancelling the still-pending dismiss timer before it ever fired, so the
+  // toast never actually disappeared. Deferring the URL cleanup until AFTER
+  // the delay — rather than tracking visibility as its own state — means
+  // there's no premature transition for a cleanup to race against.
   useEffect(() => {
     if (!show) return;
-    setVisible(true);
-    router.replace(pathname, { scroll: false });
-    const timer = setTimeout(() => setVisible(false), 3000);
+    const timer = setTimeout(() => router.replace(pathname, { scroll: false }), 3000);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show]);
 
-  if (!visible) return null;
+  if (!show) return null;
 
   return (
     <div
