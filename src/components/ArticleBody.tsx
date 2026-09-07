@@ -101,10 +101,16 @@ export function ArticleBody({
           </figure>
         )}
 
-        {summary && expanded && (
-          <p style={{ fontSize: "1.0625rem", lineHeight: 1.75, color: "var(--site-text)", whiteSpace: "pre-line", margin: "0 0 1.5rem" }}>
-            {summary}
-          </p>
+        {summary && (
+          <div className={`summary-box${expanded ? " summary-box-expanded" : ""}`}>
+            <div className="summary-box-clip">
+              <div className="summary-box-content">
+                <p style={{ fontSize: "1.0625rem", lineHeight: 1.75, color: "var(--site-text)", whiteSpace: "pre-line", margin: 0 }}>
+                  {summary}
+                </p>
+              </div>
+            </div>
+          </div>
         )}
 
         <div
@@ -118,6 +124,32 @@ export function ArticleBody({
       <style>{`
         @media (max-width: 640px) {
           .article-cover-figure { float: none !important; width: 100% !important; margin-left: 0 !important; }
+        }
+        /* Animates from 0 to its natural content height with no JS height
+           measuring: a single-row grid with height:auto on the container
+           resolves 1fr against the row's max-content size, so "0fr -> 1fr"
+           genuinely tweens 0 -> auto. The overflow:hidden wrapper just below
+           clips the content while the row is shorter than it. */
+        .summary-box {
+          display: grid;
+          grid-template-rows: 0fr;
+          opacity: 0;
+          transition: grid-template-rows 0.35s ease, opacity 0.25s ease;
+        }
+        .summary-box-expanded {
+          grid-template-rows: 1fr;
+          opacity: 1;
+        }
+        .summary-box-clip {
+          overflow: hidden;
+          min-height: 0;
+        }
+        .summary-box-content {
+          background-color: rgba(67, 97, 238, 0.07);
+          border-left: 4px solid #4361EE;
+          border-radius: 0 0.625rem 0.625rem 0;
+          padding: 1.25rem 1.5rem;
+          margin-bottom: 1.5rem;
         }
       `}</style>
     </>
