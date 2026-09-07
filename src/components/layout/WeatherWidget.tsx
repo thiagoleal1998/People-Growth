@@ -79,13 +79,20 @@ export function WeatherWidget({ cityName, lat, lon }: { cityName: string; lat: n
     const timer = setTimeout(applyFallbackLocation, GEOLOCATION_TIMEOUT_MS);
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
+      (position) => {
         if (settled) return;
         settled = true;
         clearTimeout(timer);
         const { latitude, longitude } = position.coords;
-        const detectedCity = await reverseGeocode(latitude, longitude);
-        setLocation({ cityName: detectedCity ?? cityName, lat: latitude, lon: longitude });
+        // Set the coordinates right away (with the admin-configured city as
+        // a placeholder label) so the forecast fetch — the one thing that
+        // actually gates showing anything at all — starts immediately,
+        // instead of waiting on reverse-geocoding first. The real city name
+        // swaps in a moment later, in parallel, once it resolves.
+        setLocation({ cityName, lat: latitude, lon: longitude });
+        reverseGeocode(latitude, longitude).then((detectedCity) => {
+          if (detectedCity) setLocation((prev) => (prev ? { ...prev, cityName: detectedCity } : prev));
+        });
       },
       (err) => {
         console.error(`[WeatherWidget] geolocation failed: ${GEOLOCATION_ERROR_NAMES[err.code] ?? err.code} — ${err.message}`);
@@ -131,7 +138,12 @@ export function WeatherWidget({ cityName, lat, lon }: { cityName: string; lat: n
       cancelled = true;
       clearInterval(interval);
     };
-  }, [location]);
+    // Deliberately keyed on lat/lon, not the whole `location` object — its
+    // cityName updates a moment later once reverse-geocoding resolves,
+    // which must not re-trigger this fetch for coordinates that haven't
+    // actually changed.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location?.lat, location?.lon]);
 
   // Geolocation alone can take up to GEOLOCATION_TIMEOUT_MS (plus whatever
   // the browser's own permission prompt takes) before anything shows here —
