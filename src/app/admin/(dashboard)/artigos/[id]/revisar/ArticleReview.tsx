@@ -10,7 +10,7 @@ import { publishArticle, approveAndSchedule, requestChanges } from "../../action
 import type { Article, Author, Category } from "@/types/database.types";
 
 type Annotation = { id: string; quote: string; note: string };
-type Popover = { x: number; y: number; quote: string; range: Range };
+type Popover = { id: string; x: number; y: number; quote: string };
 
 const cardStyle: React.CSSProperties = {
   backgroundColor: "var(--admin-surface)",
@@ -32,6 +32,18 @@ export function ArticleReview({ article, author, category }: { article: Article;
   const [noteText, setNoteText] = useState("");
   const [pending, startTransition] = useTransition();
 
+  // Removes a <mark> previously inserted by surroundContents while keeping
+  // its text in place — used both for a cancelled (never confirmed)
+  // selection and for an annotation the admin later deletes from the list.
+  function unwrapMark(id: string) {
+    const mark = containerRef.current?.querySelector<HTMLElement>(`mark[data-annotation-id="${id}"]`);
+    if (!mark || !mark.parentNode) return;
+    const parent = mark.parentNode;
+    while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
+    parent.removeChild(mark);
+    parent.normalize();
+  }
+
   function handleMouseUp() {
     const selection = window.getSelection();
     if (!selection || selection.isCollapsed || !containerRef.current) return;
@@ -39,31 +51,46 @@ export function ArticleReview({ article, author, category }: { article: Article;
     if (!text) return;
     const range = selection.getRangeAt(0);
     if (!containerRef.current.contains(range.commonAncestorContainer)) return;
+    // A previous selection whose popover was left open without being
+    // confirmed shouldn't stay highlighted once a new one is made.
+    if (popover) unwrapMark(popover.id);
     const rect = range.getBoundingClientRect();
-    setPopover({ x: rect.left + rect.width / 2, y: rect.bottom + 8, quote: text, range: range.cloneRange() });
+    const id = crypto.randomUUID();
+    // Highlight immediately, before the note is even typed — otherwise the
+    // native browser selection (the only thing marking which text was
+    // picked) disappears the moment focus moves into the popover's
+    // textarea, and there's no way to tell what's being commented on.
+    // surroundContents throws if the selection crosses element boundaries
+    // (e.g. spans two paragraphs); the annotation is still recorded either
+    // way, just without the highlight in that case.
+    try {
+      const mark = document.createElement("mark");
+      mark.dataset.annotationId = id;
+      mark.style.backgroundColor = "rgba(255,183,3,0.45)";
+      mark.style.borderRadius = "0.2rem";
+      mark.style.boxShadow = "0 0 0 2px rgba(255,183,3,0.45)";
+      range.surroundContents(mark);
+    } catch {
+      // selection spanned multiple elements — skip the highlight, keep the note
+    }
+    window.getSelection()?.removeAllRanges();
+    setPopover({ id, x: rect.left + rect.width / 2, y: rect.bottom + 8, quote: text });
     setNoteText("");
   }
 
   function addAnnotation() {
     if (!popover || !noteText.trim()) return;
-    // Best-effort visual highlight — surroundContents throws if the
-    // selection crosses element boundaries (e.g. spans two paragraphs),
-    // which is common enough that the annotation still needs to be
-    // recorded either way, just without the highlight in that case.
-    try {
-      const mark = document.createElement("mark");
-      mark.style.backgroundColor = "rgba(255,183,3,0.35)";
-      mark.style.borderRadius = "0.2rem";
-      popover.range.surroundContents(mark);
-    } catch {
-      // selection spanned multiple elements — skip the highlight, keep the note
-    }
-    setAnnotations((prev) => [...prev, { id: crypto.randomUUID(), quote: popover.quote, note: noteText.trim() }]);
+    setAnnotations((prev) => [...prev, { id: popover.id, quote: popover.quote, note: noteText.trim() }]);
     setPopover(null);
-    window.getSelection()?.removeAllRanges();
+  }
+
+  function cancelPopover() {
+    if (popover) unwrapMark(popover.id);
+    setPopover(null);
   }
 
   function removeAnnotation(id: string) {
+    unwrapMark(id);
     setAnnotations((prev) => prev.filter((a) => a.id !== id));
   }
 
@@ -259,7 +286,7 @@ export function ArticleReview({ article, author, category }: { article: Article;
           <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.5rem", marginTop: "0.5rem" }}>
             <button
               type="button"
-              onClick={() => setPopover(null)}
+              onClick={cancelPopover}
               style={{ padding: "0.375rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", background: "none", color: "var(--admin-text)", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer" }}
             >
               Cancelar

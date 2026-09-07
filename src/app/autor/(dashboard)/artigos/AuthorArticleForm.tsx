@@ -31,6 +31,21 @@ const statusDisplay: Record<Article["status"], { label: string; tone: "success" 
   published: { label: "Publicado", tone: "success" },
 };
 
+// requestChanges (admin side) joins each annotation as "Trecho: "quote"\n→ note"
+// blocks separated by a blank line — parsed back here so the author sees the
+// exact passage the admin highlighted, not just a wall of text. Feedback saved
+// before this format existed (plain free text) falls through with no matches
+// and is shown as-is by the caller.
+function parseFeedbackBlocks(feedback: string): { quote: string; note: string }[] {
+  return feedback
+    .split(/\n\n+/)
+    .map((block) => {
+      const match = block.match(/^Trecho: "([\s\S]*)"\n→ ([\s\S]*)$/);
+      return match ? { quote: match[1], note: match[2] } : null;
+    })
+    .filter((b): b is { quote: string; note: string } => b !== null);
+}
+
 function slugifyPreview(text: string): string {
   return text
     .trim()
@@ -152,8 +167,36 @@ export function AuthorArticleForm({ item, categories, imageError, saveError, sav
             marginBottom: "1.5rem",
           }}
         >
-          <div style={{ fontWeight: 700, color: "#b91c1c", fontSize: "0.875rem", marginBottom: "0.375rem" }}>Alterações solicitadas pelo admin</div>
-          <p style={{ margin: 0, color: "var(--admin-text)", fontSize: "0.875rem", lineHeight: 1.6, whiteSpace: "pre-line" }}>{item.review_feedback}</p>
+          <div style={{ fontWeight: 700, color: "#b91c1c", fontSize: "0.875rem", marginBottom: "0.625rem" }}>Alterações solicitadas pelo admin</div>
+          {(() => {
+            const blocks = parseFeedbackBlocks(item.review_feedback);
+            if (blocks.length === 0) {
+              return <p style={{ margin: 0, color: "var(--admin-text)", fontSize: "0.875rem", lineHeight: 1.6, whiteSpace: "pre-line" }}>{item.review_feedback}</p>;
+            }
+            return (
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                {blocks.map((b, i) => (
+                  <div key={i}>
+                    <p
+                      style={{
+                        margin: "0 0 0.25rem",
+                        fontSize: "0.8125rem",
+                        fontStyle: "italic",
+                        color: "var(--admin-text)",
+                        backgroundColor: "rgba(255,183,3,0.3)",
+                        borderRadius: "0.25rem",
+                        padding: "0.25rem 0.5rem",
+                        display: "inline-block",
+                      }}
+                    >
+                      &ldquo;{b.quote}&rdquo;
+                    </p>
+                    <p style={{ margin: 0, color: "var(--admin-text)", fontSize: "0.875rem", lineHeight: 1.5 }}>{b.note}</p>
+                  </div>
+                ))}
+              </div>
+            );
+          })()}
         </div>
       )}
 
