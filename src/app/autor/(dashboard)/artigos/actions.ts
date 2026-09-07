@@ -7,6 +7,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { uploadPublicImage } from "@/lib/supabase/storage";
 import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
+import { calculateReadTime } from "@/lib/markdown-lite";
 import type { Article } from "@/types/database.types";
 
 // Authors have no RLS permission to insert into `notifications` at all —
@@ -76,13 +77,15 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
   // intent === "draft" (or anything else): stays draft, keeping whatever
   // date was already set so a draft-in-progress doesn't lose a planned date.
 
+  // Normalize any "\r\n" that might still slip through — the markdown-lite
+  // renderer's paragraph/list/quote splitting only recognizes plain "\n\n".
+  const contentPt = String(formData.get("content_pt") ?? "").replace(/\r\n?/g, "\n");
+
   const payload = {
     title_pt,
     title_en: String(formData.get("title_en") ?? "") || null,
     slug: slugInput || slugify(title_pt, { lower: true, strict: true }),
-    // Normalize any "\r\n" that might still slip through — the markdown-lite
-    // renderer's paragraph/list/quote splitting only recognizes plain "\n\n".
-    content_pt: String(formData.get("content_pt") ?? "").replace(/\r\n?/g, "\n"),
+    content_pt: contentPt,
     content_en: String(formData.get("content_en") ?? "").replace(/\r\n?/g, "\n") || null,
     excerpt_pt: String(formData.get("excerpt_pt") ?? "") || null,
     excerpt_en: String(formData.get("excerpt_en") ?? "") || null,
@@ -95,6 +98,7 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
     category_id: String(formData.get("category_id") ?? "") || null,
     seo_title_pt: String(formData.get("seo_title_pt") ?? "") || null,
     seo_desc_pt: String(formData.get("seo_desc_pt") ?? "") || null,
+    read_time: calculateReadTime(contentPt),
     format,
     status,
     scheduled_for: scheduledFor,

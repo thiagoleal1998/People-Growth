@@ -136,3 +136,12 @@ export function stripMarkdownLite(text: string): string {
     .replace(/\n/g, " ")
     .trim();
 }
+
+// There's no UI field for this — it's always derived from the word count,
+// at a standard 200 words/minute silent-reading pace, same as most
+// newsrooms' CMSs use. Every save must recompute it (never carry over the
+// old value) since the content itself may have changed.
+export function calculateReadTime(content: string): number {
+  const wordCount = stripMarkdownLite(content).split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(wordCount / 200));
+}

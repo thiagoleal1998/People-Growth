@@ -7,6 +7,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { uploadPublicImage } from "@/lib/supabase/storage";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
+import { calculateReadTime } from "@/lib/markdown-lite";
 import type { Article } from "@/types/database.types";
 
 // Shared by publishArticle/approveAndSchedule/requestChanges — resolves
@@ -60,13 +61,15 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
   const format = (String(formData.get("format") ?? "noticia")) as Article["format"];
   const scheduledFor = String(formData.get("scheduled_for") ?? "").trim() || null;
 
+  // Normalize any "\r\n" that might still slip through — the markdown-lite
+  // renderer's paragraph/list/quote splitting only recognizes plain "\n\n".
+  const contentPt = String(formData.get("content_pt") ?? "").replace(/\r\n?/g, "\n");
+
   const payload: Omit<Article, "id" | "created_at" | "updated_at" | "views"> = {
     title_pt,
     title_en: String(formData.get("title_en") ?? "") || null,
     slug: slugInput || slugify(title_pt, { lower: true, strict: true }),
-    // Normalize any "\r\n" that might still slip through — the markdown-lite
-    // renderer's paragraph/list/quote splitting only recognizes plain "\n\n".
-    content_pt: String(formData.get("content_pt") ?? "").replace(/\r\n?/g, "\n"),
+    content_pt: contentPt,
     content_en: String(formData.get("content_en") ?? "").replace(/\r\n?/g, "\n") || null,
     excerpt_pt: String(formData.get("excerpt_pt") ?? "") || null,
     excerpt_en: String(formData.get("excerpt_en") ?? "") || null,
@@ -82,7 +85,7 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     published_at: status === "published" ? new Date().toISOString() : null,
     scheduled_for: scheduledFor,
     author_id: authorId || null,
-    read_time: null,
+    read_time: calculateReadTime(contentPt),
     seo_title_pt: String(formData.get("seo_title_pt") ?? "") || null,
     seo_title_en: String(formData.get("seo_title_en") ?? "") || null,
     seo_desc_pt: String(formData.get("seo_desc_pt") ?? "") || null,
