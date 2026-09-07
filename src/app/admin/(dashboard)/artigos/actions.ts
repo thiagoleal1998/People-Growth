@@ -9,6 +9,21 @@ import { getCurrentProfile } from "@/lib/auth/profile";
 import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
 import type { Article } from "@/types/database.types";
 
+// Shared by publishArticle/approveAndSchedule/requestChanges — resolves
+// which login is linked to an author (user_profiles' own RLS only allows
+// reading your own row, hence the admin client) and drops a notification
+// in their bell.
+async function notifyAuthor(authorId: string | null, notification: { title: string; body?: string; link: string }) {
+  if (!authorId) return;
+  const admin = await createAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: authorProfile } = await (admin as any).from("user_profiles").select("id").eq("author_id", authorId).single();
+  if (!authorProfile) return;
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase as any).from("notifications").insert({ user_id: authorProfile.id, ...notification });
+}
+
 export async function upsertArticle(id: string | null, formData: FormData) {
   let articleIdForErrorRedirect = id;
   try {
@@ -136,11 +151,15 @@ export async function publishArticle(id: string) {
   const profile = await getCurrentProfile();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const { data: article } = await client.from("articles").select("title_pt").eq("id", id).single();
+  const { data: article } = await client.from("articles").select("title_pt, author_id").eq("id", id).single();
   await client.from("articles").update({ status: "published", published_at: new Date().toISOString() }).eq("id", id);
   if (profile) {
     await logActivity({ userId: profile.id, userEmail: profile.email, action: "publish", entityType: "artigo", entityLabel: article?.title_pt });
   }
+  await notifyAuthor(article?.author_id ?? null, {
+    title: `"${article?.title_pt}" foi publicado`,
+    link: `/autor/artigos/${id}`,
+  });
   revalidatePath("/admin/artigos");
   revalidatePath("/[locale]", "page");
 }
@@ -150,12 +169,17 @@ export async function approveAndSchedule(id: string) {
   const profile = await getCurrentProfile();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const { data: article } = await client.from("articles").select("title_pt, scheduled_for").eq("id", id).single();
+  const { data: article } = await client.from("articles").select("title_pt, author_id, scheduled_for").eq("id", id).single();
   if (!article?.scheduled_for) return;
   await client.from("articles").update({ status: "scheduled" }).eq("id", id);
   if (profile) {
     await logActivity({ userId: profile.id, userEmail: profile.email, action: "publish", entityType: "artigo", entityLabel: `${article.title_pt} (agendado)` });
   }
+  await notifyAuthor(article.author_id, {
+    title: `"${article.title_pt}" foi aprovado e agendado`,
+    body: `Vai ao ar em ${new Date(article.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}.`,
+    link: `/autor/artigos/${id}`,
+  });
   revalidatePath("/admin/artigos");
   revalidatePath(`/admin/artigos/${id}`);
 }
@@ -176,23 +200,24 @@ export async function requestChanges(id: string, feedback: string) {
 
   await client.from("articles").update({ status: "draft", review_feedback: feedback }).eq("id", id);
 
-  if (article.author_id) {
-    // user_profiles' own RLS only allows reading your own row — need the
-    // admin client to resolve which login is linked to this author.
-    const admin = await createAdminClient();
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: authorProfile } = await (admin as any).from("user_profiles").select("id").eq("author_id", article.author_id).single();
-    if (authorProfile) {
-      await client.from("notifications").insert({
-        user_id: authorProfile.id,
-        title: `Alterações solicitadas em "${article.title_pt}"`,
-        body: feedback,
-        link: `/autor/artigos/${id}`,
-      });
-    }
-  }
+  await notifyAuthor(article.author_id, {
+    title: `Alterações solicitadas em "${article.title_pt}"`,
+    body: feedback,
+    link: `/autor/artigos/${id}`,
+  });
 
-  await logActivity({ userId: profile.id, userEmail: profile.email, action: "update", entityType: "artigo", entityLabel: `${article.title_pt} (alterações solicitadas)` });
+  // The article's own review_feedback column only ever holds the CURRENT
+  // note — it's nulled out once the author acts on it (see upsertOwnArticle
+  // /upsertArticle). Passing it as a field change here is what actually
+  // preserves the full text in "Relatório de atividade" once that happens.
+  await logActivity({
+    userId: profile.id,
+    userEmail: profile.email,
+    action: "update",
+    entityType: "artigo",
+    entityLabel: `${article.title_pt} (alterações solicitadas)`,
+    details: [{ field: "Alterações solicitadas", before: "", after: feedback }],
+  });
 
   revalidatePath("/admin/artigos");
   revalidatePath(`/admin/artigos/${id}`);
