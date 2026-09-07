@@ -3,11 +3,25 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { uploadPublicImage } from "@/lib/supabase/storage";
 import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
 import type { Article } from "@/types/database.types";
+
+// Authors have no RLS permission to insert into `notifications` at all —
+// only "Admins can create notifications for anyone" exists (migration 038)
+// — so this has to run entirely on the service-role client, both to list
+// who the admins are (user_profiles RLS also only allows reading your own
+// row) and to write the rows.
+async function notifyAdmins(notification: { title: string; body?: string; link: string }) {
+  const admin = await createAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: admins } = await (admin as any).from("user_profiles").select("id").eq("role", "admin");
+  if (!admins || admins.length === 0) return;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (admin as any).from("notifications").insert(admins.map((a: { id: string }) => ({ user_id: a.id, ...notification })));
+}
 
 export async function upsertOwnArticle(id: string | null, formData: FormData) {
   try {
@@ -129,7 +143,22 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
     details: diffFields(oldArticle, payload, ARTICLE_TRACKED_FIELDS),
   });
 
+  // Only notify on the transition INTO pending — not every draft save, and
+  // not again if it was already sitting in pending (e.g. re-saving without
+  // changing the action taken).
+  const wasPending = oldArticle?.status === "pending";
+  if (status === "pending" && !wasPending) {
+    const cameFromChangesRequested = Boolean(oldArticle?.review_feedback);
+    await notifyAdmins({
+      title: cameFromChangesRequested
+        ? `"${title_pt}" foi revisado e reenviado para aprovação`
+        : `"${title_pt}" foi enviado para aprovação`,
+      link: `/admin/artigos/${articleId}/revisar`,
+    });
+  }
+
   revalidatePath("/autor");
+  revalidatePath("/admin/artigos");
 
   if (imageError && articleId) {
     redirect(`/autor/artigos/${articleId}?imageError=${encodeURIComponent(imageError)}`);
