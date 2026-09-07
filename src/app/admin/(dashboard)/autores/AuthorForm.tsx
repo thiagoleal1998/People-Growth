@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
 import { Field, Input, Textarea, Select, SubmitButton, FieldGrid } from "@/components/admin/ui";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
+import { ImageCropper } from "@/components/admin/ImageCropper";
 import { upsertAuthor } from "./actions";
 import type { Author } from "@/types/database.types";
 
@@ -42,6 +43,26 @@ type TabId = (typeof tabs)[number]["id"];
 export function AuthorForm({ item, imageError }: { item?: Author; imageError?: string }) {
   const action = upsertAuthor.bind(null, item?.id ?? null);
   const [active, setActive] = useState<TabId>("perfil");
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [croppedPreview, setCroppedPreview] = useState<string | null>(null);
+  const submitFileRef = useRef<HTMLInputElement>(null);
+
+  function handlePicked(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (file) setPendingFile(file);
+  }
+
+  function handleCropConfirm(cropped: File) {
+    const dt = new DataTransfer();
+    dt.items.add(cropped);
+    if (submitFileRef.current) submitFileRef.current.files = dt.files;
+    setCroppedPreview((prev) => {
+      if (prev) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(cropped);
+    });
+    setPendingFile(null);
+  }
 
   return (
     <div style={{ maxWidth: "900px" }}>
@@ -103,20 +124,31 @@ export function AuthorForm({ item, imageError }: { item?: Author; imageError?: s
             </FieldGrid>
             <Field
               label="Foto"
-              hint='Envie um arquivo (recomendado) — links copiados de redes sociais como Instagram costumam expirar depois de um tempo e a foto some sozinha. PNG, JPG ou WEBP, convertida automaticamente para WebP.'
+              hint='Envie um arquivo (recomendado) — links copiados de redes sociais como Instagram costumam expirar depois de um tempo e a foto some sozinha. Depois de escolher o arquivo, você pode ajustar o posicionamento e o zoom antes de salvar. PNG, JPG ou WEBP, convertida automaticamente para WebP.'
             >
-              {item?.photo_url && (
+              {(croppedPreview ?? item?.photo_url) && (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
-                  src={item.photo_url}
+                  src={croppedPreview ?? item?.photo_url ?? undefined}
                   alt="Foto atual"
                   style={{ width: "4rem", height: "4rem", borderRadius: "50%", objectFit: "cover", display: "block", marginBottom: "0.625rem", border: "1px solid var(--admin-border)" }}
                 />
               )}
-              <input className="admin-file-input" type="file" name="photo_file" accept="image/png,image/jpeg,image/webp" />
+              {/* This is the file the form actually submits — its contents are
+                  set programmatically from the cropped result, never picked
+                  directly by the browser's file dialog. */}
+              <input ref={submitFileRef} type="file" name="photo_file" accept="image/png,image/jpeg,image/webp" style={{ display: "none" }} />
+              <input className="admin-file-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={handlePicked} />
               <input type="hidden" name="current_photo_url" value={item?.photo_url ?? ""} />
               <ErrorBanner message={imageError} />
             </Field>
+            {pendingFile && (
+              <ImageCropper
+                file={pendingFile}
+                onCancel={() => setPendingFile(null)}
+                onConfirm={handleCropConfirm}
+              />
+            )}
             <Field label="...ou URL da foto" hint="Alternativa ao envio de arquivo acima — use apenas um link estável (não expira), não um link temporário de rede social.">
               <Input name="photo_url" placeholder="https://..." />
             </Field>

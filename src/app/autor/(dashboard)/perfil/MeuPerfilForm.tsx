@@ -1,33 +1,45 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { Linkedin, Instagram, Award } from "lucide-react";
 import { Field, Input, Textarea, SubmitButton } from "@/components/admin/ui";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
+import { ImageCropper } from "@/components/admin/ImageCropper";
 import { parseMilestones } from "@/lib/founder-data";
 import { updateOwnAuthorProfile } from "./actions";
 import type { Author } from "@/types/database.types";
 
 export function MeuPerfilForm({ author, photoError }: { author: Author | null; photoError?: string }) {
   const [photoPreview, setPhotoPreview] = useState<string | null>(author?.photo_url ?? null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [taglinePt, setTaglinePt] = useState(author?.tagline_pt ?? "");
   const [bioPt, setBioPt] = useState(author?.bio_pt ?? "");
   const [milestonesPt, setMilestonesPt] = useState(author?.milestones_pt ?? "");
   const taglineRemaining = 80 - taglinePt.length;
   const milestones = parseMilestones(milestonesPt);
+  const submitFileRef = useRef<HTMLInputElement>(null);
 
-  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handlePhotoPicked(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = () => setPhotoPreview(reader.result as string);
-    reader.readAsDataURL(file);
+    e.target.value = "";
+    if (file) setPendingFile(file);
+  }
+
+  function handleCropConfirm(cropped: File) {
+    const dt = new DataTransfer();
+    dt.items.add(cropped);
+    if (submitFileRef.current) submitFileRef.current.files = dt.files;
+    setPhotoPreview((prev) => {
+      if (prev && prev.startsWith("blob:")) URL.revokeObjectURL(prev);
+      return URL.createObjectURL(cropped);
+    });
+    setPendingFile(null);
   }
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "1.5rem", alignItems: "start" }} className="perfil-grid">
       <form action={updateOwnAuthorProfile} style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid #eef1f4", padding: "1.75rem" }}>
-        <Field label="Foto" hint="PNG, JPG, WEBP ou GIF, até 5MB. É a foto usada na tira de colunistas da home e na sua página de perfil.">
+        <Field label="Foto" hint="PNG, JPG ou WEBP. É a foto usada na tira de colunistas da home e na sua página de perfil. Depois de escolher o arquivo, dá pra ajustar o posicionamento e o zoom antes de salvar.">
           {photoPreview && (
             // eslint-disable-next-line @next/next/no-img-element
             <img
@@ -36,9 +48,15 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
               style={{ width: "4rem", height: "4rem", borderRadius: "50%", objectFit: "cover", display: "block", marginBottom: "0.625rem" }}
             />
           )}
-          <input className="admin-file-input" type="file" name="photo_file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={handlePhotoChange} />
+          {/* The file the form actually submits — populated from the cropped
+              result, never picked directly by the browser's file dialog. */}
+          <input ref={submitFileRef} type="file" name="photo_file" accept="image/png,image/jpeg,image/webp" style={{ display: "none" }} />
+          <input className="admin-file-input" type="file" accept="image/png,image/jpeg,image/webp" onChange={handlePhotoPicked} />
           <ErrorBanner message={photoError} />
         </Field>
+        {pendingFile && (
+          <ImageCropper file={pendingFile} onCancel={() => setPendingFile(null)} onConfirm={handleCropConfirm} />
+        )}
 
         <Field
           label="Frase de destaque (PT)"
