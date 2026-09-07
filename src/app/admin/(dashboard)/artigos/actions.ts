@@ -154,6 +154,7 @@ export async function approveAndSchedule(id: string) {
     await logActivity({ userId: profile.id, userEmail: profile.email, action: "publish", entityType: "artigo", entityLabel: `${article.title_pt} (agendado)` });
   }
   revalidatePath("/admin/artigos");
+  revalidatePath(`/admin/artigos/${id}`);
 }
 
 export async function deleteArticle(id: string) {

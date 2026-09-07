@@ -1,8 +1,8 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { Eye, Languages, Sparkles, Loader2 } from "lucide-react";
+import { Eye, Languages, Sparkles, Check, Loader2 } from "lucide-react";
 import { Field, Input, Textarea, Select, SubmitButton, FieldGrid } from "@/components/admin/ui";
 import { MarkdownEditor, type MarkdownEditorHandle } from "@/components/admin/MarkdownEditor";
 import { DateTimePicker } from "@/components/admin/DateTimePicker";
@@ -10,7 +10,7 @@ import { SeoPreview } from "@/components/admin/SeoPreview";
 import { SavedToast } from "@/components/admin/SavedToast";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { alertDialog } from "@/components/admin/dialog-store";
-import { upsertArticle } from "./actions";
+import { upsertArticle, approveAndSchedule } from "./actions";
 import type { Article, Category, Author } from "@/types/database.types";
 
 const tabs = [
@@ -61,6 +61,7 @@ export function ArticleForm({
   const [categoryId, setCategoryId] = useState(item?.category_id ?? "");
   const [translating, setTranslating] = useState(false);
   const [generatingExcerpt, setGeneratingExcerpt] = useState(false);
+  const [approving, startApproving] = useTransition();
   const contentPtRef = useRef<MarkdownEditorHandle>(null);
   const contentEnRef = useRef<MarkdownEditorHandle>(null);
 
@@ -272,11 +273,16 @@ export function ArticleForm({
               <Field label="Slug" hint="Deixe em branco para gerar automaticamente">
                 <Input name="slug" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={slugifyPreview(titlePt)} />
               </Field>
-              <Field label="Status">
+              <Field
+                label="Status"
+                hint={item?.status === "pending" ? 'Para agendar a data pedida pelo autor, use o botão "Aprovar e agendar" abaixo — esse status não é escolhido aqui.' : undefined}
+              >
                 <Select name="status" defaultValue={item?.status ?? "draft"}>
                   <option value="draft">Rascunho</option>
                   <option value="pending">Pendente (aguardando revisão)</option>
-                  <option value="scheduled">Agendado (publica sozinho na data)</option>
+                  {/* "Agendado" só é alcançado aprovando um pendente (botão abaixo) — só aparece
+                      aqui quando o artigo já está nesse status, pra não sumir ao editar. */}
+                  {item?.status === "scheduled" && <option value="scheduled">Agendado (publica sozinho na data)</option>}
                   <option value="published">Publicado</option>
                 </Select>
               </Field>
@@ -302,10 +308,49 @@ export function ArticleForm({
                   ))}
                 </Select>
               </Field>
-              <Field label="Data de publicação agendada" hint='Usada quando o status acima é "Agendado" — o artigo vai ao ar sozinho a partir dessa data.'>
+              <Field
+                label="Data de publicação agendada"
+                hint={
+                  item?.status === "pending"
+                    ? "Data pedida pelo autor. Salvar aqui só atualiza a data — o artigo continua Pendente até você aprovar."
+                    : 'Usada enquanto o status é "Agendado" — o artigo vai ao ar sozinho a partir dessa data.'
+                }
+              >
                 <DateTimePicker name="scheduled_for" defaultValue={item?.scheduled_for} />
               </Field>
             </FieldGrid>
+
+            {item?.status === "pending" && item?.scheduled_for && (
+              // A plain onClick calling the server action directly — not a
+              // nested <form>, since this whole tab already sits inside the
+              // outer article-save <form> and HTML doesn't allow forms
+              // inside forms (the browser would silently break the nesting).
+              <button
+                type="button"
+                disabled={approving}
+                onClick={() => startApproving(() => approveAndSchedule(item.id))}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  marginTop: "0.5rem",
+                  backgroundColor: "rgba(217,119,6,0.1)",
+                  color: "#b45309",
+                  border: "none",
+                  padding: "0.625rem 1.125rem",
+                  borderRadius: "0.625rem",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  cursor: approving ? "default" : "pointer",
+                  opacity: approving ? 0.7 : 1,
+                }}
+              >
+                {approving ? <Loader2 size={16} className="admin-spin" /> : <Check size={16} />}
+                {approving
+                  ? "Aprovando..."
+                  : `Aprovar e agendar para ${new Date(item.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}`}
+              </button>
+            )}
             <Field label="Imagem de capa" hint="PNG, JPG ou WEBP — convertida automaticamente para WebP e comprimida para menos de 1MB.">
               {item?.cover_image && (
                 // eslint-disable-next-line @next/next/no-img-element
