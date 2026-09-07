@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
+import { Selection } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
 import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Loader2 } from "lucide-react";
 import { markdownLiteToEditorHtml, editorHtmlToMarkdownLite } from "@/lib/markdown-lite-editor";
@@ -139,6 +140,16 @@ export function MarkdownEditor({
       .focus()
       .insertContent({ type: "image", attrs: { src: url, alt: caption || null, credit: credit || null, source: source || null } })
       .run();
+    // insertContent leaves the image as a selected node (NodeSelection).
+    // Typing right after inserting — the natural next thing to do — would
+    // replace the whole image instead of adding text, since ProseMirror
+    // treats typing over a selected node as "replace it". Move the cursor
+    // to a normal text position right after it instead. Selection.near
+    // (rather than a plain TextSelection) finds the closest valid text
+    // position instead of requiring an exact one.
+    const { state, view } = editor;
+    const selection = Selection.near(state.doc.resolve(state.selection.to));
+    view.dispatch(state.tr.setSelection(selection));
   }
 
   async function promptImageCaptionAndCredit() {
@@ -253,7 +264,7 @@ export function MarkdownEditor({
         >
           <ExternalLink size={16} />
         </button>
-        <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp" onChange={handleFileChange} style={{ display: "none" }} />
+        <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={handleFileChange} style={{ display: "none" }} />
       </div>
       <div
         style={{
