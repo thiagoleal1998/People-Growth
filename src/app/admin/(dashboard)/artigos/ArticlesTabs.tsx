@@ -1,11 +1,10 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useState } from "react";
 import Link from "next/link";
-import { Edit, Eye, Check, MessageSquareWarning, Loader2 } from "lucide-react";
+import { Edit, Eye, Check, MessageSquareWarning } from "lucide-react";
 import { Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
-import { promptDialog, alertDialog } from "@/components/admin/dialog-store";
-import { deleteArticle, publishArticle, approveAndSchedule, requestChanges } from "./actions";
+import { deleteArticle, publishArticle, approveAndSchedule } from "./actions";
 import type { Article } from "@/types/database.types";
 
 const statusConfig: Record<Article["status"], { label: string; tone: "success" | "warning" | "neutral" }> = {
@@ -32,47 +31,6 @@ const tabs = [
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
-
-function RequestChangesButton({ articleId }: { articleId: string }) {
-  const [pending, startTransition] = useTransition();
-
-  async function handleClick() {
-    const feedback = await promptDialog("O que precisa mudar neste artigo? O autor vai receber essa mensagem e o artigo volta para Rascunho.");
-    if (!feedback || !feedback.trim()) return;
-    startTransition(async () => {
-      try {
-        await requestChanges(articleId, feedback);
-      } catch (err) {
-        await alertDialog(err instanceof Error ? err.message : "Erro ao solicitar alterações.");
-      }
-    });
-  }
-
-  return (
-    <button
-      type="button"
-      disabled={pending}
-      onClick={handleClick}
-      title="Ler o artigo e pedir alterações ao autor"
-      style={{
-        display: "flex",
-        alignItems: "center",
-        gap: "0.25rem",
-        padding: "0.375rem 0.5rem",
-        color: "#dc2626",
-        backgroundColor: "rgba(239,68,68,0.1)",
-        border: "none",
-        borderRadius: "0.375rem",
-        cursor: pending ? "default" : "pointer",
-        fontSize: "0.75rem",
-        fontWeight: 700,
-        opacity: pending ? 0.6 : 1,
-      }}
-    >
-      {pending ? <Loader2 size={13} className="admin-spin" /> : <MessageSquareWarning size={13} />} Solicitar alterações
-    </button>
-  );
-}
 
 export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[]; currentAuthorId: string | null }) {
   const [active, setActive] = useState<TabId>("published");
@@ -175,8 +133,17 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
                           </button>
                         </form>
                       )}
-                      {a.status === "pending" && <RequestChangesButton articleId={a.id} />}
-                      <Link href={`/admin/artigos/${a.id}/preview`} target="_blank" style={{ padding: "0.375rem", color: "var(--admin-muted)", borderRadius: "0.375rem" }} title="Ler o artigo"><Eye size={15} /></Link>
+                      {a.status === "pending" ? (
+                        <Link
+                          href={`/admin/artigos/${a.id}/revisar`}
+                          title="Ler o artigo, comentar trechos e aprovar ou pedir alterações"
+                          style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.5rem", color: "#dc2626", backgroundColor: "rgba(239,68,68,0.1)", borderRadius: "0.375rem", fontSize: "0.75rem", fontWeight: 700, textDecoration: "none" }}
+                        >
+                          <MessageSquareWarning size={13} /> Revisar
+                        </Link>
+                      ) : (
+                        <Link href={`/admin/artigos/${a.id}/preview`} target="_blank" style={{ padding: "0.375rem", color: "var(--admin-muted)", borderRadius: "0.375rem" }} title="Ler o artigo"><Eye size={15} /></Link>
+                      )}
                       <Link href={`/admin/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
                       <ConfirmDeleteButton confirmText={`Excluir o artigo "${a.title_pt}"?`} onDelete={deleteArticle.bind(null, a.id)} />
                     </div>
