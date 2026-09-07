@@ -6,7 +6,7 @@ import { Search, ChevronRight } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { articleHref } from "@/lib/article-url";
-import type { Article, Category, Tag } from "@/types/database.types";
+import type { Article, Category, Tag, Author } from "@/types/database.types";
 
 function matches(article: Article, query: string) {
   const q = query.toLowerCase();
@@ -89,6 +89,7 @@ export function ArticlesExplorer({
   articles,
   categories,
   tags,
+  authors,
   mostRead,
   searchPlaceholder,
   noResultsText,
@@ -97,6 +98,7 @@ export function ArticlesExplorer({
   articles: Article[];
   categories: Category[];
   tags: Tag[];
+  authors: Author[];
   mostRead: Article[];
   searchPlaceholder: string;
   noResultsText: string;
@@ -104,7 +106,9 @@ export function ArticlesExplorer({
 }) {
   const [query, setQuery] = useState("");
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
+  const authorById = useMemo(() => new Map(authors.map((a) => [a.id, a])), [authors]);
   const [featured, ...rest] = articles;
+  const featuredAuthor = featured?.author_id ? authorById.get(featured.author_id) : undefined;
 
   const results = useMemo(() => {
     if (!query.trim()) return null;
@@ -158,9 +162,6 @@ export function ArticlesExplorer({
                         background: featured.cover_image
                           ? `url(${featured.cover_image}) center/cover`
                           : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
                         position: "relative",
                       }}
                     >
@@ -169,12 +170,16 @@ export function ArticlesExplorer({
                         return cat ? (
                           <span
                             style={{
-                              backgroundColor: `${cat.color ?? "#4361EE"}25`,
-                              color: cat.color ?? "#4361EE",
+                              position: "absolute",
+                              top: "1rem",
+                              left: "1rem",
+                              backgroundColor: cat.color ?? "#4361EE",
+                              color: "white",
                               padding: "0.4rem 1rem",
                               borderRadius: "9999px",
                               fontSize: "0.875rem",
                               fontWeight: 700,
+                              boxShadow: "0 2px 10px rgba(0,0,0,0.35)",
                             }}
                           >
                             {cat.name_pt}
@@ -196,6 +201,7 @@ export function ArticlesExplorer({
                       )}
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <span style={{ fontSize: "0.875rem", color: "var(--site-faint)" }}>
+                          {featuredAuthor && <>Por {featuredAuthor.name} · </>}
                           {featured.published_at && new Date(featured.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                           {featured.read_time ? ` · ${featured.read_time} min de leitura` : ""}
                         </span>

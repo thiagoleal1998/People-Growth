@@ -152,6 +152,7 @@ export default async function MeaSententiePage() {
               articles={articles}
               categories={categories}
               tags={tags}
+              authors={authors}
               mostRead={mostRead}
               searchPlaceholder={t("search")}
               noResultsText={t("noResults")}
