@@ -1,5 +1,11 @@
 export function renderMarkdownLite(text: string): string {
+  // Windows-style "\r\n" line endings (possible in stored content from
+  // before the WYSIWYG editor, or from certain paste/import sources) break
+  // every "\n\n"-based paragraph/list/quote split below, since "\r" sits
+  // between the two "\n" characters they're looking for. Normalizing first
+  // makes every downstream regex CRLF-agnostic.
   let html = text
+    .replace(/\r\n?/g, "\n")
     .replace(/^### (.+)$/gm, '<h3 style="font-size:1.25rem;font-weight:800;color:var(--site-text);margin:1.75rem 0 0.875rem">$1</h3>')
     .replace(/^## (.+)$/gm, '<h2 style="font-size:1.5rem;font-weight:800;color:var(--site-text);margin:2rem 0 1rem">$1</h2>')
     // Images must run before the link regex below — "![alt](url)" contains
@@ -70,6 +76,7 @@ export function renderMarkdownLite(text: string): string {
  * strips markdown-lite syntax so the browser doesn't read symbols aloud. */
 export function stripMarkdownLite(text: string): string {
   return text
+    .replace(/\r\n?/g, "\n")
     .replace(/^>\s?—\s+.+$/gm, "")
     .replace(/^>\s?/gm, "")
     .replace(/^#{2,3}\s+/gm, "")

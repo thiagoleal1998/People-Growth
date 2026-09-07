@@ -12,7 +12,12 @@
 export function markdownLiteToEditorHtml(text: string): string {
   if (!text.trim()) return "<p></p>";
 
+  // Some stored rows still have Windows-style "\r\n" line endings (from
+  // before the WYSIWYG editor existed) — normalize before the "\n\n"-based
+  // paragraph split below, or every paragraph in that article loads as one
+  // single run since "\r" sits between the two "\n" it looks for.
   let html = text
+    .replace(/\r\n?/g, "\n")
     .replace(/^### (.+)$/gm, "<h3>$1</h3>")
     .replace(/^## (.+)$/gm, "<h2>$1</h2>")
     .replace(/!\[([^\]]*)\]\(([^)]+?)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g, (_match, alt: string, src: string, credit?: string, source?: string) => {

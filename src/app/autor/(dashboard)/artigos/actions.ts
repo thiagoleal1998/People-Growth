@@ -50,8 +50,10 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
     title_pt,
     title_en: String(formData.get("title_en") ?? "") || null,
     slug: slugInput || slugify(title_pt, { lower: true, strict: true }),
-    content_pt: String(formData.get("content_pt") ?? ""),
-    content_en: String(formData.get("content_en") ?? "") || null,
+    // Normalize any "\r\n" that might still slip through — the markdown-lite
+    // renderer's paragraph/list/quote splitting only recognizes plain "\n\n".
+    content_pt: String(formData.get("content_pt") ?? "").replace(/\r\n?/g, "\n"),
+    content_en: String(formData.get("content_en") ?? "").replace(/\r\n?/g, "\n") || null,
     excerpt_pt: String(formData.get("excerpt_pt") ?? "") || null,
     excerpt_en: String(formData.get("excerpt_en") ?? "") || null,
     summary_pt: String(formData.get("summary_pt") ?? "") || null,
