@@ -49,6 +49,23 @@ function transformPastedHTML(html: string): string {
   return doc.body.innerHTML;
 }
 
+// Plain-text clipboard data from some sources (macOS rich-text apps like
+// Notes/Pages/TextEdit, PDF text extraction, some web editors' plain-text
+// export) uses the Unicode LINE SEPARATOR (U+2028) / PARAGRAPH SEPARATOR
+// (U+2029) characters instead of "\n" for line breaks. ProseMirror's default
+// plain-text paste handling only recognizes "\r\n"/"\n" to split lines into
+// paragraphs, so text using these instead pastes as one giant unbroken
+// paragraph — the exact "everything merged into one block" symptom, just
+// via the plain-text path rather than the HTML path handled above. Built
+// with String.fromCharCode/split/join (not a regex literal) because the
+// JS parser treats a raw U+2028/U+2029 character as a source line
+// terminator, which breaks inside a /regex/ literal.
+function transformPastedText(text: string): string {
+  const PARAGRAPH_SEPARATOR = String.fromCharCode(0x2029);
+  const LINE_SEPARATOR = String.fromCharCode(0x2028);
+  return text.split(PARAGRAPH_SEPARATOR).join("\n\n").split(LINE_SEPARATOR).join("\n");
+}
+
 const toolButtonStyle = {
   display: "flex",
   alignItems: "center",
@@ -97,6 +114,7 @@ export function MarkdownEditor({
         class: "tiptap-content",
       },
       transformPastedHTML,
+      transformPastedText,
     },
   });
 
