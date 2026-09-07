@@ -1,6 +1,6 @@
 "use client";
 
-import { forwardRef, useImperativeHandle, useRef, useState } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import { Selection } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
@@ -9,6 +9,7 @@ import { markdownLiteToEditorHtml, editorHtmlToMarkdownLite } from "@/lib/markdo
 import { promptDialog, alertDialog } from "./dialog-store";
 import { ImageWithCredit } from "./tiptap-image-with-credit";
 import { VideoGif } from "./tiptap-videogif";
+import { HighlightQuotes } from "./tiptap-highlight-quotes";
 
 // Pasted rich text (Word/Docs/Notion/chat apps) carries its bold/italic/link
 // formatting as real HTML — forcing plain text on paste (an earlier attempt)
@@ -95,10 +96,10 @@ export type MarkdownEditorHandle = {
   setContent: (text: string) => void;
 };
 
-export const MarkdownEditor = forwardRef<MarkdownEditorHandle, { name: string; defaultValue: string; minHeight?: number }>(function MarkdownEditor(
-  { name, defaultValue, minHeight = 420 },
-  ref
-) {
+export const MarkdownEditor = forwardRef<
+  MarkdownEditorHandle,
+  { name: string; defaultValue: string; minHeight?: number; highlightQuotes?: string[] }
+>(function MarkdownEditor({ name, defaultValue, minHeight = 420, highlightQuotes }, ref) {
   const [serialized, setSerialized] = useState(defaultValue);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -108,6 +109,7 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, { name: string; d
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       ImageWithCredit,
       VideoGif,
+      HighlightQuotes.configure({ quotes: highlightQuotes ?? [] }),
     ],
     content: markdownLiteToEditorHtml(defaultValue),
     immediatelyRender: false,
@@ -123,6 +125,15 @@ export const MarkdownEditor = forwardRef<MarkdownEditorHandle, { name: string; d
       transformPastedText,
     },
   });
+
+  // Covers the case where `highlightQuotes` becomes known/changes after the
+  // editor already exists — the `.configure()` above only seeds its initial
+  // state, since `useEditor` doesn't re-create the editor when its config
+  // object's identity changes.
+  useEffect(() => {
+    editor?.commands.setHighlightQuotes(highlightQuotes ?? []);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, JSON.stringify(highlightQuotes ?? [])]);
 
   useImperativeHandle(
     ref,

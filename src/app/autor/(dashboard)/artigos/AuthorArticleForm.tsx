@@ -133,9 +133,21 @@ export function AuthorArticleForm({ item, categories, imageError, saveError, sav
   const categorySlug = categories.find((c) => c.id === categoryId)?.slug || "geral";
   const previewUrl = `peoplegrowth.com.br › conteudo › ${formatSegment} › categoria › ${categorySlug} › ${slug || slugifyPreview(titlePt) || "..."}`;
   const status = item?.status ?? "draft";
+  const feedbackBlocks = item?.review_feedback ? parseFeedbackBlocks(item.review_feedback) : [];
+  // The three action buttons live in the sidebar (see below) — this only
+  // changes their wording so a resubmission after requested changes reads
+  // as "reenviar", not the generic first-submission copy.
+  const isResubmission = Boolean(item?.review_feedback);
+
+  const sidebarCardStyle: React.CSSProperties = {
+    backgroundColor: "var(--admin-surface)",
+    border: "1px solid var(--admin-border)",
+    borderRadius: "1rem",
+    padding: "1.25rem",
+  };
 
   return (
-    <div style={{ maxWidth: "900px" }}>
+    <div style={{ maxWidth: "1200px" }}>
       <SavedToast show={Boolean(saved)} />
       <div style={{ marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
         <div>
@@ -157,74 +169,32 @@ export function AuthorArticleForm({ item, categories, imageError, saveError, sav
         )}
       </div>
 
-      {item?.review_feedback && (
-        <div
-          style={{
-            backgroundColor: "rgba(220,38,38,0.08)",
-            border: "1px solid rgba(220,38,38,0.3)",
-            borderRadius: "0.75rem",
-            padding: "1rem 1.25rem",
-            marginBottom: "1.5rem",
-          }}
-        >
-          <div style={{ fontWeight: 700, color: "#b91c1c", fontSize: "0.875rem", marginBottom: "0.625rem" }}>Alterações solicitadas pelo admin</div>
-          {(() => {
-            const blocks = parseFeedbackBlocks(item.review_feedback);
-            if (blocks.length === 0) {
-              return <p style={{ margin: 0, color: "var(--admin-text)", fontSize: "0.875rem", lineHeight: 1.6, whiteSpace: "pre-line" }}>{item.review_feedback}</p>;
-            }
-            return (
-              <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-                {blocks.map((b, i) => (
-                  <div key={i}>
-                    <p
-                      style={{
-                        margin: "0 0 0.25rem",
-                        fontSize: "0.8125rem",
-                        fontStyle: "italic",
-                        color: "var(--admin-text)",
-                        backgroundColor: "rgba(255,183,3,0.3)",
-                        borderRadius: "0.25rem",
-                        padding: "0.25rem 0.5rem",
-                        display: "inline-block",
-                      }}
-                    >
-                      &ldquo;{b.quote}&rdquo;
-                    </p>
-                    <p style={{ margin: 0, color: "var(--admin-text)", fontSize: "0.875rem", lineHeight: 1.5 }}>{b.note}</p>
-                  </div>
-                ))}
-              </div>
-            );
-          })()}
-        </div>
-      )}
+      <form action={action} className="author-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "1.5rem", alignItems: "start" }}>
+        <div>
+          <div style={{ display: "flex", gap: "0.25rem", borderBottom: "1px solid var(--admin-border)", marginBottom: "1.75rem" }}>
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActive(tab.id)}
+                style={{
+                  padding: "0.75rem 1.25rem",
+                  fontSize: "0.875rem",
+                  fontWeight: 700,
+                  color: active === tab.id ? "#4361EE" : "var(--admin-muted)",
+                  background: "none",
+                  border: "none",
+                  borderBottom: active === tab.id ? "2px solid #4361EE" : "2px solid transparent",
+                  cursor: "pointer",
+                  marginBottom: "-1px",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
 
-      <form action={action}>
-        <div style={{ display: "flex", gap: "0.25rem", borderBottom: "1px solid var(--admin-border)", marginBottom: "1.75rem" }}>
-          {tabs.map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setActive(tab.id)}
-              style={{
-                padding: "0.75rem 1.25rem",
-                fontSize: "0.875rem",
-                fontWeight: 700,
-                color: active === tab.id ? "#4361EE" : "var(--admin-muted)",
-                background: "none",
-                border: "none",
-                borderBottom: active === tab.id ? "2px solid #4361EE" : "2px solid transparent",
-                cursor: "pointer",
-                marginBottom: "-1px",
-              }}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
-
-        <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
+          <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
           <div style={{ display: active === "conteudo" ? "block" : "none" }}>
             <Field label="Título (PT)">
               <Input name="title_pt" value={titlePt} onChange={(e) => setTitlePt(e.target.value)} required />
@@ -277,7 +247,12 @@ export function AuthorArticleForm({ item, categories, imageError, saveError, sav
               label="Conteúdo (PT)"
               hint='Use a barra de ferramentas para negrito, itálico, sublinhado, subtítulos, listas, citação, link e imagem — ou digite direto: **negrito**, _itálico_, ++sublinhado++, [link](url), ## subtítulo, ### subtítulo pequeno, "- " para lista, "> texto" para citação (com "> — Autor" numa linha própria, opcional).'
             >
-              <MarkdownEditor ref={contentPtRef} name="content_pt" defaultValue={item?.content_pt ?? ""} />
+              <MarkdownEditor
+                ref={contentPtRef}
+                name="content_pt"
+                defaultValue={item?.content_pt ?? ""}
+                highlightQuotes={feedbackBlocks.map((b) => b.quote)}
+              />
             </Field>
 
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "1.25rem 0" }}>
@@ -373,46 +348,87 @@ export function AuthorArticleForm({ item, categories, imageError, saveError, sav
             </Field>
             <Field
               label="Data desejada de publicação"
-              hint="Usada se você escolher 'Agendar' abaixo. A aprovação de um admin pode levar até 72h — escolha a data considerando essa margem."
+              hint="Usada se você escolher 'Agendar' na barra lateral. A aprovação de um admin pode levar até 72h — escolha a data considerando essa margem."
             >
               <DateTimePicker name="scheduled_for" defaultValue={item?.scheduled_for} />
             </Field>
-
-            <Field label="Status">
-              <div>
-                <Badge tone={statusDisplay[status].tone}>{statusDisplay[status].label}</Badge>
-              </div>
-            </Field>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem", marginTop: "1.5rem", paddingTop: "1.5rem", borderTop: "1px solid var(--admin-border)" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-                <SubmitButton name="intent" value="draft" variant="secondary" pendingText="Salvando...">
-                  Manter como rascunho
-                </SubmitButton>
-                <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>Fica só com você, sem entrar na fila de aprovação.</span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-                <SubmitButton name="intent" value="schedule" variant="secondary" pendingText="Enviando...">
-                  Agendar
-                </SubmitButton>
-                <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>
-                  Será agendado para a data acima assim que um admin aprovar (até 72h).
-                </span>
-              </div>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
-                <SubmitButton name="intent" value="send" pendingText="Enviando...">
-                  Enviar para Aprovação
-                </SubmitButton>
-                <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>
-                  Será publicado automaticamente assim que um admin aprovar, sem data marcada.
-                </span>
-              </div>
-            </div>
+          </div>
           </div>
         </div>
 
-        <ErrorBanner message={saveError} label="Não foi possível salvar o artigo" />
+        <div className="author-sidebar" style={{ position: "sticky", top: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={sidebarCardStyle}>
+            <p style={{ margin: "0 0 0.5rem", fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text)" }}>Status</p>
+            <Badge tone={statusDisplay[status].tone}>{statusDisplay[status].label}</Badge>
+          </div>
+
+          {feedbackBlocks.length > 0 && (
+            <div style={{ ...sidebarCardStyle, backgroundColor: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.3)" }}>
+              <p style={{ margin: "0 0 0.75rem", fontSize: "0.8125rem", fontWeight: 700, color: "#b91c1c" }}>Alterações solicitadas pelo admin</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                {feedbackBlocks.map((b, i) => (
+                  <div key={i}>
+                    <p
+                      style={{
+                        margin: "0 0 0.25rem",
+                        fontSize: "0.8125rem",
+                        fontStyle: "italic",
+                        color: "var(--admin-text)",
+                        backgroundColor: "rgba(255,183,3,0.3)",
+                        borderRadius: "0.25rem",
+                        padding: "0.25rem 0.5rem",
+                        display: "inline-block",
+                      }}
+                    >
+                      &ldquo;{b.quote}&rdquo;
+                    </p>
+                    <p style={{ margin: 0, color: "var(--admin-text)", fontSize: "0.8125rem", lineHeight: 1.5 }}>{b.note}</p>
+                  </div>
+                ))}
+              </div>
+              <p style={{ margin: "0.875rem 0 0", fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+                Os trechos marcados também aparecem destacados no Conteúdo (PT), na aba Conteúdo.
+              </p>
+            </div>
+          )}
+
+          <div style={sidebarCardStyle}>
+            <p style={{ margin: "0 0 0.875rem", fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text)" }}>Ações</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div>
+                <SubmitButton name="intent" value="draft" variant="secondary" pendingText="Salvando...">
+                  Manter como rascunho
+                </SubmitButton>
+                <p style={{ margin: "0.375rem 0 0", fontSize: "0.75rem", color: "var(--admin-faint)" }}>Fica só com você, sem entrar na fila de aprovação.</p>
+              </div>
+              <div>
+                <SubmitButton name="intent" value="schedule" variant="secondary" pendingText="Enviando...">
+                  {isResubmission ? "Reagendar" : "Agendar"}
+                </SubmitButton>
+                <p style={{ margin: "0.375rem 0 0", fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+                  Será agendado para a data escolhida na aba Detalhes assim que um admin aprovar (até 72h).
+                </p>
+              </div>
+              <div>
+                <SubmitButton name="intent" value="send" pendingText="Enviando...">
+                  {isResubmission ? "Reenviar para aprovação" : "Enviar para Aprovação"}
+                </SubmitButton>
+                <p style={{ margin: "0.375rem 0 0", fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+                  Será publicado automaticamente assim que um admin aprovar, sem data marcada.
+                </p>
+              </div>
+            </div>
+            <ErrorBanner message={saveError} label="Não foi possível salvar o artigo" />
+          </div>
+        </div>
       </form>
+
+      <style>{`
+        @media (max-width: 900px) {
+          .author-form-grid { grid-template-columns: 1fr !important; }
+          .author-sidebar { position: static !important; order: -1; }
+        }
+      `}</style>
     </div>
   );
 }
