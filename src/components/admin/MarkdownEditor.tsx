@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { forwardRef, useImperativeHandle, useRef, useState } from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import { Selection } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
@@ -87,15 +87,18 @@ function activeStyle(active: boolean) {
     : toolButtonStyle;
 }
 
-export function MarkdownEditor({
-  name,
-  defaultValue,
-  minHeight = 420,
-}: {
-  name: string;
-  defaultValue: string;
-  minHeight?: number;
-}) {
+// Lets a parent form read the editor's current live content (e.g. before
+// it's been saved) and replace it programmatically (e.g. after a
+// translation call) — see the "Traduzir" button in ArticleForm.
+export type MarkdownEditorHandle = {
+  getContent: () => string;
+  setContent: (text: string) => void;
+};
+
+export const MarkdownEditor = forwardRef<MarkdownEditorHandle, { name: string; defaultValue: string; minHeight?: number }>(function MarkdownEditor(
+  { name, defaultValue, minHeight = 420 },
+  ref
+) {
   const [serialized, setSerialized] = useState(defaultValue);
   const [uploading, setUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -120,6 +123,18 @@ export function MarkdownEditor({
       transformPastedText,
     },
   });
+
+  useImperativeHandle(
+    ref,
+    () => ({
+      getContent: () => serialized,
+      setContent: (text: string) => {
+        editor?.commands.setContent(markdownLiteToEditorHtml(text));
+        setSerialized(text);
+      },
+    }),
+    [serialized, editor]
+  );
 
   async function insertLink(editor: Editor) {
     const previousUrl = editor.getAttributes("link").href as string | undefined;
@@ -311,4 +326,4 @@ export function MarkdownEditor({
       <input type="hidden" name={name} value={serialized} />
     </div>
   );
-}
+});

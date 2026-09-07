@@ -1,14 +1,15 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import Link from "next/link";
-import { Eye } from "lucide-react";
+import { Eye, Languages, Loader2 } from "lucide-react";
 import { Field, Input, Textarea, Select, SubmitButton, FieldGrid } from "@/components/admin/ui";
-import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
+import { MarkdownEditor, type MarkdownEditorHandle } from "@/components/admin/MarkdownEditor";
 import { DateTimePicker } from "@/components/admin/DateTimePicker";
 import { SeoPreview } from "@/components/admin/SeoPreview";
 import { SavedToast } from "@/components/admin/SavedToast";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
+import { alertDialog } from "@/components/admin/dialog-store";
 import { upsertArticle } from "./actions";
 import type { Article, Category, Author } from "@/types/database.types";
 
@@ -49,11 +50,48 @@ export function ArticleForm({
   const [active, setActive] = useState<TabId>("conteudo");
   const [titlePt, setTitlePt] = useState(item?.title_pt ?? "");
   const [excerptPt, setExcerptPt] = useState(item?.excerpt_pt ?? "");
+  const [summaryPt, setSummaryPt] = useState(item?.summary_pt ?? "");
+  const [titleEn, setTitleEn] = useState(item?.title_en ?? "");
+  const [excerptEn, setExcerptEn] = useState(item?.excerpt_en ?? "");
+  const [summaryEn, setSummaryEn] = useState(item?.summary_en ?? "");
   const [seoTitlePt, setSeoTitlePt] = useState(item?.seo_title_pt ?? "");
   const [seoDescPt, setSeoDescPt] = useState(item?.seo_desc_pt ?? "");
   const [slug, setSlug] = useState(item?.slug ?? "");
   const [format, setFormat] = useState<Article["format"]>(item?.format ?? "noticia");
   const [categoryId, setCategoryId] = useState(item?.category_id ?? "");
+  const [translating, setTranslating] = useState(false);
+  const contentPtRef = useRef<MarkdownEditorHandle>(null);
+  const contentEnRef = useRef<MarkdownEditorHandle>(null);
+
+  async function handleTranslate() {
+    if (!titlePt.trim() && !contentPtRef.current?.getContent().trim()) {
+      await alertDialog("Preencha o título ou o conteúdo em português antes de traduzir.");
+      return;
+    }
+    setTranslating(true);
+    try {
+      const res = await fetch("/api/admin/translate-article", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title_pt: titlePt,
+          excerpt_pt: excerptPt,
+          summary_pt: summaryPt,
+          content_pt: contentPtRef.current?.getContent() ?? "",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Falha ao traduzir o artigo.");
+      setTitleEn(data.title_en);
+      setExcerptEn(data.excerpt_en);
+      setSummaryEn(data.summary_en);
+      contentEnRef.current?.setContent(data.content_en);
+    } catch (err) {
+      await alertDialog(err instanceof Error ? err.message : "Erro ao traduzir o artigo.");
+    } finally {
+      setTranslating(false);
+    }
+  }
 
   const formatSegment = format === "opiniao" ? "mea-sententia" : "noticia";
   const categorySlug = categories.find((c) => c.id === categoryId)?.slug || "geral";
@@ -112,22 +150,22 @@ export function ArticleForm({
               <Input name="title_pt" value={titlePt} onChange={(e) => setTitlePt(e.target.value)} required />
             </Field>
             <Field label="Título (EN)">
-              <Input name="title_en" defaultValue={item?.title_en ?? ""} />
+              <Input name="title_en" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} />
             </Field>
             <FieldGrid>
               <Field label="Linha fina / subtítulo (PT)" hint="Aparece nas listagens, cards de artigos e como descrição em buscadores — não é o Resumo em destaque abaixo.">
                 <Textarea name="excerpt_pt" rows={2} value={excerptPt} onChange={(e) => setExcerptPt(e.target.value)} />
               </Field>
               <Field label="Linha fina / subtítulo (EN)">
-                <Textarea name="excerpt_en" rows={2} defaultValue={item?.excerpt_en ?? ""} />
+                <Textarea name="excerpt_en" rows={2} value={excerptEn} onChange={(e) => setExcerptEn(e.target.value)} />
               </Field>
             </FieldGrid>
             <FieldGrid>
               <Field label="Resumo em destaque (PT)" hint='Opcional. Aparece numa caixa "Resumo" expansível, no início do artigo. Deixe em branco para não mostrar essa caixa.'>
-                <Textarea name="summary_pt" rows={3} defaultValue={item?.summary_pt ?? ""} />
+                <Textarea name="summary_pt" rows={3} value={summaryPt} onChange={(e) => setSummaryPt(e.target.value)} />
               </Field>
               <Field label="Resumo em destaque (EN)">
-                <Textarea name="summary_en" rows={3} defaultValue={item?.summary_en ?? ""} />
+                <Textarea name="summary_en" rows={3} value={summaryEn} onChange={(e) => setSummaryEn(e.target.value)} />
               </Field>
             </FieldGrid>
 
@@ -135,10 +173,39 @@ export function ArticleForm({
               label="Conteúdo (PT)"
               hint='Use a barra de ferramentas para negrito, itálico, sublinhado, subtítulos, listas, citação, link e imagem — ou digite direto: **negrito**, _itálico_, ++sublinhado++, [link](url), ## subtítulo, ### subtítulo pequeno, "- " para lista, "> texto" para citação (com "> — Autor" numa linha própria, opcional).'
             >
-              <MarkdownEditor name="content_pt" defaultValue={item?.content_pt ?? ""} />
+              <MarkdownEditor ref={contentPtRef} name="content_pt" defaultValue={item?.content_pt ?? ""} />
             </Field>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "1.25rem 0" }}>
+              <button
+                type="button"
+                onClick={handleTranslate}
+                disabled={translating}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  backgroundColor: "var(--admin-surface-alt)",
+                  border: "1px solid var(--admin-border-strong)",
+                  color: "var(--admin-text)",
+                  padding: "0.625rem 1.125rem",
+                  borderRadius: "0.625rem",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  cursor: translating ? "default" : "pointer",
+                  opacity: translating ? 0.7 : 1,
+                }}
+              >
+                {translating ? <Loader2 size={16} className="admin-spin" /> : <Languages size={16} />}
+                {translating ? "Traduzindo..." : "Traduzir para inglês (PT → EN)"}
+              </button>
+              <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+                Preenche título, linha fina, resumo e conteúdo em inglês a partir do texto em PT acima — sobrescreve o que já estiver nos campos EN.
+              </span>
+            </div>
+
             <Field label="Conteúdo (EN)">
-              <MarkdownEditor name="content_en" defaultValue={item?.content_en ?? ""} minHeight={280} />
+              <MarkdownEditor ref={contentEnRef} name="content_en" defaultValue={item?.content_en ?? ""} minHeight={280} />
             </Field>
 
             <Field label="Vídeo (URL do YouTube)" hint="Opcional — vira o visual principal do artigo, no lugar da imagem de capa. Mesmo assim, cadastre uma imagem de capa na aba Detalhes: ela é usada como miniatura ao compartilhar o link.">
