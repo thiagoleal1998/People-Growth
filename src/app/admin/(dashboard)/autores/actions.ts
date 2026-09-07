@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import slugify from "slugify";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
+import { uploadPublicImage } from "@/lib/supabase/storage";
 import { logActivity } from "@/lib/activity-log";
 import type { Author } from "@/types/database.types";
 
@@ -12,6 +13,7 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
   const supabase = await createClient();
   const actor = await getCurrentProfile();
 
+  const { url: uploadedPhotoUrl, error: photoError } = await uploadPublicImage(formData.get("photo_file"), "authors");
   const name = String(formData.get("name") ?? "");
   const slugInput = String(formData.get("slug") ?? "").trim();
 
@@ -27,7 +29,7 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
     bio_en: String(formData.get("bio_en") ?? "") || null,
     milestones_pt: String(formData.get("milestones_pt") ?? "") || null,
     milestones_en: String(formData.get("milestones_en") ?? "") || null,
-    photo_url: String(formData.get("photo_url") ?? "") || null,
+    photo_url: uploadedPhotoUrl || String(formData.get("photo_url") ?? "").trim() || String(formData.get("current_photo_url") ?? "") || null,
     email: String(formData.get("email") ?? "") || null,
     linkedin_url: String(formData.get("linkedin_url") ?? "") || null,
     instagram_url: String(formData.get("instagram_url") ?? "") || null,
@@ -38,10 +40,12 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
   const isNew = !id;
+  let articleId = id;
   if (id) {
     await client.from("authors").update(payload).eq("id", id);
   } else {
-    await client.from("authors").insert(payload);
+    const { data } = await client.from("authors").insert(payload).select("id").single();
+    articleId = data?.id ?? null;
   }
 
   if (actor) {
@@ -53,6 +57,10 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
   revalidatePath("/[locale]/sobre", "page");
   revalidatePath("/[locale]/sobre/[slug]", "page");
   revalidatePath("/[locale]", "page");
+
+  if (photoError && articleId) {
+    redirect(`/admin/autores/${articleId}?imageError=${encodeURIComponent(photoError)}`);
+  }
   redirect("/admin/autores?saved=1");
 }
 

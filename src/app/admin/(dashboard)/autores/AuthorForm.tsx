@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Field, Input, Textarea, Select, SubmitButton, FieldGrid } from "@/components/admin/ui";
+import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { upsertAuthor } from "./actions";
 import type { Author } from "@/types/database.types";
 
@@ -38,7 +39,7 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]["id"];
 
-export function AuthorForm({ item }: { item?: Author }) {
+export function AuthorForm({ item, imageError }: { item?: Author; imageError?: string }) {
   const action = upsertAuthor.bind(null, item?.id ?? null);
   const [active, setActive] = useState<TabId>("perfil");
 
@@ -99,10 +100,26 @@ export function AuthorForm({ item }: { item?: Author }) {
               <Field label="Cargo (EN)">
                 <Input name="role_en" defaultValue={item?.role_en ?? ""} />
               </Field>
-              <Field label="Foto (URL)">
-                <Input name="photo_url" defaultValue={item?.photo_url ?? ""} />
-              </Field>
             </FieldGrid>
+            <Field
+              label="Foto"
+              hint='Envie um arquivo (recomendado) — links copiados de redes sociais como Instagram costumam expirar depois de um tempo e a foto some sozinha. PNG, JPG ou WEBP, convertida automaticamente para WebP.'
+            >
+              {item?.photo_url && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={item.photo_url}
+                  alt="Foto atual"
+                  style={{ width: "4rem", height: "4rem", borderRadius: "50%", objectFit: "cover", display: "block", marginBottom: "0.625rem", border: "1px solid var(--admin-border)" }}
+                />
+              )}
+              <input className="admin-file-input" type="file" name="photo_file" accept="image/png,image/jpeg,image/webp" />
+              <input type="hidden" name="current_photo_url" value={item?.photo_url ?? ""} />
+              <ErrorBanner message={imageError} />
+            </Field>
+            <Field label="...ou URL da foto" hint="Alternativa ao envio de arquivo acima — use apenas um link estável (não expira), não um link temporário de rede social.">
+              <Input name="photo_url" placeholder="https://..." />
+            </Field>
             <FieldGrid>
               <TaglineField name="tagline_pt" label="Frase de destaque (PT)" defaultValue={item?.tagline_pt ?? ""} />
               <TaglineField name="tagline_en" label="Frase de destaque (EN)" defaultValue={item?.tagline_en ?? ""} />
