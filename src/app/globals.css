@@ -146,7 +146,8 @@
   text-decoration: underline;
 }
 
-.tiptap-content img {
+.tiptap-content img,
+.tiptap-content video {
   max-width: 100%;
   border-radius: 0.5rem;
   display: block;

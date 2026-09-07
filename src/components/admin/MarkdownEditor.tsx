@@ -4,10 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import { Selection } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
-import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Loader2 } from "lucide-react";
+import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Film, Loader2 } from "lucide-react";
 import { markdownLiteToEditorHtml, editorHtmlToMarkdownLite } from "@/lib/markdown-lite-editor";
 import { promptDialog, alertDialog } from "./dialog-store";
 import { ImageWithCredit } from "./tiptap-image-with-credit";
+import { VideoGif } from "./tiptap-videogif";
 
 // Pasted rich text (Word/Docs/Notion/chat apps) carries its bold/italic/link
 // formatting as real HTML — forcing plain text on paste (an earlier attempt)
@@ -103,6 +104,7 @@ export function MarkdownEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       ImageWithCredit,
+      VideoGif,
     ],
     content: markdownLiteToEditorHtml(defaultValue),
     immediatelyRender: false,
@@ -165,6 +167,28 @@ export function MarkdownEditor({
     if (!url || !url.trim()) return;
     const { caption, credit, source } = await promptImageCaptionAndCredit();
     insertImageMarkdown(editor, url.trim(), caption, credit, source);
+  }
+
+  function insertVideoGifMarkdown(editor: Editor, url: string, caption: string, credit: string, source: string) {
+    editor
+      .chain()
+      .focus()
+      .insertContent({ type: "videoGif", attrs: { src: url, alt: caption || null, credit: credit || null, source: source || null } })
+      .run();
+    // Same fix as insertImageMarkdown — see its comment for why this is needed.
+    const { state, view } = editor;
+    const selection = Selection.near(state.doc.resolve(state.selection.to));
+    view.dispatch(state.tr.setSelection(selection));
+  }
+
+  async function handleVideoGifUrlInsert() {
+    if (!editor) return;
+    const url = await promptDialog(
+      "URL do gif/vídeo em loop (use isso quando um link \".gif\" aparecer quebrado — muitos sites, como portais de notícia, servem esses \"gifs\" como vídeo por trás):"
+    );
+    if (!url || !url.trim()) return;
+    const { caption, credit, source } = await promptImageCaptionAndCredit();
+    insertVideoGifMarkdown(editor, url.trim(), caption, credit, source);
   }
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -263,6 +287,14 @@ export function MarkdownEditor({
           style={toolButtonStyle}
         >
           <ExternalLink size={16} />
+        </button>
+        <button
+          type="button"
+          title='Inserir gif/vídeo em loop por link — use quando um ".gif" aparecer quebrado (muitos sites servem esses "gifs" como vídeo)'
+          onClick={handleVideoGifUrlInsert}
+          style={toolButtonStyle}
+        >
+          <Film size={16} />
         </button>
         <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={handleFileChange} style={{ display: "none" }} />
       </div>

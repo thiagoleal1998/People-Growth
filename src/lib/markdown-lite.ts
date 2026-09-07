@@ -25,6 +25,19 @@ export function renderMarkdownLite(text: string): string {
     .replace(/\r\n?/g, "\n")
     .replace(/^### (.+)$/gm, '<h3 style="font-size:1.25rem;font-weight:800;color:var(--site-text);margin:1.75rem 0 0.875rem">$1</h3>')
     .replace(/^## (.+)$/gm, '<h2 style="font-size:1.5rem;font-weight:800;color:var(--site-text);margin:2rem 0 1rem">$1</h2>')
+    // "!gif[alt](url "credito" "fonte")" — a looping muted video, for links
+    // that only LOOK like a still ".gif" but are actually served as video
+    // (common on news CDNs: the file is really an mp4, which an <img> tag
+    // can't display at all — broken icon, no error). Same two optional
+    // quoted slots as images. Must run before the image regex since it
+    // shares the "[alt](url)" shape.
+    .replace(/!gif\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g, (_match, alt: string, url: string, credit: string | undefined, source: string | undefined) => {
+      const captionLine = alt ? `<span style="display:block">${alt}</span>` : "";
+      const creditLine = credit ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Créditos: ${credit}</span>` : "";
+      const sourceLine = source ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Fonte: ${source}</span>` : "";
+      const figcaption = alt || credit || source ? `<figcaption style="margin-top:0.625rem;font-size:0.8125rem;color:var(--site-muted);text-align:center">${captionLine}${creditLine}${sourceLine}</figcaption>` : "";
+      return protect("FIG", `<figure style="margin:2rem 0"><video src="${url}" autoplay loop muted playsinline style="width:100%;border-radius:0.75rem;display:block"></video>${figcaption}</figure>`);
+    })
     // Images must run before the link regex below — "![alt](url)" contains
     // a "[alt](url)" substring that the link pattern would otherwise eat.
     // Two optional quoted slots after the url — "![alt](url "credito" "fonte")"
@@ -113,6 +126,7 @@ export function stripMarkdownLite(text: string): string {
     .replace(/^>\s?/gm, "")
     .replace(/^#{2,3}\s+/gm, "")
     .replace(/^[-\d]+\.?\s+/gm, "")
+    .replace(/!gif\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+(?:\s+"[^"]*")?(?:\s+"[^"]*")?\)/g, "")
     .replace(/!\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+(?:\s+"[^"]*")?(?:\s+"[^"]*")?\)/g, "")
     .replace(/\[([^\]]+)\]\((?:[^\s()]|\([^()]*\))+\)/g, "$1")
     .replace(/\*\*(.+?)\*\*/g, "$1")

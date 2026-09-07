@@ -33,6 +33,14 @@ export function markdownLiteToEditorHtml(text: string): string {
     .replace(/\r\n?/g, "\n")
     .replace(/^### (.+)$/gm, "<h3>$1</h3>")
     .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+    // "!gif[...]" — a looping muted video standing in for a "gif" that's
+    // actually served as video by its host. Must run before the image
+    // regex since it shares the "[alt](url)" shape.
+    .replace(/!gif\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g, (_match, alt: string, src: string, credit?: string, source?: string) => {
+      const creditAttr = credit ? ` data-credit="${credit}"` : "";
+      const sourceAttr = source ? ` data-source="${source}"` : "";
+      return protect("FIG", `<video src="${src}" alt="${alt}"${creditAttr}${sourceAttr}></video>`);
+    })
     // The url group allows one level of balanced parens — plain "[^)]+"
     // stops at the FIRST ")", which breaks real-world URLs that contain
     // one (many CDNs, including Globo's, encode image filters like
@@ -93,6 +101,17 @@ function serializeImage(el: HTMLElement): string {
   return `![${alt}](${src}${suffix})`;
 }
 
+// Same shape as serializeImage but with the "!gif" marker — see VideoGif
+// in tiptap-videogif.ts for why this is a separate node from images.
+function serializeVideoGif(el: HTMLElement): string {
+  const alt = el.getAttribute("alt") ?? "";
+  const src = el.getAttribute("src") ?? "";
+  const credit = el.getAttribute("data-credit") ?? "";
+  const source = el.getAttribute("data-source") ?? "";
+  const suffix = credit || source ? ` "${credit}" "${source}"` : "";
+  return `!gif[${alt}](${src}${suffix})`;
+}
+
 export function editorHtmlToMarkdownLite(html: string): string {
   const doc = new DOMParser().parseFromString(html, "text/html");
 
@@ -119,6 +138,8 @@ export function editorHtmlToMarkdownLite(html: string): string {
         return `[${inner()}](${el.getAttribute("href") ?? ""})`;
       case "img":
         return serializeImage(el);
+      case "video":
+        return serializeVideoGif(el);
       case "br":
         // Same reasoning as the text-node case above.
         return "\n\n";
@@ -142,6 +163,8 @@ export function editorHtmlToMarkdownLite(html: string): string {
         return `### ${renderChildrenInline(el)}`;
       case "img":
         return serializeImage(el);
+      case "video":
+        return serializeVideoGif(el);
       case "ul":
         return Array.from(el.children).map((li) => `- ${renderChildrenInline(li)}`).join("\n");
       case "ol":
