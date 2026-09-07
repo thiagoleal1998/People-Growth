@@ -42,11 +42,22 @@ export async function callGeminiJson<T>(prompt: string, responseSchema: Record<s
   if (!res.ok) {
     const errText = await res.text();
     console.error(`Gemini request failed (${errorLabel}):`, res.status, errText);
-    throw new Error(
-      res.status === 503
-        ? "O serviço de IA está sobrecarregado no momento. Tente de novo em alguns instantes."
-        : `Falha ao chamar o serviço de IA (${errorLabel}). Tente novamente.`
-    );
+    if (res.status === 503) {
+      throw new Error("O serviço de IA está sobrecarregado no momento. Tente de novo em alguns instantes.");
+    }
+    if (res.status === 429) {
+      // The free tier caps this model at a small number of requests PER DAY
+      // (observed limit: 20/day, shared across every AI feature on the
+      // site) — retrying won't help until the quota resets, so don't waste
+      // a serverless function's execution time on it; just say so plainly.
+      const isDailyQuota = errText.includes("PerDay");
+      throw new Error(
+        isDailyQuota
+          ? "O limite diário gratuito da IA (Gemini) foi atingido. Tente de novo amanhã, ou ative faturamento no Google AI Studio para aumentar o limite."
+          : "O serviço de IA está recebendo muitas requisições agora. Aguarde um minuto e tente de novo."
+      );
+    }
+    throw new Error(`Falha ao chamar o serviço de IA (${errorLabel}). Tente novamente.`);
   }
 
   const data = await res.json();
