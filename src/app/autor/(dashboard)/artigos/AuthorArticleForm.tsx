@@ -142,6 +142,21 @@ export function AuthorArticleForm({ item, categories, imageError, saveError, sav
         )}
       </div>
 
+      {item?.review_feedback && (
+        <div
+          style={{
+            backgroundColor: "rgba(220,38,38,0.08)",
+            border: "1px solid rgba(220,38,38,0.3)",
+            borderRadius: "0.75rem",
+            padding: "1rem 1.25rem",
+            marginBottom: "1.5rem",
+          }}
+        >
+          <div style={{ fontWeight: 700, color: "#b91c1c", fontSize: "0.875rem", marginBottom: "0.375rem" }}>Alterações solicitadas pelo admin</div>
+          <p style={{ margin: 0, color: "var(--admin-text)", fontSize: "0.875rem", lineHeight: 1.6, whiteSpace: "pre-line" }}>{item.review_feedback}</p>
+        </div>
+      )}
+
       <form action={action}>
         <div style={{ display: "flex", gap: "0.25rem", borderBottom: "1px solid var(--admin-border)", marginBottom: "1.75rem" }}>
           {tabs.map((tab) => (

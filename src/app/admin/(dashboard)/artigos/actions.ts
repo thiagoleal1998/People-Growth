@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { uploadPublicImage } from "@/lib/supabase/storage";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
@@ -72,6 +72,9 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     seo_title_en: String(formData.get("seo_title_en") ?? "") || null,
     seo_desc_pt: String(formData.get("seo_desc_pt") ?? "") || null,
     seo_desc_en: String(formData.get("seo_desc_en") ?? "") || null,
+    // Saving through the main editor supersedes any standing "alterações
+    // solicitadas" note (see requestChanges) — it's been acted on.
+    review_feedback: null,
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -153,6 +156,44 @@ export async function approveAndSchedule(id: string) {
   if (profile) {
     await logActivity({ userId: profile.id, userEmail: profile.email, action: "publish", entityType: "artigo", entityLabel: `${article.title_pt} (agendado)` });
   }
+  revalidatePath("/admin/artigos");
+  revalidatePath(`/admin/artigos/${id}`);
+}
+
+// Sends a pending article back to draft with written feedback instead of
+// approving it outright — the author sees the note on their edit form and
+// gets a notification (reusing the same bell used by the ticket system).
+export async function requestChanges(id: string, feedback: string) {
+  const supabase = await createClient();
+  const profile = await getCurrentProfile();
+  if (!profile) throw new Error("Não autenticado.");
+  if (!feedback.trim()) throw new Error("Escreva o que precisa mudar antes de enviar.");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+
+  const { data: article } = await client.from("articles").select("title_pt, author_id").eq("id", id).single();
+  if (!article) return;
+
+  await client.from("articles").update({ status: "draft", review_feedback: feedback }).eq("id", id);
+
+  if (article.author_id) {
+    // user_profiles' own RLS only allows reading your own row — need the
+    // admin client to resolve which login is linked to this author.
+    const admin = await createAdminClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data: authorProfile } = await (admin as any).from("user_profiles").select("id").eq("author_id", article.author_id).single();
+    if (authorProfile) {
+      await client.from("notifications").insert({
+        user_id: authorProfile.id,
+        title: `Alterações solicitadas em "${article.title_pt}"`,
+        body: feedback,
+        link: `/autor/artigos/${id}`,
+      });
+    }
+  }
+
+  await logActivity({ userId: profile.id, userEmail: profile.email, action: "update", entityType: "artigo", entityLabel: `${article.title_pt} (alterações solicitadas)` });
+
   revalidatePath("/admin/artigos");
   revalidatePath(`/admin/artigos/${id}`);
 }

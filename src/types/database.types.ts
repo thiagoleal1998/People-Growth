@@ -33,6 +33,7 @@ type ArticleRow = {
   seo_title_en: string | null;
   seo_desc_pt: string | null;
   seo_desc_en: string | null;
+  review_feedback: string | null;
   created_at: string;
   updated_at: string;
 };

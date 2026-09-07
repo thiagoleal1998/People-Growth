@@ -85,6 +85,11 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
     status,
     scheduled_for: scheduledFor,
     author_id: profile.author_id,
+    // Clear any standing "alterações solicitadas" note once the author
+    // actually resubmits — leave it alone on a plain draft save (an
+    // `undefined` value is dropped from the JSON body entirely, so the
+    // column is left untouched rather than being overwritten with it).
+    review_feedback: intent === "draft" ? undefined : null,
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
