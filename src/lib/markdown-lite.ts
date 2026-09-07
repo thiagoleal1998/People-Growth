@@ -75,16 +75,21 @@ export function renderMarkdownLite(text: string): string {
     }
     const quoteText = lines.join(" ");
     return `<blockquote style="position:relative;margin:2rem 0;padding:0.5rem 1rem 0.5rem 2.75rem;border-left:3px solid #4361EE">
-      <span style="position:absolute;left:0;top:-0.5rem;font-size:3rem;line-height:1;color:#4361EE;font-family:Georgia,serif;font-weight:800">&ldquo;</span>
+      <span style="position:absolute;left:0.5rem;top:-0.5rem;font-size:3rem;line-height:1;color:#4361EE;font-family:Georgia,serif;font-weight:800">&ldquo;</span>
       <p style="font-size:1.1875rem;font-weight:700;font-style:italic;color:var(--site-text);line-height:1.5;margin:0">${quoteText}</p>
       ${attribution ? `<p style="margin:0.625rem 0 0;font-size:0.875rem;font-weight:700;color:var(--site-muted)">— ${attribution}</p>` : ""}
     </blockquote>\n\n`;
   });
 
-  // Consecutive "1. …" lines become an <ol>
+  // Consecutive "1. …" lines become an <ol>. list-style is set explicitly
+  // (not just left to the browser default) because Tailwind's preflight
+  // reset zeroes it globally on every <ul>/<ol> — without it the markers
+  // silently don't render anywhere this HTML is dropped in via
+  // dangerouslySetInnerHTML, only inside the editor (which has its own
+  // scoped ".tiptap-content ul/ol" override, see globals.css).
   html = html.replace(/(?:^\d+\.\s+.+$\n?)+/gm, (block) => {
     const items = block.trim().split("\n").map((line) => line.replace(/^\d+\.\s+/, ""));
-    return `<ol style="padding-left:1.5rem;margin:1rem 0;display:flex;flex-direction:column;gap:0.75rem">${items
+    return `<ol style="padding-left:1.5rem;margin:1rem 0;list-style:decimal;display:flex;flex-direction:column;gap:0.75rem">${items
       .map((i) => `<li>${i}</li>`)
       .join("")}</ol>`;
   });
@@ -92,7 +97,7 @@ export function renderMarkdownLite(text: string): string {
   // Consecutive "- …" lines become a <ul>
   html = html.replace(/(?:^-\s+.+$\n?)+/gm, (block) => {
     const items = block.trim().split("\n").map((line) => line.replace(/^-\s+/, ""));
-    return `<ul style="padding-left:1.5rem;margin:1rem 0">${items
+    return `<ul style="padding-left:1.5rem;margin:1rem 0;list-style:disc">${items
       .map((i) => `<li style="margin-bottom:0.5rem">${i}</li>`)
       .join("")}</ul>`;
   });
@@ -114,7 +119,56 @@ export function renderMarkdownLite(text: string): string {
     .join("");
 
   const tokenRe = new RegExp(`${NUL}(?:FIG|LNK)(\\d+)${NUL}`, "g");
-  return rendered.replace(tokenRe, (_match, index: string) => blocks[Number(index)]);
+  const resolved = rendered.replace(tokenRe, (_match, index: string) => blocks[Number(index)]);
+  return highlightSourceSections(resolved);
+}
+
+// A "## Fontes principais" / "## Bibliografia" heading and whatever follows
+// it (until the next heading) reads as a plain paragraph/list like any
+// other — nothing marks it as a block of citations rather than body text,
+// and its links open in the same tab, taking the reader off the article.
+// Matched against the WHOLE heading text, not just a substring — a heading
+// like "Depois das fontes" or "As fontes do problema" merely mentions the
+// word and isn't a citations section. An image's own "Fonte: ..." credit
+// line (rendered as a <figcaption><span>, never a heading) is a different
+// thing entirely and is never touched by this.
+const SOURCE_HEADING_RE = /^(fontes?(\s+principais)?|bibliografia|refer[êe]ncias?)\s*:?$/i;
+
+function highlightSourceSections(html: string): string {
+  const blockRe = /<(h2|h3|ul|ol|blockquote|figure|p)\b[^>]*>[\s\S]*?<\/\1>/g;
+  const blocks = html.match(blockRe);
+  // Earlier steps sometimes leave a stray "\n" between two top-level blocks
+  // (e.g. a list consumes only one of the two newlines that originally
+  // separated it from the next paragraph) — harmless, since whitespace
+  // between block-level tags has no visual effect once rendered, but it
+  // means blocks.join("") won't always equal `html` character-for-character.
+  // Compare with whitespace stripped from both sides instead: that still
+  // catches a genuine mismatch (a missing/malformed block) while tolerating
+  // the harmless kind.
+  if (!blocks || blocks.join("").replace(/\s+/g, "") !== html.replace(/\s+/g, "")) return html;
+
+  let output = "";
+  for (let i = 0; i < blocks.length; i++) {
+    const headingMatch = blocks[i].match(/^<h[23][^>]*>([\s\S]*?)<\/h[23]>$/);
+    const headingText = headingMatch ? headingMatch[1].replace(/<[^>]+>/g, "").trim() : null;
+    if (!headingText || !SOURCE_HEADING_RE.test(headingText)) {
+      output += blocks[i];
+      continue;
+    }
+    const group = [blocks[i]];
+    i++;
+    while (i < blocks.length && !/^<h[23]/.test(blocks[i])) {
+      group.push(blocks[i]);
+      i++;
+    }
+    i--; // outer for-loop's i++ accounts for the heading itself
+    const groupHtml = group
+      .join("")
+      .replace(/<h([23])([^>]*)style="([^"]*)"/, '<h$1$2style="$3;margin-top:0"')
+      .replace(/<a\s+href="([^"]*)"/g, '<a target="_blank" rel="noopener noreferrer" href="$1"');
+    output += `<div style="background-color:rgba(67,97,238,0.05);border:1px solid rgba(67,97,238,0.15);border-radius:0.75rem;padding:0.25rem 1.5rem 1.25rem;margin:2rem 0;font-size:0.9rem;color:var(--site-text-secondary)">${groupHtml}</div>`;
+  }
+  return output;
 }
 
 /** Plain-text version of the article body, for the text-to-speech reader —
