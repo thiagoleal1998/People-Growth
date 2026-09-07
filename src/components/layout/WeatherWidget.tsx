@@ -48,6 +48,13 @@ const GEOLOCATION_ERROR_NAMES: Record<number, string> = {
   3: "TIMEOUT",
 };
 
+const MONTHS_PT = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+
+function formatDate(date: Date): string {
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${day}, ${MONTHS_PT[date.getMonth()]} de ${date.getFullYear()}`;
+}
+
 export function WeatherWidget({ cityName, lat, lon }: { cityName: string; lat: number; lon: number }) {
   const [location, setLocation] = useState<Location | null>(null);
   const [data, setData] = useState<WeatherData | null>(null);
@@ -126,10 +133,22 @@ export function WeatherWidget({ cityName, lat, lon }: { cityName: string; lat: n
     };
   }, [location]);
 
-  if (!location || !data) return null;
+  // Geolocation alone can take up to GEOLOCATION_TIMEOUT_MS (plus whatever
+  // the browser's own permission prompt takes) before anything shows here —
+  // a skeleton in the meantime beats the bar silently jumping in width once
+  // this pops in, which read as the page still loading something broken.
+  if (!location || !data) {
+    return (
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+        <div className="skeleton" style={{ height: "0.8125rem", width: "9rem", opacity: 0.15 }} />
+      </div>
+    );
+  }
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.75rem", whiteSpace: "nowrap" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", fontSize: "0.75rem", whiteSpace: "nowrap" }}>
+      <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>{formatDate(new Date())}</span>
+      <span style={{ color: "rgba(255,255,255,0.25)" }}>·</span>
       <WeatherIcon code={data.code} />
       <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>{location.cityName}</span>
       <span>
