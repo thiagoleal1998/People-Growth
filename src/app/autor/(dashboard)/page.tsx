@@ -9,7 +9,7 @@ import type { Article } from "@/types/database.types";
 
 const statusConfig: Record<Article["status"], { label: string; tone: "success" | "warning" | "neutral" }> = {
   draft: { label: "Rascunho", tone: "neutral" },
-  pending: { label: "Em revisão", tone: "warning" },
+  pending: { label: "Aguardando Aprovação", tone: "warning" },
   scheduled: { label: "Agendado", tone: "warning" },
   published: { label: "Publicado", tone: "success" },
 };

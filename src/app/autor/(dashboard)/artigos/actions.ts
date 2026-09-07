@@ -38,13 +38,29 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
 
   const title_pt = String(formData.get("title_pt") ?? "");
   const slugInput = String(formData.get("slug") ?? "").trim();
-  const intent = String(formData.get("intent") ?? "");
-  const requestedStatus = String(formData.get("status") ?? "draft");
-  // Authors can only save as draft or submit for review — never publish directly.
-  // "Salvar rascunho" always forces draft, ignoring the Status dropdown.
-  const status: Article["status"] = intent === "draft" ? "draft" : requestedStatus === "pending" ? "pending" : "draft";
+  const intent = String(formData.get("intent") ?? "draft");
   const format = (String(formData.get("format") ?? "opiniao")) as Article["format"];
-  const scheduledFor = String(formData.get("scheduled_for") ?? "").trim() || null;
+  const requestedScheduledFor = String(formData.get("scheduled_for") ?? "").trim() || null;
+
+  // Status is never picked directly — it follows which of the three action
+  // buttons was clicked. Authors can only ever reach draft/pending; only an
+  // admin's approval can move an article to scheduled/published (see
+  // approveAndSchedule/publishArticle in the admin actions).
+  let status: Article["status"] = "draft";
+  let scheduledFor = requestedScheduledFor;
+  if (intent === "schedule") {
+    if (!requestedScheduledFor) {
+      throw new Error("Escolha uma data de publicação antes de agendar.");
+    }
+    status = "pending";
+  } else if (intent === "send") {
+    status = "pending";
+    // No specific date requested — this is the "approve = publish right
+    // away" path (see the admin list's "Aprovar" vs "Aprovar e agendar").
+    scheduledFor = null;
+  }
+  // intent === "draft" (or anything else): stays draft, keeping whatever
+  // date was already set so a draft-in-progress doesn't lose a planned date.
 
   const payload = {
     title_pt,
@@ -63,6 +79,8 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
     cover_image_credit: String(formData.get("cover_image_credit") ?? "") || null,
     video_url: String(formData.get("video_url") ?? "").trim() || null,
     category_id: String(formData.get("category_id") ?? "") || null,
+    seo_title_pt: String(formData.get("seo_title_pt") ?? "") || null,
+    seo_desc_pt: String(formData.get("seo_desc_pt") ?? "") || null,
     format,
     status,
     scheduled_for: scheduledFor,
