@@ -3,6 +3,7 @@ import { Footer } from "@/components/layout/Footer";
 import { CookieBanner } from "@/components/layout/CookieBanner";
 import { CategoryNav } from "@/components/layout/CategoryNav";
 import { UtilityBar } from "@/components/layout/UtilityBar";
+import { SocialSidebar } from "@/components/layout/SocialSidebar";
 import { createClient } from "@/lib/supabase/server";
 import { publishDueScheduledArticles } from "@/lib/publish-scheduled";
 
@@ -18,7 +19,7 @@ export default async function PublicLayout({
   const { data: configData } = await client
     .from("site_config")
     .select("key,value")
-    .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email"]);
+    .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email", "instagram", "linkedin", "whatsapp"]);
 
   const config = Object.fromEntries(((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""]));
   const logoUrl = config.logo_url || undefined;
@@ -36,6 +37,7 @@ export default async function PublicLayout({
         {children}
       </main>
       <Footer logoUrl={logoUrl} contactEmail={contactEmail} />
+      <SocialSidebar instagram={config.instagram || undefined} linkedin={config.linkedin || undefined} whatsapp={config.whatsapp || undefined} />
       <CookieBanner />
       <style>{`
         @media (max-width: 768px) {
