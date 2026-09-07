@@ -12,6 +12,19 @@
 export function markdownLiteToEditorHtml(text: string): string {
   if (!text.trim()) return "<p></p>";
 
+  // Same reasoning as renderMarkdownLite in markdown-lite.ts: URLs commonly
+  // contain "_" (Globo's CDN URLs, among others, routinely do), and the
+  // bold/italic/underline regexes below would otherwise run over an
+  // already-rendered <img>/<a> tag's src/href text and mangle it. Stash
+  // each behind an opaque NUL-based token until every other regex has run.
+  const NUL = String.fromCharCode(0);
+  const blocks: string[] = [];
+  const protect = (prefix: "FIG" | "LNK", html: string): string => {
+    const token = NUL + prefix + blocks.length + NUL;
+    blocks.push(html);
+    return token;
+  };
+
   // Some stored rows still have Windows-style "\r\n" line endings (from
   // before the WYSIWYG editor existed) — normalize before the "\n\n"-based
   // paragraph split below, or every paragraph in that article loads as one
@@ -20,12 +33,16 @@ export function markdownLiteToEditorHtml(text: string): string {
     .replace(/\r\n?/g, "\n")
     .replace(/^### (.+)$/gm, "<h3>$1</h3>")
     .replace(/^## (.+)$/gm, "<h2>$1</h2>")
-    .replace(/!\[([^\]]*)\]\(([^)]+?)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g, (_match, alt: string, src: string, credit?: string, source?: string) => {
+    // The url group allows one level of balanced parens — plain "[^)]+"
+    // stops at the FIRST ")", which breaks real-world URLs that contain
+    // one (many CDNs, including Globo's, encode image filters like
+    // "filters:strip_icc()" directly in the path).
+    .replace(/!\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g, (_match, alt: string, src: string, credit?: string, source?: string) => {
       const creditAttr = credit ? ` data-credit="${credit}"` : "";
       const sourceAttr = source ? ` data-source="${source}"` : "";
-      return `<img src="${src}" alt="${alt}"${creditAttr}${sourceAttr} />`;
+      return protect("FIG", `<img src="${src}" alt="${alt}"${creditAttr}${sourceAttr} />`);
     })
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2">$1</a>')
+    .replace(/\[([^\]]+)\]\(((?:[^\s()]|\([^()]*\))+)\)/g, (_match, linkText: string, url: string) => protect("LNK", `<a href="${url}">${linkText}</a>`))
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/\+\+(.+?)\+\+/g, "<u>$1</u>")
     .replace(/_(.+?)_/g, "<em>$1</em>");
@@ -45,16 +62,21 @@ export function markdownLiteToEditorHtml(text: string): string {
     return `<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>`;
   });
 
-  return html
+  const figTokenRe = new RegExp(`^${NUL}FIG\\d+${NUL}$`);
+  const rendered = html
     .split(/\n\n+/)
     .map((block) => {
       const trimmed = block.trim();
       if (!trimmed) return "";
-      if (/^<(h2|h3|ul|ol|blockquote|img)/.test(trimmed)) return trimmed;
+      if (figTokenRe.test(trimmed)) return trimmed;
+      if (/^<(h2|h3|ul|ol|blockquote)/.test(trimmed)) return trimmed;
       return `<p>${trimmed}</p>`;
     })
     .filter(Boolean)
     .join("");
+
+  const tokenRe = new RegExp(`${NUL}(?:FIG|LNK)(\\d+)${NUL}`, "g");
+  return rendered.replace(tokenRe, (_match, index: string) => blocks[Number(index)]);
 }
 
 // TipTap's editor.getHTML() -> stored markdown-lite text. Client-only

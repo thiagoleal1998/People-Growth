@@ -1,4 +1,21 @@
 export function renderMarkdownLite(text: string): string {
+  // URLs (in images/links) commonly contain "_" — signed CDN tokens
+  // especially (Globo's image URLs, for one, routinely do). If the
+  // rendered <img>/<a> tag were left inline, the bold/italic/underline
+  // regexes further down would run over its src/href text too and see
+  // markdown emphasis markers that were never meant as such, mangling the
+  // URL. Each image/link is rendered immediately but stashed behind an
+  // opaque placeholder token (built from a NUL character, which can never
+  // occur in authored text) so later regexes have nothing to misread, then
+  // swapped back in at the very end.
+  const NUL = String.fromCharCode(0);
+  const blocks: string[] = [];
+  const protect = (prefix: "FIG" | "LNK", html: string): string => {
+    const token = NUL + prefix + blocks.length + NUL;
+    blocks.push(html);
+    return token;
+  };
+
   // Windows-style "\r\n" line endings (possible in stored content from
   // before the WYSIWYG editor, or from certain paste/import sources) break
   // every "\n\n"-based paragraph/list/quote split below, since "\r" sits
@@ -13,14 +30,21 @@ export function renderMarkdownLite(text: string): string {
     // Two optional quoted slots after the url — "![alt](url "credito" "fonte")"
     // — carry the credit and source lines shown under the image. A single
     // quoted slot is the older format (credit only), kept for old articles.
-    .replace(/!\[([^\]]*)\]\(([^)]+?)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g, (_match, alt: string, url: string, credit: string | undefined, source: string | undefined) => {
+    // The url group allows one level of balanced parens — plain "[^)]+"
+    // stops at the FIRST ")", which breaks real-world URLs that contain
+    // one (many CDNs, including Globo's, encode image filters like
+    // "filters:strip_icc()" directly in the path).
+    .replace(/!\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g, (_match, alt: string, url: string, credit: string | undefined, source: string | undefined) => {
       const captionLine = alt ? `<span style="display:block">${alt}</span>` : "";
       const creditLine = credit ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Créditos: ${credit}</span>` : "";
       const sourceLine = source ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Fonte: ${source}</span>` : "";
       const figcaption = alt || credit || source ? `<figcaption style="margin-top:0.625rem;font-size:0.8125rem;color:var(--site-muted);text-align:center">${captionLine}${creditLine}${sourceLine}</figcaption>` : "";
-      return `<figure style="margin:2rem 0"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block" />${figcaption}</figure>`;
+      return protect("FIG", `<figure style="margin:2rem 0"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block" />${figcaption}</figure>`);
     })
-    .replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" style="color:#4361EE;font-weight:600;text-decoration:underline">$1</a>')
+    // Same balanced-parens allowance as the image url above.
+    .replace(/\[([^\]]+)\]\(((?:[^\s()]|\([^()]*\))+)\)/g, (_match, linkText: string, url: string) =>
+      protect("LNK", `<a href="${url}" style="color:#4361EE;font-weight:600;text-decoration:underline">${linkText}</a>`)
+    )
     .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:700;color:var(--site-text)">$1</strong>')
     // Underline has no standard markdown syntax, so it uses its own marker.
     // Both this and italic run after bold, so a lone "_" or "+" left over
@@ -60,16 +84,24 @@ export function renderMarkdownLite(text: string): string {
       .join("")}</ul>`;
   });
 
-  // Remaining blank-line-separated blocks become paragraphs
-  return html
+  // Remaining blank-line-separated blocks become paragraphs. A block that
+  // is nothing but a single image placeholder stays a bare <figure> (its
+  // own visual block); everything else — including a block that's nothing
+  // but a link — gets wrapped in a <p>, matching prior behavior.
+  const figTokenRe = new RegExp(`^${NUL}FIG\\d+${NUL}$`);
+  const rendered = html
     .split(/\n\n+/)
     .map((block) => {
       const trimmed = block.trim();
       if (!trimmed) return "";
-      if (/^<(h2|h3|ul|ol|blockquote|figure)/.test(trimmed)) return trimmed;
+      if (figTokenRe.test(trimmed)) return trimmed;
+      if (/^<(h2|h3|ul|ol|blockquote)/.test(trimmed)) return trimmed;
       return `<p style="margin:0 0 1.25rem">${trimmed}</p>`;
     })
     .join("");
+
+  const tokenRe = new RegExp(`${NUL}(?:FIG|LNK)(\\d+)${NUL}`, "g");
+  return rendered.replace(tokenRe, (_match, index: string) => blocks[Number(index)]);
 }
 
 /** Plain-text version of the article body, for the text-to-speech reader —
@@ -81,8 +113,8 @@ export function stripMarkdownLite(text: string): string {
     .replace(/^>\s?/gm, "")
     .replace(/^#{2,3}\s+/gm, "")
     .replace(/^[-\d]+\.?\s+/gm, "")
-    .replace(/!\[[^\]]*\]\([^)]+\)/g, "")
-    .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+    .replace(/!\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+(?:\s+"[^"]*")?(?:\s+"[^"]*")?\)/g, "")
+    .replace(/\[([^\]]+)\]\((?:[^\s()]|\([^()]*\))+\)/g, "$1")
     .replace(/\*\*(.+?)\*\*/g, "$1")
     .replace(/\+\+(.+?)\+\+/g, "$1")
     .replace(/_(.+?)_/g, "$1")
