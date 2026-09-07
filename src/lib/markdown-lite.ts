@@ -87,11 +87,17 @@ export function renderMarkdownLite(text: string): string {
   // silently don't render anywhere this HTML is dropped in via
   // dangerouslySetInnerHTML, only inside the editor (which has its own
   // scoped ".tiptap-content ul/ol" override, see globals.css).
+  // The matched span consumes one of the two "\n"s that originally separated
+  // this list from whatever comes after it (each line's own trailing "\n" is
+  // part of the match) — forcing two newlines back after the closing tag,
+  // same as the blockquote block above, guarantees the paragraph splitter
+  // below still sees a real block boundary regardless of how many blank
+  // lines followed in the source.
   html = html.replace(/(?:^\d+\.\s+.+$\n?)+/gm, (block) => {
     const items = block.trim().split("\n").map((line) => line.replace(/^\d+\.\s+/, ""));
     return `<ol style="padding-left:1.5rem;margin:1rem 0;list-style:decimal;display:flex;flex-direction:column;gap:0.75rem">${items
       .map((i) => `<li>${i}</li>`)
-      .join("")}</ol>`;
+      .join("")}</ol>\n\n`;
   });
 
   // Consecutive "- …" lines become a <ul>
@@ -99,7 +105,7 @@ export function renderMarkdownLite(text: string): string {
     const items = block.trim().split("\n").map((line) => line.replace(/^-\s+/, ""));
     return `<ul style="padding-left:1.5rem;margin:1rem 0;list-style:disc">${items
       .map((i) => `<li style="margin-bottom:0.5rem">${i}</li>`)
-      .join("")}</ul>`;
+      .join("")}</ul>\n\n`;
   });
 
   // Remaining blank-line-separated blocks become paragraphs. A block that
@@ -107,26 +113,31 @@ export function renderMarkdownLite(text: string): string {
   // own visual block); everything else — including a block that's nothing
   // but a link — gets wrapped in a <p>, matching prior behavior.
   const figTokenRe = new RegExp(`^${NUL}FIG\\d+${NUL}$`);
-  const rendered = html
-    .split(/\n\n+/)
-    .map((block) => {
-      const trimmed = block.trim();
-      if (!trimmed) return "";
-      if (figTokenRe.test(trimmed)) return trimmed;
-      if (/^<(h2|h3|ul|ol|blockquote)/.test(trimmed)) return trimmed;
-      return `<p style="margin:0 0 1.25rem">${trimmed}</p>`;
-    })
-    .join("");
+  const renderedBlocks = html.split(/\n\n+/).map((block) => {
+    const trimmed = block.trim();
+    if (!trimmed) return "";
+    if (figTokenRe.test(trimmed)) return trimmed;
+    if (/^<(h2|h3|ul|ol|blockquote)/.test(trimmed)) return trimmed;
+    return `<p style="margin:0 0 1.25rem">${trimmed}</p>`;
+  });
 
+  // A "## Fontes principais" / "## Bibliografia" heading and whatever
+  // follows it (until the next heading) used to read as a plain
+  // paragraph/list like any other — nothing marked it as a block of
+  // citations rather than body text, and its links opened in the same tab,
+  // taking the reader off the article. Grouped using these EXACT block
+  // boundaries (rather than re-deriving them from the assembled HTML string
+  // via regex, which — tried first — silently failed to find anything on
+  // any article long/varied enough to contain a block shape the
+  // reconstruction regex didn't perfectly round-trip, since one mismatch
+  // anywhere in the whole document discarded the grouping everywhere).
+  groupSourceSections(renderedBlocks, blocks);
+
+  const rendered = renderedBlocks.join("");
   const tokenRe = new RegExp(`${NUL}(?:FIG|LNK)(\\d+)${NUL}`, "g");
-  const resolved = rendered.replace(tokenRe, (_match, index: string) => blocks[Number(index)]);
-  return highlightSourceSections(resolved);
+  return rendered.replace(tokenRe, (_match, index: string) => blocks[Number(index)]);
 }
 
-// A "## Fontes principais" / "## Bibliografia" heading and whatever follows
-// it (until the next heading) reads as a plain paragraph/list like any
-// other — nothing marks it as a block of citations rather than body text,
-// and its links open in the same tab, taking the reader off the article.
 // Matched against the WHOLE heading text, not just a substring — a heading
 // like "Depois das fontes" or "As fontes do problema" merely mentions the
 // word and isn't a citations section. An image's own "Fonte: ..." credit
@@ -134,41 +145,46 @@ export function renderMarkdownLite(text: string): string {
 // thing entirely and is never touched by this.
 const SOURCE_HEADING_RE = /^(fontes?(\s+principais)?|bibliografia|refer[êe]ncias?)\s*:?$/i;
 
-function highlightSourceSections(html: string): string {
-  const blockRe = /<(h2|h3|ul|ol|blockquote|figure|p)\b[^>]*>[\s\S]*?<\/\1>/g;
-  const blocks = html.match(blockRe);
-  // Earlier steps sometimes leave a stray "\n" between two top-level blocks
-  // (e.g. a list consumes only one of the two newlines that originally
-  // separated it from the next paragraph) — harmless, since whitespace
-  // between block-level tags has no visual effect once rendered, but it
-  // means blocks.join("") won't always equal `html` character-for-character.
-  // Compare with whitespace stripped from both sides instead: that still
-  // catches a genuine mismatch (a missing/malformed block) while tolerating
-  // the harmless kind.
-  if (!blocks || blocks.join("").replace(/\s+/g, "") !== html.replace(/\s+/g, "")) return html;
+// Mutates `renderedBlocks` in place, merging a matched heading with every
+// block after it up to the next heading into one wrapped, tinted group, and
+// mutates the matching entries of `protectedBlocks` (the shared protect()
+// array — see renderMarkdownLite) so every link inside that group opens in
+// a new tab. Each link's protect() call gets its own array index, so
+// rewriting specific indices here can never affect a link anywhere else in
+// the document.
+function groupSourceSections(renderedBlocks: string[], protectedBlocks: string[]): void {
+  const NUL = String.fromCharCode(0);
+  const lnkTokenRe = new RegExp(`${NUL}LNK(\\d+)${NUL}`, "g");
 
-  let output = "";
-  for (let i = 0; i < blocks.length; i++) {
-    const headingMatch = blocks[i].match(/^<h[23][^>]*>([\s\S]*?)<\/h[23]>$/);
+  for (let i = 0; i < renderedBlocks.length; i++) {
+    const headingMatch = renderedBlocks[i].match(/^<h[23][^>]*>([\s\S]*?)<\/h[23]>$/);
     const headingText = headingMatch ? headingMatch[1].replace(/<[^>]+>/g, "").trim() : null;
-    if (!headingText || !SOURCE_HEADING_RE.test(headingText)) {
-      output += blocks[i];
-      continue;
+    if (!headingText || !SOURCE_HEADING_RE.test(headingText)) continue;
+
+    const groupStart = i;
+    let groupEnd = i + 1;
+    while (groupEnd < renderedBlocks.length && !/^<h[23]/.test(renderedBlocks[groupEnd])) groupEnd++;
+
+    const groupHtml = renderedBlocks.slice(groupStart, groupEnd).join("");
+    let match: RegExpExecArray | null;
+    lnkTokenRe.lastIndex = 0;
+    while ((match = lnkTokenRe.exec(groupHtml))) {
+      const idx = Number(match[1]);
+      if (!/\btarget=/.test(protectedBlocks[idx])) {
+        protectedBlocks[idx] = protectedBlocks[idx].replace(/<a\s+href="/, '<a target="_blank" rel="noopener noreferrer" href="');
+      }
     }
-    const group = [blocks[i]];
-    i++;
-    while (i < blocks.length && !/^<h[23]/.test(blocks[i])) {
-      group.push(blocks[i]);
-      i++;
-    }
-    i--; // outer for-loop's i++ accounts for the heading itself
-    const groupHtml = group
-      .join("")
-      .replace(/<h([23])([^>]*)style="([^"]*)"/, '<h$1$2style="$3;margin-top:0"')
-      .replace(/<a\s+href="([^"]*)"/g, '<a target="_blank" rel="noopener noreferrer" href="$1"');
-    output += `<div style="background-color:rgba(67,97,238,0.05);border:1px solid rgba(67,97,238,0.15);border-radius:0.75rem;padding:0.25rem 1.5rem 1.25rem;margin:2rem 0;font-size:0.9rem;color:var(--site-text-secondary)">${groupHtml}</div>`;
+
+    const styledHeading = renderedBlocks[groupStart].replace(/style="([^"]*)"/, 'style="$1;margin-top:0"');
+    const rest = renderedBlocks.slice(groupStart + 1, groupEnd).join("");
+    // Collapse the whole group into its first slot and blank out the rest
+    // (rather than splicing them out) so the outer loop's indices stay
+    // valid — the blanked slots just contribute nothing once joined.
+    renderedBlocks[groupStart] =
+      `<div style="background-color:rgba(67,97,238,0.05);border:1px solid rgba(67,97,238,0.15);border-radius:0.75rem;padding:0.25rem 1.5rem 1.25rem;margin:2rem 0;font-size:0.9rem;color:var(--site-text-secondary)">${styledHeading}${rest}</div>`;
+    for (let j = groupStart + 1; j < groupEnd; j++) renderedBlocks[j] = "";
+    i = groupEnd - 1;
   }
-  return output;
 }
 
 /** Plain-text version of the article body, for the text-to-speech reader —
