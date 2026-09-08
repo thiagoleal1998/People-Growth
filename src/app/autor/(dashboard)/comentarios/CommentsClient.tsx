@@ -14,7 +14,8 @@ const statusConfig: Record<Comment["status"], { label: string; color: string; bg
 };
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("pt-BR");
+  // timeZone pinned to avoid a hydration mismatch — see ArticlesTabs.tsx.
+  return new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
 }
 
 export function CommentsClient({

@@ -76,7 +76,17 @@ function ArticleRow({ article, category }: { article: Article; category: Categor
             </p>
           )}
           <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
-            {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+            {/* This is a Client Component — Next.js server-renders it once
+                for the initial HTML, then hydrates it in the browser.
+                toLocaleDateString() with no timeZone falls back to the
+                runtime's own timezone: UTC on the server, whatever the
+                visitor's local one is in the browser. For an article
+                published near a UTC day boundary, that flips the calendar
+                day between the two renders — a real hydration mismatch
+                (confirmed live: server said "04 de set.", the same
+                visitor's browser said "03 de set."). Pinning the timezone
+                keeps both renders identical regardless of where either runs. */}
+            {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" })}
             {article.read_time ? ` · ${article.read_time} min` : ""}
           </span>
         </div>
@@ -202,7 +212,8 @@ export function ArticlesExplorer({
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <span style={{ fontSize: "0.875rem", color: "var(--site-faint)" }}>
                           {featuredAuthor && <>Por {featuredAuthor.name} · </>}
-                          {featured.published_at && new Date(featured.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                          {/* timeZone pinned for the same hydration-mismatch reason as ArticleRow above */}
+                          {featured.published_at && new Date(featured.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" })}
                           {featured.read_time ? ` · ${featured.read_time} min de leitura` : ""}
                         </span>
                         <span style={{ color: "#4361EE", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.25rem" }}>

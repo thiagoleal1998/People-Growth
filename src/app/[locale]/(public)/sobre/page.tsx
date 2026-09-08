@@ -160,7 +160,7 @@ export default async function SobrePage() {
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "1.5rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "1.5rem" }}>
             {authors.map((author) => (
               <FounderCard key={author.id} author={author} />
             ))}
@@ -190,7 +190,7 @@ export default async function SobrePage() {
             Os princípios que guiam cada projeto, consultoria e treinamento.
           </p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.5rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))", gap: "1.5rem" }}>
             {philosophy.map(({ icon, title, description }) => (
               <div
                 key={title}
@@ -219,7 +219,7 @@ export default async function SobrePage() {
           <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, textAlign: "center", marginBottom: "3rem" }}>
             Projetos & Iniciativas
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.5rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))", gap: "1.5rem" }}>
             {[
               {
                 name: "People & Growth",

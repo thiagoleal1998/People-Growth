@@ -44,7 +44,7 @@ export default async function RecursosPage() {
               Nenhum recurso disponível no momento.
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.75rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: "1.75rem" }}>
               {resources.map((resource) => {
                 const meta = typeMeta[resource.type];
                 const Icon = meta.icon;

@@ -12,5 +12,11 @@ export function timeAgo(iso: string): string {
   const days = Math.floor(hours / 24);
   if (days < 30) return `há ${days} dia${days === 1 ? "" : "s"}`;
 
-  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" });
+  // Pinned timezone: this runs inside "use client" components that Next.js
+  // both server-renders and hydrates — with no explicit timeZone, the date
+  // formats in UTC on the server but the visitor's own local timezone in
+  // the browser, which can flip the calendar day for a comment posted near
+  // a UTC day boundary and throw a real hydration mismatch (confirmed live
+  // for the same pattern in ArticlesExplorer.tsx).
+  return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" });
 }

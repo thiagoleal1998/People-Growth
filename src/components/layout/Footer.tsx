@@ -22,7 +22,7 @@ export function Footer({ logoUrl, contactEmail }: { logoUrl?: string | null; con
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))",
             gap: "2.5rem",
             paddingBottom: "3rem",
             borderBottom: "1px solid rgba(255,255,255,0.08)",

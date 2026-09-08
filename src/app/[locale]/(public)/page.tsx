@@ -214,7 +214,7 @@ export default async function HomePage() {
                 )}
 
                 {secondary.length > 0 && (
-                  <div style={{ borderTop: "1px solid var(--site-border)", marginTop: "1.125rem", paddingTop: "1.125rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.125rem" }}>
+                  <div style={{ borderTop: "1px solid var(--site-border)", marginTop: "1.125rem", paddingTop: "1.125rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1.125rem" }}>
                     {secondary.map((article) => (
                       <Link
                         key={article.id}
@@ -692,7 +692,7 @@ export default async function HomePage() {
               <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#06D6A0", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
                 Quem está por trás da People &amp; Growth
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))", gap: "2rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "2rem" }}>
                 {authors.map((author) => (
                   <div key={author.id} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
                     <div
@@ -751,7 +751,7 @@ export default async function HomePage() {
           <div
             style={{
               display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))",
+              gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))",
               gap: "1.5rem",
             }}
           >
@@ -861,7 +861,7 @@ export default async function HomePage() {
           className="container-xl"
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))",
+            gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))",
             gap: "4rem",
             alignItems: "center",
           }}

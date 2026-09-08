@@ -15,7 +15,11 @@ const statusConfig: Record<Article["status"], { label: string; tone: "success" |
 };
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("pt-BR");
+  // timeZone pinned — this runs inside a "use client" component that Next.js
+  // both server-renders and hydrates; with none set, the date formats in
+  // UTC on the server but the viewer's local timezone in the browser,
+  // which can flip the calendar day and throw a real hydration mismatch.
+  return new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 }
 
 function formatDateTime(iso: string) {

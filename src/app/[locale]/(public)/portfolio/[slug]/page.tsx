@@ -57,7 +57,7 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
 
       <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
         <div className="container-xl" style={{ maxWidth: "900px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "3rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: "3rem" }}>
             <div>
               {c.challenge_pt && (
                 <>

@@ -348,7 +348,8 @@ export function ArticleForm({
                 {approving ? <Loader2 size={16} className="admin-spin" /> : <Check size={16} />}
                 {approving
                   ? "Aprovando..."
-                  : `Aprovar e agendar para ${new Date(item.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}`}
+                  : // timeZone pinned to avoid a hydration mismatch — see ArticlesTabs.tsx.
+                    `Aprovar e agendar para ${new Date(item.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" })}`}
               </button>
             )}
             <Field label="Imagem de capa" hint="PNG, JPG ou WEBP — convertida automaticamente para WebP e comprimida para menos de 1MB.">

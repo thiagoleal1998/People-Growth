@@ -46,7 +46,7 @@ export default async function PortfolioPage() {
               Nenhum case cadastrado no momento.
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(320px, 1fr))", gap: "2rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))", gap: "2rem" }}>
               {cases.map((c) => {
                 const meta = categoryMeta[c.category];
                 const firstResult = (c.results_pt ?? "").split("\n").map((l) => l.trim()).filter(Boolean)[0];

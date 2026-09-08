@@ -274,7 +274,7 @@ export default async function CurriculoPage() {
 
           {/* Certifications */}
           <Section icon={Award} title={t("certifications")} color="#FFB703">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(220px, 1fr))", gap: "0.75rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(220px, 100%), 1fr))", gap: "0.75rem" }}>
               {certifications.map((cert) => (
                 <div
                   key={cert}
@@ -323,7 +323,7 @@ export default async function CurriculoPage() {
 
           {/* Courses taught */}
           <Section icon={BookOpen} title={t("courses")} color="#06D6A0">
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "0.75rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(260px, 100%), 1fr))", gap: "0.75rem" }}>
               {courses.map((c) => (
                 <div
                   key={c}

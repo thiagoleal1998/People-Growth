@@ -50,7 +50,7 @@ export default async function FerramentasPage() {
               <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.5rem", paddingBottom: "0.75rem", borderBottom: "2px solid var(--site-border-strong)" }}>
                 {category}
               </h2>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(260px, 100%), 1fr))", gap: "1rem" }}>
                 {items.map(({ name, description, icon, badge }) => (
                   <div key={name} className="hover-card" style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--site-border)", position: "relative" }}>
                     {badge && (

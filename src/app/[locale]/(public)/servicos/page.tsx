@@ -86,7 +86,7 @@ export default async function ServicosPage() {
               Nenhum serviço cadastrado no momento.
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(340px, 1fr))", gap: "2rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(340px, 100%), 1fr))", gap: "2rem" }}>
               {services.map((service, i) => {
                 const Icon = (service.icon && iconMap[service.icon]) || Wrench;
                 const color = palette[i % palette.length];
@@ -182,7 +182,7 @@ export default async function ServicosPage() {
             Um processo estruturado para gerar resultados reais.
           </p>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1.5rem", textAlign: "left" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(160px, 100%), 1fr))", gap: "1.5rem", textAlign: "left" }}>
             {[
               { step: "01", title: "Diagnóstico", desc: "Entendimento profundo do negócio, desafios e oportunidades." },
               { step: "02", title: "Estratégia", desc: "Desenvolvimento do plano estratégico personalizado." },

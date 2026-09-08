@@ -16,7 +16,8 @@ const statusConfig: Record<Lead["status"], { label: string; color: string; bg: s
 };
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("pt-BR");
+  // timeZone pinned to avoid a hydration mismatch — see ArticlesTabs.tsx.
+  return new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 }
 
 export function LeadsClient({ leads }: { leads: Lead[] }) {

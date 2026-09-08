@@ -42,7 +42,7 @@ export default async function NaMidiaPage() {
               Nenhuma menção cadastrada no momento.
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.5rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: "1.5rem" }}>
               {items.map((item) => {
                 const meta = typeMeta[item.type];
                 const Icon = meta.icon;

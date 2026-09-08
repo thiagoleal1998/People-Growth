@@ -370,7 +370,7 @@ export default async function ArticlePage({
                 <h2 style={{ fontWeight: 800, fontSize: "1.125rem", color: "var(--site-text)", marginBottom: "1.25rem" }}>
                   Leia também
                 </h2>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.25rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1.25rem" }}>
                   {related.map((r) => (
                     <Link
                       key={r.id}

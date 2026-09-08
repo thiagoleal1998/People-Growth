@@ -6,7 +6,8 @@ import type { PasswordResetRequest, UserProfile } from "@/types/database.types";
 import { resetUserPassword, dismissPasswordResetRequest } from "./actions";
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("pt-BR");
+  // timeZone pinned to avoid a hydration mismatch — see ArticlesTabs.tsx.
+  return new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
 }
 
 export function PasswordResetRequestsClient({ requests, users }: { requests: PasswordResetRequest[]; users: UserProfile[] }) {

@@ -43,7 +43,7 @@ export default async function LaboratorioIAPage() {
           <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "2.5rem", textAlign: "center" }}>
             Projetos & Experimentos
           </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.75rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: "1.75rem" }}>
             {projects.map(({ icon: Icon, title, description, tags, color }) => (
               <div key={title} className="hover-card" style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "2rem", border: "1px solid var(--site-border)" }}>
                 <div style={{ width: "3.5rem", height: "3.5rem", borderRadius: "1rem", backgroundColor: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1.25rem" }}>

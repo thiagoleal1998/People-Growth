@@ -34,7 +34,7 @@ export function MediaCarousel({ items }: { items: MediaItem[] }) {
 
   return (
     <div onMouseEnter={() => setPaused(true)} onMouseLeave={() => setPaused(false)} onTouchStart={() => setPaused(true)}>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "1.25rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))", gap: "1.25rem" }}>
         {visibleItems.map((item) => {
           const meta = mediaTypeMeta[item.type];
           const Icon = meta.icon;
@@ -62,7 +62,8 @@ export function MediaCarousel({ items }: { items: MediaItem[] }) {
                 {item.outlet && <div style={{ color: "var(--site-muted)", fontSize: "0.8125rem", fontWeight: 600, marginBottom: "0.25rem" }}>{item.outlet}</div>}
                 {item.date && (
                   <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--site-faint)", fontSize: "0.75rem" }}>
-                    <Calendar size={12} /> {new Date(item.date).toLocaleDateString("pt-BR", { month: "short", year: "numeric" })}
+                    {/* timeZone pinned to avoid a hydration mismatch — see ArticlesTabs.tsx */}
+                    <Calendar size={12} /> {new Date(item.date).toLocaleDateString("pt-BR", { month: "short", year: "numeric", timeZone: "America/Sao_Paulo" })}
                   </div>
                 )}
               </div>

@@ -104,7 +104,7 @@ export default async function ServicePage({
             {results.length > 0 && (
               <>
                 <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.5rem" }}>Resultados típicos</h2>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1rem" }}>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1rem" }}>
                   {results.map((r) => (
                     <div key={r} style={{ backgroundColor: "var(--site-surface-alt)", borderRadius: "0.75rem", padding: "1.25rem", border: `1px solid ${color}25` }}>
                       <p style={{ color: "var(--site-text)", fontWeight: 600, fontSize: "0.9rem", lineHeight: 1.5 }}>✓ {r}</p>

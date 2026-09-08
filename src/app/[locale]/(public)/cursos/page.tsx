@@ -38,7 +38,7 @@ export default async function CursosPage() {
               Nenhum curso cadastrado no momento.
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: "1.75rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: "1.75rem" }}>
               {courses.map((course, i) => {
                 const color = palette[i % palette.length];
                 return (
