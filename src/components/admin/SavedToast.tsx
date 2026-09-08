@@ -4,12 +4,12 @@ import { useEffect, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import { CheckCircle2, X } from "lucide-react";
 
-const DURATION_MS = 3000;
+const DURATION_MS = 5000;
 
 export function SavedToast({ show }: { show: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
-  // Lets the "x" button hide the toast immediately, ahead of the 3s auto-
+  // Lets the "x" button hide the toast immediately, ahead of the auto-
   // dismiss timer below (which still fires and clears the URL regardless —
   // harmless, since a second router.replace to the same path is a no-op).
   const [dismissed, setDismissed] = useState(false);
@@ -27,7 +27,7 @@ export function SavedToast({ show }: { show: boolean }) {
   // The toast's visibility is just `show` directly — no separate local
   // state to keep in sync with it. The previous version stripped "?saved=1"
   // from the URL immediately, which flipped `show` back to false well
-  // before the 3s mark; a cleanup tied to that dependency change ended up
+  // before the auto-dismiss mark; a cleanup tied to that dependency change ended up
   // cancelling the still-pending dismiss timer before it ever fired, so the
   // toast never actually disappeared. Deferring the URL cleanup until AFTER
   // the delay — rather than tracking visibility as its own state — means
