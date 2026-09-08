@@ -62,6 +62,8 @@ export function PromoForm({ item, imageError }: { item?: Promo; imageError?: str
   const [introEmoji, setIntroEmoji] = useState(item?.intro_emoji ?? "");
   const [introText, setIntroText] = useState(item?.intro_text ?? "");
   const [imagePreview, setImagePreview] = useState<string | null>(item?.image_url ?? null);
+  const currency = item?.currency ?? "BRL";
+  const currencyLabel = currency === "BRL" ? "R$" : currency;
 
   const previewText = useMemo(
     () =>
@@ -77,8 +79,9 @@ export function PromoForm({ item, imageError }: { item?: Promo; imageError?: str
         affiliateLink: affiliateLink || null,
         introEmoji: introEmoji || null,
         introText: introText || null,
+        currency,
       }),
-    [productName, oldPrice, newPrice, pixPrice, paymentTerms, couponCode, sizesAvailable, productLink, affiliateLink, introEmoji, introText]
+    [productName, oldPrice, newPrice, pixPrice, paymentTerms, couponCode, sizesAvailable, productLink, affiliateLink, introEmoji, introText, currency]
   );
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
@@ -98,6 +101,11 @@ export function PromoForm({ item, imageError }: { item?: Promo; imageError?: str
         {item?.source === "mercado_livre" && (
           <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginTop: "0.25rem" }}>
             Encontrada automaticamente no Mercado Livre — complete PIX, cupom, tamanhos e link de afiliado antes de copiar.
+          </p>
+        )}
+        {item?.source === "ebay" && (
+          <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginTop: "0.25rem" }}>
+            Encontrada automaticamente no eBay — preços em dólar (catálogo internacional). Complete os campos antes de copiar.
           </p>
         )}
       </div>
@@ -130,15 +138,15 @@ export function PromoForm({ item, imageError }: { item?: Promo; imageError?: str
             </Field>
 
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0 1.5rem" }}>
-              <Field label="Preço antigo (R$)" hint="Opcional — deixe em branco se não houver desconto.">
+              <Field label={`Preço antigo (${currencyLabel})`} hint="Opcional — deixe em branco se não houver desconto.">
                 <Input name="old_price" type="number" step="0.01" min="0" value={oldPrice} onChange={(e) => setOldPrice(e.target.value)} />
               </Field>
-              <Field label="Preço novo (R$)">
+              <Field label={`Preço novo (${currencyLabel})`}>
                 <Input name="new_price" type="number" step="0.01" min="0" value={newPrice} onChange={(e) => setNewPrice(e.target.value)} required />
               </Field>
             </div>
 
-            <Field label="Preço no PIX (R$)" hint="Opcional.">
+            <Field label={`Preço no PIX (${currencyLabel})`} hint={currency === "BRL" ? "Opcional." : "Só faz sentido para produtos em real — deixe em branco para promoções em dólar."}>
               <Input name="pix_price" type="number" step="0.01" min="0" value={pixPrice} onChange={(e) => setPixPrice(e.target.value)} />
             </Field>
 

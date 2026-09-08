@@ -29,6 +29,7 @@ export async function upsertPromo(id: string | null, formData: FormData) {
 
   const payload: Partial<PromoInsert> = {
     source: "manual",
+    currency: "BRL",
     product_name: productName,
     old_price: numberOrNull(formData.get("old_price")),
     new_price: numberOrNull(formData.get("new_price")) ?? 0,
@@ -46,10 +47,13 @@ export async function upsertPromo(id: string | null, formData: FormData) {
   const isNew = !id;
   let promoId = id;
   if (promoId) {
-    // A promo found automatically via Mercado Livre keeps its "source" and
-    // "external_id" when edited — only manual field-completion should
-    // change here, not what created the row in the first place.
+    // A promo found automatically (Mercado Livre/eBay) keeps its "source",
+    // "external_id" and "currency" when edited — only manual
+    // field-completion should change here, not what created the row or
+    // what currency its price fields are actually in (an eBay promo is USD;
+    // overwriting that back to "BRL" here would mislabel its prices).
     delete payload.source;
+    delete payload.currency;
     const { error } = await client.from("promos").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", promoId);
     if (error) throw error;
   } else {

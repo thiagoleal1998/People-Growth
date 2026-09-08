@@ -10,10 +10,15 @@ export type PromoFields = {
   affiliateLink: string | null;
   introEmoji: string | null;
   introText: string | null;
+  // Manual and Mercado Livre promos are always BRL; eBay's catalog is USD
+  // (its search API has no BRL pricing) — formatting has to follow suit
+  // instead of mislabeling a dollar amount with "R$".
+  currency: string;
 };
 
-function fmtBRL(v: number): string {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+function fmtPrice(v: number, currency: string): string {
+  const locale = currency === "BRL" ? "pt-BR" : "en-US";
+  return v.toLocaleString(locale, { style: "currency", currency });
 }
 
 // WhatsApp only supports *bold*, _italic_, ~strikethrough~ and
@@ -30,9 +35,9 @@ export function buildWhatsAppPromoText(f: PromoFields): string {
   const headline = f.introText?.trim() || "PROMOÇÃO";
   lines.push(`${emoji} *${headline}* ${emoji}`, "", `*${f.productName.trim()}*`, "");
 
-  if (f.oldPrice) lines.push(`De: ~${fmtBRL(f.oldPrice)}~`);
-  lines.push(`Por: *${fmtBRL(f.newPrice)}*`);
-  if (f.pixPrice) lines.push(`💳 No PIX: *${fmtBRL(f.pixPrice)}*`);
+  if (f.oldPrice) lines.push(`De: ~${fmtPrice(f.oldPrice, f.currency)}~`);
+  lines.push(`Por: *${fmtPrice(f.newPrice, f.currency)}*`);
+  if (f.pixPrice) lines.push(`💳 No PIX: *${fmtPrice(f.pixPrice, f.currency)}*`);
   if (f.paymentTerms?.trim()) lines.push(`💰 ${f.paymentTerms.trim()}`);
 
   if (f.couponCode?.trim()) lines.push("", `🏷️ Cupom: *${f.couponCode.trim()}*`);

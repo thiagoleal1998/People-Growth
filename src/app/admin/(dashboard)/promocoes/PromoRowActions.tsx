@@ -25,6 +25,7 @@ export function PromoRowActions({ promo }: { promo: Promo }) {
       affiliateLink: promo.affiliate_link,
       introEmoji: promo.intro_emoji,
       introText: promo.intro_text,
+      currency: promo.currency,
     });
     try {
       await navigator.clipboard.writeText(text);

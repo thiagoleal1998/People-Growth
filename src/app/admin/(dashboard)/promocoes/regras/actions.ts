@@ -11,9 +11,10 @@ export async function createSearchRule(formData: FormData) {
 
   const query = String(formData.get("query") ?? "").trim();
   const minDiscountPct = Number(formData.get("min_discount_pct") ?? 20) || 20;
+  const marketplace = String(formData.get("marketplace") ?? "mercado_livre") === "ebay" ? "ebay" : "mercado_livre";
   if (!query) redirect("/admin/promocoes/regras");
 
-  await client.from("promo_search_rules").insert({ query, min_discount_pct: minDiscountPct, active: true });
+  await client.from("promo_search_rules").insert({ query, min_discount_pct: minDiscountPct, marketplace, active: true });
 
   revalidatePath("/admin/promocoes/regras");
   redirect("/admin/promocoes/regras");

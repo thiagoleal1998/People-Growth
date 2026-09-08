@@ -6,9 +6,15 @@ import { SavedToast } from "@/components/admin/SavedToast";
 import { PromoRowActions } from "./PromoRowActions";
 import type { Promo } from "@/types/database.types";
 
-function fmtBRL(v: number): string {
-  return v.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
+function fmtPrice(v: number, currency: string): string {
+  return v.toLocaleString(currency === "BRL" ? "pt-BR" : "en-US", { style: "currency", currency });
 }
+
+const sourceLabels: Record<Promo["source"], string> = {
+  manual: "Manual",
+  mercado_livre: "Mercado Livre",
+  ebay: "eBay",
+};
 
 export default async function PromocoesPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
   const { saved } = await searchParams;
@@ -66,14 +72,12 @@ export default async function PromocoesPage({ searchParams }: { searchParams: Pr
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem", fontSize: "0.8125rem" }}>
                     {promo.old_price && (
-                      <span style={{ color: "var(--admin-faint)", textDecoration: "line-through", marginRight: "0.375rem" }}>{fmtBRL(promo.old_price)}</span>
+                      <span style={{ color: "var(--admin-faint)", textDecoration: "line-through", marginRight: "0.375rem" }}>{fmtPrice(promo.old_price, promo.currency)}</span>
                     )}
-                    <span style={{ color: "var(--admin-text)", fontWeight: 700 }}>{fmtBRL(promo.new_price)}</span>
+                    <span style={{ color: "var(--admin-text)", fontWeight: 700 }}>{fmtPrice(promo.new_price, promo.currency)}</span>
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <Badge tone={promo.source === "mercado_livre" ? "warning" : "neutral"}>
-                      {promo.source === "mercado_livre" ? "Mercado Livre" : "Manual"}
-                    </Badge>
+                    <Badge tone={promo.source === "manual" ? "neutral" : "warning"}>{sourceLabels[promo.source]}</Badge>
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.8125rem" }}>
                     {new Date(promo.created_at).toLocaleDateString("pt-BR")}

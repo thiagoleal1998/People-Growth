@@ -365,7 +365,7 @@ type AdEventRow = {
 
 type PromoRow = {
   id: string;
-  source: "manual" | "mercado_livre";
+  source: "manual" | "mercado_livre" | "ebay";
   external_id: string | null;
   product_name: string;
   image_url: string | null;
@@ -379,6 +379,7 @@ type PromoRow = {
   affiliate_link: string | null;
   intro_emoji: string | null;
   intro_text: string | null;
+  currency: string;
   sent_at: string | null;
   created_by: string | null;
   created_at: string;
@@ -389,6 +390,7 @@ type PromoSearchRuleRow = {
   id: string;
   query: string;
   min_discount_pct: number;
+  marketplace: "mercado_livre" | "ebay";
   active: boolean;
   created_at: string;
 };
