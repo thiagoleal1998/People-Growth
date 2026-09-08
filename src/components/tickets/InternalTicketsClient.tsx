@@ -176,7 +176,16 @@ export function InternalTicketsClient({
             canManage && assignAction
               ? async (userId) => {
                   const name = userId ? members.find((m) => m.id === userId)?.name ?? null : null;
-                  setItems((prev) => prev.map((it) => (it.id === openTicket.id ? { ...it, assigned_to: userId, assigned_to_name: name } : it)));
+                  // Mirrors the server's own auto-transition (assignTicket in
+                  // actions.ts): assigning someone to a still-open ticket
+                  // moves it to "in progress" immediately in the UI too.
+                  setItems((prev) =>
+                    prev.map((it) =>
+                      it.id === openTicket.id
+                        ? { ...it, assigned_to: userId, assigned_to_name: name, status: userId && it.status === "open" ? "in_progress" : it.status }
+                        : it
+                    )
+                  );
                   await assignAction(openTicket.id, userId);
                 }
               : undefined

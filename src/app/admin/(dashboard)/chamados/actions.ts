@@ -114,13 +114,37 @@ export async function assignTicket(id: string, userId: string | null) {
     if (assigneeProfile) assigneeName = await resolveActorName(assigneeProfile);
   }
 
-  await client.from("internal_tickets").update({ assigned_to: userId, assigned_to_name: userId ? assigneeName : null, updated_at: new Date().toISOString() }).eq("id", id);
+  const { data: ticket } = await client.from("internal_tickets").select("status").eq("id", id).single();
+  // Being assigned to someone is a real signal that work has started — move
+  // a freshly-opened ticket into "in progress" automatically instead of
+  // leaving it sitting in "open" until someone remembers to flip it by hand.
+  const startsProgress = Boolean(userId) && ticket?.status === "open";
+
+  await client
+    .from("internal_tickets")
+    .update({
+      assigned_to: userId,
+      assigned_to_name: userId ? assigneeName : null,
+      ...(startsProgress ? { status: "in_progress" } : {}),
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+
   await client.from("ticket_events").insert({
     ticket_id: id,
     event_type: "assigned",
     actor_name: actorName,
     detail: userId ? `Atribuído a ${assigneeName}` : "Atribuição removida",
   });
+
+  if (startsProgress) {
+    await client.from("ticket_events").insert({
+      ticket_id: id,
+      event_type: "status_changed",
+      actor_name: actorName,
+      detail: `Status alterado de "${STATUS_LABEL.open}" para "${STATUS_LABEL.in_progress}"`,
+    });
+  }
 
   revalidatePath("/admin/chamados");
   revalidatePath("/autor/chamados");
