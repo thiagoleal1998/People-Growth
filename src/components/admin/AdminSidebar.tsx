@@ -29,6 +29,7 @@ import {
   Megaphone,
   BarChart3,
   LifeBuoy,
+  Tag,
 } from "lucide-react";
 
 const links = [
@@ -47,6 +48,7 @@ const links = [
   { href: "/admin/recursos", label: "Recursos", icon: Download },
   { href: "/admin/midia", label: "Na Mídia", icon: Monitor },
   { href: "/admin/publicidade", label: "Publicidade", icon: Megaphone },
+  { href: "/admin/promocoes", label: "Promoções", icon: Tag },
   { href: "/admin/seo", label: "SEO, GEO & AEO", icon: Search },
   { href: "/admin/usuarios", label: "Usuários", icon: KeyRound, countKey: "resetRequests" as const },
   { href: "/admin/paginas", label: "Páginas Institucionais", icon: ScrollText },

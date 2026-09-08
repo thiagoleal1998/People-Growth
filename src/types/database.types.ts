@@ -363,6 +363,36 @@ type AdEventRow = {
   created_at: string;
 };
 
+type PromoRow = {
+  id: string;
+  source: "manual" | "mercado_livre";
+  external_id: string | null;
+  product_name: string;
+  image_url: string | null;
+  old_price: number | null;
+  new_price: number;
+  pix_price: number | null;
+  payment_terms: string | null;
+  coupon_code: string | null;
+  sizes_available: string | null;
+  product_link: string;
+  affiliate_link: string | null;
+  intro_emoji: string | null;
+  intro_text: string | null;
+  sent_at: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type PromoSearchRuleRow = {
+  id: string;
+  query: string;
+  min_discount_pct: number;
+  active: boolean;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -395,6 +425,8 @@ export type Database = {
       ads: { Row: AdRow; Insert: Omit<AdRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AdRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       ad_targets: { Row: AdTargetRow; Insert: AdTargetRow; Update: Partial<AdTargetRow>; Relationships: [] };
       ad_events: { Row: AdEventRow; Insert: Omit<AdEventRow, "id" | "created_at">; Update: Partial<Omit<AdEventRow, "id" | "created_at">>; Relationships: [] };
+      promos: { Row: PromoRow; Insert: Omit<PromoRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<PromoRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      promo_search_rules: { Row: PromoSearchRuleRow; Insert: Omit<PromoSearchRuleRow, "id" | "created_at">; Update: Partial<Omit<PromoSearchRuleRow, "id" | "created_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -427,5 +459,7 @@ export type PageView = PageViewRow;
 export type AdSlot = AdSlotRow;
 export type Ad = AdRow;
 export type AdTarget = AdTargetRow;
+export type Promo = PromoRow;
+export type PromoSearchRule = PromoSearchRuleRow;
 export type AdEvent = AdEventRow;
 export type InstitutionalPage = InstitutionalPageRow;
