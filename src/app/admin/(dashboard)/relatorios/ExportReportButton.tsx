@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Download, X, Loader2 } from "lucide-react";
 import { alertDialog } from "@/components/admin/dialog-store";
 
-type SectionKey = "resumo" | "paginas" | "origens" | "localizacoes" | "anuncios" | "artigos" | "atividade";
+type SectionKey = "resumo" | "paginas" | "origens" | "localizacoes" | "anuncios" | "artigos" | "chamados" | "erros" | "atividade";
 
 const SECTIONS: { key: SectionKey; label: string; hint: string }[] = [
   { key: "resumo", label: "Resumo geral", hint: "Visualizações, visitantes únicos, CTR e leitura média" },
@@ -13,6 +13,8 @@ const SECTIONS: { key: SectionKey; label: string; hint: string }[] = [
   { key: "localizacoes", label: "Localização dos visitantes", hint: "Cidade/país aproximados" },
   { key: "anuncios", label: "Desempenho dos anúncios", hint: "Impressões, cliques e CTR por anúncio" },
   { key: "artigos", label: "Estatísticas por artigo", hint: "Visualizações, comentários, curtidas e denúncias" },
+  { key: "chamados", label: "Chamados internos", hint: "Um por linha: tipo, status, responsável, quem abriu" },
+  { key: "erros", label: "Erros reportados", hint: "Um por linha: página, descrição, e-mail, status" },
   { key: "atividade", label: "Log de atividade", hint: "Quem fez o quê, e quando" },
 ];
 
@@ -34,7 +36,16 @@ export function ExportReportButton({
   const [open, setOpen] = useState(false);
   const [downloading, setDownloading] = useState(false);
   const [selected, setSelected] = useState<Set<SectionKey>>(
-    () => new Set(tab === "artigos" ? ["artigos"] : tab === "atividade" ? ["atividade"] : GENERAL_KEYS)
+    () =>
+      new Set(
+        tab === "artigos"
+          ? ["artigos"]
+          : tab === "chamados"
+            ? ["chamados", "erros"]
+            : tab === "atividade"
+              ? ["atividade"]
+              : GENERAL_KEYS
+      )
   );
 
   function toggle(key: SectionKey) {

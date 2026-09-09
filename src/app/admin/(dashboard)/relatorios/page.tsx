@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { diffWords } from "diff";
-import { Eye, Users, MousePointerClick, Percent, X, ThumbsUp, MessageCircle, Flag, MoveDown } from "lucide-react";
+import { Eye, Users, MousePointerClick, Percent, X, ThumbsUp, MessageCircle, Flag, MoveDown, Ticket, Bug } from "lucide-react";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
 import { AD_SLOT_DEFS } from "../publicidade/ad-slots";
 import { ExportReportButton } from "./ExportReportButton";
-import type { Article, Ad, Author, Comment, ActivityLog } from "@/types/database.types";
+import type { Article, Ad, Author, Comment, ActivityLog, InternalTicket, ErrorReport } from "@/types/database.types";
 
 const PERIODS = [
   { key: "7", label: "7 dias" },
@@ -17,8 +17,21 @@ const PERIODS = [
 const TABS = [
   { key: "geral", label: "Visão geral" },
   { key: "artigos", label: "Artigos" },
+  { key: "chamados", label: "Chamados" },
   { key: "atividade", label: "Relatório de atividade" },
 ] as const;
+
+const TICKET_STATUS_LABELS: Record<string, string> = { open: "Aberto", in_progress: "Em andamento", resolved: "Resolvido" };
+const TICKET_TYPE_LABELS: Record<string, string> = { bug: "Erro / bug", suggestion: "Sugestão de melhoria" };
+const ERROR_STATUS_LABELS: Record<string, string> = { new: "Novo", reviewing: "Em análise", resolved: "Resolvido" };
+
+function tally(items: string[], labels: Record<string, string>): { key: string; label: string; count: number }[] {
+  const counts = new Map<string, number>();
+  for (const it of items) counts.set(it, (counts.get(it) ?? 0) + 1);
+  return Array.from(counts.entries())
+    .map(([key, count]) => ({ key, label: labels[key] ?? key, count }))
+    .sort((a, b) => b.count - a.count);
+}
 
 const ACTIVITY_ACTION_LABELS: Record<string, { label: string; color: string }> = {
   create: { label: "Criou", color: "#06D6A0" },
@@ -361,6 +374,54 @@ export default async function RelatoriosPage({
     activityNameByEmail = new Map(activityUsers.map((u) => [u.email, u.name]));
   }
 
+  let chamadosStats: {
+    totalTickets: number;
+    openTickets: number;
+    ticketsByStatus: { key: string; label: string; count: number }[];
+    ticketsByType: { key: string; label: string; count: number }[];
+    ticketsByAssignee: { name: string; count: number }[];
+    totalErrors: number;
+    pendingErrors: number;
+    errorsByStatus: { key: string; label: string; count: number }[];
+    errorsByPage: { page: string; count: number }[];
+  } | null = null;
+  if (tab === "chamados") {
+    let ticketsQuery = client.from("internal_tickets").select("type, status, assigned_to_name, created_at");
+    if (since) ticketsQuery = ticketsQuery.gte("created_at", since);
+    if (until) ticketsQuery = ticketsQuery.lte("created_at", until);
+    let errorsQuery = client.from("error_reports").select("status, page_url, created_at");
+    if (since) errorsQuery = errorsQuery.gte("created_at", since);
+    if (until) errorsQuery = errorsQuery.lte("created_at", until);
+
+    const [{ data: ticketsData }, { data: errorsData }] = await Promise.all([ticketsQuery, errorsQuery]);
+    const tickets = (ticketsData ?? []) as Pick<InternalTicket, "type" | "status" | "assigned_to_name" | "created_at">[];
+    const errors = (errorsData ?? []) as Pick<ErrorReport, "status" | "page_url" | "created_at">[];
+
+    const assigneeCounts = new Map<string, number>();
+    for (const t of tickets) {
+      const name = t.assigned_to_name ?? "Não atribuído";
+      assigneeCounts.set(name, (assigneeCounts.get(name) ?? 0) + 1);
+    }
+
+    const pageCounts = new Map<string, number>();
+    for (const e of errors) pageCounts.set(e.page_url, (pageCounts.get(e.page_url) ?? 0) + 1);
+
+    chamadosStats = {
+      totalTickets: tickets.length,
+      openTickets: tickets.filter((t) => t.status !== "resolved").length,
+      ticketsByStatus: tally(tickets.map((t) => t.status), TICKET_STATUS_LABELS),
+      ticketsByType: tally(tickets.map((t) => t.type), TICKET_TYPE_LABELS),
+      ticketsByAssignee: Array.from(assigneeCounts.entries()).map(([name, count]) => ({ name, count })).sort((a, b) => b.count - a.count),
+      totalErrors: errors.length,
+      pendingErrors: errors.filter((e) => e.status !== "resolved").length,
+      errorsByStatus: tally(errors.map((e) => e.status), ERROR_STATUS_LABELS),
+      errorsByPage: Array.from(pageCounts.entries())
+        .map(([page, count]) => ({ page, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10),
+    };
+  }
+
   return (
     <div>
       <PageHeader
@@ -441,6 +502,148 @@ export default async function RelatoriosPage({
             </table>
           )}
         </Card>
+      ) : tab === "chamados" ? (
+        <>
+          <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", marginBottom: "1.25rem" }}>
+            <div style={{ display: "flex", gap: "0.25rem", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "0.625rem", padding: "0.25rem" }}>
+              {PERIODS.map((p) => (
+                <Link
+                  key={p.key}
+                  href={`/admin/relatorios?tab=chamados&period=${p.key}`}
+                  style={{
+                    padding: "0.375rem 0.75rem",
+                    borderRadius: "0.375rem",
+                    fontSize: "0.8125rem",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                    color: !usingCustomRange && period === p.key ? "white" : "var(--admin-muted)",
+                    backgroundColor: !usingCustomRange && period === p.key ? "#4361EE" : "transparent",
+                  }}
+                >
+                  {p.label}
+                </Link>
+              ))}
+            </div>
+
+            <form
+              method="get"
+              style={{ display: "flex", gap: "0.5rem", alignItems: "center", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "0.625rem", padding: "0.375rem 0.625rem" }}
+            >
+              <input type="hidden" name="tab" value="chamados" />
+              <input
+                type="date"
+                name="from"
+                defaultValue={from ?? ""}
+                style={{ border: "1px solid var(--admin-border-strong)", borderRadius: "0.375rem", padding: "0.3rem 0.5rem", fontSize: "0.8125rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" }}
+              />
+              <span style={{ color: "var(--admin-faint)", fontSize: "0.8125rem" }}>até</span>
+              <input
+                type="date"
+                name="to"
+                defaultValue={to ?? ""}
+                style={{ border: "1px solid var(--admin-border-strong)", borderRadius: "0.375rem", padding: "0.3rem 0.5rem", fontSize: "0.8125rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" }}
+              />
+              <button
+                type="submit"
+                style={{ backgroundColor: "#4361EE", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.375rem 0.875rem", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+              >
+                Aplicar
+              </button>
+            </form>
+          </div>
+
+          {chamadosStats && (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.25rem", marginBottom: "1.5rem" }}>
+                <StatCard icon={Ticket} label="Chamados internos" value={chamadosStats.totalTickets.toLocaleString("pt-BR")} color="#4361EE" />
+                <StatCard icon={Ticket} label="Chamados em aberto" value={chamadosStats.openTickets.toLocaleString("pt-BR")} color="#cc9200" />
+                <StatCard icon={Bug} label="Erros reportados" value={chamadosStats.totalErrors.toLocaleString("pt-BR")} color="#dc2626" />
+                <StatCard icon={Bug} label="Erros pendentes" value={chamadosStats.pendingErrors.toLocaleString("pt-BR")} color="#cc9200" />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))", gap: "1.25rem" }}>
+                <Card>
+                  <div style={{ padding: "1.5rem" }}>
+                    <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "1.25rem" }}>Chamados internos — por status</h2>
+                    {chamadosStats.ticketsByStatus.length === 0 ? (
+                      <p style={{ color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum chamado neste período.</p>
+                    ) : (
+                      chamadosStats.ticketsByStatus.map((s) => (
+                        <Bar key={s.key} label={s.label} value={s.count} max={chamadosStats!.ticketsByStatus[0].count} />
+                      ))
+                    )}
+                  </div>
+                </Card>
+
+                <Card>
+                  <div style={{ padding: "1.5rem" }}>
+                    <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "1.25rem" }}>Chamados internos — por tipo</h2>
+                    {chamadosStats.ticketsByType.length === 0 ? (
+                      <p style={{ color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum chamado neste período.</p>
+                    ) : (
+                      chamadosStats.ticketsByType.map((t) => (
+                        <Bar key={t.key} label={t.label} value={t.count} max={chamadosStats!.ticketsByType[0].count} />
+                      ))
+                    )}
+                  </div>
+                </Card>
+
+                <Card>
+                  <div style={{ padding: "1.5rem" }}>
+                    <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "1.25rem" }}>Chamados internos — por responsável</h2>
+                    {chamadosStats.ticketsByAssignee.length === 0 ? (
+                      <p style={{ color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum chamado neste período.</p>
+                    ) : (
+                      chamadosStats.ticketsByAssignee.map((a) => (
+                        <Bar key={a.name} label={a.name} value={a.count} max={chamadosStats!.ticketsByAssignee[0].count} />
+                      ))
+                    )}
+                  </div>
+                </Card>
+
+                <Card>
+                  <div style={{ padding: "1.5rem" }}>
+                    <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "1.25rem" }}>Erros reportados — por status</h2>
+                    {chamadosStats.errorsByStatus.length === 0 ? (
+                      <p style={{ color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum erro reportado neste período.</p>
+                    ) : (
+                      chamadosStats.errorsByStatus.map((s) => (
+                        <Bar key={s.key} label={s.label} value={s.count} max={chamadosStats!.errorsByStatus[0].count} />
+                      ))
+                    )}
+                  </div>
+                </Card>
+
+                <Card>
+                  <div style={{ padding: "1.5rem" }}>
+                    <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "1.25rem" }}>Páginas com mais erros reportados</h2>
+                    {chamadosStats.errorsByPage.length === 0 ? (
+                      <p style={{ color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum erro reportado neste período.</p>
+                    ) : (
+                      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
+                        <thead>
+                          <tr>
+                            {["Página", "Erros reportados"].map((h) => (
+                              <th key={h} style={{ textAlign: "left", padding: "0.5rem 0", color: "var(--admin-muted)", fontWeight: 700, fontSize: "0.75rem", textTransform: "uppercase" }}>{h}</th>
+                            ))}
+                          </tr>
+                        </thead>
+                        <tbody>
+                          {chamadosStats.errorsByPage.map((p) => (
+                            <tr key={p.page} style={{ borderTop: "1px solid var(--admin-border)" }}>
+                              <td style={{ padding: "0.625rem 0", color: "var(--admin-text)", fontWeight: 600, wordBreak: "break-all" }}>{p.page}</td>
+                              <td style={{ padding: "0.625rem 0", color: "var(--admin-text-secondary)" }}>{p.count}</td>
+                            </tr>
+                          ))}
+                        </tbody>
+                      </table>
+                    )}
+                  </div>
+                </Card>
+              </div>
+            </>
+          )}
+        </>
       ) : tab === "atividade" ? (
         <>
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", marginBottom: "1.25rem" }}>

@@ -3,9 +3,9 @@ import writeExcelFile, { type Row } from "write-excel-file/node";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { AD_SLOT_DEFS } from "@/app/admin/(dashboard)/publicidade/ad-slots";
-import type { Article, Ad, Author, Comment } from "@/types/database.types";
+import type { Article, Ad, Author, Comment, InternalTicket, ErrorReport } from "@/types/database.types";
 
-export const SECTION_KEYS = ["resumo", "paginas", "origens", "localizacoes", "anuncios", "artigos", "atividade"] as const;
+export const SECTION_KEYS = ["resumo", "paginas", "origens", "localizacoes", "anuncios", "artigos", "chamados", "erros", "atividade"] as const;
 export type SectionKey = (typeof SECTION_KEYS)[number];
 
 const HEADER = { fontWeight: "bold" } as const;
@@ -283,6 +283,71 @@ export async function GET(req: NextRequest) {
           { value: r.comments, type: Number },
           { value: r.likes, type: Number },
           { value: r.reports, type: Number },
+        ]),
+      ],
+    });
+  }
+
+  if (requested.includes("chamados")) {
+    let ticketsQuery = client.from("internal_tickets").select("ticket_number, title, type, status, assigned_to_name, created_by_name, created_at").order("created_at", { ascending: false });
+    if (since) ticketsQuery = ticketsQuery.gte("created_at", since);
+    if (until) ticketsQuery = ticketsQuery.lte("created_at", until);
+    const { data: ticketsData } = await ticketsQuery;
+    const rows = (ticketsData ?? []) as Pick<InternalTicket, "ticket_number" | "title" | "type" | "status" | "assigned_to_name" | "created_by_name" | "created_at">[];
+
+    const TICKET_TYPE_LABELS: Record<string, string> = { bug: "Erro / bug", suggestion: "Sugestão de melhoria" };
+    const TICKET_STATUS_LABELS: Record<string, string> = { open: "Aberto", in_progress: "Em andamento", resolved: "Resolvido" };
+
+    sheets.push({
+      sheet: "Chamados internos",
+      data: [
+        [
+          { value: "Número", ...HEADER },
+          { value: "Título", ...HEADER },
+          { value: "Tipo", ...HEADER },
+          { value: "Status", ...HEADER },
+          { value: "Responsável", ...HEADER },
+          { value: "Aberto por", ...HEADER },
+          { value: "Criado em", ...HEADER },
+        ],
+        ...rows.map((r) => [
+          { value: `CPG-${String(r.ticket_number).padStart(4, "0")}` },
+          { value: r.title },
+          { value: TICKET_TYPE_LABELS[r.type] ?? r.type },
+          { value: TICKET_STATUS_LABELS[r.status] ?? r.status },
+          { value: r.assigned_to_name ?? "Não atribuído" },
+          { value: r.created_by_name },
+          { value: new Date(r.created_at), type: Date, format: "dd/mm/yyyy hh:mm" },
+        ]),
+      ],
+    });
+  }
+
+  if (requested.includes("erros")) {
+    let errorsQuery = client.from("error_reports").select("page_url, description, email, status, created_at").order("created_at", { ascending: false });
+    if (since) errorsQuery = errorsQuery.gte("created_at", since);
+    if (until) errorsQuery = errorsQuery.lte("created_at", until);
+    const { data: errorsData } = await errorsQuery;
+    const rows = (errorsData ?? []) as Pick<ErrorReport, "page_url" | "description" | "email" | "status" | "created_at">[];
+
+    const ERROR_STATUS_LABELS: Record<string, string> = { new: "Novo", reviewing: "Em análise", resolved: "Resolvido" };
+
+    sheets.push({
+      sheet: "Erros reportados",
+      data: [
+        [
+          { value: "Página", ...HEADER },
+          { value: "Descrição", ...HEADER },
+          { value: "E-mail", ...HEADER },
+          { value: "Status", ...HEADER },
+          { value: "Criado em", ...HEADER },
+        ],
+        ...rows.map((r) => [
+          { value: r.page_url },
+          { value: r.description },
+          { value: r.email ?? "Anônimo" },
+          { value: ERROR_STATUS_LABELS[r.status] ?? r.status },
+          { value: new Date(r.created_at), type: Date, format: "dd/mm/yyyy hh:mm" },
         ]),
       ],
     });
