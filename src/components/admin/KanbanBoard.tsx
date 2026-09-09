@@ -33,7 +33,7 @@ export function KanbanBoard<T, S extends string>({
 
   return (
     <div style={{ display: "flex", gap: "1rem", overflowX: "auto", alignItems: "flex-start", paddingBottom: "0.5rem" }}>
-      {columns.map((col) => {
+      {columns.map((col, i) => {
         const colItems = items.filter((it) => getStatus(it) === col.id);
         const isOver = overColumn === col.id;
         return (
@@ -100,7 +100,11 @@ export function KanbanBoard<T, S extends string>({
             </div>
           </div>
         );
-      })}
+      }).reduce<ReactNode[]>((acc, col, i) => {
+        if (i > 0) acc.push(<div key={`sep-${i}`} style={{ width: "1px", alignSelf: "stretch", backgroundColor: "var(--admin-border)", flexShrink: 0 }} />);
+        acc.push(col);
+        return acc;
+      }, [])}
     </div>
   );
 }
