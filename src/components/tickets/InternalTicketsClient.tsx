@@ -1,10 +1,13 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useMemo, useState, useTransition } from "react";
 import { Plus, Trash2, X, Lightbulb, Bug } from "lucide-react";
 import { Field, Input, Select } from "@/components/admin/ui";
 import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
 import { confirmDialog } from "@/components/admin/dialog-store";
+import { KanbanBoard, type KanbanColumn } from "@/components/admin/KanbanBoard";
+import { ListKanbanToolbar, type BoardView } from "@/components/admin/ListKanbanToolbar";
+import { dateKeySaoPaulo } from "@/lib/date-key";
 import { formatTicketId } from "@/lib/display-id";
 import { TicketModal, type Member } from "./TicketModal";
 import type { InternalTicket } from "@/types/database.types";
@@ -14,6 +17,14 @@ const statusConfig: Record<InternalTicket["status"], { label: string; color: str
   in_progress: { label: "Em andamento", color: "#cc9200", bg: "rgba(255,183,3,0.1)" },
   resolved: { label: "Resolvido", color: "#04a87d", bg: "rgba(6,214,160,0.1)" },
 };
+
+const columns: KanbanColumn<InternalTicket["status"]>[] = [
+  { id: "open", label: "Aberto", color: statusConfig.open.color },
+  { id: "in_progress", label: "Em andamento", color: statusConfig.in_progress.color },
+  { id: "resolved", label: "Resolvido", color: statusConfig.resolved.color },
+];
+
+const UNASSIGNED = "__unassigned__";
 
 const typeConfig: Record<InternalTicket["type"], { label: string; icon: typeof Bug; color: string; bg: string }> = {
   bug: { label: "Erro / bug", icon: Bug, color: "#dc2626", bg: "rgba(239,68,68,0.1)" },
@@ -53,7 +64,32 @@ export function InternalTicketsClient({
   const [openId, setOpenId] = useState<string | null>(null);
   const [creating, startCreating] = useTransition();
   const [, startTransition] = useTransition();
+  const [view, setView] = useState<BoardView>("kanban");
+  const [search, setSearch] = useState("");
+  const [userFilter, setUserFilter] = useState("");
+  const [dateFrom, setDateFrom] = useState("");
+  const [dateTo, setDateTo] = useState("");
   const openTicket = items.find((i) => i.id === openId) ?? null;
+
+  const userOptions = useMemo(() => [{ value: UNASSIGNED, label: "Não atribuído" }, ...members.map((m) => ({ value: m.id, label: m.name }))], [members]);
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    return items.filter((ticket) => {
+      if (q && !ticket.title.toLowerCase().includes(q) && !ticket.description.toLowerCase().includes(q)) return false;
+      if (userFilter === UNASSIGNED && ticket.assigned_to) return false;
+      if (userFilter && userFilter !== UNASSIGNED && ticket.assigned_to !== userFilter) return false;
+      const day = dateKeySaoPaulo(ticket.created_at);
+      if (dateFrom && day < dateFrom) return false;
+      if (dateTo && day > dateTo) return false;
+      return true;
+    });
+  }, [items, search, userFilter, dateFrom, dateTo]);
+
+  async function changeStatus(id: string, status: InternalTicket["status"]) {
+    setItems((prev) => prev.map((it) => (it.id === id ? { ...it, status } : it)));
+    if (updateStatusAction) await updateStatusAction(id, status);
+  }
 
   function handleCreate(formData: FormData) {
     const type = formData.get("type") as InternalTicket["type"];
@@ -106,13 +142,72 @@ export function InternalTicketsClient({
         </form>
       )}
 
-      <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
-        {items.length === 0 ? (
-          <div style={{ padding: "3rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.9rem" }}>
-            Nenhum chamado interno até agora.
-          </div>
-        ) : (
-          items.map((ticket, idx) => {
+      <ListKanbanToolbar
+        view={view}
+        onViewChange={setView}
+        search={search}
+        onSearchChange={setSearch}
+        searchPlaceholder="Pesquisar por título ou descrição..."
+        userOptions={userOptions}
+        userValue={userFilter}
+        onUserChange={setUserFilter}
+        dateFrom={dateFrom}
+        onDateFromChange={setDateFrom}
+        dateTo={dateTo}
+        onDateToChange={setDateTo}
+      />
+
+      {filtered.length === 0 ? (
+        <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "3rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.9rem" }}>
+          Nenhum chamado interno encontrado.
+        </div>
+      ) : view === "kanban" ? (
+        <KanbanBoard
+          columns={columns}
+          items={filtered}
+          getId={(ticket) => ticket.id}
+          getStatus={(ticket) => ticket.status}
+          onMove={(ticket, status) => changeStatus(ticket.id, status)}
+          onCardClick={(ticket) => setOpenId(ticket.id)}
+          renderCard={(ticket) => {
+            const t = typeConfig[ticket.type];
+            const TypeIcon = t.icon;
+            return (
+              <div>
+                <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.5rem" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", backgroundColor: t.bg, color: t.color, padding: "0.2rem 0.5rem", borderRadius: "9999px", fontSize: "0.6875rem", fontWeight: 700, flexShrink: 0 }}>
+                    <TypeIcon size={11} /> {t.label}
+                  </span>
+                  {canManage && deleteAction && (
+                    <button
+                      type="button"
+                      onClick={async (e) => {
+                        e.stopPropagation();
+                        if (await confirmDialog("Excluir este chamado?", { danger: true, confirmText: "Excluir" })) {
+                          setItems((prev) => prev.filter((it) => it.id !== ticket.id));
+                          startTransition(() => deleteAction(ticket.id));
+                        }
+                      }}
+                      style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer", flexShrink: 0, padding: "0.125rem" }}
+                      title="Excluir chamado"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                  )}
+                </div>
+                <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--admin-text)", marginTop: "0.5rem" }}>
+                  <span style={{ color: "var(--admin-faint)", fontWeight: 700, marginRight: "0.375rem" }}>{formatTicketId(ticket.ticket_number)}</span>
+                  {ticket.title}
+                </div>
+                <div style={{ fontSize: "0.75rem", color: "var(--admin-muted)", marginTop: "0.375rem" }}>{ticket.assigned_to_name ?? "Não atribuído"}</div>
+                <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.375rem" }}>{formatDate(ticket.created_at)}</div>
+              </div>
+            );
+          }}
+        />
+      ) : (
+        <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
+          {filtered.map((ticket, idx) => {
             const s = statusConfig[ticket.status];
             const t = typeConfig[ticket.type];
             const TypeIcon = t.icon;
@@ -154,9 +249,9 @@ export function InternalTicketsClient({
                 )}
               </div>
             );
-          })
-        )}
-      </div>
+          })}
+        </div>
+      )}
 
       {openTicket && (
         <TicketModal
@@ -164,14 +259,7 @@ export function InternalTicketsClient({
           canManage={canManage}
           members={members}
           onClose={() => setOpenId(null)}
-          onUpdateStatus={
-            canManage && updateStatusAction
-              ? async (status) => {
-                  setItems((prev) => prev.map((it) => (it.id === openTicket.id ? { ...it, status } : it)));
-                  await updateStatusAction(openTicket.id, status);
-                }
-              : undefined
-          }
+          onUpdateStatus={canManage && updateStatusAction ? (status) => changeStatus(openTicket.id, status) : undefined}
           onAssign={
             canManage && assignAction
               ? async (userId) => {
