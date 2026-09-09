@@ -4,6 +4,7 @@ import { Eye, Users, MousePointerClick, Percent, X, ThumbsUp, MessageCircle, Fla
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
 import { AD_SLOT_DEFS } from "../publicidade/ad-slots";
+import { ExportReportButton } from "./ExportReportButton";
 import type { Article, Ad, Author, Comment, ActivityLog } from "@/types/database.types";
 
 const PERIODS = [
@@ -367,24 +368,28 @@ export default async function RelatoriosPage({
         subtitle="Métricas reais de audiência do site — visitas anônimas, sem cookies de rastreamento."
       />
 
-      <div style={{ display: "flex", gap: "0.25rem", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "0.625rem", padding: "0.25rem", marginBottom: "1.25rem", width: "fit-content" }}>
-        {TABS.map((t) => (
-          <Link
-            key={t.key}
-            href={t.key === "geral" ? `/admin/relatorios?${new URLSearchParams(rangeQuery).toString()}` : `/admin/relatorios?tab=${t.key}`}
-            style={{
-              padding: "0.5rem 1rem",
-              borderRadius: "0.5rem",
-              fontSize: "0.8125rem",
-              fontWeight: 700,
-              textDecoration: "none",
-              color: tab === t.key ? "white" : "var(--admin-muted)",
-              backgroundColor: tab === t.key ? "#4361EE" : "transparent",
-            }}
-          >
-            {t.label}
-          </Link>
-        ))}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.25rem" }}>
+        <div style={{ display: "flex", gap: "0.25rem", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "0.625rem", padding: "0.25rem", width: "fit-content" }}>
+          {TABS.map((t) => (
+            <Link
+              key={t.key}
+              href={t.key === "geral" ? `/admin/relatorios?${new URLSearchParams(rangeQuery).toString()}` : `/admin/relatorios?tab=${t.key}`}
+              style={{
+                padding: "0.5rem 1rem",
+                borderRadius: "0.5rem",
+                fontSize: "0.8125rem",
+                fontWeight: 700,
+                textDecoration: "none",
+                color: tab === t.key ? "white" : "var(--admin-muted)",
+                backgroundColor: tab === t.key ? "#4361EE" : "transparent",
+              }}
+            >
+              {t.label}
+            </Link>
+          ))}
+        </div>
+
+        <ExportReportButton tab={tab} period={period} from={from} to={to} userFilter={userFilter} />
       </div>
 
       {tab === "artigos" ? (
