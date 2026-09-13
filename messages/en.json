@@ -139,6 +139,11 @@
     "title": "Testimonials",
     "subtitle": "What clients, partners and colleagues say."
   },
+  "faq": {
+    "title": "Frequently Asked Questions",
+    "subtitle": "Quick answers to the most common questions.",
+    "empty": "No questions added yet."
+  },
   "contact": {
     "title": "Let's talk?",
     "subtitle": "Get in touch for consulting, training or partnerships.",

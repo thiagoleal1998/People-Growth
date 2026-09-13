@@ -139,6 +139,11 @@
     "title": "Depoimentos",
     "subtitle": "O que clientes, parceiros e colegas dizem."
   },
+  "faq": {
+    "title": "Perguntas Frequentes",
+    "subtitle": "Respostas rápidas para as dúvidas mais comuns.",
+    "empty": "Nenhuma pergunta cadastrada no momento."
+  },
   "contact": {
     "title": "Vamos conversar?",
     "subtitle": "Entre em contato para consultorias, treinamentos ou parcerias.",

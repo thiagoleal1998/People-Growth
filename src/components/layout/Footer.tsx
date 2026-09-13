@@ -134,6 +134,7 @@ export function Footer({ logoUrl, contactEmail }: { logoUrl?: string | null; con
                 { label: "Cursos", href: "/cursos" as const },
                 { label: "Laboratório IA", href: "/laboratorio-ia" as const },
                 { label: "Ferramentas", href: "/ferramentas" as const },
+                { label: "FAQ", href: "/faq" as const },
               ].map(({ label, href }) => (
                 <li key={label}>
                   <Link href={href} style={{ fontSize: "0.875rem", transition: "color 0.2s" }}>
