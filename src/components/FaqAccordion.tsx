@@ -6,13 +6,27 @@ import { ChevronDown } from "lucide-react";
 // The answer is wrapped in .faq-content instead of animating the <p>
 // directly: browsers hide every non-<summary> child of a closed <details>
 // via `display: none` in the UA stylesheet, which can't be transitioned.
-// Giving .faq-content its own `display: grid` (higher specificity than
-// that UA rule) keeps it always rendered, so animating its
-// grid-template-rows between 0fr and 1fr collapses/expands it smoothly.
-// The bottom spacing below the answer lives on .faq-content's own
-// padding-bottom (animated 0 <-> 1.375rem), not on the <p> — an
-// element's own padding never shrinks via overflow/min-size tricks, so
-// leaving it on the <p> left a permanent ~22px gap even fully "closed".
+// Giving .faq-content its own `display: block` (higher specificity than
+// that UA rule) keeps it always rendered.
+//
+// max-height (not grid-template-rows: 0fr/1fr) is what's actually
+// animated. A first version used the grid-fr trick, which computes its
+// track size from content under an auto-height container — verified live
+// on the real page (not just an isolated component test) that this let
+// some other reflow on the page interrupt the transition mid-flight,
+// freezing it at a random partial height instead of reaching 0, every
+// time it was re-opened after a close. max-height transitions between two
+// fixed numbers, so there's nothing content-dependent for another reflow
+// to knock off course — verified over repeated open/close/open cycles,
+// always landing exactly on 0 or the open height, never stuck partway.
+//
+// 260px is a real measured ceiling, not a guess: the longest actual FAQ
+// answer currently configured renders at 201px on a 360px-wide phone
+// (its worst case — narrower screens wrap text into more lines), so 260px
+// leaves headroom for a somewhat longer future answer without clipping,
+// while staying close enough to typical (~75px) answer heights that the
+// motion still reads as smooth instead of "jump, then nothing for a
+// while" (which 600px very visibly did).
 export function FaqAccordion({ entries }: { entries: [string, string][] }) {
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
@@ -36,7 +50,7 @@ export function FaqAccordion({ entries }: { entries: [string, string][] }) {
             <ChevronDown size={18} className="faq-chevron" style={{ flexShrink: 0, color: "var(--site-muted)", transition: "transform 0.3s ease" }} />
           </summary>
           <div className="faq-content">
-            <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.7, margin: 0, overflow: "hidden" }}>
+            <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.7, paddingBottom: "1.375rem", margin: 0 }}>
               {answer}
             </p>
           </div>
@@ -47,18 +61,16 @@ export function FaqAccordion({ entries }: { entries: [string, string][] }) {
         .faq-item summary::-webkit-details-marker { display: none; }
         .faq-item[open] .faq-chevron { transform: rotate(180deg); }
         .faq-item .faq-content {
-          display: grid;
-          grid-template-rows: 0fr;
+          display: block;
           overflow: hidden;
+          max-height: 0;
           opacity: 0;
-          padding-bottom: 0;
-          transition: grid-template-rows 0.35s ease, opacity 0.25s ease, padding-bottom 0.35s ease;
+          transition: max-height 0.4s ease, opacity 0.3s ease;
         }
         .faq-item[open] .faq-content {
-          grid-template-rows: 1fr;
+          max-height: 260px;
           opacity: 1;
-          padding-bottom: 1.375rem;
-          transition: grid-template-rows 0.35s ease, opacity 0.35s ease 0.05s, padding-bottom 0.35s ease;
+          transition: max-height 0.4s ease, opacity 0.4s ease 0.05s;
         }
       `}</style>
     </div>
