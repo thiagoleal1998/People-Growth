@@ -1,28 +1,17 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
-import { ChevronDown } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getFaqEntriesFromConfig } from "@/lib/faq";
+import { FaqAccordion } from "@/components/FaqAccordion";
 
 export const revalidate = 300;
-
-type SiteConfigRow = { key: string; value: string | null };
 
 async function getFaqEntries(locale: string) {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = (await (supabase as any).from("site_config").select("*")) as { data: SiteConfigRow[] | null };
+  const { data } = (await (supabase as any).from("site_config").select("*")) as { data: { key: string; value: string | null }[] | null };
   const config = Object.fromEntries((data ?? []).map((row) => [row.key, row.value ?? ""]));
-
-  // Same source and "question | answer" format as the invisible FAQPage
-  // JSON-LD schema in [locale]/layout.tsx — this page is what a human
-  // visitor actually sees, the schema is what search engines/voice
-  // assistants read; both are fed by the same admin-editable text.
-  const faqKey = locale === "en" ? "aeo_faq_en" : "aeo_faq_pt";
-  const raw = config[faqKey] || config.aeo_faq_pt || "";
-  return raw
-    .split("\n")
-    .map((line: string) => line.split("|").map((part) => part.trim()))
-    .filter((parts: string[]): parts is [string, string] => parts.length === 2 && Boolean(parts[0]) && Boolean(parts[1]));
+  return getFaqEntriesFromConfig(config, locale);
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -50,39 +39,9 @@ export default async function FaqPage({ params }: { params: Promise<{ locale: st
           {entries.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>{t("empty")}</div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
-              {entries.map(([question, answer], i) => (
-                <details key={i} className="faq-item" style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", border: "1px solid var(--site-border)", padding: "0.25rem 1.5rem" }}>
-                  <summary
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "space-between",
-                      gap: "1rem",
-                      padding: "1.125rem 0",
-                      cursor: "pointer",
-                      listStyle: "none",
-                      fontWeight: 700,
-                      fontSize: "1rem",
-                      color: "var(--site-text)",
-                    }}
-                  >
-                    {question}
-                    <ChevronDown size={18} className="faq-chevron" style={{ flexShrink: 0, color: "var(--site-muted)", transition: "transform 0.2s" }} />
-                  </summary>
-                  <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.7, paddingBottom: "1.375rem", margin: 0 }}>
-                    {answer}
-                  </p>
-                </details>
-              ))}
-            </div>
+            <FaqAccordion entries={entries} />
           )}
         </div>
-
-        <style>{`
-          .faq-item summary::-webkit-details-marker { display: none; }
-          .faq-item[open] .faq-chevron { transform: rotate(180deg); }
-        `}</style>
       </section>
     </>
   );

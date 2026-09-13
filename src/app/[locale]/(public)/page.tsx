@@ -1,4 +1,4 @@
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import {
   ArrowRight,
@@ -12,6 +12,8 @@ import {
   Radio,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getFaqEntriesFromConfig } from "@/lib/faq";
+import { FaqAccordion } from "@/components/FaqAccordion";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
@@ -82,6 +84,8 @@ export const revalidate = 300;
 
 export default async function HomePage() {
   const t = await getTranslations("home");
+  const tFaq = await getTranslations("faq");
+  const locale = await getLocale();
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -112,6 +116,7 @@ export default async function HomePage() {
   const liveStreamUrl = config.live_stream_url ? toYouTubeEmbedUrl(config.live_stream_url) : "";
   const shortsVideoUrl = config.shorts_video_url ? toYouTubeEmbedUrl(config.shorts_video_url) : "";
   const isLive = config.is_live === "true" && Boolean(liveStreamUrl);
+  const faqEntries = getFaqEntriesFromConfig(config, locale);
   const [featured, ...rest] = allArticles;
   const secondary = rest.slice(0, 3);
   // Deliberately uncapped: this sits next to a sidebar of fixed-height video
@@ -1037,6 +1042,29 @@ export default async function HomePage() {
           </Reveal>
         </div>
       </section>
+
+      {/* FAQ — same admin-editable text (Admin > SEO > AEO) that feeds the
+          invisible FAQPage schema; shown here so it's actually visible too. */}
+      {faqEntries.length > 0 && (
+        <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
+          <div className="container-xl" style={{ maxWidth: "760px", margin: "0 auto" }}>
+            <Reveal>
+              <div style={{ textAlign: "center", marginBottom: "2.5rem" }}>
+                <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>
+                  {tFaq("title")}
+                </h2>
+                <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem" }}>{tFaq("subtitle")}</p>
+              </div>
+              <FaqAccordion entries={faqEntries} />
+              <div style={{ textAlign: "center", marginTop: "2rem" }}>
+                <Link href="/faq" style={{ color: "#4361EE", fontWeight: 700, fontSize: "0.9375rem", textDecoration: "none" }}>
+                  Ver todas as perguntas →
+                </Link>
+              </div>
+            </Reveal>
+          </div>
+        </section>
+      )}
     </>
   );
 }

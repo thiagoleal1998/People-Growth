@@ -7,6 +7,7 @@ import NextTopLoader from "nextjs-toploader";
 import { Analytics } from "@/components/Analytics";
 import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
+import { getFaqEntriesFromConfig } from "@/lib/faq";
 import "../globals.css";
 
 type SiteConfigRow = { key: string; value: string | null };
@@ -94,11 +95,7 @@ export default async function LocaleLayout({
     sameAs: [config.linkedin, config.instagram].filter(Boolean),
   };
 
-  const faqKey = locale === "en" ? "aeo_faq_en" : "aeo_faq_pt";
-  const faqEntries = (config[faqKey] || config.aeo_faq_pt || "")
-    .split("\n")
-    .map((line) => line.split("|").map((part) => part.trim()))
-    .filter((parts) => parts.length === 2 && parts[0] && parts[1]);
+  const faqEntries = getFaqEntriesFromConfig(config, locale);
 
   const faqSchema = faqEntries.length > 0 ? {
     "@context": "https://schema.org",
