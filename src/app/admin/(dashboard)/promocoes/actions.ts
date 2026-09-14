@@ -49,9 +49,10 @@ export async function upsertPromo(id: string | null, formData: FormData) {
   if (promoId) {
     // A promo found automatically (Mercado Livre/eBay) keeps its "source",
     // "external_id" and "currency" when edited — only manual
-    // field-completion should change here, not what created the row or
-    // what currency its price fields are actually in (an eBay promo is USD;
-    // overwriting that back to "BRL" here would mislabel its prices).
+    // field-completion should change here, not what created the row. Every
+    // new eBay promo is already converted to BRL before insertion, but this
+    // still protects any older row that predates that conversion and still
+    // has "USD" stored, so editing it doesn't silently relabel its prices.
     delete payload.source;
     delete payload.currency;
     const { error } = await client.from("promos").update({ ...payload, updated_at: new Date().toISOString() }).eq("id", promoId);

@@ -10,9 +10,11 @@ export type PromoFields = {
   affiliateLink: string | null;
   introEmoji: string | null;
   introText: string | null;
-  // Manual and Mercado Livre promos are always BRL; eBay's catalog is USD
-  // (its search API has no BRL pricing) — formatting has to follow suit
-  // instead of mislabeling a dollar amount with "R$".
+  // Every promo this system creates is BRL — eBay's catalog prices in USD,
+  // but the cron converts it to BRL at the day's rate before ever writing a
+  // row, so nothing downstream needs to format a non-BRL amount. This field
+  // stays currency-aware only in case an older row (from before that
+  // conversion existed) still has "USD" stored.
   currency: string;
 };
 

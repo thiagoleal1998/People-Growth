@@ -72,12 +72,29 @@ type EbaySearchItem = {
   marketingPrice?: { originalPrice: { value: string }; discountPercentage: string };
 };
 
-// eBay's catalog is international/USD — a real fallback since it's the
-// only marketplace API that works without an approval wait right now, but
-// a poor fit for a Brazilian audience compared to Mercado Livre.
-// marketingPrice (with a real discountPercentage) is only present on items
-// eBay itself is treating as "on sale", which is exactly what's wanted here.
-async function searchEbay(query: string, minDiscountPct: number): Promise<{ deals: Deal[]; error?: string }> {
+// The AwesomeAPI feed this project's own CurrencyTicker already uses —
+// proven reliable elsewhere in the codebase, so reused here rather than
+// picking a new provider just for this.
+async function getUsdToBrlRate(): Promise<number> {
+  const res = await fetch("https://economia.awesomeapi.com.br/json/last/USD-BRL");
+  if (!res.ok) throw new Error(`Cotação USD-BRL respondeu ${res.status}`);
+  const json = (await res.json()) as { USDBRL?: { bid?: string } };
+  const rate = Number(json.USDBRL?.bid);
+  if (!rate || Number.isNaN(rate)) throw new Error("Cotação USD-BRL inválida");
+  return rate;
+}
+
+// eBay's catalog is international — a real fallback since it's the only
+// marketplace API that works without an approval wait right now, but a
+// poor fit for a Brazilian audience compared to Mercado Livre. Every promo
+// in this system should read in reais regardless of source, so USD prices
+// (EBAY_US marketplace below always prices in USD) are converted at the
+// day's rate right here, once, rather than carrying mixed currencies into
+// the admin list/WhatsApp text/export and converting at display time in
+// several places. marketingPrice (with a real discountPercentage) is only
+// present on items eBay itself is treating as "on sale", which is exactly
+// what's wanted here.
+async function searchEbay(query: string, minDiscountPct: number, usdToBrlRate: number): Promise<{ deals: Deal[]; error?: string }> {
   let token: string;
   try {
     token = await getEbayAccessToken();
@@ -99,10 +116,10 @@ async function searchEbay(query: string, minDiscountPct: number): Promise<{ deal
       externalId: item.itemId,
       productName: item.title,
       imageUrl: item.image?.imageUrl ?? null,
-      oldPrice: Number(item.marketingPrice!.originalPrice.value),
-      newPrice: Number(item.price.value),
+      oldPrice: Math.round(Number(item.marketingPrice!.originalPrice.value) * usdToBrlRate * 100) / 100,
+      newPrice: Math.round(Number(item.price.value) * usdToBrlRate * 100) / 100,
       productLink: item.itemWebUrl,
-      currency: item.price.currency || "USD",
+      currency: "BRL",
     }));
   return { deals };
 }
@@ -133,9 +150,24 @@ export async function GET(request: NextRequest) {
   let created = 0;
   const errors: string[] = [];
 
+  // Fetched once per run (not per rule) — every promo must read in reais,
+  // so any active eBay rule needs today's rate before it can run at all.
+  let usdToBrlRate: number | null = null;
+  if (rules.some((r) => r.marketplace === "ebay")) {
+    try {
+      usdToBrlRate = await getUsdToBrlRate();
+    } catch (err) {
+      errors.push(`cotação USD-BRL: ${err instanceof Error ? err.message : String(err)}`);
+    }
+  }
+
   for (const rule of rules) {
     try {
-      const { deals, error } = rule.marketplace === "ebay" ? await searchEbay(rule.query, rule.min_discount_pct) : await searchMercadoLivre(rule.query, rule.min_discount_pct);
+      if (rule.marketplace === "ebay" && !usdToBrlRate) {
+        errors.push(`${rule.query} (ebay): sem cotação USD-BRL disponível, pulado nesta execução`);
+        continue;
+      }
+      const { deals, error } = rule.marketplace === "ebay" ? await searchEbay(rule.query, rule.min_discount_pct, usdToBrlRate!) : await searchMercadoLivre(rule.query, rule.min_discount_pct);
       if (error) {
         errors.push(`${rule.query} (${rule.marketplace}): ${error}`);
         continue;
@@ -150,7 +182,16 @@ export async function GET(request: NextRequest) {
       const externalIds = deals.map((d) => d.externalId);
       const { data: existing } = await client.from("promos").select("external_id").in("external_id", externalIds);
       const existingIds = new Set(((existing ?? []) as { external_id: string }[]).map((e) => e.external_id));
-      const newDeals = deals.filter((d) => !existingIds.has(d.externalId));
+      // eBay's search results have occasionally repeated the same item
+      // (multi-variation listings) within one response — deduping here too
+      // (not just against what's already in the DB) avoids the whole batch
+      // insert below failing on a same-request duplicate external_id.
+      const seenInThisRun = new Set<string>();
+      const newDeals = deals.filter((d) => {
+        if (existingIds.has(d.externalId) || seenInThisRun.has(d.externalId)) return false;
+        seenInThisRun.add(d.externalId);
+        return true;
+      });
       if (newDeals.length === 0) continue;
 
       const { error: insertError } = await client.from("promos").insert(
