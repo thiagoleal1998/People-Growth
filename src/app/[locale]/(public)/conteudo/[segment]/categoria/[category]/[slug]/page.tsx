@@ -37,11 +37,16 @@ async function getArticle(slug: string) {
     .single();
   if (!article) return null;
 
-  const [categoryRes, authorRes, commentsRes] = await Promise.all([
+  const [categoryRes, authorRes, commentsRes, allAuthorsRes] = await Promise.all([
     article.category_id ? client.from("categories").select("*").eq("id", article.category_id).single() : Promise.resolve({ data: null }),
     article.author_id ? client.from("authors").select("*").eq("id", article.author_id).single() : Promise.resolve({ data: null }),
     client.from("comments").select("*").eq("article_id", article.id).eq("status", "approved").order("created_at", { ascending: false }),
+    client.from("authors").select("*"),
   ]);
+  // Used to show "Por {autor}" on each "Leia também" card below — a
+  // separate fetch of every author rather than a join, matching the same
+  // pattern already used on the homepage/category/search listings.
+  const authorById = new Map(((allAuthorsRes.data ?? []) as Author[]).map((a) => [a.id, a]));
 
   let related: ArticleWithCategory[] = [];
   if (article.category_id) {
@@ -73,6 +78,7 @@ async function getArticle(slug: string) {
     author: authorRes.data as Author | null,
     comments: (commentsRes.data ?? []) as Comment[],
     related,
+    authorById,
   };
 }
 
@@ -125,7 +131,7 @@ export default async function ArticlePage({
 
   if (!result) notFound();
 
-  const { article, category: categoryRow, author, comments, related } = result;
+  const { article, category: categoryRow, author, comments, related, authorById } = result;
 
   // Self-healing canonical URL: if the format/category in the address bar
   // doesn't match this article's actual data (stale link, category changed
@@ -392,6 +398,11 @@ export default async function ArticlePage({
                       <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", lineHeight: 1.4 }}>
                         {r.title_pt}
                       </h3>
+                      {r.author_id && authorById.get(r.author_id) && (
+                        <span style={{ display: "block", marginTop: "0.375rem", fontSize: "0.75rem", color: "var(--site-faint)" }}>
+                          Por {authorById.get(r.author_id)!.name}
+                        </span>
+                      )}
                     </Link>
                   ))}
                 </div>

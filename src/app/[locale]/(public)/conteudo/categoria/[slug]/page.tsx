@@ -5,7 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { FormatTag } from "@/components/FormatTag";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
-import type { Article, Category } from "@/types/database.types";
+import type { Article, Author, Category } from "@/types/database.types";
 
 export const revalidate = 300;
 
@@ -17,14 +17,21 @@ async function getCategoryData(slug: string) {
   const { data: category } = await client.from("categories").select("*").eq("slug", slug).single();
   if (!category) return null;
 
-  const { data: articlesData } = await client
-    .from("articles")
-    .select("*")
-    .eq("category_id", category.id)
-    .eq("status", "published")
-    .order("published_at", { ascending: false });
+  const [{ data: articlesData }, { data: authorsData }] = await Promise.all([
+    client
+      .from("articles")
+      .select("*")
+      .eq("category_id", category.id)
+      .eq("status", "published")
+      .order("published_at", { ascending: false }),
+    client.from("authors").select("*"),
+  ]);
 
-  return { category: category as Category, articles: (articlesData ?? []) as Article[] };
+  return {
+    category: category as Category,
+    articles: (articlesData ?? []) as Article[],
+    authorById: new Map(((authorsData ?? []) as Author[]).map((a) => [a.id, a])),
+  };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
@@ -42,7 +49,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
   if (!result) notFound();
 
-  const { category, articles } = result;
+  const { category, articles, authorById } = result;
 
   return (
     <>
@@ -106,9 +113,10 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                           {article.excerpt_pt}
                         </p>
                       )}
-                      {article.published_at && (
+                      {(article.author_id || article.published_at) && (
                         <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
-                          {new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                          {article.author_id && authorById.get(article.author_id) && <>Por {authorById.get(article.author_id)!.name} · </>}
+                          {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                         </span>
                       )}
                     </div>

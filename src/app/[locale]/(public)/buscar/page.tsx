@@ -3,7 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { Search, Calendar } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
-import type { Article, Category } from "@/types/database.types";
+import type { Article, Author, Category } from "@/types/database.types";
 
 type ArticleWithCategory = Article & { categories: Pick<Category, "slug"> | null };
 
@@ -17,18 +17,23 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const query = (q ?? "").trim();
 
   let results: ArticleWithCategory[] = [];
+  let authorById = new Map<string, Author>();
   if (query) {
     const supabase = await createClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const client = supabase as any;
-    const { data } = await client
-      .from("articles")
-      .select("*, categories(slug)")
-      .eq("status", "published")
-      .or(`title_pt.ilike.%${query}%,excerpt_pt.ilike.%${query}%,content_pt.ilike.%${query}%`)
-      .order("published_at", { ascending: false })
-      .limit(30);
+    const [{ data }, { data: authorsData }] = await Promise.all([
+      client
+        .from("articles")
+        .select("*, categories(slug)")
+        .eq("status", "published")
+        .or(`title_pt.ilike.%${query}%,excerpt_pt.ilike.%${query}%,content_pt.ilike.%${query}%`)
+        .order("published_at", { ascending: false })
+        .limit(30),
+      client.from("authors").select("*"),
+    ]);
     results = (data ?? []) as ArticleWithCategory[];
+    authorById = new Map(((authorsData ?? []) as Author[]).map((a) => [a.id, a]));
   }
 
   return (
@@ -85,9 +90,11 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                     {article.excerpt_pt}
                   </p>
                 )}
-                {article.published_at && (
+                {(article.author_id || article.published_at) && (
                   <span style={{ display: "flex", alignItems: "center", gap: "0.3125rem", fontSize: "0.75rem", color: "var(--site-faint)" }}>
-                    <Calendar size={12} /> {new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                    <Calendar size={12} />
+                    {article.author_id && authorById.get(article.author_id) && <>Por {authorById.get(article.author_id)!.name} · </>}
+                    {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                   </span>
                 )}
               </div>

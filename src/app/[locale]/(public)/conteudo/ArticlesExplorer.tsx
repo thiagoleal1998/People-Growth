@@ -16,7 +16,7 @@ function matches(article: Article, query: string) {
   );
 }
 
-function ArticleRow({ article, category }: { article: Article; category: Category | undefined }) {
+function ArticleRow({ article, category, author }: { article: Article; category: Category | undefined; author: Author | undefined }) {
   return (
     <Link
       href={articleHref(article, category?.slug)}
@@ -76,6 +76,7 @@ function ArticleRow({ article, category }: { article: Article; category: Categor
             </p>
           )}
           <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
+            {author && <>Por {author.name} · </>}
             {/* This is a Client Component — Next.js server-renders it once
                 for the initial HTML, then hydrates it in the browser.
                 toLocaleDateString() with no timeZone falls back to the
@@ -139,7 +140,7 @@ export function ArticlesExplorer({
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                 {results.map((article) => (
-                  <ArticleRow key={article.id} article={article} category={article.category_id ? categoryById.get(article.category_id) : undefined} />
+                  <ArticleRow key={article.id} article={article} category={article.category_id ? categoryById.get(article.category_id) : undefined} author={article.author_id ? authorById.get(article.author_id) : undefined} />
                 ))}
               </div>
             )}
@@ -234,7 +235,7 @@ export function ArticlesExplorer({
                 </h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                   {rest.map((article) => (
-                    <ArticleRow key={article.id} article={article} category={article.category_id ? categoryById.get(article.category_id) : undefined} />
+                    <ArticleRow key={article.id} article={article} category={article.category_id ? categoryById.get(article.category_id) : undefined} author={article.author_id ? authorById.get(article.author_id) : undefined} />
                   ))}
                 </div>
               </>

@@ -100,6 +100,7 @@ export default async function HomePage() {
 
   const allArticles = (articlesData ?? []) as ArticleWithCategory[];
   const authors = (authorsData ?? []) as Author[];
+  const authorById = new Map(authors.map((a) => [a.id, a]));
   const founderFirstNames = authors.map((a) => a.name.split(" ")[0]);
   const founderNamesText =
     founderFirstNames.length > 1
@@ -199,6 +200,11 @@ export default async function HomePage() {
                         {featured.excerpt_pt}
                       </p>
                     )}
+                    {featured.author_id && authorById.get(featured.author_id) && (
+                      <span style={{ display: "block", marginTop: "0.5rem", fontSize: "0.875rem", color: "var(--site-faint)" }}>
+                        Por {authorById.get(featured.author_id)!.name}
+                      </span>
+                    )}
                   </div>
                 </Link>
 
@@ -241,6 +247,11 @@ export default async function HomePage() {
                         <h4 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", lineHeight: 1.4 }}>
                           {article.title_pt}
                         </h4>
+                        {article.author_id && authorById.get(article.author_id) && (
+                          <span style={{ display: "block", marginTop: "0.25rem", fontSize: "0.75rem", color: "var(--site-faint)" }}>
+                            Por {authorById.get(article.author_id)!.name}
+                          </span>
+                        )}
                       </Link>
                     ))}
                   </div>
@@ -316,6 +327,7 @@ export default async function HomePage() {
                             </p>
                           )}
                           <span style={{ fontSize: "0.75rem", color: "var(--site-faint)" }}>
+                            {article.author_id && authorById.get(article.author_id) && <>Por {authorById.get(article.author_id)!.name} · </>}
                             {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
                           </span>
                         </div>
