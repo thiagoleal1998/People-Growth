@@ -94,6 +94,13 @@ async function getUsdToBrlRate(): Promise<number> {
 // several places. marketingPrice (with a real discountPercentage) is only
 // present on items eBay itself is treating as "on sale", which is exactly
 // what's wanted here.
+//
+// itemLocationCountry:BR restricts results to sellers physically located
+// in Brazil, so a promo never means international shipping — confirmed
+// against the real API that this cuts volume hard (e.g. "livros" goes
+// from ~19,000 matches worldwide to 200 from Brazil, with far fewer of
+// those actually marked on sale), but that trade-off was a deliberate
+// choice over more volume with cross-border shipping.
 async function searchEbay(query: string, minDiscountPct: number, usdToBrlRate: number): Promise<{ deals: Deal[]; error?: string }> {
   let token: string;
   try {
@@ -102,7 +109,7 @@ async function searchEbay(query: string, minDiscountPct: number, usdToBrlRate: n
     return { deals: [], error: err instanceof Error ? err.message : String(err) };
   }
 
-  const res = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?q=${encodeURIComponent(query)}&limit=50`, {
+  const res = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?q=${encodeURIComponent(query)}&filter=${encodeURIComponent("itemLocationCountry:BR")}&limit=50`, {
     headers: { Authorization: `Bearer ${token}`, "X-EBAY-C-MARKETPLACE-ID": "EBAY_US" },
   });
   if (!res.ok) return { deals: [], error: `eBay respondeu ${res.status}` };
