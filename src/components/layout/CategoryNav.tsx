@@ -1,10 +1,13 @@
+import { getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
+import { pickLocale } from "@/lib/locale-content";
 import type { Category } from "@/types/database.types";
 
 const order = ["negocios", "marketing", "ia", "politica", "esporte", "economia", "cultura", "meio-ambiente"];
 
 export async function CategoryNav() {
+  const locale = await getLocale();
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("categories").select("*");
@@ -37,7 +40,7 @@ export async function CategoryNav() {
               whiteSpace: "nowrap",
             }}
           >
-            {category.name_pt}
+            {pickLocale(locale, category.name_pt, category.name_en)}
           </Link>
         ))}
         <Link
@@ -53,7 +56,7 @@ export async function CategoryNav() {
             whiteSpace: "nowrap",
           }}
         >
-          Colunistas
+          {locale === "en" ? "Columnists" : "Colunistas"}
         </Link>
       </div>
     </nav>

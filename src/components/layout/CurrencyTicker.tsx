@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import { ArrowUp, ArrowDown } from "lucide-react";
 
 type Quote = { bid: number; pctChange: number };
@@ -13,6 +14,7 @@ const ENDPOINT = "https://economia.awesomeapi.com.br/json/last/USD-BRL,EUR-BRL";
 const REFRESH_MS = 5 * 60 * 1000;
 
 export function CurrencyTicker() {
+  const locale = useLocale();
   const [quotes, setQuotes] = useState<Quotes | null>(null);
 
   useEffect(() => {
@@ -44,20 +46,21 @@ export function CurrencyTicker() {
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-      {quotes.USD && <CurrencyItem label="Dólar" quote={quotes.USD} />}
-      {quotes.EUR && <CurrencyItem label="Euro" quote={quotes.EUR} />}
+      {quotes.USD && <CurrencyItem label={locale === "en" ? "Dollar" : "Dólar"} quote={quotes.USD} locale={locale} />}
+      {quotes.EUR && <CurrencyItem label="Euro" quote={quotes.EUR} locale={locale} />}
     </div>
   );
 }
 
-function CurrencyItem({ label, quote }: { label: string; quote: Quote }) {
+function CurrencyItem({ label, quote, locale }: { label: string; quote: Quote; locale: string }) {
   const up = quote.pctChange >= 0;
   const color = up ? "#06D6A0" : "#ef4444";
+  const formatted = locale === "en" ? quote.bid.toFixed(3) : quote.bid.toFixed(3).replace(".", ",");
   return (
     <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.75rem", whiteSpace: "nowrap" }}>
       <span style={{ color: "rgba(255,255,255,0.55)" }}>{label}</span>
       {up ? <ArrowUp size={11} color={color} /> : <ArrowDown size={11} color={color} />}
-      <span style={{ color, fontWeight: 700 }}>{quote.bid.toFixed(3).replace(".", ",")}</span>
+      <span style={{ color, fontWeight: 700 }}>{formatted}</span>
     </span>
   );
 }

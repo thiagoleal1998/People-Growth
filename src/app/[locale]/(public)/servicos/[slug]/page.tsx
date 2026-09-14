@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { ContactForm } from "@/components/ContactForm";
 import { createClient } from "@/lib/supabase/server";
+import { pickLocale } from "@/lib/locale-content";
 import type { Service } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -22,31 +24,33 @@ function linesToList(text: string | null): string[] {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const service = await getService(slug);
   if (!service) return { title: "Serviço não encontrado" };
   return {
-    title: service.title_pt,
-    description: service.description_pt,
+    title: pickLocale(locale, service.title_pt, service.title_en),
+    description: pickLocale(locale, service.description_pt, service.description_en),
   };
 }
 
 export default async function ServicePage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const service = await getService(slug);
 
   if (!service) notFound();
 
+  const t = await getTranslations("services");
+  const tNav = await getTranslations("nav");
   const color = "#4361EE";
   const benefits = service.benefits ?? [];
-  const methodology = linesToList(service.methodology_pt);
-  const results = linesToList(service.results_pt);
+  const methodology = linesToList(pickLocale(locale, service.methodology_pt, service.methodology_en));
+  const results = linesToList(pickLocale(locale, service.results_pt, service.results_en));
 
   return (
     <>
@@ -54,13 +58,13 @@ export default async function ServicePage({
       <section style={{ background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)", paddingTop: "6rem", paddingBottom: "5rem", color: "white" }}>
         <div className="container-xl" style={{ maxWidth: "800px" }}>
           <Link href="/servicos" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
-            <ArrowLeft size={16} /> Serviços
+            <ArrowLeft size={16} /> {tNav("services")}
           </Link>
           <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 800, lineHeight: 1.1, marginBottom: "1rem" }}>
-            {service.title_pt}
+            {pickLocale(locale, service.title_pt, service.title_en)}
           </h1>
           <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.125rem", lineHeight: 1.7 }}>
-            {service.description_pt}
+            {pickLocale(locale, service.description_pt, service.description_en)}
           </p>
         </div>
       </section>
@@ -71,7 +75,7 @@ export default async function ServicePage({
             {/* Methodology */}
             {methodology.length > 0 && (
               <>
-                <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.5rem" }}>Metodologia</h2>
+                <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.5rem" }}>{t("methodology")}</h2>
                 <ol style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.875rem", marginBottom: "3rem" }}>
                   {methodology.map((item, i) => (
                     <li key={item} style={{ display: "flex", gap: "1rem", alignItems: "flex-start" }}>
@@ -88,7 +92,7 @@ export default async function ServicePage({
             {/* Benefits */}
             {benefits.length > 0 && (
               <>
-                <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.5rem" }}>Benefícios</h2>
+                <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.5rem" }}>{t("benefits")}</h2>
                 <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.75rem", marginBottom: "3rem" }}>
                   {benefits.map((b) => (
                     <li key={b} style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start" }}>
@@ -103,7 +107,7 @@ export default async function ServicePage({
             {/* Results */}
             {results.length > 0 && (
               <>
-                <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.5rem" }}>Resultados típicos</h2>
+                <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.5rem" }}>{t("typicalResults")}</h2>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1rem" }}>
                   {results.map((r) => (
                     <div key={r} style={{ backgroundColor: "var(--site-surface-alt)", borderRadius: "0.75rem", padding: "1.25rem", border: `1px solid ${color}25` }}>
@@ -119,12 +123,12 @@ export default async function ServicePage({
           <div style={{ position: "sticky", top: "5rem" }}>
             <div style={{ backgroundColor: "var(--site-surface-alt)", borderRadius: "1.25rem", padding: "2rem" }}>
               <h3 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.5rem" }}>
-                Solicitar proposta
+                {t("cta")}
               </h3>
               <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
-                Preencha abaixo e entraremos em contato em até 24h.
+                {t("formHint")}
               </p>
-              <ContactForm serviceDefault={service.title_pt} />
+              <ContactForm serviceDefault={pickLocale(locale, service.title_pt, service.title_en)} />
             </div>
           </div>
         </div>

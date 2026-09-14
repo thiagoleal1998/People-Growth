@@ -31,7 +31,10 @@
     "servicesSubtitle": "Strategy and execution for businesses that want to grow intelligently.",
     "testimonialsTitle": "What people say about our work",
     "contactTitle": "Let's talk?",
-    "contactSubtitle": "Schedule a free 30-minute session."
+    "contactSubtitle": "Schedule a free 30-minute session.",
+    "liveBroadcast": "BROADCAST",
+    "liveNow": "LIVE",
+    "featuredVideo": "FEATURED VIDEO"
   },
   "about": {
     "title": "About People & Growth",
@@ -66,7 +69,11 @@
     "challenge": "Challenge",
     "solution": "Solution",
     "tools": "Tools used",
-    "results": "Results"
+    "results": "Results",
+    "noCases": "No case studies registered at the moment.",
+    "viewFullCase": "View full case study",
+    "backToPortfolio": "Portfolio",
+    "wantResults": "I want results like this for my business →"
   },
   "services": {
     "title": "Services",
@@ -81,7 +88,23 @@
     "bi": "Business Intelligence",
     "ai": "Artificial Intelligence",
     "corporateTraining": "Corporate Training",
-    "mentoring": "Mentoring"
+    "mentoring": "Mentoring",
+    "heroTitle1": "Strategic solutions for",
+    "heroTitle2": "businesses that want to grow.",
+    "noServices": "No services registered at the moment.",
+    "processTitle": "How the consulting works",
+    "processSubtitle": "A structured process to generate real results.",
+    "step1Title": "Diagnosis",
+    "step1Desc": "Deep understanding of the business, challenges and opportunities.",
+    "step2Title": "Strategy",
+    "step2Desc": "Development of a personalized strategic plan.",
+    "step3Title": "Execution",
+    "step3Desc": "Implementation with close follow-up.",
+    "step4Title": "Results",
+    "step4Desc": "Measurement, adjustment and consolidation of gains.",
+    "scheduleFreeCall": "Schedule a free call",
+    "typicalResults": "Typical results",
+    "formHint": "Fill in below and we'll get in touch within 24h."
   },
   "newsletter": {
     "title": "Content",
@@ -94,7 +117,17 @@
     "categories": "Categories",
     "tags": "Tags",
     "search": "Search articles...",
-    "noResults": "No articles found."
+    "noResults": "No articles found.",
+    "heroBadge": "CONTENT",
+    "heroTitle": "News and opinion",
+    "empty": "No articles published yet. Check back soon.",
+    "featured": "Featured",
+    "allArticles": "All articles",
+    "resultsForOne": "result for",
+    "resultsForMany": "results for",
+    "mostRead": "Most read",
+    "subscribeCtaTitle": "✍️ Subscribe to Mea Sententia",
+    "subscribeCtaSubtitle": "Opinion on business, society and the issues shaping people — straight to your inbox."
   },
   "courses": {
     "title": "Courses",
@@ -102,7 +135,8 @@
     "comingSoon": "Coming soon",
     "notifyMe": "Notify me when it launches",
     "notifyEmail": "Your email",
-    "notifyButton": "Notify me"
+    "notifyButton": "Notify me",
+    "noCourses": "No courses registered at the moment."
   },
   "aiLab": {
     "title": "AI Laboratory",
@@ -121,7 +155,15 @@
     "prompts": "AI Prompts",
     "download": "Download free",
     "fillForm": "Fill in to receive",
-    "downloadSuccess": "Sent! Check your email."
+    "downloadSuccess": "Sent! Check your email.",
+    "noResources": "No resources available at the moment.",
+    "typeTemplate": "Template",
+    "typeChecklist": "Checklist",
+    "typePrompt": "AI Prompt",
+    "typeGuide": "Guide",
+    "typeEbook": "E-book",
+    "downloadsLabel": "downloads",
+    "comingSoon": "Coming soon"
   },
   "media": {
     "title": "In the Media",
@@ -137,7 +179,8 @@
   },
   "testimonials": {
     "title": "Testimonials",
-    "subtitle": "What clients, partners and colleagues say."
+    "subtitle": "What clients, partners and colleagues say.",
+    "noTestimonials": "No testimonials registered at the moment."
   },
   "faq": {
     "title": "Frequently Asked Questions",
@@ -161,16 +204,31 @@
     "tagline": "Strong businesses are born from strong people.",
     "rights": "All rights reserved.",
     "privacy": "Privacy Policy",
-    "terms": "Terms of Use"
+    "terms": "Terms of Use",
+    "navigation": "Navigation",
+    "services": "Services",
+    "resources": "Resources",
+    "freeResources": "Free Resources",
+    "copyrightNotice": "Copyright Notice",
+    "adminArea": "Admin Area",
+    "strategicConsulting": "Strategic Consulting",
+    "digitalMarketing": "Digital Marketing",
+    "growth": "Growth",
+    "bi": "Business Intelligence",
+    "aiForBusiness": "AI for Business",
+    "training": "Training"
   },
   "common": {
     "loading": "Loading...",
     "error": "Something went wrong. Please try again.",
     "back": "Back",
     "learnMore": "Learn more",
+    "cookieNotice": "We use essential cookies for the site to work. We do not use tracking or advertising cookies.",
+    "gotIt": "Got it",
     "seeAll": "See all",
-    "by": "by",
+    "by": "By",
     "in": "in",
-    "minutes": "min read"
+    "minutes": "min read",
+    "siteSearchPlaceholder": "Search the site"
   }
 }

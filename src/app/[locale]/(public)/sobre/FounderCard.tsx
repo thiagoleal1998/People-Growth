@@ -1,8 +1,11 @@
 import { ChevronRight } from "lucide-react";
+import { getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import { pickLocale } from "@/lib/locale-content";
 import type { Author } from "@/types/database.types";
 
-export function FounderCard({ author }: { author: Author }) {
+export async function FounderCard({ author }: { author: Author }) {
+  const locale = await getLocale();
   return (
     <Link
       href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
@@ -33,7 +36,7 @@ export function FounderCard({ author }: { author: Author }) {
           <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--site-text)" }}>{author.name}</h3>
           {author.role_pt && (
             <div style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.8125rem", marginTop: "0.125rem" }}>
-              {author.role_pt}
+              {pickLocale(locale, author.role_pt, author.role_en)}
             </div>
           )}
         </div>
@@ -52,7 +55,7 @@ export function FounderCard({ author }: { author: Author }) {
             overflow: "hidden",
           }}
         >
-          {author.tagline_pt}
+          {pickLocale(locale, author.tagline_pt, author.tagline_en)}
         </p>
       )}
 
@@ -67,7 +70,7 @@ export function FounderCard({ author }: { author: Author }) {
           color: "#4361EE",
         }}
       >
-        Ver trajetória
+        {locale === "en" ? "View journey" : "Ver trajetória"}
         <ChevronRight size={14} />
       </div>
     </Link>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import { Sun, CloudSun, Cloud, CloudFog, CloudDrizzle, CloudRain, CloudSnow, CloudLightning } from "lucide-react";
 
 type WeatherData = { current: number; max: number; min: number; code: number };
@@ -27,9 +28,9 @@ function WeatherIcon({ code }: { code: number }) {
 /** Reverse-geocodes coordinates to a city name via BigDataCloud's free,
  * keyless client endpoint — used only for the label; the forecast itself
  * runs on the raw coordinates regardless of whether this succeeds. */
-async function reverseGeocode(lat: number, lon: number): Promise<string | null> {
+async function reverseGeocode(lat: number, lon: number, locale: string): Promise<string | null> {
   try {
-    const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=pt`);
+    const res = await fetch(`https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lon}&localityLanguage=${locale === "en" ? "en" : "pt"}`);
     if (!res.ok) {
       console.error("[WeatherWidget] reverse geocode HTTP error:", res.status);
       return null;
@@ -49,13 +50,16 @@ const GEOLOCATION_ERROR_NAMES: Record<number, string> = {
 };
 
 const MONTHS_PT = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+const MONTHS_EN = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
-function formatDate(date: Date): string {
+function formatDate(date: Date, locale: string): string {
   const day = String(date.getDate()).padStart(2, "0");
-  return `${day}, ${MONTHS_PT[date.getMonth()]} de ${date.getFullYear()}`;
+  const month = locale === "en" ? MONTHS_EN[date.getMonth()] : MONTHS_PT[date.getMonth()];
+  return locale === "en" ? `${month} ${day}, ${date.getFullYear()}` : `${day}, ${month} de ${date.getFullYear()}`;
 }
 
 export function WeatherWidget({ cityName, lat, lon }: { cityName: string; lat: number; lon: number }) {
+  const locale = useLocale();
   const [location, setLocation] = useState<Location | null>(null);
   const [data, setData] = useState<WeatherData | null>(null);
 
@@ -90,7 +94,7 @@ export function WeatherWidget({ cityName, lat, lon }: { cityName: string; lat: n
         // instead of waiting on reverse-geocoding first. The real city name
         // swaps in a moment later, in parallel, once it resolves.
         setLocation({ cityName, lat: latitude, lon: longitude });
-        reverseGeocode(latitude, longitude).then((detectedCity) => {
+        reverseGeocode(latitude, longitude, locale).then((detectedCity) => {
           if (detectedCity) setLocation((prev) => (prev ? { ...prev, cityName: detectedCity } : prev));
         });
       },
@@ -159,7 +163,7 @@ export function WeatherWidget({ cityName, lat, lon }: { cityName: string; lat: n
 
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", fontSize: "0.75rem", whiteSpace: "nowrap" }}>
-      <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>{formatDate(new Date())}</span>
+      <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>{formatDate(new Date(), locale)}</span>
       <span style={{ color: "rgba(255,255,255,0.25)" }}>·</span>
       <WeatherIcon code={data.code} />
       <span style={{ color: "rgba(255,255,255,0.75)", fontWeight: 600 }}>{location.cityName}</span>

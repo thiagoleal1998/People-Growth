@@ -1,11 +1,14 @@
 import type { Metadata } from "next";
+import { getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
+import { pickLocale } from "@/lib/locale-content";
 
 export const revalidate = 300;
 
-const DEFAULT_TITLE = "Aviso de Direitos Autorais";
-const DEFAULT_BODY = `## Titularidade do conteúdo
+const DEFAULT_TITLE_PT = "Aviso de Direitos Autorais";
+const DEFAULT_TITLE_EN = "Copyright Notice";
+const DEFAULT_BODY_PT = `## Titularidade do conteúdo
 Os textos, imagens, vídeos e demais materiais publicados pela People & Growth — incluindo artigos, a coluna Mea Sententia e páginas institucionais — são de titularidade da People & Growth ou de seus autores, e protegidos pela legislação brasileira de direitos autorais (Lei nº 9.610/1998), salvo quando indicada outra fonte.
 
 ## Uso permitido
@@ -16,19 +19,31 @@ Imagens e vídeos incorporados de terceiros (como YouTube) pertencem a seus resp
 
 ## Solicitações e denúncias
 Caso identifique conteúdo nosso publicado indevidamente em outro site, ou acredite que publicamos algo que viola direitos autorais de terceiros, entre em contato pela [página de Contato](/contato).`;
+const DEFAULT_BODY_EN = `## Content ownership
+The text, images, videos and other materials published by People & Growth — including articles, the Mea Sententia column and institutional pages — are owned by People & Growth or its authors, and protected by Brazilian copyright law (Law No. 9,610/1998), unless another source is indicated.
+
+## Permitted use
+You may share links to our content and quote short excerpts, provided the source is cited with a link to the original article. Full reproduction of articles without prior authorization is not permitted.
+
+## Third-party materials
+Images and videos embedded from third parties (such as YouTube) belong to their respective authors or licensors and are used according to the terms of use of the originating platforms.
+
+## Requests and reports
+If you find our content published without authorization on another site, or believe we've published something that infringes a third party's copyright, please contact us via the [Contact page](/contato).`;
 
 export const metadata: Metadata = {
-  title: DEFAULT_TITLE,
+  title: DEFAULT_TITLE_PT,
   description: "Termos de uso do conteúdo publicado pela People & Growth.",
 };
 
 export default async function DireitosAutoraisPage() {
+  const locale = await getLocale();
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("institutional_pages").select("*").eq("slug", "direitos-autorais").single();
 
-  const title = data?.title_pt || DEFAULT_TITLE;
-  const body = data?.body_pt || DEFAULT_BODY;
+  const title = pickLocale(locale, data?.title_pt, data?.title_en) || (locale === "en" ? DEFAULT_TITLE_EN : DEFAULT_TITLE_PT);
+  const body = pickLocale(locale, data?.body_pt, data?.body_en) || (locale === "en" ? DEFAULT_BODY_EN : DEFAULT_BODY_PT);
 
   return (
     <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
@@ -37,7 +52,7 @@ export default async function DireitosAutoraisPage() {
           {title}
         </h1>
         <p style={{ color: "var(--site-muted)", fontSize: "1rem", marginBottom: "2.5rem" }}>
-          Última atualização: {new Date().toLocaleDateString("pt-BR", { month: "long", year: "numeric" })}
+          {locale === "en" ? "Last updated" : "Última atualização"}: {new Date().toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { month: "long", year: "numeric" })}
         </p>
 
         <div

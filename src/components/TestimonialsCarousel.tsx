@@ -1,13 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useLocale } from "next-intl";
 import { Quote, Star, ChevronLeft, ChevronRight } from "lucide-react";
+import { pickLocale } from "@/lib/locale-content";
 import type { Testimonial } from "@/types/database.types";
 
 const VISIBLE = 3;
 const INTERVAL_MS = 5000;
 
 export function TestimonialsCarousel({ testimonials }: { testimonials: Testimonial[] }) {
+  const locale = useLocale();
   const [start, setStart] = useState(0);
   const [paused, setPaused] = useState(false);
 
@@ -50,7 +53,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
               </div>
             )}
             <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.7, marginBottom: "1.25rem", flex: 1 }}>
-              &ldquo;{item.text_pt}&rdquo;
+              &ldquo;{pickLocale(locale, item.text_pt, item.text_en)}&rdquo;
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
               <div

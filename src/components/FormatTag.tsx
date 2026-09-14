@@ -1,6 +1,11 @@
 import type { Article } from "@/types/database.types";
 
-export function FormatTag({ format }: { format: Article["format"] }) {
+// Takes locale as a prop (rather than calling useLocale() itself) because
+// this component is rendered from both plain Server Component pages and
+// the "use client" ArticlesExplorer — a hook here would break wherever
+// there's no client boundary above it. Every caller already has locale in
+// scope (getLocale() server-side, useLocale() client-side).
+export function FormatTag({ format, locale }: { format: Article["format"]; locale: string }) {
   const isOpinion = format === "opiniao";
   return (
     <span
@@ -16,7 +21,7 @@ export function FormatTag({ format }: { format: Article["format"] }) {
         borderRadius: "0.25rem",
       }}
     >
-      {isOpinion ? "Mea Sententia" : "Notícia"}
+      {isOpinion ? "Mea Sententia" : locale === "en" ? "News" : "Notícia"}
     </span>
   );
 }

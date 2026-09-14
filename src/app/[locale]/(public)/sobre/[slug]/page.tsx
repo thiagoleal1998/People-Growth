@@ -1,8 +1,10 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, ArrowRight, Award, Linkedin, Instagram, Mail } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { pickLocale } from "@/lib/locale-content";
 import type { Author } from "@/types/database.types";
 import { parseMilestones, bioParagraphs } from "@/lib/founder-data";
 
@@ -28,29 +30,30 @@ async function getFounder(slug: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const result = await getFounder(slug);
   if (!result) return { title: "Não encontrado" };
   return {
     title: result.author.name,
-    description: result.author.tagline_pt ?? result.author.role_pt ?? undefined,
+    description: pickLocale(locale, result.author.tagline_pt, result.author.tagline_en) ?? pickLocale(locale, result.author.role_pt, result.author.role_en) ?? undefined,
   };
 }
 
 export default async function FounderPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const result = await getFounder(slug);
   if (!result) notFound();
 
   const { author, articleCount } = result;
-  const milestones = parseMilestones(author.milestones_pt);
-  const paragraphs = bioParagraphs(author.bio_pt);
+  const tNav = await getTranslations("nav");
+  const milestones = parseMilestones(pickLocale(locale, author.milestones_pt, author.milestones_en));
+  const paragraphs = bioParagraphs(pickLocale(locale, author.bio_pt, author.bio_en));
 
   return (
     <>
@@ -75,7 +78,7 @@ export default async function FounderPage({
               fontWeight: 500,
             }}
           >
-            <ArrowLeft size={16} /> Sobre
+            <ArrowLeft size={16} /> {tNav("about")}
           </Link>
 
           <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", flexWrap: "wrap" }}>
@@ -94,12 +97,12 @@ export default async function FounderPage({
               </h1>
               {author.role_pt && (
                 <p style={{ color: "#06D6A0", fontWeight: 600, fontSize: "1rem", marginBottom: "0.875rem" }}>
-                  {author.role_pt}
+                  {pickLocale(locale, author.role_pt, author.role_en)}
                 </p>
               )}
               {author.tagline_pt && (
                 <p style={{ color: "rgba(255,255,255,0.7)", lineHeight: 1.7, marginBottom: "1rem", maxWidth: "560px", fontStyle: "italic" }}>
-                  &ldquo;{author.tagline_pt}&rdquo;
+                  &ldquo;{pickLocale(locale, author.tagline_pt, author.tagline_en)}&rdquo;
                 </p>
               )}
               <div style={{ display: "flex", gap: "0.875rem" }}>
@@ -139,7 +142,7 @@ export default async function FounderPage({
             {paragraphs.length > 0 && (
               <div style={{ marginBottom: "2.5rem" }}>
                 <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1rem" }}>
-                  Sobre {author.name.split(" ")[0]}
+                  {locale === "en" ? `About ${author.name.split(" ")[0]}` : `Sobre ${author.name.split(" ")[0]}`}
                 </h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   {paragraphs.map((p, i) => (
@@ -166,7 +169,7 @@ export default async function FounderPage({
                   fontSize: "0.9375rem",
                 }}
               >
-                Ver artigos de {author.name.split(" ")[0]} <ArrowRight size={18} />
+                {locale === "en" ? `View ${author.name.split(" ")[0]}'s articles` : `Ver artigos de ${author.name.split(" ")[0]}`} <ArrowRight size={18} />
               </Link>
             )}
           </div>
@@ -174,7 +177,7 @@ export default async function FounderPage({
           {milestones.length > 0 && (
             <div>
               <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem" }}>
-                Trajetória
+                {locale === "en" ? "Journey" : "Trajetória"}
               </h2>
               <div style={{ position: "relative" }}>
                 <div

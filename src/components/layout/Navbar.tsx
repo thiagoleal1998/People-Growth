@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useTranslations } from "next-intl";
+import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
 import { Menu, X } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
@@ -145,32 +145,44 @@ export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
   );
 }
 
+// Switches locale while staying on the current page (e.g. /servicos ->
+// /en/services) instead of bouncing to the homepage — usePathname() from
+// "@/i18n/navigation" already returns the locale-agnostic internal
+// pathname (e.g. "/servicos" even while on /en/services), which
+// next-intl's Link then re-localizes for the target locale.
 function LocaleSwitcher() {
+  const pathname = usePathname();
+  const locale = useLocale();
   return (
     <div style={{ display: "flex", gap: "0.25rem", marginLeft: "0.5rem" }}>
       <Link
-        href="/"
+        // usePathname() returns the union of every known pathname, including
+        // dynamic ones (e.g. "/sobre/[slug]") that Link's typed href only
+        // accepts together with their params — which aren't known here.
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        href={pathname as any}
         locale="pt"
         style={{
           padding: "0.25rem 0.5rem",
           borderRadius: "0.375rem",
           fontSize: "0.75rem",
           fontWeight: 600,
-          color: "rgba(255,255,255,0.6)",
+          color: locale === "pt" ? "white" : "rgba(255,255,255,0.6)",
           border: "1px solid rgba(255,255,255,0.15)",
         }}
       >
         PT
       </Link>
       <Link
-        href="/"
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        href={pathname as any}
         locale="en"
         style={{
           padding: "0.25rem 0.5rem",
           borderRadius: "0.375rem",
           fontSize: "0.75rem",
           fontWeight: 600,
-          color: "rgba(255,255,255,0.6)",
+          color: locale === "en" ? "white" : "rgba(255,255,255,0.6)",
           border: "1px solid rgba(255,255,255,0.15)",
         }}
       >

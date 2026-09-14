@@ -1,11 +1,13 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 
 const STORAGE_KEY = "cookie-consent";
 
 export function CookieBanner() {
+  const t = useTranslations("common");
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -51,9 +53,9 @@ export function CookieBanner() {
         }}
       >
         <p style={{ color: "rgba(255,255,255,0.75)", fontSize: "0.8125rem", lineHeight: 1.6, margin: 0, maxWidth: "640px" }}>
-          Usamos cookies essenciais para o funcionamento do site. Não usamos cookies de rastreamento ou publicidade.{" "}
+          {t("cookieNotice")}{" "}
           <Link href="/cookies" style={{ color: "#06D6A0", fontWeight: 600 }}>
-            Saiba mais
+            {t("learnMore")}
           </Link>
         </p>
         <button
@@ -70,7 +72,7 @@ export function CookieBanner() {
             flexShrink: 0,
           }}
         >
-          Entendi
+          {t("gotIt")}
         </button>
       </div>
     </div>

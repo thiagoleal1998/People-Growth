@@ -82,7 +82,7 @@ export function Footer({ logoUrl, contactEmail }: { logoUrl?: string | null; con
           {/* Nav links */}
           <div>
             <h4 style={{ color: "white", fontWeight: 600, fontSize: "0.875rem", marginBottom: "1rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Navegação
+              {t("navigation")}
             </h4>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
               {[
@@ -109,13 +109,13 @@ export function Footer({ logoUrl, contactEmail }: { logoUrl?: string | null; con
           {/* Services */}
           <div>
             <h4 style={{ color: "white", fontWeight: 600, fontSize: "0.875rem", marginBottom: "1rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Serviços
+              {t("services")}
             </h4>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-              {["Consultoria Estratégica", "Marketing Digital", "Growth", "Business Intelligence", "IA para Negócios", "Treinamentos"].map((item) => (
-                <li key={item}>
+              {["strategicConsulting", "digitalMarketing", "growth", "bi", "aiForBusiness", "training"].map((key) => (
+                <li key={key}>
                   <Link href="/servicos" style={{ fontSize: "0.875rem", transition: "color 0.2s" }}>
-                    {item}
+                    {t(key as "strategicConsulting")}
                   </Link>
                 </li>
               ))}
@@ -125,15 +125,15 @@ export function Footer({ logoUrl, contactEmail }: { logoUrl?: string | null; con
           {/* Resources */}
           <div>
             <h4 style={{ color: "white", fontWeight: 600, fontSize: "0.875rem", marginBottom: "1rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              Recursos
+              {t("resources")}
             </h4>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
               {[
                 { label: "Mea Sententia", href: "/conteudo" as const },
-                { label: "Recursos Gratuitos", href: "/recursos" as const },
-                { label: "Cursos", href: "/cursos" as const },
-                { label: "Laboratório IA", href: "/laboratorio-ia" as const },
-                { label: "Ferramentas", href: "/ferramentas" as const },
+                { label: t("freeResources"), href: "/recursos" as const },
+                { label: nav("courses"), href: "/cursos" as const },
+                { label: nav("aiLab"), href: "/laboratorio-ia" as const },
+                { label: nav("tools"), href: "/ferramentas" as const },
                 { label: "FAQ", href: "/faq" as const },
               ].map(({ label, href }) => (
                 <li key={label}>
@@ -168,13 +168,13 @@ export function Footer({ logoUrl, contactEmail }: { logoUrl?: string | null; con
               {t("terms")}
             </Link>
             <Link href="/direitos-autorais" style={{ fontSize: "0.8125rem" }}>
-              Aviso de Direitos Autorais
+              {t("copyrightNotice")}
             </Link>
             <Link href="/cookies" style={{ fontSize: "0.8125rem" }}>
               Cookies
             </Link>
             <NextLink href="/admin" style={{ fontSize: "0.8125rem", color: "inherit" }}>
-              Área Administrativa
+              {t("adminArea")}
             </NextLink>
             <ErrorReportButton />
           </div>

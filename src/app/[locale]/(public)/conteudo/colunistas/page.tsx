@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { pickLocale } from "@/lib/locale-content";
 import type { Author } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -12,6 +14,8 @@ export const metadata: Metadata = {
 };
 
 export default async function ColunistasPage() {
+  const locale = await getLocale();
+  const tNav = await getTranslations("nav");
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("authors").select("*").eq("status", "active").order("order");
@@ -25,11 +29,13 @@ export default async function ColunistasPage() {
             href="/conteudo"
             style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", marginBottom: "1.5rem", fontWeight: 500 }}
           >
-            <ArrowLeft size={16} /> Conteúdo
+            <ArrowLeft size={16} /> {tNav("newsletter")}
           </Link>
-          <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 800, marginBottom: "1rem" }}>Colunistas</h1>
+          <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 800, marginBottom: "1rem" }}>{locale === "en" ? "Columnists" : "Colunistas"}</h1>
           <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.0625rem", lineHeight: 1.7 }}>
-            Quem escreve a Mea Sententia — perspectivas sobre negócios, pessoas e os temas que impactam o mundo.
+            {locale === "en"
+              ? "Who writes Mea Sententia — perspectives on business, people and the issues shaping the world."
+              : "Quem escreve a Mea Sententia — perspectivas sobre negócios, pessoas e os temas que impactam o mundo."}
           </p>
         </div>
       </section>
@@ -38,7 +44,7 @@ export default async function ColunistasPage() {
         <div className="container-xl" style={{ maxWidth: "900px" }}>
           {authors.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
-              Nenhum colunista cadastrado no momento.
+              {locale === "en" ? "No columnists registered at the moment." : "Nenhum colunista cadastrado no momento."}
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "1.5rem" }}>
@@ -73,17 +79,17 @@ export default async function ColunistasPage() {
                       <div>
                         <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)" }}>{author.name}</h2>
                         {author.role_pt && (
-                          <p style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.8125rem" }}>{author.role_pt}</p>
+                          <p style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.8125rem" }}>{pickLocale(locale, author.role_pt, author.role_en)}</p>
                         )}
                       </div>
                     </div>
                     {(author.tagline_pt || author.bio_pt) && (
                       <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6, flex: 1, marginBottom: "1rem" }}>
-                        {author.tagline_pt?.trim() || author.bio_pt}
+                        {pickLocale(locale, author.tagline_pt, author.tagline_en)?.trim() || pickLocale(locale, author.bio_pt, author.bio_en)}
                       </p>
                     )}
                     <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#4361EE", fontWeight: 700, fontSize: "0.875rem" }}>
-                      Ver artigos <ArrowRight size={15} />
+                      {locale === "en" ? "View articles" : "Ver artigos"} <ArrowRight size={15} />
                     </span>
                   </article>
                 </Link>

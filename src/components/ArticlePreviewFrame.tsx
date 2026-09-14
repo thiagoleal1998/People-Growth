@@ -39,7 +39,7 @@ export function ArticlePreviewFrame({ article, author, category }: { article: Ar
 
       <div style={{ backgroundColor: "#0d1b2a", borderRadius: "1rem 1rem 0 0", padding: "2.5rem 2.5rem 2rem", color: "white" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
-          <FormatTag format={article.format} />
+          <FormatTag format={article.format} locale="pt" />
           {category && (
             <span
               style={{

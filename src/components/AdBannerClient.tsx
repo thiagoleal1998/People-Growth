@@ -2,10 +2,13 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
+import { useLocale } from "next-intl";
 import { getVisitorId } from "@/lib/visitor";
 import type { Ad } from "@/types/database.types";
 
 export function AdBannerClient({ ad, style }: { ad: Ad; style?: React.CSSProperties }) {
+  const locale = useLocale();
+  const adLabel = locale === "en" ? "Advertisement" : "Publicidade";
   const linkRef = useRef<HTMLAnchorElement>(null);
   const firedRef = useRef(false);
   const pathname = usePathname();
@@ -48,8 +51,8 @@ export function AdBannerClient({ ad, style }: { ad: Ad; style?: React.CSSPropert
       style={{ display: "block", textDecoration: "none", ...style }}
     >
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={ad.image_url!} alt={ad.alt_text || "Publicidade"} style={{ width: "100%", height: "auto", display: "block", borderRadius: "0.5rem" }} />
-      <div style={{ fontSize: "0.6875rem", color: "var(--site-faint)", textAlign: "center", marginTop: "0.25rem" }}>Publicidade</div>
+      <img src={ad.image_url!} alt={ad.alt_text || adLabel} style={{ width: "100%", height: "auto", display: "block", borderRadius: "0.5rem" }} />
+      <div style={{ fontSize: "0.6875rem", color: "var(--site-faint)", textAlign: "center", marginTop: "0.25rem" }}>{adLabel}</div>
     </a>
   );
 }

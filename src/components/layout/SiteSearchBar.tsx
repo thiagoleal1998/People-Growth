@@ -1,10 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Search } from "lucide-react";
 import { useRouter } from "@/i18n/navigation";
 
 export function SiteSearchBar() {
+  const t = useTranslations("common");
   const [query, setQuery] = useState("");
   const router = useRouter();
 
@@ -33,7 +35,7 @@ export function SiteSearchBar() {
         type="search"
         value={query}
         onChange={(e) => setQuery(e.target.value)}
-        placeholder="Buscar no site"
+        placeholder={t("siteSearchPlaceholder")}
         style={{
           background: "none",
           border: "none",

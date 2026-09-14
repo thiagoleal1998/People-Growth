@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Linkedin, Instagram, Mail, ChevronRight } from "lucide-react";
 import { FormatTag } from "@/components/FormatTag";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
+import { pickLocale } from "@/lib/locale-content";
 import type { Article, Author, Category } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -32,29 +34,30 @@ async function getAuthorData(slug: string) {
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const result = await getAuthorData(slug);
   if (!result) return { title: "Autor não encontrado" };
   return {
-    title: `${result.author.name} — Conteúdo`,
-    description: result.author.role_pt ?? undefined,
+    title: `${result.author.name} — ${locale === "en" ? "Content" : "Conteúdo"}`,
+    description: pickLocale(locale, result.author.role_pt, result.author.role_en) ?? undefined,
   };
 }
 
 export default async function AuthorPage({
   params,
 }: {
-  params: Promise<{ slug: string }>;
+  params: Promise<{ slug: string; locale: string }>;
 }) {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const result = await getAuthorData(slug);
 
   if (!result) notFound();
 
   const { author, articles, categories } = result;
   const categoryById = new Map(categories.map((c) => [c.id, c]));
+  const tNav = await getTranslations({ locale, namespace: "nav" });
 
   return (
     <>
@@ -79,7 +82,7 @@ export default async function AuthorPage({
               fontWeight: 500,
             }}
           >
-            <ArrowLeft size={16} /> Conteúdo
+            <ArrowLeft size={16} /> {tNav("newsletter")}
           </Link>
 
           <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", flexWrap: "wrap" }}>
@@ -98,12 +101,12 @@ export default async function AuthorPage({
               </h1>
               {author.role_pt && (
                 <p style={{ color: "#06D6A0", fontWeight: 600, fontSize: "1rem", marginBottom: "0.875rem" }}>
-                  {author.role_pt}
+                  {pickLocale(locale, author.role_pt, author.role_en)}
                 </p>
               )}
               {author.bio_pt && (
                 <p style={{ color: "rgba(255,255,255,0.7)", lineHeight: 1.7, marginBottom: "1rem", maxWidth: "560px" }}>
-                  {author.bio_pt}
+                  {pickLocale(locale, author.bio_pt, author.bio_en)}
                 </p>
               )}
               <div style={{ display: "flex", gap: "0.875rem" }}>
@@ -132,7 +135,7 @@ export default async function AuthorPage({
         <div className="container-xl" style={{ maxWidth: "800px" }}>
           {articles.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
-              {author.name} ainda não publicou nenhum artigo.
+              {locale === "en" ? `${author.name} hasn't published any articles yet.` : `${author.name} ainda não publicou nenhum artigo.`}
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
@@ -181,24 +184,24 @@ export default async function AuthorPage({
                               fontWeight: 700,
                             }}
                           >
-                            {cat.name_pt.toUpperCase()}
+                            {pickLocale(locale, cat.name_pt, cat.name_en).toUpperCase()}
                           </span>
                         )}
                       </div>
                       <div style={{ flex: 1 }}>
                         <div style={{ marginBottom: "0.375rem" }}>
-                          <FormatTag format={article.format} />
+                          <FormatTag format={article.format} locale={locale} />
                         </div>
                         <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.375rem" }}>
-                          {article.title_pt}
+                          {pickLocale(locale, article.title_pt, article.title_en)}
                         </h3>
                         {article.excerpt_pt && (
                           <p style={{ fontSize: "0.875rem", color: "var(--site-muted)", lineHeight: 1.6, marginBottom: "0.625rem" }}>
-                            {article.excerpt_pt}
+                            {pickLocale(locale, article.excerpt_pt, article.excerpt_en)}
                           </p>
                         )}
                         <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)", display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                          {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                          {article.published_at && new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                           <ChevronRight size={13} />
                         </span>
                       </div>

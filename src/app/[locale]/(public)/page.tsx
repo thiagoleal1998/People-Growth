@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getFaqEntriesFromConfig } from "@/lib/faq";
+import { pickLocale } from "@/lib/locale-content";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
@@ -84,6 +85,8 @@ export const revalidate = 300;
 
 export default async function HomePage() {
   const t = await getTranslations("home");
+  const tNewsletter = await getTranslations("newsletter");
+  const tc = await getTranslations("common");
   const tFaq = await getTranslations("faq");
   const locale = await getLocale();
 
@@ -166,7 +169,7 @@ export default async function HomePage() {
         <section style={{ backgroundColor: "var(--site-bg)", paddingTop: "1.5rem", paddingBottom: "1.5rem" }}>
           <div className="container-xl">
             <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4361EE", letterSpacing: "0.08em", marginBottom: "0.75rem" }}>
-              CONTEÚDO
+              {tNewsletter("heroBadge")}
             </div>
 
             <div className="home-lead-grid" style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: "1.5rem", alignItems: "start" }}>
@@ -190,19 +193,19 @@ export default async function HomePage() {
                   )}
                   <div>
                     <div style={{ marginBottom: "0.5rem" }}>
-                      <FormatTag format={featured.format} />
+                      <FormatTag format={featured.format} locale={locale} />
                     </div>
                     <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "var(--site-text)", lineHeight: 1.1, marginBottom: "0.5rem" }}>
-                      {featured.title_pt}
+                      {pickLocale(locale, featured.title_pt, featured.title_en)}
                     </h1>
                     {featured.excerpt_pt && (
                       <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", lineHeight: 1.5 }}>
-                        {featured.excerpt_pt}
+                        {pickLocale(locale, featured.excerpt_pt, featured.excerpt_en)}
                       </p>
                     )}
                     {featured.author_id && authorById.get(featured.author_id) && (
                       <span style={{ display: "block", marginTop: "0.5rem", fontSize: "0.875rem", color: "var(--site-faint)" }}>
-                        Por {authorById.get(featured.author_id)!.name}
+                        {tc("by")} {authorById.get(featured.author_id)!.name}
                       </span>
                     )}
                   </div>
@@ -217,7 +220,7 @@ export default async function HomePage() {
                           style={{ display: "flex", alignItems: "baseline", gap: "0.625rem", textDecoration: "none", color: "var(--site-text-secondary)", fontSize: "0.9375rem", fontWeight: 500 }}
                         >
                           <span style={{ width: "0.4375rem", height: "0.4375rem", backgroundColor: "#4361EE", flexShrink: 0 }} />
-                          {article.title_pt}
+                          {pickLocale(locale, article.title_pt, article.title_en)}
                         </Link>
                       </li>
                     ))}
@@ -242,14 +245,14 @@ export default async function HomePage() {
                           }}
                         />
                         <div style={{ marginBottom: "0.375rem" }}>
-                          <FormatTag format={article.format} />
+                          <FormatTag format={article.format} locale={locale} />
                         </div>
                         <h4 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", lineHeight: 1.4 }}>
-                          {article.title_pt}
+                          {pickLocale(locale, article.title_pt, article.title_en)}
                         </h4>
                         {article.author_id && authorById.get(article.author_id) && (
                           <span style={{ display: "block", marginTop: "0.25rem", fontSize: "0.75rem", color: "var(--site-faint)" }}>
-                            Por {authorById.get(article.author_id)!.name}
+                            {tc("by")} {authorById.get(article.author_id)!.name}
                           </span>
                         )}
                       </Link>
@@ -308,7 +311,7 @@ export default async function HomePage() {
                         )}
                         <div style={{ flex: 1 }}>
                           <div style={{ marginBottom: "0.375rem" }}>
-                            <FormatTag format={article.format} />
+                            <FormatTag format={article.format} locale={locale} />
                           </div>
                           <h4
                             style={{
@@ -319,15 +322,15 @@ export default async function HomePage() {
                               marginBottom: "0.25rem",
                             }}
                           >
-                            {article.title_pt}
+                            {pickLocale(locale, article.title_pt, article.title_en)}
                           </h4>
                           {i % 2 === 0 && article.excerpt_pt && (
                             <p style={{ color: "var(--site-muted)", fontSize: "0.8125rem", lineHeight: 1.5, marginBottom: "0.25rem" }}>
-                              {article.excerpt_pt}
+                              {pickLocale(locale, article.excerpt_pt, article.excerpt_en)}
                             </p>
                           )}
                           <span style={{ fontSize: "0.75rem", color: "var(--site-faint)" }}>
-                            {article.author_id && authorById.get(article.author_id) && <>Por {authorById.get(article.author_id)!.name} · </>}
+                            {article.author_id && authorById.get(article.author_id) && <>{tc("by")} {authorById.get(article.author_id)!.name} · </>}
                             {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
                           </span>
                         </div>
@@ -365,7 +368,7 @@ export default async function HomePage() {
                   <div style={{ borderRadius: "0.5rem", overflow: "hidden", border: "2px solid #dc2626", marginBottom: "0.875rem" }}>
                     <div style={{ backgroundColor: "#dc2626", color: "white", padding: "0.5rem 0.75rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontWeight: 800, fontSize: "0.75rem", letterSpacing: "0.03em" }}>
-                        <Radio size={14} /> TRANSMISSÃO
+                        <Radio size={14} /> {t("liveBroadcast")}
                       </span>
                       <span
                         style={{
@@ -382,7 +385,7 @@ export default async function HomePage() {
                         }}
                       >
                         <span className="live-dot" style={{ width: "0.4375rem", height: "0.4375rem", borderRadius: "50%", backgroundColor: "#dc2626", flexShrink: 0 }} />
-                        AO VIVO
+                        {t("liveNow")}
                       </span>
                     </div>
                     <div style={{ position: "relative", paddingTop: "56.25%" }}>
@@ -405,7 +408,7 @@ export default async function HomePage() {
 
                 <div style={{ borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
                   <div style={{ backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>
-                    VÍDEO EM DESTAQUE
+                    {t("featuredVideo")}
                   </div>
                   {featuredVideoUrl ? (
                     <div style={{ position: "relative", paddingTop: "56.25%" }}>
@@ -513,7 +516,8 @@ export default async function HomePage() {
                         overflow: "hidden",
                       }}
                     >
-                      {author.tagline_pt?.trim() || (latest ? latest.title_pt : author.role_pt)}
+                      {pickLocale(locale, author.tagline_pt, author.tagline_en)?.trim() ||
+                        (latest ? pickLocale(locale, latest.title_pt, latest.title_en) : pickLocale(locale, author.role_pt, author.role_en))}
                     </div>
                   </div>
                 </Link>
@@ -725,7 +729,7 @@ export default async function HomePage() {
                       <div style={{ color: "white", fontWeight: 800, fontSize: "0.9375rem" }}>{author.name}</div>
                       {author.role_pt && (
                         <div style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8125rem", lineHeight: 1.4, marginTop: "0.125rem" }}>
-                          {author.role_pt}
+                          {pickLocale(locale, author.role_pt, author.role_en)}
                         </div>
                       )}
                     </div>

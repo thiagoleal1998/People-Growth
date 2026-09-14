@@ -1,19 +1,20 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Reveal } from "@/components/Reveal";
+import { pickLocale } from "@/lib/locale-content";
 import type { PortfolioCase } from "@/types/database.types";
 
 export const revalidate = 300;
 
-const categoryMeta: Record<PortfolioCase["category"], { label: string; color: string }> = {
-  marketing: { label: "Marketing", color: "#4361EE" },
-  growth: { label: "Growth", color: "#06D6A0" },
-  data: { label: "Dados", color: "#FFB703" },
-  ai: { label: "IA", color: "#4361EE" },
-  consulting: { label: "Consultoria", color: "#06D6A0" },
+const categoryColor: Record<PortfolioCase["category"], string> = {
+  marketing: "#4361EE",
+  growth: "#06D6A0",
+  data: "#FFB703",
+  ai: "#4361EE",
+  consulting: "#06D6A0",
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -24,6 +25,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function PortfolioPage() {
   const t = await getTranslations("portfolio");
+  const locale = await getLocale();
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("portfolio_cases").select("*").eq("status", "active").order("order");
@@ -43,13 +45,14 @@ export default async function PortfolioPage() {
           <Reveal>
           {cases.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
-              Nenhum case cadastrado no momento.
+              {t("noCases")}
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))", gap: "2rem" }}>
               {cases.map((c) => {
-                const meta = categoryMeta[c.category];
-                const firstResult = (c.results_pt ?? "").split("\n").map((l) => l.trim()).filter(Boolean)[0];
+                const color = categoryColor[c.category];
+                const label = t(c.category);
+                const firstResult = (pickLocale(locale, c.results_pt, c.results_en) ?? "").split("\n").map((l) => l.trim()).filter(Boolean)[0];
                 return (
                   <Link
                     key={c.id}
@@ -69,20 +72,20 @@ export default async function PortfolioPage() {
                           gap: "0.75rem",
                         }}
                       >
-                        <span style={{ backgroundColor: `${meta.color}25`, color: meta.color, padding: "0.25rem 0.875rem", borderRadius: "9999px", fontSize: "0.8125rem", fontWeight: 700 }}>
-                          {meta.label}
+                        <span style={{ backgroundColor: `${color}25`, color, padding: "0.25rem 0.875rem", borderRadius: "9999px", fontSize: "0.8125rem", fontWeight: 700 }}>
+                          {label}
                         </span>
                         {firstResult && (
                           <div style={{ backgroundColor: "rgba(255,255,255,0.08)", borderRadius: "0.875rem", padding: "0.625rem 1.25rem", textAlign: "center" }}>
-                            <div style={{ fontWeight: 800, color: meta.color, fontSize: "1.0625rem" }}>{firstResult}</div>
+                            <div style={{ fontWeight: 800, color, fontSize: "1.0625rem" }}>{firstResult}</div>
                           </div>
                         )}
                       </div>
 
                       <div style={{ padding: "1.75rem", flex: 1, display: "flex", flexDirection: "column" }}>
-                        <h3 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.625rem" }}>{c.title_pt}</h3>
+                        <h3 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.625rem" }}>{pickLocale(locale, c.title_pt, c.title_en)}</h3>
                         {c.challenge_pt && (
-                          <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.65, marginBottom: "1.25rem", flex: 1 }}>{c.challenge_pt}</p>
+                          <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.65, marginBottom: "1.25rem", flex: 1 }}>{pickLocale(locale, c.challenge_pt, c.challenge_en)}</p>
                         )}
 
                         {c.tools && c.tools.length > 0 && (
@@ -96,7 +99,7 @@ export default async function PortfolioPage() {
                         )}
 
                         <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#4361EE", fontWeight: 700, fontSize: "0.9rem" }}>
-                          Ver case completo <ArrowRight size={16} />
+                          {t("viewFullCase")} <ArrowRight size={16} />
                         </div>
                       </div>
                     </article>

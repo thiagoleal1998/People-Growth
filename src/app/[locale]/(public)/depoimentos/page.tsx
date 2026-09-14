@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Star } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { pickLocale } from "@/lib/locale-content";
 import type { Testimonial } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -14,6 +15,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function DepoimentosPage() {
   const t = await getTranslations("testimonials");
+  const locale = await getLocale();
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("testimonials").select("*").eq("status", "active").order("order");
@@ -32,7 +34,7 @@ export default async function DepoimentosPage() {
         <div className="container-xl">
           {testimonials.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
-              Nenhum depoimento cadastrado no momento.
+              {t("noTestimonials")}
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(320px, 100%), 1fr))", gap: "1.75rem" }}>
@@ -46,7 +48,7 @@ export default async function DepoimentosPage() {
                     </div>
                   )}
                   <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9375rem", lineHeight: 1.75, flex: 1, marginBottom: "1.5rem", fontStyle: "italic" }}>
-                    &ldquo;{item.text_pt}&rdquo;
+                    &ldquo;{pickLocale(locale, item.text_pt, item.text_en)}&rdquo;
                   </p>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
                     <div

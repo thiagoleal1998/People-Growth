@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { createClient } from "@/lib/supabase/server";
+import { pickLocale } from "@/lib/locale-content";
 import { ArticlesExplorer } from "./ArticlesExplorer";
 import type { Article, Category, Tag, Author } from "@/types/database.types";
 
@@ -23,6 +24,7 @@ export async function generateMetadata({
 
 export default async function MeaSententiePage() {
   const t = await getTranslations("newsletter");
+  const locale = await getLocale();
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
@@ -71,7 +73,7 @@ export default async function MeaSententiePage() {
               letterSpacing: "0.05em",
             }}
           >
-            CONTEÚDO
+            {t("heroBadge")}
           </div>
           <h1
             style={{
@@ -81,7 +83,7 @@ export default async function MeaSententiePage() {
               marginBottom: "1rem",
             }}
           >
-            Notícias e opinião
+            {t("heroTitle")}
           </h1>
           <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.125rem", lineHeight: 1.7, marginBottom: "2.5rem" }}>
             {t("subtitle")}
@@ -131,7 +133,8 @@ export default async function MeaSententiePage() {
                         overflow: "hidden",
                       }}
                     >
-                      {author.tagline_pt?.trim() || (latest ? latest.title_pt : author.role_pt)}
+                      {pickLocale(locale, author.tagline_pt, author.tagline_en)?.trim() ||
+                        (latest ? pickLocale(locale, latest.title_pt, latest.title_en) : pickLocale(locale, author.role_pt, author.role_en))}
                     </div>
                   </div>
                 </Link>
@@ -145,7 +148,7 @@ export default async function MeaSententiePage() {
         <div className="container-xl">
           {articles.length === 0 ? (
             <div style={{ textAlign: "center", padding: "4rem 1rem", color: "var(--site-faint)" }}>
-              Nenhum artigo publicado ainda. Volte em breve.
+              {t("empty")}
             </div>
           ) : (
             <ArticlesExplorer

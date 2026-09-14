@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
 import { FormatTag } from "@/components/FormatTag";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
+import { pickLocale } from "@/lib/locale-content";
 import type { Article, Author, Category } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -34,29 +36,31 @@ async function getCategoryData(slug: string) {
   };
 }
 
-export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
-  const { slug } = await params;
+export async function generateMetadata({ params }: { params: Promise<{ slug: string; locale: string }> }): Promise<Metadata> {
+  const { slug, locale } = await params;
   const result = await getCategoryData(slug);
   if (!result) return { title: "Categoria não encontrada" };
   return {
-    title: `${result.category.name_pt} — Conteúdo`,
+    title: `${pickLocale(locale, result.category.name_pt, result.category.name_en)} — ${locale === "en" ? "Content" : "Conteúdo"}`,
   };
 }
 
-export default async function CategoryPage({ params }: { params: Promise<{ slug: string }> }) {
-  const { slug } = await params;
+export default async function CategoryPage({ params }: { params: Promise<{ slug: string; locale: string }> }) {
+  const { slug, locale } = await params;
   const result = await getCategoryData(slug);
 
   if (!result) notFound();
 
   const { category, articles, authorById } = result;
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+  const tc = await getTranslations({ locale, namespace: "common" });
 
   return (
     <>
       <section style={{ background: "linear-gradient(135deg, #0d1b2a 0%, #1a1f3e 100%)", paddingTop: "6rem", paddingBottom: "3.5rem", color: "white" }}>
         <div className="container-xl" style={{ maxWidth: "720px" }}>
           <Link href="/conteudo" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
-            <ArrowLeft size={16} /> Conteúdo
+            <ArrowLeft size={16} /> {tNav("newsletter")}
           </Link>
           <span
             style={{
@@ -70,9 +74,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
               marginBottom: "1rem",
             }}
           >
-            CATEGORIA
+            {locale === "en" ? "CATEGORY" : "CATEGORIA"}
           </span>
-          <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 800, lineHeight: 1.1 }}>{category.name_pt}</h1>
+          <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 800, lineHeight: 1.1 }}>{pickLocale(locale, category.name_pt, category.name_en)}</h1>
         </div>
       </section>
 
@@ -80,7 +84,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
         <div className="container-xl" style={{ maxWidth: "800px" }}>
           {articles.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
-              Nenhum artigo publicado em {category.name_pt} ainda.
+              {locale === "en"
+                ? `No articles published in ${pickLocale(locale, category.name_pt, category.name_en)} yet.`
+                : `Nenhum artigo publicado em ${category.name_pt} ainda.`}
             </div>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
@@ -103,20 +109,20 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                     />
                     <div style={{ flex: 1 }}>
                       <div style={{ marginBottom: "0.375rem" }}>
-                        <FormatTag format={article.format} />
+                        <FormatTag format={article.format} locale={locale} />
                       </div>
                       <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.375rem" }}>
-                        {article.title_pt}
+                        {pickLocale(locale, article.title_pt, article.title_en)}
                       </h3>
                       {article.excerpt_pt && (
                         <p style={{ fontSize: "0.875rem", color: "var(--site-muted)", lineHeight: 1.6, marginBottom: "0.625rem" }}>
-                          {article.excerpt_pt}
+                          {pickLocale(locale, article.excerpt_pt, article.excerpt_en)}
                         </p>
                       )}
                       {(article.author_id || article.published_at) && (
                         <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
-                          {article.author_id && authorById.get(article.author_id) && <>Por {authorById.get(article.author_id)!.name} · </>}
-                          {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                          {article.author_id && authorById.get(article.author_id) && <>{tc("by")} {authorById.get(article.author_id)!.name} · </>}
+                          {article.published_at && new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                         </span>
                       )}
                     </div>

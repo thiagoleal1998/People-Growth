@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getTranslations } from "next-intl/server";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Clock, Calendar, ChevronRight, Linkedin, Instagram } from "lucide-react";
@@ -14,6 +15,7 @@ import { createClient } from "@/lib/supabase/server";
 import { renderMarkdownLite, stripMarkdownLite } from "@/lib/markdown-lite";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import { articleHref, articlePath, FORMAT_SEGMENT, UNCATEGORIZED_SEGMENT } from "@/lib/article-url";
+import { pickLocale } from "@/lib/locale-content";
 import type { Article, Category, Author, Comment } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -93,12 +95,12 @@ export async function generateMetadata({
 }: {
   params: Promise<RouteParams>;
 }): Promise<Metadata> {
-  const { slug } = await params;
+  const { slug, locale } = await params;
   const result = await getArticle(slug);
   if (!result) return { title: "Artigo não encontrado" };
 
-  const title = result.article.seo_title_pt || result.article.title_pt;
-  const description = result.article.seo_desc_pt || result.article.excerpt_pt || undefined;
+  const title = pickLocale(locale, result.article.seo_title_pt, result.article.seo_title_en) || pickLocale(locale, result.article.title_pt, result.article.title_en);
+  const description = pickLocale(locale, result.article.seo_desc_pt, result.article.seo_desc_en) || pickLocale(locale, result.article.excerpt_pt, result.article.excerpt_en) || undefined;
   const images = result.article.cover_image ? [{ url: result.article.cover_image, width: 1200, height: 630 }] : undefined;
 
   return {
@@ -131,6 +133,9 @@ export default async function ArticlePage({
 
   if (!result) notFound();
 
+  const tc = await getTranslations({ locale, namespace: "common" });
+  const tNav = await getTranslations({ locale, namespace: "nav" });
+
   const { article, category: categoryRow, author, comments, related, authorById } = result;
 
   // Self-healing canonical URL: if the format/category in the address bar
@@ -148,8 +153,8 @@ export default async function ArticlePage({
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
-    headline: article.title_pt,
-    description: article.excerpt_pt ?? undefined,
+    headline: pickLocale(locale, article.title_pt, article.title_en),
+    description: pickLocale(locale, article.excerpt_pt, article.excerpt_en) ?? undefined,
     image: article.cover_image ? [article.cover_image] : undefined,
     datePublished: article.published_at ?? article.created_at,
     dateModified: article.updated_at ?? article.published_at ?? article.created_at,
@@ -192,11 +197,11 @@ export default async function ArticlePage({
               fontWeight: 500,
             }}
           >
-            <ArrowLeft size={16} /> Conteúdo
+            <ArrowLeft size={16} /> {tNav("newsletter")}
           </Link>
 
           <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
-            <FormatTag format={article.format} />
+            <FormatTag format={article.format} locale={locale} />
             {categoryRow && (
               <span
                 style={{
@@ -209,7 +214,7 @@ export default async function ArticlePage({
                   fontWeight: 700,
                 }}
               >
-                {categoryRow.name_pt}
+                {pickLocale(locale, categoryRow.name_pt, categoryRow.name_en)}
               </span>
             )}
           </div>
@@ -222,21 +227,21 @@ export default async function ArticlePage({
               marginBottom: "1.5rem",
             }}
           >
-            {article.title_pt}
+            {pickLocale(locale, article.title_pt, article.title_en)}
           </h1>
 
           <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", flexWrap: "wrap" }}>
             {article.published_at && (
               <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                <Calendar size={14} /> {new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                <Calendar size={14} /> {new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
               </span>
             )}
             {article.read_time && (
               <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                <Clock size={14} /> {article.read_time} min de leitura
+                <Clock size={14} /> {article.read_time} {tc("minutes")}
               </span>
             )}
-            {author && <span>Por {author.name}</span>}
+            {author && <span>{tc("by")} {author.name}</span>}
           </div>
         </div>
       </section>
@@ -285,14 +290,16 @@ export default async function ArticlePage({
                       href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
                       style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
                     >
-                      Sobre {author.gender === "feminino" ? "a autora" : "o autor"} <ChevronRight size={14} />
+                      {locale === "en"
+                        ? "About the author"
+                        : `Sobre ${author.gender === "feminino" ? "a autora" : "o autor"}`} <ChevronRight size={14} />
                     </Link>
                   </div>
                 </div>
 
                 {(author.linkedin_url || author.instagram_url) && (
                   <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                    <span style={{ color: "var(--site-muted)", fontSize: "0.8125rem", fontWeight: 600 }}>Siga nas redes</span>
+                    <span style={{ color: "var(--site-muted)", fontSize: "0.8125rem", fontWeight: 600 }}>{locale === "en" ? "Follow on social media" : "Siga nas redes"}</span>
                     <div style={{ display: "flex", gap: "0.625rem" }}>
                       {author.linkedin_url && (
                         <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={{ color: "var(--site-text)" }}>
@@ -311,17 +318,17 @@ export default async function ArticlePage({
             )}
 
             <ArticleBody
-              title={article.title_pt}
-              summary={article.summary_pt}
-              speechText={stripMarkdownLite(article.content_pt)}
-              bodyHtml={renderMarkdownLite(article.content_pt)}
+              title={pickLocale(locale, article.title_pt, article.title_en)}
+              summary={pickLocale(locale, article.summary_pt, article.summary_en)}
+              speechText={stripMarkdownLite(pickLocale(locale, article.content_pt, article.content_en))}
+              bodyHtml={renderMarkdownLite(pickLocale(locale, article.content_pt, article.content_en))}
               coverImage={article.cover_image}
               coverImageCaption={article.cover_image_caption}
               coverImageCredit={article.cover_image_credit}
               videoEmbedUrl={article.video_url ? toYouTubeEmbedUrl(article.video_url) : null}
             />
 
-            <ShareButtons title={article.title_pt} />
+            <ShareButtons title={pickLocale(locale, article.title_pt, article.title_en)} />
 
             <div style={{ marginTop: "2rem" }}>
               <AdBanner slotKey="article-instream" articleId={article.id} />
@@ -358,12 +365,12 @@ export default async function ArticlePage({
                   </div>
                   {author.role_pt && (
                     <div style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.875rem", marginBottom: "0.5rem" }}>
-                      {author.role_pt}
+                      {pickLocale(locale, author.role_pt, author.role_en)}
                     </div>
                   )}
                   {author.bio_pt && (
                     <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6 }}>
-                      {author.bio_pt}
+                      {pickLocale(locale, author.bio_pt, author.bio_en)}
                     </p>
                   )}
                 </div>
@@ -374,7 +381,7 @@ export default async function ArticlePage({
             {related.length > 0 && (
               <div style={{ marginTop: "3rem" }}>
                 <h2 style={{ fontWeight: 800, fontSize: "1.125rem", color: "var(--site-text)", marginBottom: "1.25rem" }}>
-                  Leia também
+                  {locale === "en" ? "Read also" : "Leia também"}
                 </h2>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1.25rem" }}>
                   {related.map((r) => (
@@ -393,14 +400,14 @@ export default async function ArticlePage({
                         }}
                       />
                       <div style={{ marginBottom: "0.375rem" }}>
-                        <FormatTag format={r.format} />
+                        <FormatTag format={r.format} locale={locale} />
                       </div>
                       <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", lineHeight: 1.4 }}>
-                        {r.title_pt}
+                        {pickLocale(locale, r.title_pt, r.title_en)}
                       </h3>
                       {r.author_id && authorById.get(r.author_id) && (
                         <span style={{ display: "block", marginTop: "0.375rem", fontSize: "0.75rem", color: "var(--site-faint)" }}>
-                          Por {authorById.get(r.author_id)!.name}
+                          {tc("by")} {authorById.get(r.author_id)!.name}
                         </span>
                       )}
                     </Link>
@@ -412,14 +419,26 @@ export default async function ArticlePage({
             {/* Comments */}
             <div style={{ marginTop: "3rem", paddingTop: "1.5rem", borderTop: "2px solid #4361EE" }}>
               <h2 style={{ fontWeight: 800, fontSize: "1.375rem", color: "var(--site-text)", marginBottom: "0.75rem" }}>
-                {comments.length} comentário{comments.length === 1 ? "" : "s"}
+                {comments.length} {locale === "en" ? `comment${comments.length === 1 ? "" : "s"}` : `comentário${comments.length === 1 ? "" : "s"}`}
               </h2>
               <p style={{ color: "var(--site-muted)", fontSize: "0.8125rem", lineHeight: 1.6, marginBottom: "2rem" }}>
-                O autor da mensagem, e não a People &amp; Growth, é o responsável pelo comentário. Leia as{" "}
-                <Link href="/comentarios" style={{ color: "#4361EE", fontWeight: 600, textDecoration: "underline" }}>
-                  Regras de Uso dos Comentários
-                </Link>
-                .
+                {locale === "en" ? (
+                  <>
+                    The author of the message, not People &amp; Growth, is responsible for the comment. Read the{" "}
+                    <Link href="/comentarios" style={{ color: "#4361EE", fontWeight: 600, textDecoration: "underline" }}>
+                      Comment Guidelines
+                    </Link>
+                    .
+                  </>
+                ) : (
+                  <>
+                    O autor da mensagem, e não a People &amp; Growth, é o responsável pelo comentário. Leia as{" "}
+                    <Link href="/comentarios" style={{ color: "#4361EE", fontWeight: 600, textDecoration: "underline" }}>
+                      Regras de Uso dos Comentários
+                    </Link>
+                    .
+                  </>
+                )}
               </p>
 
               <Comments articleId={article.id} comments={comments} />
@@ -437,10 +456,12 @@ export default async function ArticlePage({
               }}
             >
               <h3 style={{ fontWeight: 800, fontSize: "1rem", marginBottom: "0.5rem" }}>
-                ✍️ Gostou do artigo?
+                {locale === "en" ? "✍️ Liked the article?" : "✍️ Gostou do artigo?"}
               </h3>
               <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: "1.25rem" }}>
-                Assine a Mea Sententia e receba perspectivas como essa toda semana.
+                {locale === "en"
+                  ? "Subscribe to Mea Sententia and get perspectives like this every week."
+                  : "Assine a Mea Sententia e receba perspectivas como essa toda semana."}
               </p>
               <NewsletterForm compact />
             </div>
@@ -453,10 +474,12 @@ export default async function ArticlePage({
               }}
             >
               <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", marginBottom: "1rem" }}>
-                Precisa de consultoria?
+                {locale === "en" ? "Need consulting?" : "Precisa de consultoria?"}
               </h3>
               <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: "1rem" }}>
-                Ajudamos empresas a crescerem com Marketing, Growth e IA.
+                {locale === "en"
+                  ? "We help businesses grow with Marketing, Growth and AI."
+                  : "Ajudamos empresas a crescerem com Marketing, Growth e IA."}
               </p>
               <Link
                 href="/contato"
@@ -471,7 +494,7 @@ export default async function ArticlePage({
                   fontSize: "0.875rem",
                 }}
               >
-                Agendar conversa
+                {locale === "en" ? "Schedule a call" : "Agendar conversa"}
               </Link>
             </div>
 

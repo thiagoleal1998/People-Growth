@@ -1,22 +1,28 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import { useLocale, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { Search, ChevronRight } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { articleHref } from "@/lib/article-url";
+import { pickLocale } from "@/lib/locale-content";
 import type { Article, Category, Tag, Author } from "@/types/database.types";
 
 function matches(article: Article, query: string) {
   const q = query.toLowerCase();
   return (
     article.title_pt.toLowerCase().includes(q) ||
-    (article.excerpt_pt ?? "").toLowerCase().includes(q)
+    (article.excerpt_pt ?? "").toLowerCase().includes(q) ||
+    (article.title_en ?? "").toLowerCase().includes(q) ||
+    (article.excerpt_en ?? "").toLowerCase().includes(q)
   );
 }
 
 function ArticleRow({ article, category, author }: { article: Article; category: Category | undefined; author: Author | undefined }) {
+  const locale = useLocale();
+  const t = useTranslations("common");
   return (
     <Link
       href={articleHref(article, category?.slug)}
@@ -59,24 +65,24 @@ function ArticleRow({ article, category, author }: { article: Article; category:
                 fontWeight: 700,
               }}
             >
-              {category.name_pt.toUpperCase()}
+              {pickLocale(locale, category.name_pt, category.name_en).toUpperCase()}
             </span>
           )}
         </div>
         <div style={{ flex: 1 }}>
           <div style={{ marginBottom: "0.375rem" }}>
-            <FormatTag format={article.format} />
+            <FormatTag format={article.format} locale={locale} />
           </div>
           <h3 style={{ fontWeight: 700, fontSize: "1rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.375rem" }}>
-            {article.title_pt}
+            {pickLocale(locale, article.title_pt, article.title_en)}
           </h3>
           {article.excerpt_pt && (
             <p style={{ fontSize: "0.875rem", color: "var(--site-muted)", lineHeight: 1.6, marginBottom: "0.625rem" }}>
-              {article.excerpt_pt}
+              {pickLocale(locale, article.excerpt_pt, article.excerpt_en)}
             </p>
           )}
           <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
-            {author && <>Por {author.name} · </>}
+            {author && <>{t("by")} {author.name} · </>}
             {/* This is a Client Component — Next.js server-renders it once
                 for the initial HTML, then hydrates it in the browser.
                 toLocaleDateString() with no timeZone falls back to the
@@ -87,7 +93,7 @@ function ArticleRow({ article, category, author }: { article: Article; category:
                 (confirmed live: server said "04 de set.", the same
                 visitor's browser said "03 de set."). Pinning the timezone
                 keeps both renders identical regardless of where either runs. */}
-            {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" })}
+            {article.published_at && new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" })}
             {article.read_time ? ` · ${article.read_time} min` : ""}
           </span>
         </div>
@@ -115,6 +121,9 @@ export function ArticlesExplorer({
   noResultsText: string;
   tagsLabel: string;
 }) {
+  const locale = useLocale();
+  const t = useTranslations("newsletter");
+  const tc = useTranslations("common");
   const [query, setQuery] = useState("");
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
   const authorById = useMemo(() => new Map(authors.map((a) => [a.id, a])), [authors]);
@@ -133,7 +142,7 @@ export function ArticlesExplorer({
         {results ? (
           <>
             <h2 style={{ fontSize: "1.0625rem", fontWeight: 700, color: "var(--site-muted)", marginBottom: "1.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              {results.length} resultado{results.length === 1 ? "" : "s"} para &ldquo;{query}&rdquo;
+              {results.length} {results.length === 1 ? t("resultsForOne") : t("resultsForMany")} &ldquo;{query}&rdquo;
             </h2>
             {results.length === 0 ? (
               <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>{noResultsText}</div>
@@ -151,7 +160,7 @@ export function ArticlesExplorer({
             {featured && (
               <div style={{ marginBottom: "2.5rem" }}>
                 <h2 style={{ fontSize: "1.0625rem", fontWeight: 700, color: "var(--site-muted)", marginBottom: "1.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  Destaque
+                  {t("featured")}
                 </h2>
                 <Link
                   href={articleHref(featured, featured.category_id ? categoryById.get(featured.category_id)?.slug : undefined)}
@@ -193,32 +202,32 @@ export function ArticlesExplorer({
                               boxShadow: "0 2px 10px rgba(0,0,0,0.35)",
                             }}
                           >
-                            {cat.name_pt}
+                            {pickLocale(locale, cat.name_pt, cat.name_en)}
                           </span>
                         ) : null;
                       })()}
                     </div>
                     <div style={{ padding: "2rem" }}>
                       <div style={{ marginBottom: "0.75rem" }}>
-                        <FormatTag format={featured.format} />
+                        <FormatTag format={featured.format} locale={locale} />
                       </div>
                       <h3 style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)", lineHeight: 1.3, marginBottom: "0.875rem" }}>
-                        {featured.title_pt}
+                        {pickLocale(locale, featured.title_pt, featured.title_en)}
                       </h3>
                       {featured.excerpt_pt && (
                         <p style={{ color: "var(--site-muted)", lineHeight: 1.7, marginBottom: "1.25rem" }}>
-                          {featured.excerpt_pt}
+                          {pickLocale(locale, featured.excerpt_pt, featured.excerpt_en)}
                         </p>
                       )}
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <span style={{ fontSize: "0.875rem", color: "var(--site-faint)" }}>
-                          {featuredAuthor && <>Por {featuredAuthor.name} · </>}
+                          {featuredAuthor && <>{tc("by")} {featuredAuthor.name} · </>}
                           {/* timeZone pinned for the same hydration-mismatch reason as ArticleRow above */}
-                          {featured.published_at && new Date(featured.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" })}
-                          {featured.read_time ? ` · ${featured.read_time} min de leitura` : ""}
+                          {featured.published_at && new Date(featured.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" })}
+                          {featured.read_time ? ` · ${featured.read_time} ${tc("minutes")}` : ""}
                         </span>
                         <span style={{ color: "#4361EE", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.25rem" }}>
-                          Ler artigo <ChevronRight size={16} />
+                          {t("readMore")} <ChevronRight size={16} />
                         </span>
                       </div>
                     </div>
@@ -231,7 +240,7 @@ export function ArticlesExplorer({
             {rest.length > 0 && (
               <>
                 <h2 style={{ fontSize: "1.0625rem", fontWeight: 700, color: "var(--site-muted)", marginBottom: "1.25rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                  Todos os artigos
+                  {t("allArticles")}
                 </h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                   {rest.map((article) => (
@@ -294,7 +303,7 @@ export function ArticlesExplorer({
             }}
           >
             <h3 style={{ fontWeight: 700, color: "var(--site-text)", marginBottom: "1rem", fontSize: "0.9375rem" }}>
-              Mais lidos
+              {t("mostRead")}
             </h3>
             <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
               {mostRead.map((article, i) => (
@@ -304,7 +313,7 @@ export function ArticlesExplorer({
                   style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", textDecoration: "none" }}
                 >
                   <span style={{ fontWeight: 800, fontSize: "1.125rem", color: "var(--site-faint)", lineHeight: 1.3 }}>{i + 1}</span>
-                  <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, lineHeight: 1.4 }}>{article.title_pt}</span>
+                  <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, lineHeight: 1.4 }}>{pickLocale(locale, article.title_pt, article.title_en)}</span>
                 </Link>
               ))}
             </div>
@@ -337,7 +346,7 @@ export function ArticlesExplorer({
                     fontWeight: 600,
                   }}
                 >
-                  {tag.name_pt}
+                  {pickLocale(locale, tag.name_pt, tag.name_en)}
                 </span>
               ))}
             </div>
@@ -354,10 +363,10 @@ export function ArticlesExplorer({
           }}
         >
           <h3 style={{ fontWeight: 800, fontSize: "1rem", marginBottom: "0.5rem" }}>
-            ✍️ Assine a Mea Sententia
+            {t("subscribeCtaTitle")}
           </h3>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: "1rem" }}>
-            Opinião sobre negócios, sociedade e os temas que impactam pessoas — direto no seu e-mail.
+            {t("subscribeCtaSubtitle")}
           </p>
           <NewsletterForm compact />
         </div>

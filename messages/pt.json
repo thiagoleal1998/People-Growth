@@ -31,7 +31,10 @@
     "servicesSubtitle": "Estratégia e execução para negócios que querem crescer com inteligência.",
     "testimonialsTitle": "O que dizem sobre o nosso trabalho",
     "contactTitle": "Vamos conversar?",
-    "contactSubtitle": "Agende uma sessão de 30 minutos sem compromisso."
+    "contactSubtitle": "Agende uma sessão de 30 minutos sem compromisso.",
+    "liveBroadcast": "TRANSMISSÃO",
+    "liveNow": "AO VIVO",
+    "featuredVideo": "VÍDEO EM DESTAQUE"
   },
   "about": {
     "title": "Sobre a People & Growth",
@@ -66,7 +69,11 @@
     "challenge": "Desafio",
     "solution": "Solução",
     "tools": "Ferramentas utilizadas",
-    "results": "Resultados"
+    "results": "Resultados",
+    "noCases": "Nenhum case cadastrado no momento.",
+    "viewFullCase": "Ver case completo",
+    "backToPortfolio": "Portfólio",
+    "wantResults": "Quero resultados assim no meu negócio →"
   },
   "services": {
     "title": "Serviços",
@@ -81,7 +88,23 @@
     "bi": "Business Intelligence",
     "ai": "Inteligência Artificial",
     "corporateTraining": "Treinamentos Corporativos",
-    "mentoring": "Mentorias"
+    "mentoring": "Mentorias",
+    "heroTitle1": "Soluções estratégicas para",
+    "heroTitle2": "negócios que querem crescer.",
+    "noServices": "Nenhum serviço cadastrado no momento.",
+    "processTitle": "Como funciona a consultoria",
+    "processSubtitle": "Um processo estruturado para gerar resultados reais.",
+    "step1Title": "Diagnóstico",
+    "step1Desc": "Entendimento profundo do negócio, desafios e oportunidades.",
+    "step2Title": "Estratégia",
+    "step2Desc": "Desenvolvimento do plano estratégico personalizado.",
+    "step3Title": "Execução",
+    "step3Desc": "Implementação com acompanhamento próximo.",
+    "step4Title": "Resultados",
+    "step4Desc": "Medição, ajuste e consolidação dos ganhos.",
+    "scheduleFreeCall": "Agendar conversa gratuita",
+    "typicalResults": "Resultados típicos",
+    "formHint": "Preencha abaixo e entraremos em contato em até 24h."
   },
   "newsletter": {
     "title": "Conteúdo",
@@ -94,7 +117,17 @@
     "categories": "Categorias",
     "tags": "Tags",
     "search": "Buscar artigos...",
-    "noResults": "Nenhum artigo encontrado."
+    "noResults": "Nenhum artigo encontrado.",
+    "heroBadge": "CONTEÚDO",
+    "heroTitle": "Notícias e opinião",
+    "empty": "Nenhum artigo publicado ainda. Volte em breve.",
+    "featured": "Destaque",
+    "allArticles": "Todos os artigos",
+    "resultsForOne": "resultado para",
+    "resultsForMany": "resultados para",
+    "mostRead": "Mais lidos",
+    "subscribeCtaTitle": "✍️ Assine a Mea Sententia",
+    "subscribeCtaSubtitle": "Opinião sobre negócios, sociedade e os temas que impactam pessoas — direto no seu e-mail."
   },
   "courses": {
     "title": "Cursos",
@@ -102,7 +135,8 @@
     "comingSoon": "Em breve",
     "notifyMe": "Me avise quando lançar",
     "notifyEmail": "Seu e-mail",
-    "notifyButton": "Quero ser avisado"
+    "notifyButton": "Quero ser avisado",
+    "noCourses": "Nenhum curso cadastrado no momento."
   },
   "aiLab": {
     "title": "Laboratório de IA",
@@ -121,7 +155,15 @@
     "prompts": "Prompts de IA",
     "download": "Baixar grátis",
     "fillForm": "Preencha para receber",
-    "downloadSuccess": "Enviado! Confira seu e-mail."
+    "downloadSuccess": "Enviado! Confira seu e-mail.",
+    "noResources": "Nenhum recurso disponível no momento.",
+    "typeTemplate": "Template",
+    "typeChecklist": "Checklist",
+    "typePrompt": "Prompt IA",
+    "typeGuide": "Guia",
+    "typeEbook": "E-book",
+    "downloadsLabel": "downloads",
+    "comingSoon": "Em breve"
   },
   "media": {
     "title": "Na Mídia",
@@ -137,7 +179,8 @@
   },
   "testimonials": {
     "title": "Depoimentos",
-    "subtitle": "O que clientes, parceiros e colegas dizem."
+    "subtitle": "O que clientes, parceiros e colegas dizem.",
+    "noTestimonials": "Nenhum depoimento cadastrado no momento."
   },
   "faq": {
     "title": "Perguntas Frequentes",
@@ -161,16 +204,31 @@
     "tagline": "Negócios fortes nascem de pessoas fortes.",
     "rights": "Todos os direitos reservados.",
     "privacy": "Política de Privacidade",
-    "terms": "Termos de Uso"
+    "terms": "Termos de Uso",
+    "navigation": "Navegação",
+    "services": "Serviços",
+    "resources": "Recursos",
+    "freeResources": "Recursos Gratuitos",
+    "copyrightNotice": "Aviso de Direitos Autorais",
+    "adminArea": "Área Administrativa",
+    "strategicConsulting": "Consultoria Estratégica",
+    "digitalMarketing": "Marketing Digital",
+    "growth": "Growth",
+    "bi": "Business Intelligence",
+    "aiForBusiness": "IA para Negócios",
+    "training": "Treinamentos"
   },
   "common": {
     "loading": "Carregando...",
     "error": "Algo deu errado. Tente novamente.",
     "back": "Voltar",
     "learnMore": "Saiba mais",
+    "cookieNotice": "Usamos cookies essenciais para o funcionamento do site. Não usamos cookies de rastreamento ou publicidade.",
+    "gotIt": "Entendi",
     "seeAll": "Ver todos",
-    "by": "por",
+    "by": "Por",
     "in": "em",
-    "minutes": "min de leitura"
+    "minutes": "min de leitura",
+    "siteSearchPlaceholder": "Buscar no site"
   }
 }

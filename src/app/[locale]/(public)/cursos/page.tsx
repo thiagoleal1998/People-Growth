@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Bell } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { createClient } from "@/lib/supabase/server";
+import { pickLocale } from "@/lib/locale-content";
 import type { Course } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -17,6 +18,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function CursosPage() {
   const t = await getTranslations("courses");
+  const locale = await getLocale();
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("courses").select("*").neq("status", "draft").order("order");
@@ -35,7 +37,7 @@ export default async function CursosPage() {
         <div className="container-xl">
           {courses.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
-              Nenhum curso cadastrado no momento.
+              {t("noCourses")}
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: "1.75rem" }}>
@@ -60,9 +62,9 @@ export default async function CursosPage() {
                     {course.category && (
                       <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--site-faint)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.5rem" }}>{course.category}</div>
                     )}
-                    <h3 style={{ fontWeight: 800, fontSize: "1.125rem", color: "var(--site-text)", marginBottom: "0.625rem" }}>{course.title_pt}</h3>
+                    <h3 style={{ fontWeight: 800, fontSize: "1.125rem", color: "var(--site-text)", marginBottom: "0.625rem" }}>{pickLocale(locale, course.title_pt, course.title_en)}</h3>
                     {course.description_pt && (
-                      <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.65, marginBottom: "1.5rem" }}>{course.description_pt}</p>
+                      <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.65, marginBottom: "1.5rem" }}>{pickLocale(locale, course.description_pt, course.description_en)}</p>
                     )}
                     <div style={{ borderTop: "1px solid var(--site-border-strong)", paddingTop: "1.25rem" }}>
                       <p style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--site-muted)", marginBottom: "0.75rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import {
   Target, TrendingUp, Rocket, BarChart3, Brain, Users, Sparkles, ArrowRight, CheckCircle2, Wrench,
@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { Reveal } from "@/components/Reveal";
+import { pickLocale } from "@/lib/locale-content";
 import type { Service } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -32,6 +33,7 @@ export async function generateMetadata({
 
 export default async function ServicosPage() {
   const t = await getTranslations("services");
+  const locale = await getLocale();
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("services").select("*").eq("status", "active").order("order");
@@ -65,10 +67,10 @@ export default async function ServicosPage() {
             {t("title")}
           </div>
           <h1 style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 800, lineHeight: 1.1, marginBottom: "1rem" }}>
-            Soluções estratégicas para
+            {t("heroTitle1")}
             <br />
             <span style={{ background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              negócios que querem crescer.
+              {t("heroTitle2")}
             </span>
           </h1>
           <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.125rem", lineHeight: 1.7 }}>
@@ -83,7 +85,7 @@ export default async function ServicosPage() {
           <Reveal>
           {services.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
-              Nenhum serviço cadastrado no momento.
+              {t("noServices")}
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(340px, 100%), 1fr))", gap: "2rem" }}>
@@ -123,16 +125,16 @@ export default async function ServicosPage() {
                     </div>
 
                     <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.625rem" }}>
-                      {service.title_pt}
+                      {pickLocale(locale, service.title_pt, service.title_en)}
                     </h2>
                     <p style={{ color: "var(--site-muted)", fontSize: "0.9rem", lineHeight: 1.7, marginBottom: "1.5rem", flex: 1 }}>
-                      {service.description_pt}
+                      {pickLocale(locale, service.description_pt, service.description_en)}
                     </p>
 
                     {benefits.length > 0 && (
                       <div style={{ marginBottom: "1.5rem" }}>
                         <p style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--site-faint)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.625rem" }}>
-                          Benefícios
+                          {t("benefits")}
                         </p>
                         <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.375rem" }}>
                           {benefits.map((benefit) => (
@@ -161,7 +163,7 @@ export default async function ServicosPage() {
                         textDecoration: "none",
                       }}
                     >
-                      Solicitar proposta <ArrowRight size={16} />
+                      {t("cta")} <ArrowRight size={16} />
                     </Link>
                   </div>
                 );
@@ -176,18 +178,18 @@ export default async function ServicosPage() {
       <section className="section-padding" style={{ background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)", color: "white" }}>
         <div className="container-xl" style={{ maxWidth: "800px", margin: "0 auto", textAlign: "center" }}>
           <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, marginBottom: "0.75rem" }}>
-            Como funciona a consultoria
+            {t("processTitle")}
           </h2>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1.0625rem", marginBottom: "3.5rem" }}>
-            Um processo estruturado para gerar resultados reais.
+            {t("processSubtitle")}
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(160px, 100%), 1fr))", gap: "1.5rem", textAlign: "left" }}>
             {[
-              { step: "01", title: "Diagnóstico", desc: "Entendimento profundo do negócio, desafios e oportunidades." },
-              { step: "02", title: "Estratégia", desc: "Desenvolvimento do plano estratégico personalizado." },
-              { step: "03", title: "Execução", desc: "Implementação com acompanhamento próximo." },
-              { step: "04", title: "Resultados", desc: "Medição, ajuste e consolidação dos ganhos." },
+              { step: "01", title: t("step1Title"), desc: t("step1Desc") },
+              { step: "02", title: t("step2Title"), desc: t("step2Desc") },
+              { step: "03", title: t("step3Title"), desc: t("step3Desc") },
+              { step: "04", title: t("step4Title"), desc: t("step4Desc") },
             ].map(({ step, title, desc }) => (
               <div
                 key={step}
@@ -223,7 +225,7 @@ export default async function ServicosPage() {
                 boxShadow: "0 4px 24px -4px rgba(67,97,238,0.5)",
               }}
             >
-              Agendar conversa gratuita <ArrowRight size={18} />
+              {t("scheduleFreeCall")} <ArrowRight size={18} />
             </Link>
           </div>
         </div>
