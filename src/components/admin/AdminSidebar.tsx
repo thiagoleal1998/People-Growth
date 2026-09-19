@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
+import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { APP_VERSION } from "@/lib/version";
 import { NotificationBell } from "@/components/NotificationBell";
@@ -30,30 +31,51 @@ import {
   BarChart3,
   LifeBuoy,
   Tag,
+  ChevronDown,
+  ChevronRight,
 } from "lucide-react";
 
-const links = [
+type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests";
+type NavLink = { href: string; label: string; icon: LucideIcon; countKey?: CountKey };
+type NavGroup = { label: string; icon: LucideIcon; children: NavLink[] };
+type NavItem = NavLink | NavGroup;
+
+function isGroup(item: NavItem): item is NavGroup {
+  return "children" in item;
+}
+
+const links: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/relatorios", label: "Relatórios", icon: BarChart3 },
   { href: "/admin/artigos", label: "Artigos", icon: FileText },
-  { href: "/admin/comentarios", label: "Comentários", icon: MessageCircle, countKey: "comentarios" as const },
+  { href: "/admin/comentarios", label: "Comentários", icon: MessageCircle, countKey: "comentarios" },
   { href: "/admin/autores", label: "Autores", icon: UserCircle },
   { href: "/admin/portfolio", label: "Portfólio", icon: Briefcase },
   { href: "/admin/servicos", label: "Serviços", icon: Wrench },
-  { href: "/admin/leads", label: "Leads / CRM", icon: Users, countKey: "leads" as const },
-  { href: "/admin/chamados", label: "Chamados", icon: LifeBuoy, countKey: "chamados" as const },
-  { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
+  { href: "/admin/leads", label: "Leads / CRM", icon: Users, countKey: "leads" },
+  { href: "/admin/chamados", label: "Chamados", icon: LifeBuoy, countKey: "chamados" },
+  {
+    label: "Marketing",
+    icon: Megaphone,
+    children: [
+      { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
+      { href: "/admin/publicidade", label: "Publicidade", icon: Megaphone },
+      { href: "/admin/promocoes", label: "Promoções", icon: Tag },
+    ],
+  },
   { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
   { href: "/admin/cursos", label: "Cursos", icon: BookOpen },
   { href: "/admin/recursos", label: "Recursos", icon: Download },
   { href: "/admin/midia", label: "Na Mídia", icon: Monitor },
-  { href: "/admin/publicidade", label: "Publicidade", icon: Megaphone },
-  { href: "/admin/promocoes", label: "Promoções", icon: Tag },
   { href: "/admin/seo", label: "SEO, GEO & AEO", icon: Search },
-  { href: "/admin/usuarios", label: "Usuários", icon: KeyRound, countKey: "resetRequests" as const },
+  { href: "/admin/usuarios", label: "Usuários", icon: KeyRound, countKey: "resetRequests" },
   { href: "/admin/paginas", label: "Páginas Institucionais", icon: ScrollText },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
+
+function isLinkActive(pathname: string, href: string) {
+  return pathname === href || (href !== "/admin" && pathname.startsWith(href));
+}
 
 export function AdminSidebar({
   logoUrl,
@@ -68,6 +90,21 @@ export function AdminSidebar({
 }) {
   const pathname = usePathname();
   const [loggingOut, setLoggingOut] = useState(false);
+  // Groups start expanded when the current page is one of their children,
+  // so navigating straight to e.g. /admin/promocoes doesn't hide the very
+  // link that's active.
+  const [openGroups, setOpenGroups] = useState<Set<string>>(
+    () => new Set(links.filter(isGroup).filter((g) => g.children.some((c) => isLinkActive(pathname, c.href))).map((g) => g.label))
+  );
+
+  function toggleGroup(label: string) {
+    setOpenGroups((prev) => {
+      const next = new Set(prev);
+      if (next.has(label)) next.delete(label);
+      else next.add(label);
+      return next;
+    });
+  }
 
   async function handleLogout() {
     setLoggingOut(true);
@@ -118,52 +155,47 @@ export function AdminSidebar({
 
       {/* Nav */}
       <nav className="admin-sidebar-scroll" style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
-        {links.map(({ href, label, icon: Icon, countKey }) => {
-          const isActive = pathname === href || (href !== "/admin" && pathname.startsWith(href));
-          const count = countKey ? counts?.[countKey] ?? 0 : 0;
-          return (
-            <Link
-              key={href}
-              href={href}
-              style={{
-                display: "flex",
-                alignItems: "center",
-                gap: "0.75rem",
-                padding: "0.625rem 0.875rem",
-                borderRadius: "0.5rem",
-                fontSize: "0.875rem",
-                fontWeight: 500,
-                color: isActive ? "white" : "rgba(255,255,255,0.55)",
-                backgroundColor: isActive ? "rgba(67,97,238,0.2)" : "transparent",
-                textDecoration: "none",
-                transition: "all 0.15s",
-              }}
-            >
-              <Icon size={17} />
-              {label}
-              {count > 0 && (
-                <span
+        {links.map((item) => {
+          if (isGroup(item)) {
+            const { label, icon: Icon, children } = item;
+            const open = openGroups.has(label);
+            const groupActive = children.some((c) => isLinkActive(pathname, c.href));
+            return (
+              <div key={label}>
+                <button
+                  type="button"
+                  onClick={() => toggleGroup(label)}
                   style={{
-                    marginLeft: "auto",
-                    backgroundColor: "#dc2626",
-                    color: "white",
-                    fontSize: "0.6875rem",
-                    fontWeight: 800,
-                    minWidth: "1.25rem",
-                    height: "1.25rem",
-                    borderRadius: "9999px",
                     display: "flex",
                     alignItems: "center",
-                    justifyContent: "center",
-                    padding: "0 0.3rem",
-                    flexShrink: 0,
+                    gap: "0.75rem",
+                    padding: "0.625rem 0.875rem",
+                    borderRadius: "0.5rem",
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    color: groupActive ? "white" : "rgba(255,255,255,0.55)",
+                    backgroundColor: groupActive && !open ? "rgba(67,97,238,0.2)" : "transparent",
+                    border: "none",
+                    width: "100%",
+                    cursor: "pointer",
+                    transition: "all 0.15s",
                   }}
                 >
-                  {count > 99 ? "99+" : count}
-                </span>
-              )}
-            </Link>
-          );
+                  <Icon size={17} />
+                  {label}
+                  {open ? <ChevronDown size={15} style={{ marginLeft: "auto" }} /> : <ChevronRight size={15} style={{ marginLeft: "auto" }} />}
+                </button>
+                {open && (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", marginTop: "0.25rem" }}>
+                    {children.map((child) => (
+                      <NavLinkItem key={child.href} link={child} pathname={pathname} counts={counts} indent />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          }
+          return <NavLinkItem key={item.href} link={item} pathname={pathname} counts={counts} />;
         })}
       </nav>
 
@@ -212,5 +244,64 @@ export function AdminSidebar({
         <div style={{ padding: "0.5rem 0.875rem 0", fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)" }}>v{APP_VERSION}</div>
       </div>
     </aside>
+  );
+}
+
+function NavLinkItem({
+  link,
+  pathname,
+  counts,
+  indent,
+}: {
+  link: NavLink;
+  pathname: string;
+  counts?: { comentarios: number; leads: number; chamados: number; resetRequests: number };
+  indent?: boolean;
+}) {
+  const { href, label, icon: Icon, countKey } = link;
+  const isActive = isLinkActive(pathname, href);
+  const count = countKey ? counts?.[countKey] ?? 0 : 0;
+  return (
+    <Link
+      href={href}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "0.75rem",
+        padding: "0.625rem 0.875rem",
+        paddingLeft: indent ? "2rem" : "0.875rem",
+        borderRadius: "0.5rem",
+        fontSize: "0.875rem",
+        fontWeight: 500,
+        color: isActive ? "white" : "rgba(255,255,255,0.55)",
+        backgroundColor: isActive ? "rgba(67,97,238,0.2)" : "transparent",
+        textDecoration: "none",
+        transition: "all 0.15s",
+      }}
+    >
+      <Icon size={17} />
+      {label}
+      {count > 0 && (
+        <span
+          style={{
+            marginLeft: "auto",
+            backgroundColor: "#dc2626",
+            color: "white",
+            fontSize: "0.6875rem",
+            fontWeight: 800,
+            minWidth: "1.25rem",
+            height: "1.25rem",
+            borderRadius: "9999px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "0 0.3rem",
+            flexShrink: 0,
+          }}
+        >
+          {count > 99 ? "99+" : count}
+        </span>
+      )}
+    </Link>
   );
 }
