@@ -47,14 +47,15 @@ export const COMPETENCIES: Competency[] = [
   { key: "people_development", labelPt: "Desenvolvimento e alocação de pessoal", labelEn: "People development and allocation", axis: "behavior" },
 ];
 
-// Axis-tier labels for the grid's ticks — LeadershipNineBox takes a plain
-// `locale` prop rather than using next-intl, since it's shared with the
-// admin (Server Component) tree, so this data stays colocated here rather
-// than in messages/*.json.
-export const TIER_LABELS: Record<1 | 2 | 3, { pt: string; en: string }> = {
-  1: { pt: "Abaixo dos padrões", en: "Below standard" },
-  2: { pt: "Dentro dos padrões", en: "Meets standard" },
-  3: { pt: "Excede os padrões", en: "Exceeds standard" },
+// Axis-tier labels for the grid's ticks, pre-split into two short lines so
+// they fit the grid's narrow columns without overlapping — LeadershipNineBox
+// takes a plain `locale` prop rather than using next-intl, since it's
+// shared with the admin (Server Component) tree, so this data stays
+// colocated here rather than in messages/*.json.
+export const TIER_LABELS: Record<1 | 2 | 3, { pt: [string, string]; en: [string, string] }> = {
+  1: { pt: ["Abaixo dos", "padrões"], en: ["Below", "standard"] },
+  2: { pt: ["Dentro dos", "padrões"], en: ["Meets", "standard"] },
+  3: { pt: ["Excede os", "padrões"], en: ["Exceeds", "standard"] },
 };
 
 export function scoreAxis(ratings: CompetencyRatings, axis: CompetencyAxis): number {
@@ -65,8 +66,11 @@ export function scoreAxis(ratings: CompetencyRatings, axis: CompetencyAxis): num
   return Math.round((sum / values.length) * 100) / 100;
 }
 
-// Buckets a 1-3 average into one of the grid's 3 tiers.
-function scoreTier(score: number): 1 | 2 | 3 {
+// Buckets a 1-3 average into one of the grid's 3 tiers. Exported so
+// LeadershipNineBox can plot a point at the center of the exact cell this
+// function assigns it to, instead of a continuous position that can look
+// like it's sitting on a cell boundary for scores close to a threshold.
+export function scoreTier(score: number): 1 | 2 | 3 {
   if (score < 1 + 2 / 3) return 1;
   if (score < 1 + 4 / 3) return 2;
   return 3;
