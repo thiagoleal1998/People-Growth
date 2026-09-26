@@ -33,6 +33,7 @@ import {
   Tag,
   ChevronDown,
   ChevronRight,
+  Grid3x3,
 } from "lucide-react";
 
 type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests";
@@ -53,6 +54,7 @@ const links: NavItem[] = [
   { href: "/admin/portfolio", label: "Portfólio", icon: Briefcase },
   { href: "/admin/servicos", label: "Serviços", icon: Wrench },
   { href: "/admin/leads", label: "Leads / CRM", icon: Users, countKey: "leads" },
+  { href: "/admin/diagnosticos", label: "Diagnósticos de Liderança", icon: Grid3x3 },
   { href: "/admin/chamados", label: "Chamados", icon: LifeBuoy, countKey: "chamados" },
   {
     label: "Marketing",

@@ -157,7 +157,7 @@ type ResourceRow = {
   title_en: string | null;
   description_pt: string | null;
   description_en: string | null;
-  type: "ebook" | "template" | "guide" | "checklist" | "prompt";
+  type: "ebook" | "template" | "guide" | "checklist" | "prompt" | "tool";
   file_url: string | null;
   cover_image: string | null;
   download_count: number;
@@ -395,6 +395,24 @@ type PromoSearchRuleRow = {
   created_at: string;
 };
 
+type LeadershipAssessmentRow = {
+  id: string;
+  lead_id: string | null;
+  evaluated_name: string;
+  evaluated_role: string | null;
+  evaluator_name: string | null;
+  competencies: Json;
+  strengths: string | null;
+  development_needs: string | null;
+  development_plan: string | null;
+  next_actions: string | null;
+  milestones: Json;
+  performance_score: number;
+  behavior_score: number;
+  quadrant_label: string;
+  created_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -429,6 +447,7 @@ export type Database = {
       ad_events: { Row: AdEventRow; Insert: Omit<AdEventRow, "id" | "created_at">; Update: Partial<Omit<AdEventRow, "id" | "created_at">>; Relationships: [] };
       promos: { Row: PromoRow; Insert: Omit<PromoRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<PromoRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       promo_search_rules: { Row: PromoSearchRuleRow; Insert: Omit<PromoSearchRuleRow, "id" | "created_at">; Update: Partial<Omit<PromoSearchRuleRow, "id" | "created_at">>; Relationships: [] };
+      leadership_assessments: { Row: LeadershipAssessmentRow; Insert: Omit<LeadershipAssessmentRow, "id" | "created_at">; Update: Partial<Omit<LeadershipAssessmentRow, "id" | "created_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -463,5 +482,6 @@ export type Ad = AdRow;
 export type AdTarget = AdTargetRow;
 export type Promo = PromoRow;
 export type PromoSearchRule = PromoSearchRuleRow;
+export type LeadershipAssessment = LeadershipAssessmentRow;
 export type AdEvent = AdEventRow;
 export type InstitutionalPage = InstitutionalPageRow;

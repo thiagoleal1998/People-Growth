@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { getTranslations, getLocale } from "next-intl/server";
-import { FileText, Layout, BookOpen, CheckSquare, Zap, type LucideIcon } from "lucide-react";
+import { FileText, Layout, BookOpen, CheckSquare, Zap, Grid3x3, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ResourceDownloadButton } from "@/components/ResourceDownloadButton";
+import { Link } from "@/i18n/navigation";
 import { pickLocale } from "@/lib/locale-content";
 import type { Resource } from "@/types/database.types";
 
@@ -14,6 +15,7 @@ const typeMeta: Record<Resource["type"], { labelKey: string; icon: LucideIcon; c
   prompt: { labelKey: "typePrompt", icon: Zap, color: "#FFB703" },
   guide: { labelKey: "typeGuide", icon: BookOpen, color: "#4361EE" },
   ebook: { labelKey: "typeEbook", icon: FileText, color: "#06D6A0" },
+  tool: { labelKey: "typeTool", icon: Grid3x3, color: "#FFB703" },
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -62,7 +64,18 @@ export default async function RecursosPage() {
                     {resource.description_pt && (
                       <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.65, flex: 1, marginBottom: "1.5rem" }}>{pickLocale(locale, resource.description_pt, resource.description_en)}</p>
                     )}
-                    {resource.file_url ? (
+                    {resource.type === "tool" && resource.file_url ? (
+                      <Link
+                        // resource.file_url is free-form text from the DB (an
+                        // internal path for tool-type resources), not one of
+                        // next-intl's statically known typed routes.
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        href={resource.file_url as any}
+                        style={{ display: "block", textAlign: "center", backgroundColor: meta.color, color: "white", fontWeight: 700, fontSize: "0.875rem", padding: "0.75rem", borderRadius: "0.625rem", textDecoration: "none" }}
+                      >
+                        {t("openTool")}
+                      </Link>
+                    ) : resource.file_url ? (
                       <ResourceDownloadButton
                         resourceId={resource.id}
                         leadRequired={resource.lead_required}

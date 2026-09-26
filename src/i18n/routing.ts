@@ -36,6 +36,7 @@ export const routing = defineRouting({
     "/cursos": { pt: "/cursos", en: "/courses" },
     "/laboratorio-ia": { pt: "/laboratorio-ia", en: "/ai-lab" },
     "/recursos": { pt: "/recursos", en: "/resources" },
+    "/recursos/diagnostico-lideranca": { pt: "/recursos/diagnostico-lideranca", en: "/resources/leadership-assessment" },
     "/na-midia": { pt: "/na-midia", en: "/in-the-media" },
     "/ferramentas": { pt: "/ferramentas", en: "/tools" },
     "/depoimentos": { pt: "/depoimentos", en: "/testimonials" },

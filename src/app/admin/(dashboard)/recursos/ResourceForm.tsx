@@ -10,6 +10,7 @@ const types: { value: Resource["type"]; label: string }[] = [
   { value: "guide", label: "Guia" },
   { value: "checklist", label: "Checklist" },
   { value: "prompt", label: "Prompt" },
+  { value: "tool", label: "Ferramenta interativa" },
 ];
 
 export function ResourceForm({ item }: { item?: Resource }) {
@@ -37,7 +38,10 @@ export function ResourceForm({ item }: { item?: Resource }) {
             ))}
           </Select>
         </Field>
-        <Field label="Arquivo (URL para download)">
+        <Field
+          label="Arquivo (URL para download)"
+          hint='Para o tipo "Ferramenta interativa", use o caminho interno da página em vez de um link de arquivo — ex.: /recursos/diagnostico-lideranca'
+        >
           <Input name="file_url" defaultValue={item?.file_url ?? ""} />
         </Field>
         <Field label="Capa (URL da imagem)">
