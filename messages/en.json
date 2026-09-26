@@ -157,6 +157,8 @@
     "fillForm": "Fill in to receive",
     "downloadSuccess": "Sent! Check your email.",
     "noResources": "No resources available at the moment.",
+    "allResources": "All resources",
+    "leadershipToolNav": "Leadership diagnostics",
     "typeTemplate": "Template",
     "typeChecklist": "Checklist",
     "typePrompt": "AI Prompt",

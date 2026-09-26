@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { LeadershipAssessmentTool } from "@/components/LeadershipAssessmentTool";
+import { ResourcesSubNav } from "@/components/ResourcesSubNav";
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;
@@ -22,6 +23,7 @@ export default async function DiagnosticoLiderancaPage() {
 
       <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl" style={{ maxWidth: "760px", margin: "0 auto" }}>
+          <ResourcesSubNav active="tool" />
           <LeadershipAssessmentTool />
         </div>
       </section>

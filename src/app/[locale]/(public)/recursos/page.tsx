@@ -3,6 +3,7 @@ import { getTranslations, getLocale } from "next-intl/server";
 import { FileText, Layout, BookOpen, CheckSquare, Zap, Grid3x3, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ResourceDownloadButton } from "@/components/ResourceDownloadButton";
+import { ResourcesSubNav } from "@/components/ResourcesSubNav";
 import { Link } from "@/i18n/navigation";
 import { pickLocale } from "@/lib/locale-content";
 import type { Resource } from "@/types/database.types";
@@ -43,6 +44,7 @@ export default async function RecursosPage() {
 
       <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl">
+          <ResourcesSubNav active="all" />
           {resources.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               {t("noResources")}
