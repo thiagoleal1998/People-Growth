@@ -28,6 +28,26 @@ function toLines(text: string): string[] {
     .filter(Boolean);
 }
 
+// The public layout has several position:fixed pieces (currency/weather
+// ticker, navbar, category nav, the floating social icons, cookie banner)
+// that aren't covered by a single "hide the header/footer" rule and would
+// otherwise repeat on every printed page. Hiding everything except the
+// report itself (rather than enumerating each fixed element) is the
+// robust fix. Colors are also forced to a fixed light palette instead of
+// the theme CSS variables, since --site-* resolves to light text on a
+// dark card when the visitor's site theme is dark — unreadable on paper.
+function printReport(evaluatedName: string) {
+  const safeName = evaluatedName.trim().replace(/[^\p{L}\p{N}]+/gu, "-").replace(/^-+|-+$/g, "") || "Resultado";
+  const previousTitle = document.title;
+  document.title = `Diagnostico-Lideranca-${safeName}`;
+  const restore = () => {
+    document.title = previousTitle;
+    window.removeEventListener("afterprint", restore);
+  };
+  window.addEventListener("afterprint", restore);
+  window.print();
+}
+
 export function LeadershipAssessmentTool() {
   const t = useTranslations("leadershipTool");
   const locale = useLocale();
@@ -97,11 +117,28 @@ export function LeadershipAssessmentTool() {
   if (step === 5 && result) {
     const quadrantLabelText = locale === "en" ? result.quadrant.labelEn : result.quadrant.labelPt;
     return (
-      <div>
+      <div className="leadership-report-print">
         <style>{`
           @media print {
-            header.site-navbar, footer, .no-print { display: none !important; }
-            body { background: white !important; }
+            html, body { background: white !important; }
+            body * { visibility: hidden; }
+            .leadership-report-print, .leadership-report-print * { visibility: visible; }
+            .leadership-report-print {
+              position: absolute;
+              left: 0;
+              top: 0;
+              width: 100%;
+              padding: 0;
+              margin: 0;
+            }
+            .leadership-report-print .no-print { display: none !important; }
+            .leadership-report-print > div { break-inside: avoid; page-break-inside: avoid; }
+            .leadership-report-print, .leadership-report-print * {
+              color: #0d1b2a !important;
+              background-color: white !important;
+              border-color: #d6dbe3 !important;
+              box-shadow: none !important;
+            }
           }
         `}</style>
         <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.25rem" }}>{t("resultTitle")}</h2>
@@ -156,7 +193,7 @@ export function LeadershipAssessmentTool() {
         <div className="no-print" style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
           <button
             type="button"
-            onClick={() => window.print()}
+            onClick={() => printReport(evaluatedName)}
             style={{ display: "flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#4361EE", color: "white", fontWeight: 700, fontSize: "0.875rem", padding: "0.75rem 1.25rem", borderRadius: "0.625rem", border: "none", cursor: "pointer" }}
           >
             <Printer size={16} /> {t("printButton")}
