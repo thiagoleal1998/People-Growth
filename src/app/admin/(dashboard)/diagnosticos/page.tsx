@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, Card, EmptyState, Badge } from "@/components/admin/ui";
+import { ResourcesSubNav } from "@/components/admin/ResourcesSubNav";
 import type { LeadershipAssessment, Lead } from "@/types/database.types";
 
 type AssessmentRow = LeadershipAssessment & { leads: Pick<Lead, "name" | "email" | "status"> | null };
@@ -22,6 +23,8 @@ export default async function DiagnosticosPage() {
   return (
     <div>
       <PageHeader title="Diagnósticos de Liderança" subtitle={`${items.length} diagnóstico${items.length === 1 ? "" : "s"} preenchido${items.length === 1 ? "" : "s"}`} />
+
+      <ResourcesSubNav active="tool" />
 
       <Card>
         {items.length === 0 ? (

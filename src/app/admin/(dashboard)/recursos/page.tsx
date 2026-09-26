@@ -3,6 +3,7 @@ import { Plus, Edit, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
+import { ResourcesSubNav } from "@/components/admin/ResourcesSubNav";
 import { deleteResource } from "./actions";
 import type { Resource } from "@/types/database.types";
 
@@ -21,6 +22,8 @@ export default async function RecursosPage({ searchParams }: { searchParams: Pro
         subtitle={`${items.length} recurso${items.length === 1 ? "" : "s"}`}
         action={<PrimaryLinkButton href="/admin/recursos/novo"><Plus size={16} /> Novo recurso</PrimaryLinkButton>}
       />
+
+      <ResourcesSubNav active="all" />
 
       <Card>
         {items.length === 0 ? (

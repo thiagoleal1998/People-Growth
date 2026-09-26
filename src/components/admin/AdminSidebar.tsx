@@ -33,11 +33,10 @@ import {
   Tag,
   ChevronDown,
   ChevronRight,
-  Grid3x3,
 } from "lucide-react";
 
 type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests";
-type NavLink = { href: string; label: string; icon: LucideIcon; countKey?: CountKey };
+type NavLink = { href: string; label: string; icon: LucideIcon; countKey?: CountKey; activeMatch?: string[] };
 type NavGroup = { label: string; icon: LucideIcon; children: NavLink[] };
 type NavItem = NavLink | NavGroup;
 
@@ -54,7 +53,6 @@ const links: NavItem[] = [
   { href: "/admin/portfolio", label: "Portfólio", icon: Briefcase },
   { href: "/admin/servicos", label: "Serviços", icon: Wrench },
   { href: "/admin/leads", label: "Leads / CRM", icon: Users, countKey: "leads" },
-  { href: "/admin/diagnosticos", label: "Diagnósticos de Liderança", icon: Grid3x3 },
   { href: "/admin/chamados", label: "Chamados", icon: LifeBuoy, countKey: "chamados" },
   {
     label: "Marketing",
@@ -67,7 +65,7 @@ const links: NavItem[] = [
   },
   { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
   { href: "/admin/cursos", label: "Cursos", icon: BookOpen },
-  { href: "/admin/recursos", label: "Recursos", icon: Download },
+  { href: "/admin/recursos", label: "Recursos", icon: Download, activeMatch: ["/admin/diagnosticos"] },
   { href: "/admin/midia", label: "Na Mídia", icon: Monitor },
   { href: "/admin/seo", label: "SEO, GEO & AEO", icon: Search },
   { href: "/admin/usuarios", label: "Usuários", icon: KeyRound, countKey: "resetRequests" },
@@ -260,8 +258,8 @@ function NavLinkItem({
   counts?: { comentarios: number; leads: number; chamados: number; resetRequests: number };
   indent?: boolean;
 }) {
-  const { href, label, icon: Icon, countKey } = link;
-  const isActive = isLinkActive(pathname, href);
+  const { href, label, icon: Icon, countKey, activeMatch } = link;
+  const isActive = isLinkActive(pathname, href) || (activeMatch?.some((m) => isLinkActive(pathname, m)) ?? false);
   const count = countKey ? counts?.[countKey] ?? 0 : 0;
   return (
     <Link
