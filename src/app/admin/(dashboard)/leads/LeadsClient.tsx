@@ -28,7 +28,8 @@ export function LeadsClient({ leads }: { leads: Lead[] }) {
   const filtered = leads.filter((l) =>
     l.name.toLowerCase().includes(search.toLowerCase()) ||
     l.email.toLowerCase().includes(search.toLowerCase()) ||
-    (l.service_interest ?? "").toLowerCase().includes(search.toLowerCase())
+    (l.service_interest ?? "").toLowerCase().includes(search.toLowerCase()) ||
+    (l.source ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
   return (
@@ -53,7 +54,7 @@ export function LeadsClient({ leads }: { leads: Lead[] }) {
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                  {["Nome", "E-mail", "WhatsApp", "Serviço", "Status", "Data", "", ""].map((h) => (
+                  {["Nome", "E-mail", "WhatsApp", "Serviço", "Origem", "Status", "Data", "", ""].map((h) => (
                     <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
                   ))}
                 </tr>
@@ -69,6 +70,7 @@ export function LeadsClient({ leads }: { leads: Lead[] }) {
                         <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.875rem" }}>{lead.email}</td>
                         <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.875rem" }}>{lead.phone ?? "—"}</td>
                         <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem" }}>{lead.service_interest ?? "—"}</td>
+                        <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.8125rem" }}>{lead.source ?? "—"}</td>
                         <td style={{ padding: "0.875rem 1.25rem" }}>
                           <select
                             defaultValue={lead.status}
@@ -103,7 +105,7 @@ export function LeadsClient({ leads }: { leads: Lead[] }) {
                       </tr>
                       {isOpen && (
                         <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                          <td colSpan={8} style={{ padding: "1rem 1.25rem" }}>
+                          <td colSpan={9} style={{ padding: "1rem 1.25rem" }}>
                             {lead.message && (
                               <div style={{ marginBottom: "0.75rem" }}>
                                 <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", marginBottom: "0.25rem" }}>MENSAGEM</div>
