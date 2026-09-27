@@ -19,31 +19,15 @@ export async function generateMetadata({
   };
 }
 
-const philosophy = [
-  {
-    icon: "🌱",
-    title: "Crescimento sustentável",
-    description: "Resultados duradouros nascem de estratégias bem fundamentadas, não de atalhos. Prefiro crescimento sólido a picos sem continuidade.",
-  },
-  {
-    icon: "📊",
-    title: "Decisões baseadas em dados",
-    description: "Cada estratégia começa com análise. Dados eliminam achismos e aumentam a probabilidade de acertar as apostas certas.",
-  },
-  {
-    icon: "👥",
-    title: "Pessoas como diferencial",
-    description: "Times engajados e bem desenvolvidos constroem vantagens competitivas que tecnologia sozinha não consegue replicar.",
-  },
-  {
-    icon: "🤖",
-    title: "Uso estratégico da IA",
-    description: "IA não substitui pessoas — amplifica capacidades. O segredo é integrá-la de forma estratégica, ética e orientada a resultados.",
-  },
-];
-
 export default async function SobrePage() {
   const t = await getTranslations("about");
+
+  const philosophy = [
+    { icon: "🧠", title: t("level1Title"), description: t("level1Desc") },
+    { icon: "🤝", title: t("level2Title"), description: t("level2Desc") },
+    { icon: "👥", title: t("level3Title"), description: t("level3Desc") },
+    { icon: "📈", title: t("level4Title"), description: t("level4Desc") },
+  ];
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -148,6 +132,46 @@ export default async function SobrePage() {
         </div>
       </section>
 
+      {/* Summary */}
+      <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
+        <div className="container-xl" style={{ maxWidth: "760px", margin: "0 auto", textAlign: "center" }}>
+          <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem" }}>
+            {t("summaryTitle")}
+          </h2>
+          <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", lineHeight: 1.75, marginBottom: "1.5rem" }}>
+            {t("summaryBody1")}
+          </p>
+          <p
+            style={{
+              fontSize: "1.25rem",
+              fontWeight: 800,
+              background: "linear-gradient(135deg, #4361EE, #06D6A0)",
+              WebkitBackgroundClip: "text",
+              WebkitTextFillColor: "transparent",
+              marginBottom: "1.5rem",
+            }}
+          >
+            {t("summaryChain")}
+          </p>
+          <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", lineHeight: 1.75, marginBottom: "2rem" }}>
+            {t("summaryBody2")}
+          </p>
+          <Link
+            href="/sobre/o-que-e-people-and-growth"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
+              color: "#4361EE",
+              fontWeight: 700,
+              textDecoration: "none",
+            }}
+          >
+            {t("summaryCta")} <ArrowRight size={18} />
+          </Link>
+        </div>
+      </section>
+
       {/* Founders */}
       <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
         <div className="container-xl">
@@ -187,7 +211,7 @@ export default async function SobrePage() {
             {t("philosophy")}
           </h2>
           <p style={{ color: "var(--site-muted)", textAlign: "center", marginBottom: "3rem", fontSize: "1.0625rem" }}>
-            Os princípios que guiam cada projeto, consultoria e treinamento.
+            {t("philosophySubtitle")}
           </p>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))", gap: "1.5rem" }}>

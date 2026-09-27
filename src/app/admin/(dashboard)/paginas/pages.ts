@@ -4,4 +4,5 @@ export const INSTITUTIONAL_PAGES: { slug: string; label: string; path: string }[
   { slug: "comentarios", label: "Regras de Uso dos Comentários", path: "/comentarios" },
   { slug: "normas-de-seguranca-e-privacidade", label: "Normas de Segurança e Privacidade", path: "/normas-de-seguranca-e-privacidade" },
   { slug: "termos-de-uso", label: "Termos de Uso", path: "/termos-de-uso" },
+  { slug: "o-que-e-people-and-growth", label: "O que é a People & Growth", path: "/sobre/o-que-e-people-and-growth" },
 ];
