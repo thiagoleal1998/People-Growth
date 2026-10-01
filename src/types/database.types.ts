@@ -413,6 +413,20 @@ type LeadershipAssessmentRow = {
   created_at: string;
 };
 
+type ContentCalendarItemRow = {
+  id: string;
+  type: "social_post" | "article_topic";
+  title: string;
+  notes: string | null;
+  platform: "instagram" | "linkedin" | "whatsapp" | "live" | "other" | null;
+  responsible: string | null;
+  scheduled_date: string;
+  status: "planned" | "in_progress" | "done";
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -448,6 +462,7 @@ export type Database = {
       promos: { Row: PromoRow; Insert: Omit<PromoRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<PromoRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       promo_search_rules: { Row: PromoSearchRuleRow; Insert: Omit<PromoSearchRuleRow, "id" | "created_at">; Update: Partial<Omit<PromoSearchRuleRow, "id" | "created_at">>; Relationships: [] };
       leadership_assessments: { Row: LeadershipAssessmentRow; Insert: Omit<LeadershipAssessmentRow, "id" | "created_at">; Update: Partial<Omit<LeadershipAssessmentRow, "id" | "created_at">>; Relationships: [] };
+      content_calendar_items: { Row: ContentCalendarItemRow; Insert: Omit<ContentCalendarItemRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<ContentCalendarItemRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -485,3 +500,4 @@ export type PromoSearchRule = PromoSearchRuleRow;
 export type LeadershipAssessment = LeadershipAssessmentRow;
 export type AdEvent = AdEventRow;
 export type InstitutionalPage = InstitutionalPageRow;
+export type ContentCalendarItem = ContentCalendarItemRow;

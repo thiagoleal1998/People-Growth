@@ -33,6 +33,7 @@ import {
   Tag,
   ChevronDown,
   ChevronRight,
+  Calendar,
 } from "lucide-react";
 
 type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests";
@@ -48,6 +49,7 @@ const links: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/relatorios", label: "Relatórios", icon: BarChart3 },
   { href: "/admin/artigos", label: "Artigos", icon: FileText },
+  { href: "/admin/calendario", label: "Calendário de Divulgação", icon: Calendar },
   { href: "/admin/comentarios", label: "Comentários", icon: MessageCircle, countKey: "comentarios" },
   { href: "/admin/autores", label: "Autores", icon: UserCircle },
   { href: "/admin/portfolio", label: "Portfólio", icon: Briefcase },
