@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Linkedin, Instagram, Mail, ChevronRight } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { FormatTag } from "@/components/FormatTag";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
@@ -115,7 +116,7 @@ export default async function AuthorPage({
                   href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
                   style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "#06D6A0", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
                 >
-                  {aboutAuthorLabel(author.gender, author.name.split(" ")[0], locale)} <ChevronRight size={14} />
+                  {aboutAuthorLabel(author.gender, locale)} <ChevronRight size={14} />
                 </Link>
                 <div style={{ display: "flex", gap: "0.875rem" }}>
                   {author.linkedin_url && (
@@ -126,6 +127,11 @@ export default async function AuthorPage({
                   {author.instagram_url && (
                     <a href={author.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "rgba(255,255,255,0.6)" }}>
                       <Instagram size={19} />
+                    </a>
+                  )}
+                  {author.whatsapp_url && (
+                    <a href={author.whatsapp_url} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" style={{ color: "rgba(255,255,255,0.6)" }}>
+                      <WhatsAppIcon size={19} />
                     </a>
                   )}
                   {author.email && (

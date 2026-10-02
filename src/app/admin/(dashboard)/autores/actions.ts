@@ -33,6 +33,7 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
     email: String(formData.get("email") ?? "") || null,
     linkedin_url: String(formData.get("linkedin_url") ?? "") || null,
     instagram_url: String(formData.get("instagram_url") ?? "") || null,
+    whatsapp_url: String(formData.get("whatsapp_url") ?? "") || null,
     status: (String(formData.get("status") ?? "active")) as Author["status"],
     order: Number(formData.get("order") ?? 0),
     is_founder: formData.get("is_founder") === "on",

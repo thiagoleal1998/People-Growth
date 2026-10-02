@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, Clock, Calendar, ChevronRight, Linkedin, Instagram } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { ShareButtons } from "@/components/ShareButtons";
@@ -292,13 +293,13 @@ export default async function ArticlePage({
                         href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
                         style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
                       >
-                        {aboutAuthorLabel(author.gender, author.name.split(" ")[0], locale)} <ChevronRight size={14} />
+                        {aboutAuthorLabel(author.gender, locale)} <ChevronRight size={14} />
                       </Link>
                     )}
                   </div>
                 </div>
 
-                {(author.linkedin_url || author.instagram_url) && (
+                {(author.linkedin_url || author.instagram_url || author.whatsapp_url) && (
                   <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                     <span style={{ color: "var(--site-muted)", fontSize: "0.8125rem", fontWeight: 600 }}>{locale === "en" ? "Follow on social media" : "Siga nas redes"}</span>
                     <div style={{ display: "flex", gap: "0.625rem" }}>
@@ -310,6 +311,11 @@ export default async function ArticlePage({
                       {author.instagram_url && (
                         <a href={author.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "var(--site-text)" }}>
                           <Instagram size={17} />
+                        </a>
+                      )}
+                      {author.whatsapp_url && (
+                        <a href={author.whatsapp_url} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" style={{ color: "var(--site-text)" }}>
+                          <WhatsAppIcon size={17} />
                         </a>
                       )}
                     </div>
@@ -375,7 +381,7 @@ export default async function ArticlePage({
                     </p>
                   )}
                   <span style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem" }}>
-                    {aboutAuthorLabel(author.gender, author.name.split(" ")[0], locale)} <ChevronRight size={14} />
+                    {aboutAuthorLabel(author.gender, locale)} <ChevronRight size={14} />
                   </span>
                 </div>
               </Link>

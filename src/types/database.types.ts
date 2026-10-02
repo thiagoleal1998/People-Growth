@@ -305,6 +305,7 @@ type AuthorRow = {
   email: string | null;
   linkedin_url: string | null;
   instagram_url: string | null;
+  whatsapp_url: string | null;
   status: "active" | "inactive";
   order: number;
   is_founder: boolean;

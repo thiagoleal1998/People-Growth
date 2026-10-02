@@ -118,6 +118,9 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
         <Field label="Instagram (URL)" hint="Link completo do seu perfil.">
           <Input name="instagram_url" defaultValue={author?.instagram_url ?? ""} placeholder="https://instagram.com/seu-usuario" />
         </Field>
+        <Field label="WhatsApp (URL)" hint="Link completo, ex: https://wa.me/5511999999999">
+          <Input name="whatsapp_url" defaultValue={author?.whatsapp_url ?? ""} placeholder="https://wa.me/5511999999999" />
+        </Field>
 
         <SubmitButton>Salvar alterações</SubmitButton>
       </form>

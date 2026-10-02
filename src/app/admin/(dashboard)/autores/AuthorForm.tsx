@@ -195,6 +195,9 @@ export function AuthorForm({ item, imageError }: { item?: Author; imageError?: s
               <Field label="Instagram (URL)">
                 <Input name="instagram_url" defaultValue={item?.instagram_url ?? ""} />
               </Field>
+              <Field label="WhatsApp (URL)" hint="Link completo, ex: https://wa.me/5511999999999">
+                <Input name="whatsapp_url" defaultValue={item?.whatsapp_url ?? ""} />
+              </Field>
             </FieldGrid>
           </div>
 

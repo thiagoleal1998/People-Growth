@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/admin/ui";
 import { ChamadosTabs } from "./ChamadosTabs";
@@ -25,7 +26,11 @@ export default async function ChamadosPage() {
   const users = (usersData ?? []) as UserProfile[];
   const authors = (authorsData ?? []) as Pick<Author, "id" | "name">[];
   const authorNameById = new Map(authors.map((a) => [a.id, a.name]));
-  const members = users.map((u) => ({ id: u.id, name: (u.author_id && authorNameById.get(u.author_id)) || u.email }));
+  // Only admins can be the "responsible" person on a ticket — authors
+  // (including the ticket's own creator) shouldn't show up in that picker.
+  const members = users
+    .filter((u) => u.role === "admin")
+    .map((u) => ({ id: u.id, name: (u.author_id && authorNameById.get(u.author_id)) || u.email }));
 
   return (
     <div>
@@ -33,7 +38,9 @@ export default async function ChamadosPage() {
         title="Chamados"
         subtitle="Erros reportados pelo site e chamados internos de autores e administradores"
       />
-      <ChamadosTabs reports={reports} tickets={tickets} members={members} />
+      <Suspense fallback={null}>
+        <ChamadosTabs reports={reports} tickets={tickets} members={members} />
+      </Suspense>
     </div>
   );
 }

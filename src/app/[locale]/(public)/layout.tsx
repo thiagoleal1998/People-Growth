@@ -19,7 +19,7 @@ export default async function PublicLayout({
   const { data: configData } = await client
     .from("site_config")
     .select("key,value")
-    .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email", "instagram", "linkedin", "whatsapp"]);
+    .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email", "instagram", "linkedin", "whatsapp", "youtube", "x"]);
 
   const config = Object.fromEntries(((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""]));
   const logoUrl = config.logo_url || undefined;
@@ -36,8 +36,22 @@ export default async function PublicLayout({
         <CategoryNav />
         {children}
       </main>
-      <Footer logoUrl={logoUrl} contactEmail={contactEmail} />
-      <SocialSidebar instagram={config.instagram || undefined} linkedin={config.linkedin || undefined} whatsapp={config.whatsapp || undefined} />
+      <Footer
+        logoUrl={logoUrl}
+        contactEmail={contactEmail}
+        linkedin={config.linkedin || undefined}
+        instagram={config.instagram || undefined}
+        whatsapp={config.whatsapp || undefined}
+        youtube={config.youtube || undefined}
+        x={config.x || undefined}
+      />
+      <SocialSidebar
+        instagram={config.instagram || undefined}
+        linkedin={config.linkedin || undefined}
+        whatsapp={config.whatsapp || undefined}
+        youtube={config.youtube || undefined}
+        x={config.x || undefined}
+      />
       <CookieBanner />
       <style>{`
         @media (max-width: 768px) {

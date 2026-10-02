@@ -1,10 +1,22 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import NextLink from "next/link";
-import { Linkedin, Mail, Instagram } from "lucide-react";
+import { Linkedin, Mail, Instagram, Youtube } from "lucide-react";
 import { ErrorReportButton } from "@/components/ErrorReportButton";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
+import { XIcon } from "@/components/icons/XIcon";
 
-export function Footer({ logoUrl, contactEmail }: { logoUrl?: string | null; contactEmail?: string }) {
+type FooterProps = {
+  logoUrl?: string | null;
+  contactEmail?: string;
+  linkedin?: string;
+  instagram?: string;
+  whatsapp?: string;
+  youtube?: string;
+  x?: string;
+};
+
+export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, youtube, x }: FooterProps) {
   const t = useTranslations("footer");
   const nav = useTranslations("nav");
   const year = new Date().getFullYear();
@@ -49,33 +61,36 @@ export function Footer({ logoUrl, contactEmail }: { logoUrl?: string | null; con
             )}
             <p style={{ fontSize: "0.875rem", lineHeight: 1.6 }}>{t("tagline")}</p>
             <div style={{ display: "flex", gap: "0.75rem", marginTop: "1.25rem" }}>
-              <a
-                href="https://www.linkedin.com/in/thiagoleal98/"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="LinkedIn"
-                style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}
-              >
-                <Linkedin size={20} />
-              </a>
+              {linkedin && (
+                <a href={linkedin} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}>
+                  <Linkedin size={20} />
+                </a>
+              )}
               {contactEmail && (
-                <a
-                  href={`mailto:${contactEmail}`}
-                  aria-label="Email"
-                  style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}
-                >
+                <a href={`mailto:${contactEmail}`} aria-label="Email" style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}>
                   <Mail size={20} />
                 </a>
               )}
-              <a
-                href="https://instagram.com"
-                target="_blank"
-                rel="noopener noreferrer"
-                aria-label="Instagram"
-                style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}
-              >
-                <Instagram size={20} />
-              </a>
+              {instagram && (
+                <a href={instagram} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}>
+                  <Instagram size={20} />
+                </a>
+              )}
+              {whatsapp && (
+                <a href={`https://wa.me/${whatsapp.replace(/\D/g, "")}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}>
+                  <WhatsAppIcon size={20} />
+                </a>
+              )}
+              {youtube && (
+                <a href={youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube" style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}>
+                  <Youtube size={20} />
+                </a>
+              )}
+              {x && (
+                <a href={x} target="_blank" rel="noopener noreferrer" aria-label="X" style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}>
+                  <XIcon size={20} />
+                </a>
+              )}
             </div>
           </div>
 

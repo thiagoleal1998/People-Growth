@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRouter, useSearchParams, usePathname } from "next/navigation";
 import { ErrorReportsClient } from "./ErrorReportsClient";
 import { InternalTicketsClient } from "@/components/tickets/InternalTicketsClient";
 import type { Member } from "@/components/tickets/TicketModal";
@@ -15,7 +15,20 @@ const tabs = [
 type TabId = (typeof tabs)[number]["id"];
 
 export function ChamadosTabs({ reports, tickets, members }: { reports: ErrorReport[]; tickets: InternalTicket[]; members: Member[] }) {
-  const [active, setActive] = useState<TabId>("erros");
+  // The active tab lives in the URL (not local useState) so it survives a
+  // re-render of this component from scratch — e.g. after a status-change
+  // action revalidates the page — instead of silently snapping back to
+  // the "Erros" default mid-task.
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const active: TabId = searchParams.get("tab") === "internos" ? "internos" : "erros";
+
+  function setActive(tab: TabId) {
+    const params = new URLSearchParams(searchParams);
+    params.set("tab", tab);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }
 
   const counts: Record<TabId, number> = {
     erros: reports.filter((r) => r.status === "new").length,

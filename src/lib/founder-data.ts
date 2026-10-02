@@ -11,15 +11,17 @@ export function isAuthorPubliclyVisible(author: Pick<Author, "photo_url" | "name
 }
 
 // "Sobre o autor"/"Sobre a autora" only works for the binary genders this
-// field started with — for every other option, falling back to the
-// person's own first name ("Sobre {Nome}") sidesteps needing a gendered
-// noun at all, which is the simplest respectful option in Portuguese
-// (there's no single standard neutral form in widespread formal use).
-export function aboutAuthorLabel(gender: Author["gender"], firstName: string, locale: string): string {
+// field started with — for every other option, dropping the noun
+// ("Sobre") sidesteps needing a gendered word at all, which is the
+// simplest respectful option in Portuguese (there's no single standard
+// neutral form in widespread formal use). The author's name is always
+// shown right next to this label already, so repeating it here would be
+// redundant rather than clarifying.
+export function aboutAuthorLabel(gender: Author["gender"], locale: string): string {
   if (locale === "en") return "About the author";
   if (gender === "masculino") return "Sobre o autor";
   if (gender === "feminino") return "Sobre a autora";
-  return `Sobre ${firstName}`;
+  return "Sobre";
 }
 
 export function parseMilestones(text: string | null): Milestone[] {

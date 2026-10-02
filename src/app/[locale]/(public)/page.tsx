@@ -126,7 +126,13 @@ export default async function HomePage() {
   // page reshuffles (see `shuffled` above), and only profiles finished
   // enough to actually show (photo + name + tagline).
   const completeColumnists = authors.filter(isAuthorPubliclyVisible);
-  const visibleColumnists = shuffled(completeColumnists).slice(0, 4);
+  // Random which 4 show up, but alphabetical once picked — randomizing the
+  // set alone (without also fixing the display order) would make names
+  // jump around the strip on every reshuffle even when the same person is
+  // still in it.
+  const visibleColumnists = shuffled(completeColumnists)
+    .slice(0, 4)
+    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
   const founderFirstNames = founders.map((a) => a.name.split(" ")[0]);
   const founderNamesText =
     founderFirstNames.length > 1

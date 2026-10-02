@@ -9,6 +9,8 @@ const contactFields: { key: string; label: string; placeholder?: string }[] = [
   { key: "whatsapp", label: "WhatsApp", placeholder: "+55 11 99999-9999" },
   { key: "linkedin", label: "LinkedIn (URL)" },
   { key: "instagram", label: "Instagram (URL)" },
+  { key: "youtube", label: "YouTube (URL do canal)" },
+  { key: "x", label: "X / Twitter (URL)" },
   { key: "calendly_url", label: "Link de agendamento (Calendly)" },
 ];
 

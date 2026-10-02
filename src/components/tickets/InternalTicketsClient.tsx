@@ -87,8 +87,18 @@ export function InternalTicketsClient({
   }, [items, search, userFilter, dateFrom, dateTo]);
 
   async function changeStatus(id: string, status: InternalTicket["status"]) {
+    const previous = items.find((it) => it.id === id)?.status;
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, status } : it)));
-    if (updateStatusAction) await updateStatusAction(id, status);
+    if (!updateStatusAction) return;
+    try {
+      await updateStatusAction(id, status);
+    } catch {
+      // Revert the optimistic update rather than letting the rejection
+      // propagate unhandled — an uncaught error here was the likely cause
+      // of the whole admin Chamados screen losing its place (active tab
+      // resetting back to its default) when a status change failed.
+      if (previous) setItems((prev) => prev.map((it) => (it.id === id ? { ...it, status: previous } : it)));
+    }
   }
 
   function handleCreate(formData: FormData) {

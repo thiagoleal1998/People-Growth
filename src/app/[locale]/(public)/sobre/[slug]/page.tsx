@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, ArrowRight, Award, Linkedin, Instagram, Mail } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { createClient } from "@/lib/supabase/server";
 import { pickLocale } from "@/lib/locale-content";
 import type { Author } from "@/types/database.types";
@@ -114,6 +115,11 @@ export default async function FounderPage({
                 {author.instagram_url && (
                   <a href={author.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "rgba(255,255,255,0.6)" }}>
                     <Instagram size={19} />
+                  </a>
+                )}
+                {author.whatsapp_url && (
+                  <a href={author.whatsapp_url} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" style={{ color: "rgba(255,255,255,0.6)" }}>
+                    <WhatsAppIcon size={19} />
                   </a>
                 )}
                 {author.email && (
