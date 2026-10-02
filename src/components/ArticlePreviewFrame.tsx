@@ -3,6 +3,7 @@ import { FormatTag } from "@/components/FormatTag";
 import { ArticleBody } from "@/components/ArticleBody";
 import { renderMarkdownLite, stripMarkdownLite } from "@/lib/markdown-lite";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
+import { aboutAuthorLabel } from "@/lib/founder-data";
 import type { Article, Category, Author } from "@/types/database.types";
 
 const statusLabel: Record<Article["status"], string> = {
@@ -99,7 +100,7 @@ export function ArticlePreviewFrame({ article, author, category }: { article: Ar
             <div>
               <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "0.9375rem" }}>{author.name}</div>
               <div style={{ color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem" }}>
-                Sobre {author.gender === "feminino" ? "a autora" : "o autor"}
+                {aboutAuthorLabel(author.gender, author.name.split(" ")[0], "pt")}
               </div>
             </div>
           </div>

@@ -6,7 +6,7 @@ import { ArrowLeft, ArrowRight, Award, Linkedin, Instagram, Mail } from "lucide-
 import { createClient } from "@/lib/supabase/server";
 import { pickLocale } from "@/lib/locale-content";
 import type { Author } from "@/types/database.types";
-import { parseMilestones, bioParagraphs } from "@/lib/founder-data";
+import { parseMilestones, bioParagraphs, isAuthorPubliclyVisible } from "@/lib/founder-data";
 
 export const revalidate = 300;
 
@@ -16,7 +16,7 @@ async function getFounder(slug: string) {
   const client = supabase as any;
 
   const { data: author } = await client.from("authors").select("*").eq("slug", slug).eq("status", "active").single();
-  if (!author) return null;
+  if (!author || !isAuthorPubliclyVisible(author)) return null;
 
   const { count } = await client
     .from("articles")

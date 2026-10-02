@@ -16,6 +16,7 @@ import { renderMarkdownLite, stripMarkdownLite } from "@/lib/markdown-lite";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import { articleHref, articlePath, FORMAT_SEGMENT, UNCATEGORIZED_SEGMENT } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
+import { aboutAuthorLabel, isAuthorPubliclyVisible } from "@/lib/founder-data";
 import type { Article, Category, Author, Comment } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -286,14 +287,14 @@ export default async function ArticlePage({
                   />
                   <div>
                     <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "0.9375rem" }}>{author.name}</div>
-                    <Link
-                      href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
-                      style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
-                    >
-                      {locale === "en"
-                        ? "About the author"
-                        : `Sobre ${author.gender === "feminino" ? "a autora" : "o autor"}`} <ChevronRight size={14} />
-                    </Link>
+                    {isAuthorPubliclyVisible(author) && (
+                      <Link
+                        href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
+                        style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
+                      >
+                        {aboutAuthorLabel(author.gender, author.name.split(" ")[0], locale)} <ChevronRight size={14} />
+                      </Link>
+                    )}
                   </div>
                 </div>
 
@@ -335,7 +336,7 @@ export default async function ArticlePage({
             </div>
 
             {/* Author */}
-            {author && (
+            {author && isAuthorPubliclyVisible(author) && (
               <Link
                 href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
                 className="hover-card"
@@ -374,9 +375,7 @@ export default async function ArticlePage({
                     </p>
                   )}
                   <span style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem" }}>
-                    {locale === "en"
-                      ? "About the author"
-                      : `Sobre ${author.gender === "feminino" ? "a autora" : "o autor"}`} <ChevronRight size={14} />
+                    {aboutAuthorLabel(author.gender, author.name.split(" ")[0], locale)} <ChevronRight size={14} />
                   </span>
                 </div>
               </Link>

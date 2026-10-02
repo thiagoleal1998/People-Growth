@@ -62,6 +62,10 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
           <Select name="gender" defaultValue={author?.gender ?? "masculino"}>
             <option value="masculino">Masculino (autor)</option>
             <option value="feminino">Feminino (autora)</option>
+            <option value="nao_binario">Não-binário</option>
+            <option value="genero_fluido">Gênero fluido</option>
+            <option value="agenero">Agênero</option>
+            <option value="prefiro_nao_dizer">Prefiro não dizer</option>
           </Select>
         </Field>
 

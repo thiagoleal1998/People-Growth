@@ -7,6 +7,7 @@ import { FormatTag } from "@/components/FormatTag";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
+import { aboutAuthorLabel, isAuthorPubliclyVisible } from "@/lib/founder-data";
 import type { Article, Author, Category } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -17,7 +18,7 @@ async function getAuthorData(slug: string) {
   const client = supabase as any;
 
   const { data: author } = await client.from("authors").select("*").eq("slug", slug).eq("status", "active").single();
-  if (!author) return null;
+  if (!author || !isAuthorPubliclyVisible(author)) return null;
 
   const [{ data: articlesData }, { data: categoriesData }] = await Promise.all([
     client.from("articles").select("*").eq("author_id", author.id).eq("status", "published").order("published_at", { ascending: false }),
@@ -109,22 +110,30 @@ export default async function AuthorPage({
                   {pickLocale(locale, author.bio_pt, author.bio_en)}
                 </p>
               )}
-              <div style={{ display: "flex", gap: "0.875rem" }}>
-                {author.linkedin_url && (
-                  <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={{ color: "rgba(255,255,255,0.6)" }}>
-                    <Linkedin size={19} />
-                  </a>
-                )}
-                {author.instagram_url && (
-                  <a href={author.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "rgba(255,255,255,0.6)" }}>
-                    <Instagram size={19} />
-                  </a>
-                )}
-                {author.email && (
-                  <a href={`mailto:${author.email}`} aria-label="E-mail" style={{ color: "rgba(255,255,255,0.6)" }}>
-                    <Mail size={19} />
-                  </a>
-                )}
+              <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
+                <Link
+                  href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "#06D6A0", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
+                >
+                  {aboutAuthorLabel(author.gender, author.name.split(" ")[0], locale)} <ChevronRight size={14} />
+                </Link>
+                <div style={{ display: "flex", gap: "0.875rem" }}>
+                  {author.linkedin_url && (
+                    <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={{ color: "rgba(255,255,255,0.6)" }}>
+                      <Linkedin size={19} />
+                    </a>
+                  )}
+                  {author.instagram_url && (
+                    <a href={author.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "rgba(255,255,255,0.6)" }}>
+                      <Instagram size={19} />
+                    </a>
+                  )}
+                  {author.email && (
+                    <a href={`mailto:${author.email}`} aria-label="E-mail" style={{ color: "rgba(255,255,255,0.6)" }}>
+                      <Mail size={19} />
+                    </a>
+                  )}
+                </div>
               </div>
             </div>
           </div>

@@ -292,7 +292,7 @@ type AuthorRow = {
   id: string;
   name: string;
   slug: string;
-  gender: "masculino" | "feminino";
+  gender: "masculino" | "feminino" | "nao_binario" | "genero_fluido" | "agenero" | "prefiro_nao_dizer";
   role_pt: string | null;
   role_en: string | null;
   tagline_pt: string | null;

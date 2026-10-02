@@ -110,6 +110,10 @@ export function AuthorForm({ item, imageError }: { item?: Author; imageError?: s
                 <Select name="gender" defaultValue={item?.gender ?? "masculino"}>
                   <option value="masculino">Masculino (autor)</option>
                   <option value="feminino">Feminino (autora)</option>
+                  <option value="nao_binario">Não-binário</option>
+                  <option value="genero_fluido">Gênero fluido</option>
+                  <option value="agenero">Agênero</option>
+                  <option value="prefiro_nao_dizer">Prefiro não dizer</option>
                 </Select>
               </Field>
               <Field label="Slug" hint="Usado na URL da página do autor — deixe em branco para gerar automaticamente">

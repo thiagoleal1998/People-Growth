@@ -24,7 +24,21 @@ import { Reveal } from "@/components/Reveal";
 import { VideoFacade } from "@/components/VideoFacade";
 import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/youtube";
 import { articleHref } from "@/lib/article-url";
+import { isAuthorPubliclyVisible } from "@/lib/founder-data";
 import type { Article, Author, Testimonial, MediaItem, Category } from "@/types/database.types";
+
+// Fisher-Yates — used so the home's columnist strip shows a different 4
+// each time the page re-renders (this page's `revalidate = 300` means
+// that's effectively a reshuffled set every 5 minutes, not every single
+// visitor, which is the point: a cached page can't vary per request).
+function shuffled<T>(items: T[]): T[] {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 type ArticleWithCategory = Article & { categories: Pick<Category, "slug"> | null };
 
@@ -108,6 +122,11 @@ export default async function HomePage() {
   // "fale direto com..." CTA) are specifically about the 3 founders, not
   // every active columnist — authors.is_founder distinguishes them.
   const founders = authors.filter((a) => a.is_founder);
+  // Shown in the white strip below — a different random 4 each time this
+  // page reshuffles (see `shuffled` above), and only profiles finished
+  // enough to actually show (photo + name + tagline).
+  const completeColumnists = authors.filter(isAuthorPubliclyVisible);
+  const visibleColumnists = shuffled(completeColumnists).slice(0, 4);
   const founderFirstNames = founders.map((a) => a.name.split(" ")[0]);
   const founderNamesText =
     founderFirstNames.length > 1
@@ -486,7 +505,7 @@ export default async function HomePage() {
       )}
 
       {/* Columnists strip */}
-      {authors.length > 0 && (
+      {visibleColumnists.length > 0 && (
         <section style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #4361EE", borderBottom: "1px solid var(--site-border)" }}>
           <div className="container-xl" style={{ padding: "1.25rem 0", maxWidth: "1180px", margin: "0 auto" }}>
           <div
@@ -496,7 +515,7 @@ export default async function HomePage() {
               gap: "1.5rem 2rem",
             }}
           >
-            {authors.slice(0, 4).map((author) => {
+            {visibleColumnists.map((author) => {
               const latest = latestByAuthor.get(author.id);
               return (
                 <Link
@@ -535,7 +554,7 @@ export default async function HomePage() {
               );
             })}
           </div>
-          {authors.length > 4 && (
+          {completeColumnists.length > 4 && (
             <div style={{ textAlign: "center", marginTop: "1rem" }}>
               <Link href="/conteudo/colunistas" style={{ color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}>
                 {tc("seeAll")} →

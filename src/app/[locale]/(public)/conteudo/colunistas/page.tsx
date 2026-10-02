@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { pickLocale } from "@/lib/locale-content";
+import { isAuthorPubliclyVisible } from "@/lib/founder-data";
 import type { Author } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -19,7 +20,7 @@ export default async function ColunistasPage() {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("authors").select("*").eq("status", "active").order("order");
-  const authors = (data ?? []) as Author[];
+  const authors = ((data ?? []) as Author[]).filter(isAuthorPubliclyVisible);
 
   return (
     <>
