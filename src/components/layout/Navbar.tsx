@@ -18,10 +18,11 @@ const navLinks = [
   { key: "contact", href: "/contato" as const },
 ];
 
-export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
+export function Navbar({ logoUrl, mediaEnabled = true }: { logoUrl?: string | null; mediaEnabled?: boolean }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const visibleNavLinks = mediaEnabled ? navLinks : navLinks.filter((l) => l.key !== "media");
 
   return (
     <header
@@ -61,7 +62,7 @@ export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
 
         {/* Desktop nav */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }} className="hidden-mobile">
-          {navLinks.map(({ key, href }) => {
+          {visibleNavLinks.map(({ key, href }) => {
             const isActive = pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
@@ -107,7 +108,7 @@ export function Navbar({ logoUrl }: { logoUrl?: string | null }) {
             padding: "1rem 1.5rem 1.5rem",
           }}
         >
-          {navLinks.map(({ key, href }) => (
+          {visibleNavLinks.map(({ key, href }) => (
             <Link
               key={key}
               href={href}

@@ -130,6 +130,15 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
                 ))}
               </FieldGrid>
             </SectionCard>
+
+            <SectionCard title="Seção Na Mídia" subtitle="Controla se a seção “Na Mídia” aparece no site." wide>
+              <Field label="Mostrar a seção Na Mídia?" hint="Desative para ocultar a seção na home, o link no menu/rodapé e a página /na-midia, sem apagar as menções cadastradas.">
+                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                  <input type="checkbox" name="media_enabled" defaultChecked={values.media_enabled !== "false"} />
+                  Sim, mostrar a seção Na Mídia
+                </label>
+              </Field>
+            </SectionCard>
           </SectionGrid>
         </div>
 

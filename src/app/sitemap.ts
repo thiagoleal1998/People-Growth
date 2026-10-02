@@ -24,18 +24,24 @@ const routes = [
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const locales = ["pt", "en"];
 
-  const staticEntries: MetadataRoute.Sitemap = routes.flatMap(({ path, priority }) =>
-    locales.map((locale) => ({
-      url: `${baseUrl}/${locale}${path}`,
-      lastModified: new Date(),
-      changeFrequency: "weekly" as const,
-      priority,
-    }))
-  );
-
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any)
+  const client = supabase as any;
+  const { data: mediaConfigRow } = await client.from("site_config").select("value").eq("key", "media_enabled").maybeSingle();
+  const mediaEnabled = mediaConfigRow?.value !== "false";
+
+  const staticEntries: MetadataRoute.Sitemap = routes
+    .filter(({ path }) => mediaEnabled || path !== "/na-midia")
+    .flatMap(({ path, priority }) =>
+      locales.map((locale) => ({
+        url: `${baseUrl}/${locale}${path}`,
+        lastModified: new Date(),
+        changeFrequency: "weekly" as const,
+        priority,
+      }))
+    );
+
+  const { data } = await client
     .from("articles")
     .select("slug, format, updated_at, published_at, categories(slug)")
     .eq("status", "published");

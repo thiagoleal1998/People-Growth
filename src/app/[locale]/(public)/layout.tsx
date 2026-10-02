@@ -19,7 +19,7 @@ export default async function PublicLayout({
   const { data: configData } = await client
     .from("site_config")
     .select("key,value")
-    .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email", "instagram", "linkedin", "whatsapp", "youtube", "x"]);
+    .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email", "instagram", "linkedin", "whatsapp", "youtube", "x", "media_enabled"]);
 
   const config = Object.fromEntries(((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""]));
   const logoUrl = config.logo_url || undefined;
@@ -27,11 +27,14 @@ export default async function PublicLayout({
   const weatherLat = Number(config.weather_lat) || -23.5505;
   const weatherLon = Number(config.weather_lon) || -46.6333;
   const contactEmail = config.contact_email || undefined;
+  // Defaults to enabled — the key only exists once an admin has explicitly
+  // toggled it off via Configurações.
+  const mediaEnabled = config.media_enabled !== "false";
 
   return (
     <>
       <UtilityBar cityName={weatherCity} lat={weatherLat} lon={weatherLon} />
-      <Navbar logoUrl={logoUrl} />
+      <Navbar logoUrl={logoUrl} mediaEnabled={mediaEnabled} />
       <main className="public-main" style={{ paddingTop: "6.25rem" }}>
         <CategoryNav />
         {children}
@@ -44,6 +47,7 @@ export default async function PublicLayout({
         whatsapp={config.whatsapp || undefined}
         youtube={config.youtube || undefined}
         x={config.x || undefined}
+        mediaEnabled={mediaEnabled}
       />
       <SocialSidebar
         instagram={config.instagram || undefined}

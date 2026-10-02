@@ -149,6 +149,7 @@ export default async function HomePage() {
   const liveStreamUrl = config.live_stream_url ? toYouTubeEmbedUrl(config.live_stream_url) : "";
   const shortsVideoUrl = config.shorts_video_url ? toYouTubeEmbedUrl(config.shorts_video_url) : "";
   const isLive = config.is_live === "true" && Boolean(liveStreamUrl);
+  const mediaEnabled = config.media_enabled !== "false";
   const faqEntries = getFaqEntriesFromConfig(config, locale);
   const [featured, ...rest] = allArticles;
   const secondary = rest.slice(0, 3);
@@ -863,7 +864,7 @@ export default async function HomePage() {
       </section>
 
       {/* Na Mídia */}
-      {mediaItems.length > 0 && (
+      {mediaEnabled && mediaItems.length > 0 && (
         <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
           <div className="container-xl">
             <Reveal>

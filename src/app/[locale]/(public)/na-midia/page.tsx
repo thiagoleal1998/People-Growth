@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Mic, Video, BookOpen, Calendar, Headphones, type LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
@@ -23,7 +24,15 @@ export default async function NaMidiaPage() {
   const t = await getTranslations("media");
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any).from("media_items").select("*").order("order");
+  const client = supabase as any;
+  const [{ data }, { data: configRow }] = await Promise.all([
+    client.from("media_items").select("*").order("order"),
+    client.from("site_config").select("value").eq("key", "media_enabled").maybeSingle(),
+  ]);
+  // Defaults to enabled — the key only exists once an admin has explicitly
+  // toggled it off via Configurações. Direct links to this page 404 while
+  // disabled, matching it being pulled from the nav/footer/home.
+  if (configRow?.value === "false") notFound();
   const items = (data ?? []) as MediaItem[];
 
   return (

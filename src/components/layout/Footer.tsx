@@ -14,9 +14,10 @@ type FooterProps = {
   whatsapp?: string;
   youtube?: string;
   x?: string;
+  mediaEnabled?: boolean;
 };
 
-export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, youtube, x }: FooterProps) {
+export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, youtube, x, mediaEnabled = true }: FooterProps) {
   const t = useTranslations("footer");
   const nav = useTranslations("nav");
   const year = new Date().getFullYear();
@@ -108,7 +109,9 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
                 { key: "newsletter", href: "/conteudo" as const },
                 { key: "media", href: "/na-midia" as const },
                 { key: "contact", href: "/contato" as const },
-              ].map(({ key, href }) => (
+              ]
+                .filter((l) => mediaEnabled || l.key !== "media")
+                .map(({ key, href }) => (
                 <li key={key}>
                   <Link
                     href={href}
