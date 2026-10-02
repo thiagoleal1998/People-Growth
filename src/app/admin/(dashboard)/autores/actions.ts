@@ -35,6 +35,7 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
     instagram_url: String(formData.get("instagram_url") ?? "") || null,
     status: (String(formData.get("status") ?? "active")) as Author["status"],
     order: Number(formData.get("order") ?? 0),
+    is_founder: formData.get("is_founder") === "on",
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

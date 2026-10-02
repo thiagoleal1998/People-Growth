@@ -36,6 +36,7 @@ export default async function SobrePage() {
     .from("authors")
     .select("*")
     .eq("status", "active")
+    .eq("is_founder", true)
     .order("order");
   const authors = (authorsData ?? []) as Author[];
 

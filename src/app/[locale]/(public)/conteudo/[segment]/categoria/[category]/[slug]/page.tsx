@@ -287,7 +287,7 @@ export default async function ArticlePage({
                   <div>
                     <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "0.9375rem" }}>{author.name}</div>
                     <Link
-                      href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
+                      href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
                       style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
                     >
                       {locale === "en"
@@ -337,7 +337,7 @@ export default async function ArticlePage({
             {/* Author */}
             {author && (
               <Link
-                href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
+                href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
                 className="hover-card"
                 style={{
                   marginTop: "2.5rem",
@@ -369,10 +369,15 @@ export default async function ArticlePage({
                     </div>
                   )}
                   {author.bio_pt && (
-                    <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6 }}>
+                    <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: "0.625rem" }}>
                       {pickLocale(locale, author.bio_pt, author.bio_en)}
                     </p>
                   )}
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem" }}>
+                    {locale === "en"
+                      ? "About the author"
+                      : `Sobre ${author.gender === "feminino" ? "a autora" : "o autor"}`} <ChevronRight size={14} />
+                  </span>
                 </div>
               </Link>
             )}

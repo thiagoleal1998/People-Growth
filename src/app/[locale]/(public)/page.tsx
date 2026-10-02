@@ -104,7 +104,11 @@ export default async function HomePage() {
   const allArticles = (articlesData ?? []) as ArticleWithCategory[];
   const authors = (authorsData ?? []) as Author[];
   const authorById = new Map(authors.map((a) => [a.id, a]));
-  const founderFirstNames = authors.map((a) => a.name.split(" ")[0]);
+  // "Founders" sections (the hero's "Quem está por trás" box, and the
+  // "fale direto com..." CTA) are specifically about the 3 founders, not
+  // every active columnist — authors.is_founder distinguishes them.
+  const founders = authors.filter((a) => a.is_founder);
+  const founderFirstNames = founders.map((a) => a.name.split(" ")[0]);
   const founderNamesText =
     founderFirstNames.length > 1
       ? `${founderFirstNames.slice(0, -1).join(", ")} e ${founderFirstNames[founderFirstNames.length - 1]}`
@@ -484,15 +488,22 @@ export default async function HomePage() {
       {/* Columnists strip */}
       {authors.length > 0 && (
         <section style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #4361EE", borderBottom: "1px solid var(--site-border)" }}>
-          <div className="container-xl" style={{ display: "flex", justifyContent: "center", gap: "2rem", padding: "1.25rem 0", flexWrap: "wrap" }}>
-            {authors.map((author) => {
+          <div className="container-xl" style={{ padding: "1.25rem 0", maxWidth: "1180px", margin: "0 auto" }}>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
+              gap: "1.5rem 2rem",
+            }}
+          >
+            {authors.slice(0, 4).map((author) => {
               const latest = latestByAuthor.get(author.id);
               return (
                 <Link
                   key={author.id}
                   href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
                   className="columnist-hover"
-                  style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none", width: "260px" }}
+                  style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none" }}
                 >
                   <div
                     style={{
@@ -523,6 +534,14 @@ export default async function HomePage() {
                 </Link>
               );
             })}
+          </div>
+          {authors.length > 4 && (
+            <div style={{ textAlign: "center", marginTop: "1rem" }}>
+              <Link href="/conteudo/colunistas" style={{ color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}>
+                {tc("seeAll")} →
+              </Link>
+            </div>
+          )}
           </div>
         </section>
       )}
@@ -700,7 +719,7 @@ export default async function HomePage() {
           </div>
 
           {/* Founders */}
-          {authors.length > 0 && (
+          {founders.length > 0 && (
             <div
               style={{
                 marginTop: "3rem",
@@ -714,7 +733,7 @@ export default async function HomePage() {
                 Quem está por trás da People &amp; Growth
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "2rem" }}>
-                {authors.map((author) => (
+                {founders.map((author) => (
                   <div key={author.id} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
                     <div
                       style={{
@@ -1032,10 +1051,10 @@ export default async function HomePage() {
             </Link>
           </div>
 
-          {authors.length > 0 && (
+          {founders.length > 0 && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", marginTop: "2.5rem" }}>
               <div style={{ display: "flex" }}>
-                {authors.slice(0, 4).map((author, i) => (
+                {founders.slice(0, 4).map((author, i) => (
                   <div
                     key={author.id}
                     style={{

@@ -2,7 +2,7 @@
 
 import { useRef, useState } from "react";
 import { Linkedin, Instagram, Award } from "lucide-react";
-import { Field, Input, Textarea, SubmitButton } from "@/components/admin/ui";
+import { Field, Input, Textarea, Select, SubmitButton } from "@/components/admin/ui";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { ImageCropper } from "@/components/admin/ImageCropper";
 import { parseMilestones } from "@/lib/founder-data";
@@ -58,6 +58,13 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
           <ImageCropper file={pendingFile} onCancel={() => setPendingFile(null)} onConfirm={handleCropConfirm} />
         )}
 
+        <Field label="Gênero" hint='Usado para escrever "Sobre o autor" ou "Sobre a autora" corretamente nas suas páginas de artigo.'>
+          <Select name="gender" defaultValue={author?.gender ?? "masculino"}>
+            <option value="masculino">Masculino (autor)</option>
+            <option value="feminino">Feminino (autora)</option>
+          </Select>
+        </Field>
+
         <Field
           label="Frase de destaque (PT)"
           hint={`Aparece na home, embaixo do seu nome na tira de colunistas — substitui o cargo ali. Ex: "Estratégia, dados e IA para negócios que querem crescer de verdade". ${taglineRemaining} caractere${taglineRemaining === 1 ? "" : "s"} restante${taglineRemaining === 1 ? "" : "s"}.`}
@@ -72,6 +79,13 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
         </Field>
         <Field label="Frase de destaque (EN)" hint="Mesma ideia, em inglês. Deixe em branco se o site em inglês puder repetir a frase em português.">
           <Textarea name="tagline_en" rows={2} maxLength={80} defaultValue={author?.tagline_en ?? ""} />
+        </Field>
+
+        <Field label="Cargo (PT)" hint='Usado como reserva quando você não tem uma frase de destaque nem artigo publicado ainda. Ex: "Especialista em Growth e Dados".'>
+          <Input name="role_pt" defaultValue={author?.role_pt ?? ""} />
+        </Field>
+        <Field label="Cargo (EN)" hint="Mesma ideia, em inglês.">
+          <Input name="role_en" defaultValue={author?.role_en ?? ""} />
         </Field>
 
         <Field

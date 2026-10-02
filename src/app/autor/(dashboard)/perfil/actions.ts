@@ -22,6 +22,9 @@ export async function updateOwnAuthorProfile(formData: FormData) {
   }
 
   const payload = {
+    gender: (String(formData.get("gender") ?? "masculino")) as "masculino" | "feminino",
+    role_pt: String(formData.get("role_pt") ?? "") || null,
+    role_en: String(formData.get("role_en") ?? "") || null,
     tagline_pt: String(formData.get("tagline_pt") ?? "").slice(0, 80) || null,
     tagline_en: String(formData.get("tagline_en") ?? "").slice(0, 80) || null,
     bio_pt: String(formData.get("bio_pt") ?? "") || null,
@@ -35,6 +38,7 @@ export async function updateOwnAuthorProfile(formData: FormData) {
   await client.from("authors").update(payload).eq("id", profile.author_id);
 
   revalidatePath("/autor/perfil");
+  revalidatePath("/[locale]/conteudo", "page");
   revalidatePath("/[locale]/sobre", "page");
   revalidatePath("/[locale]/sobre/[slug]", "page");
   revalidatePath("/[locale]", "page");

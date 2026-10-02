@@ -49,50 +49,55 @@ export default async function ColunistasPage() {
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "1.5rem" }}>
               {authors.map((author) => (
-                <Link
+                <article
                   key={author.id}
-                  href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
-                  className="hover-card"
-                  style={{ display: "block", textDecoration: "none" }}
+                  style={{
+                    backgroundColor: "var(--site-card)",
+                    borderRadius: "1.25rem",
+                    padding: "1.75rem",
+                    border: "1px solid var(--site-border)",
+                    height: "100%",
+                    display: "flex",
+                    flexDirection: "column",
+                  }}
                 >
-                  <article
-                    style={{
-                      backgroundColor: "var(--site-card)",
-                      borderRadius: "1.25rem",
-                      padding: "1.75rem",
-                      border: "1px solid var(--site-border)",
-                      height: "100%",
-                      display: "flex",
-                      flexDirection: "column",
-                    }}
-                  >
-                    <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1rem" }}>
-                      <div
-                        style={{
-                          width: "4rem",
-                          height: "4rem",
-                          borderRadius: "50%",
-                          flexShrink: 0,
-                          background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
-                        }}
-                      />
-                      <div>
-                        <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)" }}>{author.name}</h2>
-                        {author.role_pt && (
-                          <p style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.8125rem" }}>{pickLocale(locale, author.role_pt, author.role_en)}</p>
-                        )}
-                      </div>
+                  <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1rem" }}>
+                    <div
+                      style={{
+                        width: "4rem",
+                        height: "4rem",
+                        borderRadius: "50%",
+                        flexShrink: 0,
+                        background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                      }}
+                    />
+                    <div>
+                      <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)" }}>{author.name}</h2>
+                      {author.role_pt && (
+                        <p style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.8125rem" }}>{pickLocale(locale, author.role_pt, author.role_en)}</p>
+                      )}
                     </div>
-                    {(author.tagline_pt || author.bio_pt) && (
-                      <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6, flex: 1, marginBottom: "1rem" }}>
-                        {pickLocale(locale, author.tagline_pt, author.tagline_en)?.trim() || pickLocale(locale, author.bio_pt, author.bio_en)}
-                      </p>
-                    )}
-                    <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#4361EE", fontWeight: 700, fontSize: "0.875rem" }}>
+                  </div>
+                  {(author.tagline_pt || author.bio_pt) && (
+                    <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6, flex: 1, marginBottom: "1rem" }}>
+                      {pickLocale(locale, author.tagline_pt, author.tagline_en)?.trim() || pickLocale(locale, author.bio_pt, author.bio_en)}
+                    </p>
+                  )}
+                  <div style={{ display: "flex", gap: "1.25rem", marginTop: (author.tagline_pt || author.bio_pt) ? 0 : "auto", paddingTop: (author.tagline_pt || author.bio_pt) ? 0 : "1rem" }}>
+                    <Link
+                      href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
+                      style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#4361EE", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
+                    >
+                      {locale === "en" ? "About" : "Sobre"} <ArrowRight size={15} />
+                    </Link>
+                    <Link
+                      href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
+                      style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--site-muted)", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
+                    >
                       {locale === "en" ? "View articles" : "Ver artigos"} <ArrowRight size={15} />
-                    </span>
-                  </article>
-                </Link>
+                    </Link>
+                  </div>
+                </article>
               ))}
             </div>
           )}

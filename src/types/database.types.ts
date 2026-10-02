@@ -307,6 +307,7 @@ type AuthorRow = {
   instagram_url: string | null;
   status: "active" | "inactive";
   order: number;
+  is_founder: boolean;
   created_at: string;
   updated_at: string;
 };
