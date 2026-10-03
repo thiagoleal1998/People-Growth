@@ -4,7 +4,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "re
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import { Selection } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
-import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Film, Youtube, Loader2 } from "lucide-react";
+import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Film, Youtube, Highlighter, Loader2 } from "lucide-react";
 import { markdownLiteToEditorHtml, editorHtmlToMarkdownLite } from "@/lib/markdown-lite-editor";
 import { extractYouTubeId } from "@/lib/youtube";
 import { promptDialog, alertDialog } from "./dialog-store";
@@ -13,6 +13,7 @@ import { VideoGif } from "./tiptap-videogif";
 import { YoutubeEmbed } from "./tiptap-youtube";
 import { HighlightQuotes } from "./tiptap-highlight-quotes";
 import { ImageCropper, type AspectOption } from "./ImageCropper";
+import { BrandHighlight } from "./tiptap-highlight-mark";
 import type { EditorView } from "@tiptap/pm/view";
 
 // Pasted rich text (Word/Docs/Notion/chat apps) carries its bold/italic/link
@@ -222,6 +223,7 @@ export const MarkdownEditor = forwardRef<
       ImageWithCredit.configure({ onEditRequest: editImageFields, onCropRequest: requestImageCrop }),
       VideoGif,
       YoutubeEmbed,
+      BrandHighlight,
       HighlightQuotes.configure({ quotes: highlightQuotes ?? [] }),
     ],
     content: markdownLiteToEditorHtml(defaultValue),
@@ -413,6 +415,9 @@ export const MarkdownEditor = forwardRef<
         </button>
         <button type="button" title="Sublinhado" onClick={() => editor.chain().focus().toggleUnderline().run()} style={activeStyle(editor.isActive("underline"))}>
           <Underline size={16} />
+        </button>
+        <button type="button" title="Destacar trecho (Ctrl+Shift+H)" onClick={() => editor.chain().focus().toggleBrandHighlight().run()} style={activeStyle(editor.isActive("highlight"))}>
+          <Highlighter size={16} />
         </button>
         <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
         <button type="button" title="Subtítulo" onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()} style={activeStyle(editor.isActive("heading", { level: 2 }))}>

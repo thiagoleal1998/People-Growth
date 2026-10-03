@@ -60,6 +60,7 @@ export function markdownLiteToEditorHtml(text: string): string {
     })
     .replace(/\[([^\]]+)\]\(((?:[^\s()]|\([^()]*\))+)\)/g, (_match, linkText: string, url: string) => protect("LNK", `<a href="${url}">${linkText}</a>`))
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/==(.+?)==/g, "<mark>$1</mark>")
     .replace(/\+\+(.+?)\+\+/g, "<u>$1</u>")
     .replace(/_(.+?)_/g, "<em>$1</em>");
 
@@ -150,6 +151,8 @@ export function editorHtmlToMarkdownLite(html: string): string {
         return `_${inner()}_`;
       case "u":
         return `++${inner()}++`;
+      case "mark":
+        return `==${inner()}==`;
       case "a":
         return `[${inner()}](${el.getAttribute("href") ?? ""})`;
       case "img":
