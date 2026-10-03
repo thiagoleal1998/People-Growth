@@ -1,5 +1,5 @@
 import { Mark, mergeAttributes } from "@tiptap/core";
-import { HIGHLIGHT_STYLE } from "@/lib/markdown-lite";
+import { HIGHLIGHT_CLASS } from "@/lib/markdown-lite";
 
 // Brand-tinted highlighter for passages inside an article body. Stored as
 // "==texto==" (see markdown-lite.ts), so the editor only needs to render and
@@ -20,7 +20,7 @@ export const BrandHighlight = Mark.create({
   },
 
   renderHTML({ HTMLAttributes }) {
-    return ["mark", mergeAttributes(HTMLAttributes, { style: HIGHLIGHT_STYLE }), 0];
+    return ["mark", mergeAttributes(HTMLAttributes, { class: HIGHLIGHT_CLASS }), 0];
   },
 
   addCommands() {

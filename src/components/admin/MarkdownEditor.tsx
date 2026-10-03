@@ -4,7 +4,7 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "re
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import { Selection } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
-import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Film, Youtube, Highlighter, Loader2 } from "lucide-react";
+import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Film, Youtube, Highlighter, Unlink, Loader2 } from "lucide-react";
 import { markdownLiteToEditorHtml, editorHtmlToMarkdownLite } from "@/lib/markdown-lite-editor";
 import { extractYouTubeId } from "@/lib/youtube";
 import { promptDialog, alertDialog } from "./dialog-store";
@@ -228,6 +228,9 @@ export const MarkdownEditor = forwardRef<
     ],
     content: markdownLiteToEditorHtml(defaultValue),
     immediatelyRender: false,
+    // Toolbar buttons read editor.isActive()/disabled from render, so they
+    // must re-render when the cursor moves, not only when the text changes.
+    shouldRerenderOnTransaction: true,
     onUpdate: ({ editor }) => {
       setSerialized(editorHtmlToMarkdownLite(editor.getHTML()));
     },
@@ -447,6 +450,15 @@ export const MarkdownEditor = forwardRef<
         <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
         <button type="button" title="Link" onClick={() => insertLink(editor)} style={activeStyle(editor.isActive("link"))}>
           <Link2 size={16} />
+        </button>
+        <button
+          type="button"
+          title="Remover link (mantém o texto)"
+          disabled={!editor.isActive("link")}
+          onClick={() => editor.chain().focus().extendMarkRange("link").unsetLink().run()}
+          style={{ ...toolButtonStyle, opacity: editor.isActive("link") ? 1 : 0.4, cursor: editor.isActive("link") ? "pointer" : "default" }}
+        >
+          <Unlink size={16} />
         </button>
         <div style={{ width: "1px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 0.25rem" }} />
         <button

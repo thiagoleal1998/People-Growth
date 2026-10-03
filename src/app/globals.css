@@ -391,3 +391,33 @@
     .skeleton { animation: none; }
   }
 }
+
+/* Brand highlighter for article passages (==texto== in markdown-lite).
+   Where scroll-driven animations are supported, the tint sweeps in from the
+   left as the passage scrolls into view, like a marker being drawn across
+   it; elsewhere, and for reduced motion, it's simply shown in full. */
+.brand-highlight {
+  background: linear-gradient(rgba(67, 97, 238, 0.16), rgba(67, 97, 238, 0.16)) no-repeat left center / 100% 100%;
+  color: inherit;
+  border-radius: 0.25em;
+  padding: 0.05em 0.2em;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+}
+@supports (animation-timeline: view()) {
+  .brand-highlight {
+    background-size: 0% 100%;
+    animation: brand-highlight-sweep linear both;
+    animation-timeline: view();
+    animation-range: entry 10% cover 40%;
+  }
+}
+@keyframes brand-highlight-sweep {
+  to { background-size: 100% 100%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .brand-highlight {
+    background-size: 100% 100%;
+    animation: none;
+  }
+}

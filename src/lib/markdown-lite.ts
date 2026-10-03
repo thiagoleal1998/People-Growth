@@ -1,9 +1,10 @@
 import { extractYouTubeId, toYouTubeEmbedUrl, getYouTubeThumbnail } from "@/lib/youtube";
 
 // Shared with the editor's highlight mark so a passage looks the same while
-// being written as it does when published.
-export const HIGHLIGHT_STYLE =
-  "background-color:rgba(67,97,238,0.16);color:inherit;border-radius:0.25em;padding:0.05em 0.2em;box-decoration-break:clone;-webkit-box-decoration-break:clone";
+// being written as it does when published. The look (and the scroll-linked
+// marker sweep) lives in globals.css, not inline, so the animation can use
+// a keyframes rule.
+export const HIGHLIGHT_CLASS = "brand-highlight";
 
 // Autoplaying muted (the hero/live-stream convention via withAutoplay() in
 // youtube.ts) would be wrong here — this only ever runs from a genuine click
@@ -106,7 +107,7 @@ export function renderMarkdownLite(text: string): string {
     .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:700;color:var(--site-text)">$1</strong>')
     // "==texto==" — a brand-tinted highlighter mark, for passages the
     // author wants to stand out inside the body.
-    .replace(/==(.+?)==/g, `<mark style="${HIGHLIGHT_STYLE}">$1</mark>`)
+    .replace(/==(.+?)==/g, `<mark class="${HIGHLIGHT_CLASS}">$1</mark>`)
     // Underline has no standard markdown syntax, so it uses its own marker.
     // Both this and italic run after bold, so a lone "_" or "+" left over
     // from bold's "**" never gets misread as one of these.
