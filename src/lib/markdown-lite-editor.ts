@@ -33,6 +33,13 @@ export function markdownLiteToEditorHtml(text: string): string {
     .replace(/\r\n?/g, "\n")
     .replace(/^### (.+)$/gm, "<h3>$1</h3>")
     .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+    // "!video[caption](url)" — a YouTube link rendered as a click-to-play
+    // thumbnail by renderMarkdownLite. Must run before the image regex
+    // since it shares the "[alt](url)" shape.
+    .replace(/!video\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)\)/g, (_match, caption: string, url: string) => {
+      const captionAttr = caption ? ` data-caption="${caption}"` : "";
+      return protect("FIG", `<youtube-embed data-url="${url}"${captionAttr}></youtube-embed>`);
+    })
     // "!gif[...]" — a looping muted video standing in for a "gif" that's
     // actually served as video by its host. Must run before the image
     // regex since it shares the "[alt](url)" shape.
@@ -112,6 +119,12 @@ function serializeVideoGif(el: HTMLElement): string {
   return `!gif[${alt}](${src}${suffix})`;
 }
 
+function serializeYoutube(el: HTMLElement): string {
+  const caption = el.getAttribute("data-caption") ?? "";
+  const url = el.getAttribute("data-url") ?? "";
+  return `!video[${caption}](${url})`;
+}
+
 export function editorHtmlToMarkdownLite(html: string): string {
   const doc = new DOMParser().parseFromString(html, "text/html");
 
@@ -140,6 +153,8 @@ export function editorHtmlToMarkdownLite(html: string): string {
         return serializeImage(el);
       case "video":
         return serializeVideoGif(el);
+      case "youtube-embed":
+        return serializeYoutube(el);
       case "br":
         // Same reasoning as the text-node case above.
         return "\n\n";
@@ -165,6 +180,8 @@ export function editorHtmlToMarkdownLite(html: string): string {
         return serializeImage(el);
       case "video":
         return serializeVideoGif(el);
+      case "youtube-embed":
+        return serializeYoutube(el);
       case "ul":
         return Array.from(el.children).map((li) => `- ${renderChildrenInline(li)}`).join("\n");
       case "ol":

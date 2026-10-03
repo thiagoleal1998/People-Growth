@@ -4,11 +4,13 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "re
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import { Selection } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
-import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Film, Loader2 } from "lucide-react";
+import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Film, Youtube, Loader2 } from "lucide-react";
 import { markdownLiteToEditorHtml, editorHtmlToMarkdownLite } from "@/lib/markdown-lite-editor";
+import { extractYouTubeId } from "@/lib/youtube";
 import { promptDialog, alertDialog } from "./dialog-store";
 import { ImageWithCredit } from "./tiptap-image-with-credit";
 import { VideoGif } from "./tiptap-videogif";
+import { YoutubeEmbed } from "./tiptap-youtube";
 import { HighlightQuotes } from "./tiptap-highlight-quotes";
 
 // Pasted rich text (Word/Docs/Notion/chat apps) carries its bold/italic/link
@@ -109,6 +111,7 @@ export const MarkdownEditor = forwardRef<
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       ImageWithCredit,
       VideoGif,
+      YoutubeEmbed,
       HighlightQuotes.configure({ quotes: highlightQuotes ?? [] }),
     ],
     content: markdownLiteToEditorHtml(defaultValue),
@@ -217,6 +220,30 @@ export const MarkdownEditor = forwardRef<
     insertVideoGifMarkdown(editor, url.trim(), caption, credit, source);
   }
 
+  function insertYoutubeMarkdown(editor: Editor, url: string, caption: string) {
+    editor
+      .chain()
+      .focus()
+      .insertContent({ type: "youtubeEmbed", attrs: { url, caption: caption || null } })
+      .run();
+    // Same fix as insertImageMarkdown — see its comment for why this is needed.
+    const { state, view } = editor;
+    const selection = Selection.near(state.doc.resolve(state.selection.to));
+    view.dispatch(state.tr.setSelection(selection));
+  }
+
+  async function handleYoutubeUrlInsert() {
+    if (!editor) return;
+    const url = await promptDialog("URL do vídeo do YouTube:");
+    if (!url || !url.trim()) return;
+    if (!extractYouTubeId(url.trim())) {
+      await alertDialog("Esse link não parece ser um vídeo do YouTube válido.");
+      return;
+    }
+    const caption = (await promptDialog("Legenda do vídeo (opcional, aparece embaixo dele):")) ?? "";
+    insertYoutubeMarkdown(editor, url.trim(), caption);
+  }
+
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
@@ -321,6 +348,14 @@ export const MarkdownEditor = forwardRef<
           style={toolButtonStyle}
         >
           <Film size={16} />
+        </button>
+        <button
+          type="button"
+          title="Inserir vídeo do YouTube — mostra a miniatura no texto, toca ao clicar"
+          onClick={handleYoutubeUrlInsert}
+          style={toolButtonStyle}
+        >
+          <Youtube size={16} />
         </button>
         <input ref={fileInputRef} type="file" accept="image/png,image/jpeg,image/webp,image/gif" onChange={handleFileChange} style={{ display: "none" }} />
       </div>

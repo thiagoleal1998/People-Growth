@@ -1,3 +1,19 @@
+import { extractYouTubeId, toYouTubeEmbedUrl, getYouTubeThumbnail } from "@/lib/youtube";
+
+// Autoplaying muted (the hero/live-stream convention via withAutoplay() in
+// youtube.ts) would be wrong here — this only ever runs from a genuine click
+// on the thumbnail, so starting with sound is both allowed by browsers'
+// autoplay policy (a user gesture) and what a click-to-play video implies.
+function withClickAutoplay(embedUrl: string): string {
+  try {
+    const url = new URL(embedUrl);
+    url.searchParams.set("autoplay", "1");
+    return url.toString();
+  } catch {
+    return embedUrl;
+  }
+}
+
 export function renderMarkdownLite(text: string): string {
   // URLs (in images/links) commonly contain "_" — signed CDN tokens
   // especially (Globo's image URLs, for one, routinely do). If the
@@ -25,6 +41,26 @@ export function renderMarkdownLite(text: string): string {
     .replace(/\r\n?/g, "\n")
     .replace(/^### (.+)$/gm, '<h3 style="font-size:1.25rem;font-weight:800;color:var(--site-text);margin:1.75rem 0 0.875rem">$1</h3>')
     .replace(/^## (.+)$/gm, '<h2 style="font-size:1.5rem;font-weight:800;color:var(--site-text);margin:2rem 0 1rem">$1</h2>')
+    // "!video[caption](url)" — a YouTube link pasted inline in the body,
+    // shown as a click-to-play thumbnail (same facade pattern as
+    // VideoFacade.tsx, re-implemented in plain HTML/inline JS here since
+    // this output is a static string, not a React tree). Must run before
+    // the image regex since it shares the "[alt](url)" shape. A url that
+    // isn't a recognized YouTube link falls back to a plain text link
+    // instead of silently vanishing.
+    .replace(/!video\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)\)/g, (_match, caption: string, url: string) => {
+      const videoId = extractYouTubeId(url);
+      if (!videoId) {
+        return protect("LNK", `<a href="${url}" style="color:#4361EE;font-weight:600;text-decoration:underline">${caption || url}</a>`);
+      }
+      const thumbnail = getYouTubeThumbnail(url);
+      const autoplaySrc = withClickAutoplay(toYouTubeEmbedUrl(url));
+      const figcaption = caption ? `<figcaption style="margin-top:0.625rem;font-size:0.8125rem;color:var(--site-muted);text-align:center">${caption}</figcaption>` : "";
+      return protect(
+        "FIG",
+        `<figure style="margin:2rem 0"><div style="position:relative;padding-top:56.25%;border-radius:0.75rem;overflow:hidden"><button type="button" aria-label="Reproduzir vídeo${caption ? `: ${caption}` : ""}" data-embed-src="${autoplaySrc}" style="position:absolute;inset:0;width:100%;height:100%;border:none;padding:0;cursor:pointer;background-color:#000;${thumbnail ? `background-image:url('${thumbnail}');background-size:cover;background-position:center;` : ""}display:flex;align-items:center;justify-content:center" onclick="var f=document.createElement('iframe');f.src=this.dataset.embedSrc;f.allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';f.allowFullscreen=true;f.style.cssText='position:absolute;inset:0;width:100%;height:100%;border:none';this.replaceWith(f);"><span style="width:4.5rem;height:4.5rem;border-radius:50%;background-color:rgba(67,97,238,0.9);display:flex;align-items:center;justify-content:center;box-shadow:0 8px 32px -4px rgba(0,0,0,0.5)"><svg width="26" height="26" viewBox="0 0 24 24" fill="white" style="margin-left:3px"><path d="M8 5v14l11-7z"/></svg></span></button></div>${figcaption}</figure>`
+      );
+    })
     // "!gif[alt](url "credito" "fonte")" — a looping muted video, for links
     // that only LOOK like a still ".gif" but are actually served as video
     // (common on news CDNs: the file is really an mp4, which an <img> tag
@@ -196,6 +232,7 @@ export function stripMarkdownLite(text: string): string {
     .replace(/^>\s?/gm, "")
     .replace(/^#{2,3}\s+/gm, "")
     .replace(/^[-\d]+\.?\s+/gm, "")
+    .replace(/!video\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+\)/g, "")
     .replace(/!gif\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+(?:\s+"[^"]*")?(?:\s+"[^"]*")?\)/g, "")
     .replace(/!\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+(?:\s+"[^"]*")?(?:\s+"[^"]*")?\)/g, "")
     .replace(/\[([^\]]+)\]\((?:[^\s()]|\([^()]*\))+\)/g, "$1")
