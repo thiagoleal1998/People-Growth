@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { List, ChevronDown } from "lucide-react";
 import { TextToSpeechButton } from "./TextToSpeechButton";
 
@@ -26,6 +26,34 @@ export function ArticleBody({
   videoEmbedUrl,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Highlights draw in once they scroll into view. Done here (not in CSS
+  // scroll-driven animations) so it works in every browser — those only
+  // exist in some, and elsewhere the highlight just sat there static.
+  useEffect(() => {
+    const body = bodyRef.current;
+    if (!body) return;
+    const marks = Array.from(body.querySelectorAll<HTMLElement>(".brand-highlight"));
+    if (marks.length === 0) return;
+    if (!("IntersectionObserver" in window)) {
+      marks.forEach((m) => m.classList.add("is-revealed"));
+      return;
+    }
+    body.classList.add("highlight-sweep-ready");
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (!entry.isIntersecting) continue;
+          entry.target.classList.add("is-revealed");
+          observer.unobserve(entry.target);
+        }
+      },
+      { rootMargin: "0px 0px -15% 0px", threshold: 0.6 }
+    );
+    marks.forEach((m) => observer.observe(m));
+    return () => observer.disconnect();
+  }, [bodyHtml]);
 
   // A video is already the article's main visual, so the cover photo only
   // takes this spot when there's no video competing for it.
@@ -114,6 +142,7 @@ export function ArticleBody({
         )}
 
         <div
+          ref={bodyRef}
           style={{ fontSize: "1.0625rem", lineHeight: 1.85, color: "var(--site-text-secondary)" }}
           dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
