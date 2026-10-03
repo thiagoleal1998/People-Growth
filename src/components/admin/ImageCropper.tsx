@@ -6,10 +6,14 @@ import { Check, X, ZoomIn } from "lucide-react";
 
 const VIEWPORT = 280;
 
+export type AspectOption = { label: string; value: number };
+
 type Props = {
   file: File;
   shape?: "circle" | "square";
   outputSize?: number;
+  aspectOptions?: AspectOption[];
+  defaultAspect?: number;
   onCancel: () => void;
   onConfirm: (file: File) => void;
 };
@@ -20,8 +24,20 @@ type Props = {
  * no external library (keeps this self-contained, like the rest of the
  * admin UI kit). Portaled to document.body for the same reason
  * NotificationBell's dropdown is — this can be opened from inside a
- * scrollable/overflow-hidden form area. */
-export function ImageCropper({ file, shape = "circle", outputSize = 480, onCancel, onConfirm }: Props) {
+ * scrollable/overflow-hidden form area. `aspectOptions` (width/height ratios)
+ * adds a picker for rectangular crops; without it the crop stays square. */
+export function ImageCropper({
+  file,
+  shape = "circle",
+  outputSize = 480,
+  aspectOptions,
+  defaultAspect = 1,
+  onCancel,
+  onConfirm,
+}: Props) {
+  const [aspect, setAspect] = useState(defaultAspect);
+  const viewportW = aspect >= 1 ? VIEWPORT : VIEWPORT * aspect;
+  const viewportH = aspect >= 1 ? VIEWPORT / aspect : VIEWPORT;
   // Computed once at mount from the prop, not re-derived in an effect — this
   // component is always given a fresh `file` via a full mount/unmount (see
   // the `{pendingFile && <ImageCropper .../>}` call sites), never swapped
@@ -46,18 +62,19 @@ export function ImageCropper({ file, shape = "circle", outputSize = 480, onCance
 
   if (!natural) return null;
 
-  const baseScale = VIEWPORT / Math.min(natural.w, natural.h);
+  // Cover-fit: the image always fills the whole crop window, whatever its aspect.
+  const baseScale = Math.max(viewportW / natural.w, viewportH / natural.h);
   const scale = baseScale * zoom;
   const displayedW = natural.w * scale;
   const displayedH = natural.h * scale;
-  const maxOffsetX = Math.max(0, (displayedW - VIEWPORT) / 2);
-  const maxOffsetY = Math.max(0, (displayedH - VIEWPORT) / 2);
+  const maxOffsetX = Math.max(0, (displayedW - viewportW) / 2);
+  const maxOffsetY = Math.max(0, (displayedH - viewportH) / 2);
   const clampedOffset = {
     x: Math.min(maxOffsetX, Math.max(-maxOffsetX, offset.x)),
     y: Math.min(maxOffsetY, Math.max(-maxOffsetY, offset.y)),
   };
-  const left = VIEWPORT / 2 - displayedW / 2 + clampedOffset.x;
-  const top = VIEWPORT / 2 - displayedH / 2 + clampedOffset.y;
+  const left = viewportW / 2 - displayedW / 2 + clampedOffset.x;
+  const top = viewportH / 2 - displayedH / 2 + clampedOffset.y;
 
   function handlePointerDown(e: React.PointerEvent) {
     (e.target as Element).setPointerCapture(e.pointerId);
@@ -84,8 +101,10 @@ export function ImageCropper({ file, shape = "circle", outputSize = 480, onCance
 
   function handleConfirm() {
     const canvas = document.createElement("canvas");
-    canvas.width = outputSize;
-    canvas.height = outputSize;
+    const outW = outputSize;
+    const outH = Math.round(outputSize / aspect);
+    canvas.width = outW;
+    canvas.height = outH;
     const ctx = canvas.getContext("2d");
     if (!ctx || !imgRef.current) return;
 
@@ -93,8 +112,7 @@ export function ImageCropper({ file, shape = "circle", outputSize = 480, onCance
     // natural pixel coordinates, same scale factor used to display it.
     const sourceX = -left / scale;
     const sourceY = -top / scale;
-    const sourceSize = VIEWPORT / scale;
-    ctx.drawImage(imgRef.current, sourceX, sourceY, sourceSize, sourceSize, 0, 0, outputSize, outputSize);
+    ctx.drawImage(imgRef.current, sourceX, sourceY, viewportW / scale, viewportH / scale, 0, 0, outW, outH);
 
     canvas.toBlob(
       (blob) => {
@@ -135,6 +153,30 @@ export function ImageCropper({ file, shape = "circle", outputSize = 480, onCance
       >
         <p style={{ margin: "0 0 1rem", fontSize: "0.9375rem", fontWeight: 700, color: "var(--admin-text)" }}>Ajustar foto</p>
 
+        {aspectOptions && aspectOptions.length > 0 && (
+          <div style={{ display: "flex", gap: "0.375rem", flexWrap: "wrap", justifyContent: "center", marginBottom: "0.875rem" }}>
+            {aspectOptions.map((opt) => (
+              <button
+                key={opt.label}
+                type="button"
+                onClick={() => setAspect(opt.value)}
+                style={{
+                  padding: "0.3125rem 0.75rem",
+                  borderRadius: "9999px",
+                  fontSize: "0.8125rem",
+                  fontWeight: 700,
+                  cursor: "pointer",
+                  border: aspect === opt.value ? "1px solid #4361EE" : "1px solid var(--admin-border-strong)",
+                  backgroundColor: aspect === opt.value ? "rgba(67,97,238,0.12)" : "var(--admin-surface)",
+                  color: aspect === opt.value ? "#4361EE" : "var(--admin-muted)",
+                }}
+              >
+                {opt.label}
+              </button>
+            ))}
+          </div>
+        )}
+
         <div
           onPointerDown={handlePointerDown}
           onPointerMove={handlePointerMove}
@@ -142,10 +184,10 @@ export function ImageCropper({ file, shape = "circle", outputSize = 480, onCance
           onPointerLeave={handlePointerUp}
           onWheel={handleWheel}
           style={{
-            width: VIEWPORT,
-            height: VIEWPORT,
+            width: viewportW,
+            height: viewportH,
             margin: "0 auto",
-            borderRadius: shape === "circle" ? "50%" : "0.75rem",
+            borderRadius: shape === "circle" && aspect === 1 ? "50%" : "0.75rem",
             overflow: "hidden",
             position: "relative",
             backgroundColor: "#0d1b2a",

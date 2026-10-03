@@ -12,6 +12,8 @@ import { ImageWithCredit } from "./tiptap-image-with-credit";
 import { VideoGif } from "./tiptap-videogif";
 import { YoutubeEmbed } from "./tiptap-youtube";
 import { HighlightQuotes } from "./tiptap-highlight-quotes";
+import { ImageCropper, type AspectOption } from "./ImageCropper";
+import type { EditorView } from "@tiptap/pm/view";
 
 // Pasted rich text (Word/Docs/Notion/chat apps) carries its bold/italic/link
 // formatting as real HTML — forcing plain text on paste (an earlier attempt)
@@ -71,6 +73,54 @@ function transformPastedText(text: string): string {
   return text.split(PARAGRAPH_SEPARATOR).join("\n\n").split(LINE_SEPARATOR).join("\n");
 }
 
+const CROP_ASPECTS: AspectOption[] = [
+  { label: "16:9", value: 16 / 9 },
+  { label: "4:3", value: 4 / 3 },
+  { label: "3:2", value: 3 / 2 },
+  { label: "1:1", value: 1 },
+];
+
+async function uploadContentImage(file: File): Promise<string> {
+  const formData = new FormData();
+  formData.append("file", file);
+  const res = await fetch("/api/admin/upload-content-image", { method: "POST", body: formData });
+  const data = await res.json();
+  if (!res.ok || !data.url) throw new Error(data.error ?? "Falha no upload.");
+  return data.url as string;
+}
+
+function updateImageAttrs(editor: Editor, pos: number, patch: Record<string, unknown>) {
+  const node = editor.state.doc.nodeAt(pos);
+  if (!node) return;
+  editor.view.dispatch(editor.state.tr.setNodeMarkup(pos, undefined, { ...node.attrs, ...patch }));
+}
+
+// Images pasted from a copied file/screenshot arrive as clipboard items, not
+// as HTML — and copying an image out of a web page often gives both, so the
+// file takes precedence.
+function clipboardImageFiles(data: DataTransfer | null): File[] {
+  if (!data) return [];
+  return Array.from(data.items)
+    .filter((item) => item.kind === "file" && item.type.startsWith("image/"))
+    .map((item) => item.getAsFile())
+    .filter((file): file is File => file !== null);
+}
+
+// Some sources (Word, Google Docs, rich-text apps) paste images inline as
+// base64 data: URLs inside the HTML rather than as clipboard files.
+async function dataUrlImagesFromHtml(html: string): Promise<File[]> {
+  const doc = new DOMParser().parseFromString(html, "text/html");
+  const srcs = Array.from(doc.querySelectorAll("img"))
+    .map((img) => img.getAttribute("src") ?? "")
+    .filter((src) => src.startsWith("data:image/"));
+  return Promise.all(
+    srcs.map(async (src, i) => {
+      const blob = await (await fetch(src)).blob();
+      return new File([blob], `colado-${i + 1}.${blob.type.split("/")[1] ?? "png"}`, { type: blob.type });
+    })
+  );
+}
+
 const toolButtonStyle = {
   display: "flex",
   alignItems: "center",
@@ -104,12 +154,72 @@ export const MarkdownEditor = forwardRef<
 >(function MarkdownEditor({ name, defaultValue, minHeight = 420, highlightQuotes }, ref) {
   const [serialized, setSerialized] = useState(defaultValue);
   const [uploading, setUploading] = useState(false);
+  const [cropState, setCropState] = useState<{ file: File; pos: number } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  // Stable across renders (only uses state setters), so it's safe to hand to
+  // useEditor, which captures its config once at creation.
+  function insertPastedFiles(view: EditorView, files: File[]) {
+    setUploading(true);
+    (async () => {
+      try {
+        for (const file of files) {
+          const url = await uploadContentImage(file);
+          const { state } = view;
+          view.dispatch(state.tr.replaceSelectionWith(state.schema.nodes.image.create({ src: url })));
+          const after = view.state;
+          view.dispatch(after.tr.setSelection(Selection.near(after.doc.resolve(after.selection.to))));
+        }
+      } catch (err) {
+        await alertDialog(err instanceof Error ? err.message : "Erro ao enviar a imagem colada.");
+      } finally {
+        setUploading(false);
+      }
+    })();
+  }
+
+  async function editImageFields(editor: Editor, pos: number, attrs: Record<string, unknown>) {
+    const caption = await promptDialog("Legenda da imagem (aparece embaixo dela):", (attrs.alt as string | null) ?? "");
+    if (caption === null) return;
+    const credit = await promptDialog("Créditos da imagem (ex: nome do fotógrafo):", (attrs.credit as string | null) ?? "");
+    if (credit === null) return;
+    const source = await promptDialog("Fonte da imagem (ex: site ou publicação de origem):", (attrs.source as string | null) ?? "");
+    if (source === null) return;
+    updateImageAttrs(editor, pos, { alt: caption || null, credit: credit || null, source: source || null });
+  }
+
+  async function requestImageCrop(_editor: Editor, pos: number, attrs: Record<string, unknown>) {
+    try {
+      const res = await fetch(attrs.src as string);
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      setCropState({ file: new File([blob], "foto", { type: blob.type || "image/jpeg" }), pos });
+    } catch {
+      await alertDialog(
+        "Não consegui abrir esta imagem para recortar. Imagens de outros sites podem bloquear isso — baixe o arquivo e cole ou envie pelo botão de imagem, que aí dá para recortar."
+      );
+    }
+  }
+
+  async function applyCroppedImage(cropped: File) {
+    const target = cropState;
+    setCropState(null);
+    if (!target || !editor) return;
+    setUploading(true);
+    try {
+      const url = await uploadContentImage(cropped);
+      updateImageAttrs(editor, target.pos, { src: url });
+    } catch (err) {
+      await alertDialog(err instanceof Error ? err.message : "Erro ao enviar a imagem recortada.");
+    } finally {
+      setUploading(false);
+    }
+  }
 
   const editor = useEditor({
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
-      ImageWithCredit,
+      ImageWithCredit.configure({ onEditRequest: editImageFields, onCropRequest: requestImageCrop }),
       VideoGif,
       YoutubeEmbed,
       HighlightQuotes.configure({ quotes: highlightQuotes ?? [] }),
@@ -126,6 +236,20 @@ export const MarkdownEditor = forwardRef<
       },
       transformPastedHTML,
       transformPastedText,
+      handlePaste: (view, event) => {
+        const files = clipboardImageFiles(event.clipboardData);
+        if (files.length > 0) {
+          insertPastedFiles(view, files);
+          return true;
+        }
+        const html = event.clipboardData?.getData("text/html") ?? "";
+        const text = event.clipboardData?.getData("text/plain") ?? "";
+        if (!html.includes("data:image/") || text.trim() !== "") return false;
+        dataUrlImagesFromHtml(html).then((inlineFiles) => {
+          if (inlineFiles.length > 0) insertPastedFiles(view, inlineFiles);
+        });
+        return true;
+      },
     },
   });
 
@@ -251,13 +375,9 @@ export const MarkdownEditor = forwardRef<
 
     setUploading(true);
     try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const res = await fetch("/api/admin/upload-content-image", { method: "POST", body: formData });
-      const data = await res.json();
-      if (!res.ok || !data.url) throw new Error(data.error ?? "Falha no upload.");
+      const url = await uploadContentImage(file);
       const { caption, credit, source } = await promptImageCaptionAndCredit();
-      insertImageMarkdown(editor, data.url, caption, credit, source);
+      insertImageMarkdown(editor, url, caption, credit, source);
     } catch (err) {
       await alertDialog(err instanceof Error ? err.message : "Erro ao enviar a imagem.");
     } finally {
@@ -370,6 +490,17 @@ export const MarkdownEditor = forwardRef<
         <EditorContent editor={editor} />
       </div>
       <input type="hidden" name={name} value={serialized} />
+      {cropState && (
+        <ImageCropper
+          file={cropState.file}
+          shape="square"
+          outputSize={1600}
+          aspectOptions={CROP_ASPECTS}
+          defaultAspect={16 / 9}
+          onCancel={() => setCropState(null)}
+          onConfirm={applyCroppedImage}
+        />
+      )}
     </div>
   );
 });

@@ -83,12 +83,16 @@ export function renderMarkdownLite(text: string): string {
     // stops at the FIRST ")", which breaks real-world URLs that contain
     // one (many CDNs, including Globo's, encode image filters like
     // "filters:strip_icc()" directly in the path).
-    .replace(/!\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g, (_match, alt: string, url: string, credit: string | undefined, source: string | undefined) => {
+    // An optional "{w:NN}" right after the ")" sets the image's width as a
+    // percentage of the text column (set by dragging its handle in the
+    // editor); without it the image fills the column as before.
+    .replace(/!\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)(?:\{w:(\d{1,3})\})?/g, (_match, alt: string, url: string, credit: string | undefined, source: string | undefined, widthPct: string | undefined) => {
       const captionLine = alt ? `<span style="display:block">${alt}</span>` : "";
       const creditLine = credit ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Créditos: ${credit}</span>` : "";
       const sourceLine = source ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Fonte: ${source}</span>` : "";
       const figcaption = alt || credit || source ? `<figcaption style="margin-top:0.625rem;font-size:0.8125rem;color:var(--site-muted);text-align:center">${captionLine}${creditLine}${sourceLine}</figcaption>` : "";
-      return protect("FIG", `<figure style="margin:2rem 0"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block" />${figcaption}</figure>`);
+      const width = widthPct ? Math.min(100, Math.max(10, Number(widthPct))) : 100;
+      return protect("FIG", `<figure style="margin:2rem auto;width:${width}%"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block" />${figcaption}</figure>`);
     })
     // Same balanced-parens allowance as the image url above.
     .replace(/\[([^\]]+)\]\(((?:[^\s()]|\([^()]*\))+)\)/g, (_match, linkText: string, url: string) =>
@@ -234,7 +238,7 @@ export function stripMarkdownLite(text: string): string {
     .replace(/^[-\d]+\.?\s+/gm, "")
     .replace(/!video\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+\)/g, "")
     .replace(/!gif\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+(?:\s+"[^"]*")?(?:\s+"[^"]*")?\)/g, "")
-    .replace(/!\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+(?:\s+"[^"]*")?(?:\s+"[^"]*")?\)/g, "")
+    .replace(/!\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+(?:\s+"[^"]*")?(?:\s+"[^"]*")?\)(?:\{w:\d{1,3}\})?/g, "")
     .replace(/\[([^\]]+)\]\((?:[^\s()]|\([^()]*\))+\)/g, "$1")
     .replace(/\*\*(.+?)\*\*/g, "$1")
     .replace(/\+\+(.+?)\+\+/g, "$1")

@@ -52,10 +52,11 @@ export function markdownLiteToEditorHtml(text: string): string {
     // stops at the FIRST ")", which breaks real-world URLs that contain
     // one (many CDNs, including Globo's, encode image filters like
     // "filters:strip_icc()" directly in the path).
-    .replace(/!\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g, (_match, alt: string, src: string, credit?: string, source?: string) => {
+    .replace(/!\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)(?:\{w:(\d{1,3})\})?/g, (_match, alt: string, src: string, credit?: string, source?: string, widthPct?: string) => {
       const creditAttr = credit ? ` data-credit="${credit}"` : "";
       const sourceAttr = source ? ` data-source="${source}"` : "";
-      return protect("FIG", `<img src="${src}" alt="${alt}"${creditAttr}${sourceAttr} />`);
+      const widthAttr = widthPct ? ` data-width-pct="${widthPct}"` : "";
+      return protect("FIG", `<img src="${src}" alt="${alt}"${creditAttr}${sourceAttr}${widthAttr} />`);
     })
     .replace(/\[([^\]]+)\]\(((?:[^\s()]|\([^()]*\))+)\)/g, (_match, linkText: string, url: string) => protect("LNK", `<a href="${url}">${linkText}</a>`))
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
@@ -104,8 +105,10 @@ function serializeImage(el: HTMLElement): string {
   const src = el.getAttribute("src") ?? "";
   const credit = el.getAttribute("data-credit") ?? "";
   const source = el.getAttribute("data-source") ?? "";
+  const widthPct = el.getAttribute("data-width-pct");
   const suffix = credit || source ? ` "${credit}" "${source}"` : "";
-  return `![${alt}](${src}${suffix})`;
+  const widthSuffix = widthPct ? `{w:${widthPct}}` : "";
+  return `![${alt}](${src}${suffix})${widthSuffix}`;
 }
 
 // Same shape as serializeImage but with the "!gif" marker — see VideoGif
