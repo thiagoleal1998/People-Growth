@@ -395,8 +395,7 @@
 /* Brand highlighter for article passages (==texto== in markdown-lite).
    ArticleBody marks the container "highlight-sweep-ready" and adds
    "is-revealed" to each highlight as it scrolls into view, so the tint draws
-   in from the left. Outside that container, and for reduced motion, the
-   highlight is simply shown in full. */
+   in from the left. Outside that container the highlight is simply shown in full. */
 .brand-highlight {
   background: linear-gradient(rgba(67, 97, 238, 0.16), rgba(67, 97, 238, 0.16)) no-repeat left center / 100% 100%;
   color: inherit;
@@ -413,11 +412,4 @@
 .highlight-sweep-ready .brand-highlight.is-revealed {
   background-size: 100% 100%;
   transition: background-size 1s cubic-bezier(0.4, 0, 0.2, 1);
-}
-@media (prefers-reduced-motion: reduce) {
-  .highlight-sweep-ready .brand-highlight,
-  .highlight-sweep-ready .brand-highlight.is-revealed {
-    background-size: 100% 100%;
-    transition: none;
-  }
 }
