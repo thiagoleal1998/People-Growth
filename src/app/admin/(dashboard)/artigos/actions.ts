@@ -87,6 +87,7 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     cover_image_credit: String(formData.get("cover_image_credit") ?? "") || null,
     video_url: String(formData.get("video_url") ?? "").trim() || null,
     sources: parseSources(formData),
+    ai_usage: formData.get("ai_used") === "yes" ? formData.getAll("ai_usage").map((value) => String(value)) : [],
     category_id: categoryId || null,
     format,
     status,

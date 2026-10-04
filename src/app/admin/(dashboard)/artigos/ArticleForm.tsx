@@ -12,6 +12,7 @@ import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { alertDialog } from "@/components/admin/dialog-store";
 import { upsertArticle, approveAndSchedule } from "./actions";
 import type { Article, ArticleSource, Category, Author } from "@/types/database.types";
+import { AI_USAGE_OPTIONS, aiDisclosureText } from "@/lib/ai-disclosure";
 
 const tabs = [
   { id: "conteudo", label: "Conteúdo" },
@@ -50,6 +51,11 @@ export function ArticleForm({
   const action = upsertArticle.bind(null, item?.id ?? null);
   const [active, setActive] = useState<TabId>("conteudo");
   const [sources, setSources] = useState<ArticleSource[]>(item?.sources ?? []);
+  const [aiUsed, setAiUsed] = useState((item?.ai_usage ?? []).length > 0);
+  const [aiUsage, setAiUsage] = useState<string[]>(item?.ai_usage ?? []);
+  function toggleAiUsage(value: string) {
+    setAiUsage((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
+  }
   function updateSource(index: number, patch: Partial<ArticleSource>) {
     setSources((prev) => prev.map((source, i) => (i === index ? { ...source, ...patch } : source)));
   }
@@ -301,6 +307,48 @@ export function ArticleForm({
             >
               + Adicionar fonte
             </button>
+
+            <div style={{ marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid var(--admin-border)" }}>
+              <div style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--admin-text)", marginBottom: "0.5rem" }}>
+                Inteligência artificial utilizada neste artigo?
+              </div>
+              <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "0.75rem", lineHeight: 1.6 }}>
+                Se sim, o artigo recebe uma declaração de transparência ao final do texto, antes das fontes.
+              </p>
+              <div style={{ display: "flex", gap: "1.25rem", marginBottom: "1rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.375rem", cursor: "pointer" }}>
+                  <input type="radio" name="ai_used" value="no" checked={!aiUsed} onChange={() => setAiUsed(false)} />
+                  Não
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.375rem", cursor: "pointer" }}>
+                  <input type="radio" name="ai_used" value="yes" checked={aiUsed} onChange={() => setAiUsed(true)} />
+                  Sim
+                </label>
+              </div>
+              {aiUsed && (
+                <div>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--admin-text-secondary)", marginBottom: "0.5rem" }}>
+                    Como a inteligência artificial foi utilizada?
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "0.5rem 1rem", marginBottom: "1rem" }}>
+                    {AI_USAGE_OPTIONS.map((option) => (
+                      <label key={option.value} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)", cursor: "pointer" }}>
+                        <input type="checkbox" name="ai_usage" value={option.value} checked={aiUsage.includes(option.value)} onChange={() => toggleAiUsage(option.value)} />
+                        {option.label}
+                      </label>
+                    ))}
+                  </div>
+                  <div style={{ padding: "0.875rem 1rem", borderRadius: "0.625rem", backgroundColor: "rgba(67,97,238,0.05)", border: "1px solid rgba(67,97,238,0.15)" }}>
+                    <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--admin-faint)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.375rem" }}>
+                      Declaração que aparecerá no artigo
+                    </div>
+                    <div style={{ fontSize: "0.875rem", fontStyle: "italic", color: "var(--admin-text-secondary)", lineHeight: 1.6 }}>
+                      {aiDisclosureText(aiUsage, "pt") ?? "Escolha pelo menos uma forma de uso."}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <div style={{ display: active === "detalhes" ? "block" : "none" }}>

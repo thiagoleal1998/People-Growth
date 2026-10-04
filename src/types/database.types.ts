@@ -22,6 +22,7 @@ type ArticleRow = {
   cover_image_credit: string | null;
   video_url: string | null;
   sources?: ArticleSource[] | null;
+  ai_usage?: string[] | null;
   summary_pt: string | null;
   summary_en: string | null;
   category_id: string | null;

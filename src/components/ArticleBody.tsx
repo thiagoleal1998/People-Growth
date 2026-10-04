@@ -15,6 +15,7 @@ type Props = {
   coverImageCredit: string | null;
   videoEmbedUrl: string | null;
   sources?: ArticleSource[] | null;
+  aiDisclosure?: { title: string; text: string } | null;
 };
 
 export function ArticleBody({
@@ -27,6 +28,7 @@ export function ArticleBody({
   coverImageCredit,
   videoEmbedUrl,
   sources,
+  aiDisclosure,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -150,10 +152,18 @@ export function ArticleBody({
           dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
 
+        {aiDisclosure && (
+          <section style={{ marginTop: "2.5rem", padding: "0 0.25rem", fontSize: "0.875rem", lineHeight: 1.6, color: "var(--site-muted)" }}>
+            <div style={{ fontWeight: 700, color: "var(--site-text)", marginBottom: "0.25rem" }}>
+              {aiDisclosure.title}
+            </div>
+            <p style={{ margin: 0, fontStyle: "italic" }}>{aiDisclosure.text}</p>
+          </section>
+        )}
         {sources && sources.length > 0 && (
           <section
             style={{
-              marginTop: "2.5rem",
+              marginTop: "1.5rem",
               backgroundColor: "rgba(67,97,238,0.05)",
               border: "1px solid rgba(67,97,238,0.15)",
               borderTop: "2px solid #4361EE",

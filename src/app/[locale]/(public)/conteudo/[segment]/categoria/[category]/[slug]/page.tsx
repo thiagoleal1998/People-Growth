@@ -17,6 +17,7 @@ import { renderMarkdownLite, stripMarkdownLite } from "@/lib/markdown-lite";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import { articleHref, articlePath, FORMAT_SEGMENT, UNCATEGORIZED_SEGMENT } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
+import { aiDisclosureText } from "@/lib/ai-disclosure";
 import { aboutAuthorLabel, isAuthorPubliclyVisible } from "@/lib/founder-data";
 import type { Article, Category, Author, Comment } from "@/types/database.types";
 import { HideSideRails } from "@/components/HideSideRails";
@@ -153,6 +154,11 @@ export default async function ArticlePage({
 
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://peopleandgrowth.com.br";
   const canonicalPath = articlePath(article, article.categories?.slug, "pt");
+  const aiText = aiDisclosureText(article.ai_usage, locale);
+  const aiDisclosure = aiText
+    ? { title: locale === "en" ? "Declaration on the use of artificial intelligence" : "Declaração sobre o uso de inteligência artificial", text: aiText }
+    : null;
+
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "NewsArticle",
@@ -345,6 +351,7 @@ export default async function ArticlePage({
               coverImageCredit={article.cover_image_credit}
               videoEmbedUrl={article.video_url ? toYouTubeEmbedUrl(article.video_url) : null}
               sources={article.sources}
+              aiDisclosure={aiDisclosure}
             />
 
             <ShareButtons title={pickLocale(locale, article.title_pt, article.title_en)} />

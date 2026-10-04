@@ -2,6 +2,7 @@ import { Calendar, Clock } from "lucide-react";
 import { FormatTag } from "@/components/FormatTag";
 import { ArticleBody } from "@/components/ArticleBody";
 import { renderMarkdownLite, stripMarkdownLite } from "@/lib/markdown-lite";
+import { aiDisclosureText } from "@/lib/ai-disclosure";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import { aboutAuthorLabel } from "@/lib/founder-data";
 import type { Article, Category, Author } from "@/types/database.types";
@@ -17,6 +18,8 @@ const statusLabel: Record<Article["status"], string> = {
  * public site, reusing the same ArticleBody component — so what the
  * author/admin sees here is what actually ships, not an approximation. */
 export function ArticlePreviewFrame({ article, author, category }: { article: Article; author: Author | null; category: Category | null }) {
+  const previewAiText = aiDisclosureText(article.ai_usage, "pt");
+  const previewAiDisclosure = previewAiText ? { title: "Declaração sobre o uso de inteligência artificial", text: previewAiText } : null;
   return (
     <div>
       <div
@@ -116,6 +119,7 @@ export function ArticlePreviewFrame({ article, author, category }: { article: Ar
           coverImageCredit={article.cover_image_credit}
           videoEmbedUrl={article.video_url ? toYouTubeEmbedUrl(article.video_url) : null}
           sources={article.sources}
+          aiDisclosure={previewAiDisclosure}
         />
       </div>
     </div>
