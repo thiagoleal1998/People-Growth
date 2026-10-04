@@ -3,33 +3,17 @@ import { getLocale } from "next-intl/server";
 import { createClient } from "@/lib/supabase/server";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
 import { pickLocale } from "@/lib/locale-content";
+import { INSTITUTIONAL_DEFAULTS } from "@/lib/institutional-defaults";
 
 export const revalidate = 300;
 
-const DEFAULT_TITLE_PT = "Aviso de Direitos Autorais";
-const DEFAULT_TITLE_EN = "Copyright Notice";
-const DEFAULT_BODY_PT = `## Titularidade do conteúdo
-Os textos, imagens, vídeos e demais materiais publicados pela People & Growth — incluindo artigos, a coluna Mea Sententia e páginas institucionais — são de titularidade da People & Growth ou de seus autores, e protegidos pela legislação brasileira de direitos autorais (Lei nº 9.610/1998), salvo quando indicada outra fonte.
+const DEFAULT_TITLE_PT = INSTITUTIONAL_DEFAULTS["direitos-autorais"].titlePt;
+const DEFAULT_TITLE_EN = INSTITUTIONAL_DEFAULTS["direitos-autorais"].titleEn;
+const DEFAULT_BODY_PT = INSTITUTIONAL_DEFAULTS["direitos-autorais"].bodyPt;
+const DEFAULT_BODY_EN = INSTITUTIONAL_DEFAULTS["direitos-autorais"].bodyEn;
 
-## Uso permitido
-É permitido compartilhar links para o nosso conteúdo e citar trechos curtos, desde que citada a fonte com link para o artigo original. Reprodução integral de artigos, sem autorização prévia, não é permitida.
 
-## Materiais de terceiros
-Imagens e vídeos incorporados de terceiros (como YouTube) pertencem a seus respectivos autores ou licenciantes e são utilizados conforme os termos de uso das plataformas de origem.
 
-## Solicitações e denúncias
-Caso identifique conteúdo nosso publicado indevidamente em outro site, ou acredite que publicamos algo que viola direitos autorais de terceiros, entre em contato pela [página de Contato](/contato).`;
-const DEFAULT_BODY_EN = `## Content ownership
-The text, images, videos and other materials published by People & Growth — including articles, the Mea Sententia column and institutional pages — are owned by People & Growth or its authors, and protected by Brazilian copyright law (Law No. 9,610/1998), unless another source is indicated.
-
-## Permitted use
-You may share links to our content and quote short excerpts, provided the source is cited with a link to the original article. Full reproduction of articles without prior authorization is not permitted.
-
-## Third-party materials
-Images and videos embedded from third parties (such as YouTube) belong to their respective authors or licensors and are used according to the terms of use of the originating platforms.
-
-## Requests and reports
-If you find our content published without authorization on another site, or believe we've published something that infringes a third party's copyright, please contact us via the [Contact page](/contato).`;
 
 export const metadata: Metadata = {
   title: DEFAULT_TITLE_PT,
