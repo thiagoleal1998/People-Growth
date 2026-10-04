@@ -25,11 +25,12 @@ export async function updateSiteConfig(formData: FormData) {
   }
 
   const entries = Array.from(formData.entries()).filter(
-    ([key]) => key !== "" && key !== "is_live" && key !== "media_enabled" && key !== "logo_file" && key !== "favicon_file"
+    ([key]) => key !== "" && key !== "is_live" && key !== "media_enabled" && key !== "tse_widget_enabled" && key !== "logo_file" && key !== "favicon_file"
   );
 
   await client.from("site_config").upsert({ key: "is_live", value: formData.get("is_live") === "on" ? "true" : "false" });
   await client.from("site_config").upsert({ key: "media_enabled", value: formData.get("media_enabled") === "on" ? "true" : "false" });
+  await client.from("site_config").upsert({ key: "tse_widget_enabled", value: formData.get("tse_widget_enabled") === "on" ? "true" : "false" });
 
   for (const [key, value] of entries) {
     await client.from("site_config").upsert({ key, value: String(value) });

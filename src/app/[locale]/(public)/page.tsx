@@ -23,6 +23,8 @@ import { AdBanner } from "@/components/AdBanner";
 import { Reveal } from "@/components/Reveal";
 import { VideoFacade } from "@/components/VideoFacade";
 import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/youtube";
+import { getGovernorRace, getPresidentRace } from "@/lib/tse";
+import { ElectionResults } from "@/components/ElectionResults";
 import { articleHref } from "@/lib/article-url";
 import { isAuthorPubliclyVisible } from "@/lib/founder-data";
 import type { Article, Author, Testimonial, MediaItem, Category } from "@/types/database.types";
@@ -156,6 +158,10 @@ export default async function HomePage() {
   const showLiveBox = config.is_live === "true" && Boolean(liveBoxUrl);
   const isLive = !liveBoxIsReplay;
   const mediaEnabled = config.media_enabled !== "false";
+  const electionsEnabled = config.tse_widget_enabled !== "false";
+  const electionsInitial = electionsEnabled
+    ? { uf: "sp", president: await getPresidentRace(), governor: await getGovernorRace("sp") }
+    : null;
   const faqEntries = getFaqEntriesFromConfig(config, locale);
   // Articles are ordered by publication date, except where an admin pinned one
   // to a home slot: that one takes its slot regardless of date. Editing an
@@ -214,6 +220,12 @@ export default async function HomePage() {
       <div className="container-xl" style={{ paddingTop: "1.25rem" }}>
         <AdBanner slotKey="home-top" />
       </div>
+
+      {electionsInitial && (
+        <div className="container-xl" style={{ maxWidth: "1180px", margin: "0 auto", paddingTop: "1.5rem" }}>
+          <ElectionResults initial={electionsInitial} locale={locale} />
+        </div>
+      )}
 
       {/* News lead — UOL-style front page block */}
       {featured && (

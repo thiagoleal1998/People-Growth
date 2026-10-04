@@ -138,6 +138,15 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
               </FieldGrid>
             </SectionCard>
 
+            <SectionCard title="Eleições 2026" subtitle="Bloco de apuração na home, com os dados oficiais do TSE." wide>
+              <Field label="Mostrar o bloco de eleições na home?" hint="Desative depois da eleição para tirar o bloco da home. A página /eleicoes continua disponível.">
+                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                  <input type="checkbox" name="tse_widget_enabled" defaultChecked={values.tse_widget_enabled !== "false"} />
+                  Sim, mostrar o bloco de eleições
+                </label>
+              </Field>
+            </SectionCard>
+
             <SectionCard title="Seção Na Mídia" subtitle="Controla se a seção “Na Mídia” aparece no site." wide>
               <Field label="Mostrar a seção Na Mídia?" hint="Desative para ocultar a seção na home, o link no menu/rodapé e a página /na-midia, sem apagar as menções cadastradas.">
                 <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
