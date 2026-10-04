@@ -18,7 +18,35 @@ function withClickAutoplay(embedUrl: string): string {
   }
 }
 
-export function renderMarkdownLite(text: string): string {
+// The same ids are produced for the section list and for the headings they
+// link to, so both sides must walk "## " headings in document order.
+export function headingSlug(title: string): string {
+  return title
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "");
+}
+
+export function extractH2Headings(text: string): { id: string; title: string }[] {
+  const seen = new Map<string, number>();
+  const headings: { id: string; title: string }[] = [];
+  for (const match of text.replace(/\r\n?/g, "\n").matchAll(/^## (.+)$/gm)) {
+    const title = match[1].replace(/\*\*(.+?)\*\*/g, "$1").trim();
+    headings.push({ id: uniqueId(headingSlug(title), seen), title });
+  }
+  return headings;
+}
+
+function uniqueId(base: string, seen: Map<string, number>): string {
+  const count = seen.get(base) ?? 0;
+  seen.set(base, count + 1);
+  return count === 0 ? base : `${base}-${count + 1}`;
+}
+
+export function renderMarkdownLite(text: string, options: { anchorHeadings?: boolean } = {}): string {
+  const headingIds = new Map<string, number>();
   // URLs (in images/links) commonly contain "_" — signed CDN tokens
   // especially (Globo's image URLs, for one, routinely do). If the
   // rendered <img>/<a> tag were left inline, the bold/italic/underline
@@ -44,7 +72,11 @@ export function renderMarkdownLite(text: string): string {
   let html = text
     .replace(/\r\n?/g, "\n")
     .replace(/^### (.+)$/gm, '<h3 style="font-size:1.25rem;font-weight:800;color:var(--site-text);margin:1.75rem 0 0.875rem">$1</h3>\n')
-    .replace(/^## (.+)$/gm, '<h2 style="font-size:1.5rem;font-weight:800;color:var(--site-text);margin:2rem 0 1rem">$1</h2>\n')
+    .replace(/^## (.+)$/gm, (_match, title: string) => {
+      const plain = title.replace(/\*\*(.+?)\*\*/g, "$1").trim();
+      const id = options.anchorHeadings ? ` id="${uniqueId(headingSlug(plain), headingIds)}"` : "";
+      return `<h2${id} style="font-size:1.5rem;font-weight:800;color:var(--site-text);margin:2rem 0 1rem;scroll-margin-top:7rem">${title}</h2>\n`;
+    })
     // "!video[caption](url)" — a YouTube link pasted inline in the body,
     // shown as a click-to-play thumbnail (same facade pattern as
     // VideoFacade.tsx, re-implemented in plain HTML/inline JS here since
