@@ -22,7 +22,7 @@ import { MediaCarousel } from "@/components/MediaCarousel";
 import { AdBanner } from "@/components/AdBanner";
 import { Reveal } from "@/components/Reveal";
 import { VideoFacade } from "@/components/VideoFacade";
-import { toYouTubeEmbedUrl, getYouTubeThumbnail } from "@/lib/youtube";
+import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/youtube";
 import { articleHref } from "@/lib/article-url";
 import { isAuthorPubliclyVisible } from "@/lib/founder-data";
 import type { Article, Author, Testimonial, MediaItem, Category } from "@/types/database.types";
@@ -424,10 +424,12 @@ export default async function HomePage() {
                       )}
                     </div>
                     <div style={{ position: "relative", paddingTop: "56.25%" }}>
-                      <VideoFacade
-                        embedUrl={toYouTubeEmbedUrl(liveBoxUrl)}
-                        thumbnailUrl={getYouTubeThumbnail(liveBoxUrl)}
+                      <iframe
+                        src={withAutoplay(toYouTubeEmbedUrl(liveBoxUrl), { muted: true })}
                         title={isLive ? t("liveBroadcast") : "Replay"}
+                        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
                       />
                     </div>
                     {config.live_caption_pt && (
