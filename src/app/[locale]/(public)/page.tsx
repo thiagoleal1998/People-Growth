@@ -22,7 +22,7 @@ import { MediaCarousel } from "@/components/MediaCarousel";
 import { AdBanner } from "@/components/AdBanner";
 import { Reveal } from "@/components/Reveal";
 import { VideoFacade } from "@/components/VideoFacade";
-import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/youtube";
+import { toYouTubeEmbedUrl, getYouTubeThumbnail } from "@/lib/youtube";
 import { articleHref } from "@/lib/article-url";
 import { isAuthorPubliclyVisible } from "@/lib/founder-data";
 import type { Article, Author, Testimonial, MediaItem, Category } from "@/types/database.types";
@@ -149,6 +149,9 @@ export default async function HomePage() {
   const liveStreamUrl = config.live_stream_url ? toYouTubeEmbedUrl(config.live_stream_url) : "";
   const shortsVideoUrl = config.shorts_video_url ? toYouTubeEmbedUrl(config.shorts_video_url) : "";
   const isLive = config.is_live === "true" && Boolean(liveStreamUrl);
+  // When nothing is on air, the same box shows the last broadcast as a replay.
+  const liveBoxUrl = isLive ? config.live_stream_url : config.live_replay_url;
+  const showLiveBox = Boolean(liveBoxUrl);
   const mediaEnabled = config.media_enabled !== "false";
   const faqEntries = getFaqEntriesFromConfig(config, locale);
   const [featured, ...rest] = allArticles;
@@ -394,36 +397,37 @@ export default async function HomePage() {
 
               {/* Sidebar */}
               <aside>
-                {isLive && (
-                  <div style={{ borderRadius: "0.5rem", overflow: "hidden", border: "2px solid #dc2626", marginBottom: "0.875rem" }}>
-                    <div style={{ backgroundColor: "#dc2626", color: "white", padding: "0.5rem 0.75rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                {showLiveBox && (
+                  <div style={{ borderRadius: "0.5rem", overflow: "hidden", border: `2px solid ${isLive ? "#dc2626" : "#4361EE"}`, marginBottom: "0.875rem" }}>
+                    <div style={{ backgroundColor: isLive ? "#dc2626" : "#4361EE", color: "white", padding: "0.5rem 0.75rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontWeight: 800, fontSize: "0.75rem", letterSpacing: "0.03em" }}>
-                        <Radio size={14} /> {t("liveBroadcast")}
+                        <Radio size={14} /> {isLive ? t("liveBroadcast") : "Replay"}
                       </span>
-                      <span
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          gap: "0.3125rem",
-                          backgroundColor: "white",
-                          color: "#dc2626",
-                          padding: "0.1875rem 0.5rem",
-                          borderRadius: "9999px",
-                          fontWeight: 800,
-                          fontSize: "0.6875rem",
-                          letterSpacing: "0.03em",
-                        }}
-                      >
-                        <span className="live-dot" style={{ width: "0.4375rem", height: "0.4375rem", borderRadius: "50%", backgroundColor: "#dc2626", flexShrink: 0 }} />
-                        {t("liveNow")}
-                      </span>
+                      {isLive && (
+                        <span
+                          style={{
+                            display: "flex",
+                            alignItems: "center",
+                            gap: "0.3125rem",
+                            backgroundColor: "white",
+                            color: "#dc2626",
+                            padding: "0.1875rem 0.5rem",
+                            borderRadius: "9999px",
+                            fontWeight: 800,
+                            fontSize: "0.6875rem",
+                            letterSpacing: "0.03em",
+                          }}
+                        >
+                          <span className="live-dot" style={{ width: "0.4375rem", height: "0.4375rem", borderRadius: "50%", backgroundColor: "#dc2626", flexShrink: 0 }} />
+                          {t("liveNow")}
+                        </span>
+                      )}
                     </div>
                     <div style={{ position: "relative", paddingTop: "56.25%" }}>
-                      <iframe
-                        src={withAutoplay(liveStreamUrl)}
-                        style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
+                      <VideoFacade
+                        embedUrl={toYouTubeEmbedUrl(liveBoxUrl)}
+                        thumbnailUrl={getYouTubeThumbnail(liveBoxUrl)}
+                        title={isLive ? t("liveBroadcast") : "Replay"}
                       />
                     </div>
                     {config.live_caption_pt && (
@@ -515,23 +519,18 @@ export default async function HomePage() {
       {visibleColumnists.length > 0 && (
         <section style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #4361EE", borderBottom: "1px solid var(--site-border)" }}>
           <div className="container-xl" style={{ padding: "1.25rem 0", maxWidth: "1180px", margin: "0 auto" }}>
-          <div
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-              gap: "1.5rem 2rem",
-            }}
-          >
+          <div className="columnist-grid">
             {visibleColumnists.map((author) => {
               const latest = latestByAuthor.get(author.id);
               return (
                 <Link
                   key={author.id}
                   href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
-                  className="columnist-hover"
+                  className="columnist-hover columnist-card"
                   style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none" }}
                 >
                   <div
+                    className="columnist-photo"
                     style={{
                       width: "3.5rem",
                       height: "3.5rem",
@@ -540,7 +539,7 @@ export default async function HomePage() {
                       background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
                     }}
                   />
-                  <div>
+                  <div className="columnist-text">
                     <div style={{ fontWeight: 800, fontSize: "0.8125rem", color: "#4361EE", marginBottom: "0.25rem" }}>{author.name}</div>
                     <div
                       style={{
@@ -569,6 +568,40 @@ export default async function HomePage() {
             </div>
           )}
           </div>
+          {/* Phones get a horizontal swipe row of tall cards instead of a
+              stacked list of small rows — the photo becomes the card. */}
+          <style>{`
+            .columnist-grid {
+              display: grid;
+              grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+              gap: 1.5rem 2rem;
+            }
+            @media (max-width: 768px) {
+              .columnist-grid {
+                display: flex;
+                overflow-x: auto;
+                scroll-snap-type: x mandatory;
+                gap: 0.875rem;
+                margin: 0 -1rem;
+                padding: 0 1rem 0.5rem;
+                scrollbar-width: none;
+              }
+              .columnist-grid::-webkit-scrollbar { display: none; }
+              .columnist-card {
+                flex: 0 0 60%;
+                flex-direction: column !important;
+                gap: 0.625rem !important;
+                scroll-snap-align: start;
+              }
+              .columnist-photo {
+                width: 100% !important;
+                height: auto !important;
+                aspect-ratio: 1 / 1;
+                border-radius: 0.75rem !important;
+              }
+              .columnist-text { width: 100%; }
+            }
+          `}</style>
         </section>
       )}
 

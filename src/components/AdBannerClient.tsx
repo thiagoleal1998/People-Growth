@@ -50,8 +50,11 @@ export function AdBannerClient({ ad, style }: { ad: Ad; style?: React.CSSPropert
       onClick={() => track("click")}
       style={{ display: "block", textDecoration: "none", ...style }}
     >
-      {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img src={ad.image_url!} alt={ad.alt_text || adLabel} style={{ width: "100%", height: "auto", display: "block", borderRadius: "0.5rem" }} />
+      <picture>
+        {ad.image_url_mobile && <source media="(max-width: 768px)" srcSet={ad.image_url_mobile} />}
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={ad.image_url!} alt={ad.alt_text || adLabel} style={{ width: "100%", height: "auto", display: "block", borderRadius: "0.5rem" }} />
+      </picture>
       <div style={{ fontSize: "0.6875rem", color: "var(--site-faint)", textAlign: "center", marginTop: "0.25rem" }}>{adLabel}</div>
     </a>
   );

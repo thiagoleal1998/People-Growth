@@ -17,6 +17,7 @@ export async function upsertAd(id: string | null, formData: FormData) {
   const client = supabase as any;
 
   const { url: imageUrl, error: imageError } = await uploadPublicImage(formData.get("image_file"), "ads");
+  const { url: mobileImageUrl } = await uploadPublicImage(formData.get("image_file_mobile"), "ads");
 
   const slotKey = String(formData.get("slot_key") ?? "home-top");
   const targetMode = slotKey === "home-top" ? "all" : (String(formData.get("target_mode") ?? "all") as "all" | "specific");
@@ -31,6 +32,7 @@ export async function upsertAd(id: string | null, formData: FormData) {
     active: formData.get("active") === "on",
   };
   if (imageUrl) payload.image_url = imageUrl;
+  if (mobileImageUrl) payload.image_url_mobile = mobileImageUrl;
 
   const isNew = !id;
   let adId = id;

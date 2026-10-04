@@ -30,6 +30,7 @@ const weatherFields: { key: string; label: string; placeholder?: string }[] = [
 const liveFields: { key: string; label: string; placeholder?: string }[] = [
   { key: "live_stream_url", label: "Live (URL de embed do YouTube)", placeholder: "https://www.youtube.com/embed/live_stream?channel=..." },
   { key: "live_caption_pt", label: "Legenda da live", placeholder: "Ex: Thiago Leal comenta os principais temas da semana" },
+  { key: "live_replay_url", label: "Replay (URL do YouTube) — aparece na mesma caixa quando não estiver ao vivo", placeholder: "https://www.youtube.com/watch?v=..." },
 ];
 
 type SiteConfigRow = { key: string; value: string | null };

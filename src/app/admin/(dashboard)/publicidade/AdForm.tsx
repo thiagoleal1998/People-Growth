@@ -72,7 +72,7 @@ export function AdForm({
             </label>
           </Field>
 
-          <Field label="Imagem do banner" hint="PNG, JPG ou WEBP, até 5MB. Sem imagem, o anúncio não aparece mesmo que ativado.">
+          <Field label="Imagem do banner (computador)" hint="PNG, JPG ou WEBP, até 5MB. Sem imagem, o anúncio não aparece mesmo que ativado.">
             {item?.image_url && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -83,6 +83,18 @@ export function AdForm({
             )}
             <input className="admin-file-input" type="file" name="image_file" accept="image/png,image/jpeg,image/webp" />
             <ErrorBanner message={imageError} />
+          </Field>
+
+          <Field label="Imagem do banner (celular, opcional)" hint="Usada em telas estreitas. Se vazia, o celular usa a imagem do computador — para ficar legível, o ideal é uma versão em formato mais alto.">
+            {item?.image_url_mobile && (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={item.image_url_mobile}
+                alt="Banner de celular atual"
+                style={{ maxHeight: "6rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border)" }}
+              />
+            )}
+            <input className="admin-file-input" type="file" name="image_file_mobile" accept="image/png,image/jpeg,image/webp" />
           </Field>
 
           <Field label="Link de destino (URL)">

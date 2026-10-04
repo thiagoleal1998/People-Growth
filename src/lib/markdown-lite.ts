@@ -6,10 +6,8 @@ import { extractYouTubeId, toYouTubeEmbedUrl, getYouTubeThumbnail } from "@/lib/
 // a keyframes rule.
 export const HIGHLIGHT_CLASS = "brand-highlight";
 
-// Autoplaying muted (the hero/live-stream convention via withAutoplay() in
-// youtube.ts) would be wrong here — this only ever runs from a genuine click
-// on the thumbnail, so starting with sound is both allowed by browsers'
-// autoplay policy (a user gesture) and what a click-to-play video implies.
+// Only ever runs from a genuine click on the thumbnail, so starting with sound
+// is allowed by browsers' autoplay policy (a user gesture).
 function withClickAutoplay(embedUrl: string): string {
   try {
     const url = new URL(embedUrl);

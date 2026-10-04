@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import NextLink from "next/link";
 import { Linkedin, Mail, Instagram, Youtube } from "lucide-react";
 import { ErrorReportButton } from "@/components/ErrorReportButton";
+import { FooterSection } from "@/components/layout/FooterSection";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { XIcon } from "@/components/icons/XIcon";
 
@@ -33,6 +34,7 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
     >
       <div className="container-xl">
         <div
+          className="ft-grid"
           style={{
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))",
@@ -41,8 +43,57 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
             borderBottom: "1px solid rgba(255,255,255,0.08)",
           }}
         >
+          <style>{`
+            .ft-toggle {
+              display: none;
+            }
+            .ft-body {
+              display: block;
+            }
+            @media (max-width: 640px) {
+              .ft-grid {
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0 1.25rem !important;
+                padding-bottom: 2rem !important;
+              }
+              .ft-brand {
+                grid-column: 1 / -1;
+                padding-bottom: 1.5rem;
+              }
+              .ft-section {
+                border-bottom: 1px solid rgba(255,255,255,0.08);
+                align-self: start;
+              }
+              .ft-heading {
+                display: none !important;
+              }
+              .ft-toggle {
+                display: flex !important;
+                width: 100%;
+                align-items: center;
+                justify-content: space-between;
+                padding: 0.875rem 0;
+                background: none;
+                border: none;
+                color: white;
+                font-size: 0.8125rem;
+                font-weight: 700;
+                letter-spacing: 0.05em;
+                text-transform: uppercase;
+                text-align: left;
+                cursor: pointer;
+              }
+              .ft-body {
+                display: none;
+                padding-bottom: 0.875rem;
+              }
+              .ft-body-open {
+                display: block;
+              }
+            }
+          `}</style>
           {/* Brand */}
-          <div>
+          <div className="ft-brand">
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logoUrl} alt="People & Growth" style={{ height: "3rem", width: "auto", marginBottom: "0.75rem" }} />
@@ -96,10 +147,7 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
           </div>
 
           {/* Nav links */}
-          <div>
-            <h4 style={{ color: "white", fontWeight: 600, fontSize: "0.875rem", marginBottom: "1rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              {t("navigation")}
-            </h4>
+          <FooterSection title={t("navigation")}>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
               {[
                 { key: "home", href: "/" as const },
@@ -122,13 +170,10 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
                 </li>
               ))}
             </ul>
-          </div>
+          </FooterSection>
 
           {/* Services */}
-          <div>
-            <h4 style={{ color: "white", fontWeight: 600, fontSize: "0.875rem", marginBottom: "1rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              {t("services")}
-            </h4>
+          <FooterSection title={t("services")}>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
               {["strategicConsulting", "digitalMarketing", "growth", "bi", "aiForBusiness", "training"].map((key) => (
                 <li key={key}>
@@ -138,13 +183,10 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
                 </li>
               ))}
             </ul>
-          </div>
+          </FooterSection>
 
           {/* Resources */}
-          <div>
-            <h4 style={{ color: "white", fontWeight: 600, fontSize: "0.875rem", marginBottom: "1rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-              {t("resources")}
-            </h4>
+          <FooterSection title={t("resources")}>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
               {[
                 { label: "Mea Sententia", href: "/conteudo" as const },
@@ -161,7 +203,7 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
                 </li>
               ))}
             </ul>
-          </div>
+          </FooterSection>
         </div>
 
         {/* Bottom bar */}

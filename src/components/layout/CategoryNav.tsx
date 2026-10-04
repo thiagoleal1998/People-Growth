@@ -22,8 +22,8 @@ export async function CategoryNav() {
   return (
     <nav style={{ backgroundColor: "var(--site-surface-alt)", borderBottom: "1px solid var(--site-border)" }}>
       <div
-        className="container-xl"
-        style={{ display: "flex", justifyContent: "center", gap: "1.75rem", overflowX: "auto", padding: "0.75rem 0" }}
+        className="container-xl category-nav-row"
+        style={{ display: "flex", justifyContent: "safe center", gap: "1.75rem", overflowX: "auto", padding: "0.75rem 0" }}
       >
         {sorted.map((category) => (
           <Link
@@ -59,6 +59,16 @@ export async function CategoryNav() {
           {locale === "en" ? "Columnists" : "Colunistas"}
         </Link>
       </div>
+      {/* On phones the row scrolls sideways: "safe center" keeps the first
+          item reachable (plain "center" clips it off the left edge), and the
+          scrollbar is hidden since swiping is the expected gesture. */}
+      <style>{`
+        .category-nav-row { scrollbar-width: none; scroll-padding-inline: 1rem; }
+        .category-nav-row::-webkit-scrollbar { display: none; }
+        @media (max-width: 768px) {
+          .category-nav-row { gap: 1.25rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }
+        }
+      `}</style>
     </nav>
   );
 }

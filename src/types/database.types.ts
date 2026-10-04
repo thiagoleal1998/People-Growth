@@ -342,6 +342,7 @@ type AdRow = {
   slot_key: string;
   title: string;
   image_url: string | null;
+  image_url_mobile: string | null;
   link_url: string | null;
   alt_text: string | null;
   target_mode: "all" | "specific";

@@ -54,16 +54,17 @@ export function getYouTubeThumbnail(url: string): string | null {
 }
 
 /**
- * Adds autoplay params to an embed URL. Browsers only allow autoplay when
- * the video starts muted — the viewer can unmute from the player's own
- * controls, same as UOL's "ao vivo" box.
+ * Adds autoplay params to an embed URL. Only call this from a click (the
+ * facade), where the browser counts the press as a user gesture, so the
+ * video starts with sound. Muting is opt-in for any caller that autoplays
+ * without a click.
  */
-export function withAutoplay(embedUrl: string): string {
+export function withAutoplay(embedUrl: string, options: { muted?: boolean } = {}): string {
   if (!embedUrl) return embedUrl;
   try {
     const url = new URL(embedUrl);
     url.searchParams.set("autoplay", "1");
-    url.searchParams.set("mute", "1");
+    if (options.muted) url.searchParams.set("mute", "1");
     url.searchParams.set("playsinline", "1");
     return url.toString();
   } catch {
