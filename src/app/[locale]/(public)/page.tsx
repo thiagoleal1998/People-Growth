@@ -149,7 +149,9 @@ export default async function HomePage() {
   const shortsVideoUrl = config.shorts_video_url ? toYouTubeEmbedUrl(config.shorts_video_url) : "";
   // The admin picks whether the box is labelled "Ao vivo" or "Replay"; the
   // video follows that choice, and the box shows only when is_live is on.
-  const liveBoxIsReplay = config.live_box_type === "replay";
+  // With no live link set there is nothing to play live, so the box falls back
+  // to the replay and is labelled as one.
+  const liveBoxIsReplay = config.live_box_type === "replay" || !config.live_stream_url;
   const liveBoxUrl = liveBoxIsReplay ? config.live_replay_url : config.live_stream_url;
   const showLiveBox = config.is_live === "true" && Boolean(liveBoxUrl);
   const isLive = !liveBoxIsReplay;
