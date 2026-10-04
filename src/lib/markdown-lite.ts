@@ -132,7 +132,7 @@ export function renderMarkdownLite(text: string, options: { anchorHeadings?: boo
     })
     // Same balanced-parens allowance as the image url above.
     .replace(/\[([^\]]+)\]\(((?:[^\s()]|\([^()]*\))+)\)/g, (_match, linkText: string, url: string) =>
-      protect("LNK", `<a href="${url}" style="color:#4361EE;font-weight:600;text-decoration:underline">${linkText}</a>`)
+      protect("LNK", `<a href="${url}" style="color:#4361EE;font-weight:600;text-decoration:underline">${linkText.replace(/^\+\+|\+\+$/g, "")}</a>`)
     )
     .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:700;color:var(--site-text)">$1</strong>')
     // "==texto==" — a brand-tinted highlighter mark, for passages the
@@ -254,13 +254,13 @@ function groupSourceSections(renderedBlocks: string[], protectedBlocks: string[]
       }
     }
 
-    const styledHeading = renderedBlocks[groupStart].replace(/style="([^"]*)"/, 'style="$1;margin-top:0"');
+    const styledHeading = renderedBlocks[groupStart].replace(/style="([^"]*)"/, 'style="$1;margin-top:0;font-size:1rem;text-transform:uppercase"');
     const rest = renderedBlocks.slice(groupStart + 1, groupEnd).join("");
     // Collapse the whole group into its first slot and blank out the rest
     // (rather than splicing them out) so the outer loop's indices stay
     // valid — the blanked slots just contribute nothing once joined.
     renderedBlocks[groupStart] =
-      `<div style="background-color:rgba(67,97,238,0.05);border:1px solid rgba(67,97,238,0.15);border-radius:0.75rem;padding:0.25rem 1.5rem 1.25rem;margin:2rem 0;font-size:0.9rem;color:var(--site-text-secondary)">${styledHeading}${rest}</div>`;
+      `<div style="background-color:rgba(67,97,238,0.05);border:1px solid rgba(67,97,238,0.15);border-top:2px solid #4361EE;border-radius:0.75rem;padding:0.25rem 1.5rem 1.25rem;margin:2rem 0;font-size:0.9rem;color:var(--site-text-secondary)">${styledHeading}${rest}</div>`;
     for (let j = groupStart + 1; j < groupEnd; j++) renderedBlocks[j] = "";
     i = groupEnd - 1;
   }
