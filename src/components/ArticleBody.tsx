@@ -151,15 +151,24 @@ export function ArticleBody({
         />
 
         {sources && sources.length > 0 && (
-          <section style={{ marginTop: "2.5rem", paddingTop: "1.25rem", borderTop: "2px solid #4361EE" }}>
-            <h2 style={{ fontSize: "0.9375rem", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--site-text)", marginBottom: "0.875rem" }}>
-              Fontes
+          <section
+            style={{
+              marginTop: "2.5rem",
+              backgroundColor: "rgba(67,97,238,0.05)",
+              border: "1px solid rgba(67,97,238,0.15)",
+              borderTop: "2px solid #4361EE",
+              borderRadius: "0.75rem",
+              padding: "1.25rem 1.5rem 1.5rem",
+            }}
+          >
+            <h2 style={{ fontSize: "1rem", fontWeight: 800, textTransform: "uppercase", color: "var(--site-text)", marginBottom: "0.875rem" }}>
+              Fontes:
             </h2>
-            <ol style={{ paddingLeft: "1.25rem", margin: 0, display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.9rem", lineHeight: 1.6, color: "var(--site-muted)" }}>
+            <ul style={{ paddingLeft: "1.25rem", margin: 0, listStyle: "disc", display: "flex", flexDirection: "column", gap: "0.625rem", fontSize: "0.9rem", lineHeight: 1.6, color: "var(--site-muted)" }}>
               {sources.map((source, index) => (
                 <li key={index}>
                   {source.url ? (
-                    <a href={source.url} target="_blank" rel="noopener noreferrer" style={{ color: "#4361EE", textDecoration: "underline" }}>
+                    <a href={source.url} target="_blank" rel="noopener noreferrer" style={{ color: "#4361EE", textDecoration: "underline", wordBreak: "break-word" }}>
                       {source.label}
                     </a>
                   ) : (
@@ -167,7 +176,7 @@ export function ArticleBody({
                   )}
                 </li>
               ))}
-            </ol>
+            </ul>
           </section>
         )}
 
