@@ -7,6 +7,7 @@ import { extractH2Headings, renderMarkdownLite } from "@/lib/markdown-lite";
 import { pickLocale } from "@/lib/locale-content";
 import { InstitutionalToc } from "@/components/InstitutionalToc";
 import { INSTITUTIONAL_DEFAULTS } from "@/lib/institutional-defaults";
+import { HideSideRails } from "@/components/HideSideRails";
 
 export const revalidate = 300;
 
@@ -38,6 +39,7 @@ export default async function OQueEPeopleAndGrowthPage() {
 
   return (
     <>
+      <HideSideRails />
       <section
         style={{
           background: "linear-gradient(135deg, #0d1b2a 0%, #1a1f3e 100%)",

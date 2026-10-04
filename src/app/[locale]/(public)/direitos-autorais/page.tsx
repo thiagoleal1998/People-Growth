@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/server";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
 import { pickLocale } from "@/lib/locale-content";
 import { INSTITUTIONAL_DEFAULTS } from "@/lib/institutional-defaults";
+import { HideSideRails } from "@/components/HideSideRails";
 
 export const revalidate = 300;
 
@@ -30,7 +31,9 @@ export default async function DireitosAutoraisPage() {
   const body = pickLocale(locale, data?.body_pt, data?.body_en) || (locale === "en" ? DEFAULT_BODY_EN : DEFAULT_BODY_PT);
 
   return (
-    <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
+    <>
+      <HideSideRails />
+      <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
       <div className="container-xl" style={{ maxWidth: "720px" }}>
         <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>
           {title}
@@ -44,6 +47,7 @@ export default async function DireitosAutoraisPage() {
           dangerouslySetInnerHTML={{ __html: renderMarkdownLite(body) }}
         />
       </div>
-    </section>
+      </section>
+    </>
   );
 }

@@ -19,6 +19,7 @@ import { articleHref, articlePath, FORMAT_SEGMENT, UNCATEGORIZED_SEGMENT } from 
 import { pickLocale } from "@/lib/locale-content";
 import { aboutAuthorLabel, isAuthorPubliclyVisible } from "@/lib/founder-data";
 import type { Article, Category, Author, Comment } from "@/types/database.types";
+import { HideSideRails } from "@/components/HideSideRails";
 
 export const revalidate = 300;
 
@@ -171,6 +172,7 @@ export default async function ArticlePage({
 
   return (
     <>
+      <HideSideRails />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
