@@ -90,19 +90,20 @@ export async function CategoryNav() {
             pointer-events: none;
           }
         }
-        /* Wide desktops: a card fixed on the left, starting at the same height
-           as the social icons on the right, so the two columns line up. */
+        /* Wide desktops: a dark card fixed on the left, matching the social icons
+           on the right (same dark tone, so it reads over light and dark sections).
+           Both columns start at the vertical middle of the screen. */
         @media (min-width: 1600px) {
           .category-nav {
             position: fixed;
-            top: 10rem;
+            top: 50%;
             left: 1.25rem;
             width: 180px;
             z-index: 40;
-            border: 1px solid var(--site-border) !important;
+            border: 1px solid rgba(255, 255, 255, 0.08) !important;
             border-radius: 1rem;
             padding: 0.875rem 0.625rem 0.625rem;
-            background-color: var(--site-surface) !important;
+            background-color: rgba(13, 27, 42, 0.92) !important;
             box-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.25);
           }
           .category-nav .category-nav-wrap { overflow: visible; }
@@ -123,7 +124,7 @@ export async function CategoryNav() {
             padding: 0.5rem 0.625rem;
             border-radius: 0.5rem;
             font-size: 0.75rem !important;
-            color: var(--site-text-secondary) !important;
+            color: rgba(255, 255, 255, 0.8) !important;
             transition: background-color 0.15s, color 0.15s;
           }
           .category-nav .category-nav-row a::before {
@@ -134,7 +135,7 @@ export async function CategoryNav() {
             background: linear-gradient(135deg, #4361EE, #06D6A0);
             flex-shrink: 0;
           }
-          .category-nav .category-nav-row a:hover { background: rgba(67, 97, 238, 0.09); color: #4361EE !important; }
+          .category-nav .category-nav-row a:hover { background: rgba(255, 255, 255, 0.08); color: white !important; }
           .category-nav .category-nav-row a.category-nav-columnists {
             margin-top: 0.5rem;
             background: #4361EE;
