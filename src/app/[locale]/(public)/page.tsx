@@ -146,6 +146,7 @@ export default async function HomePage() {
   const heroVideoUrl = config.hero_video_url ? toYouTubeEmbedUrl(config.hero_video_url) : "";
   const heroVideoThumbnail = config.hero_video_url ? getYouTubeThumbnail(config.hero_video_url) : null;
   const featuredVideoUrl = config.featured_video_url ? toYouTubeEmbedUrl(config.featured_video_url) : "";
+  const shortsVideoUrl = config.shorts_video_url ? toYouTubeEmbedUrl(config.shorts_video_url) : "";
   // The admin picks whether the box is labelled "Ao vivo" or "Replay"; the
   // video follows that choice, and the box shows only when is_live is on.
   const liveBoxIsReplay = config.live_box_type === "replay";

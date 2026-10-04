@@ -20,7 +20,7 @@ export async function CategoryNav() {
   if (sorted.length === 0) return null;
 
   return (
-    <nav style={{ backgroundColor: "var(--site-surface-alt)", borderBottom: "1px solid var(--site-border)" }}>
+    <nav className="category-nav" style={{ backgroundColor: "var(--site-surface-alt)", borderBottom: "1px solid var(--site-border)" }}>
       <div className="category-nav-wrap">
       <div
         className="container-xl category-nav-row"
@@ -88,6 +88,39 @@ export async function CategoryNav() {
             background: linear-gradient(to right, transparent, var(--site-surface-alt));
             pointer-events: none;
           }
+        }
+        /* Wide desktops: the categories become a fixed column on the left, in
+           the space beside the content, so they stay in view while scrolling.
+           Narrower screens keep the horizontal row. */
+        @media (min-width: 1600px) {
+          .category-nav {
+            position: fixed;
+            top: 7.5rem;
+            left: 0.75rem;
+            width: 170px;
+            z-index: 40;
+            border: 1px solid var(--site-border) !important;
+            border-radius: 0.75rem;
+            padding: 0.5rem;
+            background-color: var(--site-surface) !important;
+          }
+          .category-nav .category-nav-wrap { overflow: visible; }
+          .category-nav .category-nav-row {
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: flex-start !important;
+            overflow: visible !important;
+            gap: 0 !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            max-width: none !important;
+          }
+          .category-nav .category-nav-row a {
+            padding: 0.5rem 0.75rem;
+            border-radius: 0.5rem;
+            font-size: 0.75rem !important;
+          }
+          .category-nav .category-nav-row a:hover { background: rgba(67,97,238,0.08); color: #4361EE !important; }
         }
       `}</style>
     </nav>
