@@ -369,6 +369,15 @@ export function ArticleForm({
                   <option value="published">Publicado</option>
                 </Select>
               </Field>
+              <Field label="Posição na home" hint="Sem posição, a matéria segue a ordem de publicação. Fixar em uma posição a coloca ali, mesmo sendo antiga; a posição fica com uma matéria só.">
+                <Select name="home_slot" defaultValue={item?.home_slot ?? ""}>
+                  <option value="">Automática (pela data)</option>
+                  <option value="principal">Destaque principal</option>
+                  <option value="secundario_1">Destaque secundário 1</option>
+                  <option value="secundario_2">Destaque secundário 2</option>
+                  <option value="secundario_3">Destaque secundário 3</option>
+                </Select>
+              </Field>
               <Field label="Tipo de conteúdo" hint="Notícia: reportagem/atualidade. Opinião: aparece com a tag Mea Sententia.">
                 <Select name="format" value={format} onChange={(e) => setFormat(e.target.value as Article["format"])}>
                   <option value="noticia">Notícia</option>

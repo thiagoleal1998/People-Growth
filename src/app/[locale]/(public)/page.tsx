@@ -157,14 +157,29 @@ export default async function HomePage() {
   const isLive = !liveBoxIsReplay;
   const mediaEnabled = config.media_enabled !== "false";
   const faqEntries = getFaqEntriesFromConfig(config, locale);
-  const [featured, ...rest] = allArticles;
-  const secondary = rest.slice(0, 3);
+  // Articles are ordered by publication date, except where an admin pinned one
+  // to a home slot: that one takes its slot regardless of date. Editing an
+  // article never changes its date, so it only moves when it is pinned.
+  const pinnedPrincipal = allArticles.find((a) => a.home_slot === "principal");
+  const pinnedSecondary = [1, 2, 3].map((n) => allArticles.find((a) => a.home_slot === `secundario_${n}`));
+  const unpinned = allArticles.filter((a) => !a.home_slot);
+  const featured = pinnedPrincipal ?? unpinned[0];
+  const queue = unpinned.filter((a) => a.id !== featured?.id);
+  const secondary: ArticleWithCategory[] = [];
+  for (let i = 0; i < 3; i++) {
+    const pinned = pinnedSecondary[i];
+    if (pinned) secondary.push(pinned);
+    else {
+      const next = queue.shift();
+      if (next) secondary.push(next);
+    }
+  }
   // Deliberately uncapped: this sits next to a sidebar of fixed-height video
   // widgets. Capping it to "match" that height leaves dead whitespace once
   // there's more news than fits the cap, since the two columns grow in
   // fundamentally different units (video aspect ratio vs. text rows) — the
   // only stable option is to let this one run its natural length.
-  const moreNews = rest.slice(3);
+  const moreNews = queue;
 
   const latestByAuthor = new Map<string, Article>();
   for (const a of allArticles) {

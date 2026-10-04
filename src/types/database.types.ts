@@ -23,6 +23,7 @@ type ArticleRow = {
   video_url: string | null;
   sources?: ArticleSource[] | null;
   ai_usage?: string[] | null;
+  home_slot?: "principal" | "secundario_1" | "secundario_2" | "secundario_3" | null;
   summary_pt: string | null;
   summary_en: string | null;
   category_id: string | null;

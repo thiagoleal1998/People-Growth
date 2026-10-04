@@ -26,6 +26,11 @@ async function notifyAuthor(authorId: string | null, notification: { title: stri
 }
 
 // Rows come in as parallel source_label / source_url fields; rows without a label are dropped.
+function parseHomeSlot(formData: FormData): "principal" | "secundario_1" | "secundario_2" | "secundario_3" | null {
+  const value = String(formData.get("home_slot") ?? "");
+  return value === "principal" || value === "secundario_1" || value === "secundario_2" || value === "secundario_3" ? value : null;
+}
+
 function parseSources(formData: FormData): ArticleSource[] {
   const labels = formData.getAll("source_label").map((value) => String(value).trim());
   const urls = formData.getAll("source_url").map((value) => String(value).trim());
@@ -87,6 +92,7 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     cover_image_credit: String(formData.get("cover_image_credit") ?? "") || null,
     video_url: String(formData.get("video_url") ?? "").trim() || null,
     sources: parseSources(formData),
+    home_slot: parseHomeSlot(formData),
     ai_usage: formData.get("ai_used") === "yes" ? formData.getAll("ai_usage").map((value) => String(value)) : [],
     category_id: categoryId || null,
     format,
@@ -127,6 +133,12 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     const { data, error } = await client.from("articles").insert(payload).select("id").single();
     if (error) saveError = error.message;
     articleId = data?.id ?? null;
+  }
+
+  // A home slot holds one article at a time: taking it moves it off whichever
+  // article held it before.
+  if (!saveError && payload.home_slot && articleId) {
+    await client.from("articles").update({ home_slot: null }).eq("home_slot", payload.home_slot).neq("id", articleId);
   }
 
   // A failed write (e.g. a duplicate slug) must never look like a success —

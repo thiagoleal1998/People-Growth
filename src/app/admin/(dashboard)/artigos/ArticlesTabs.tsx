@@ -36,6 +36,16 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]["id"];
 
+function homeSlotLabel(slot: string | null | undefined): string {
+  switch (slot) {
+    case "principal": return "Principal";
+    case "secundario_1": return "Secundário 1";
+    case "secundario_2": return "Secundário 2";
+    case "secundario_3": return "Secundário 3";
+    default: return "Automática";
+  }
+}
+
 export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[]; currentAuthorId: string | null }) {
   const [active, setActive] = useState<TabId>("published");
 
@@ -88,7 +98,7 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                {["Título", "Formato", "Status", "Visualizações", "Data", ""].map((h) => (
+                {["Título", "Formato", "Status", "Visualizações", "Posição na home", "Data", ""].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
                 ))}
               </tr>
@@ -112,6 +122,7 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
                     )}
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.875rem" }}>{a.views.toLocaleString("pt-BR")}</td>
+                  <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.8125rem" }}>{homeSlotLabel(a.home_slot)}</td>
                   <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem" }}>{formatDate(a.created_at)}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
