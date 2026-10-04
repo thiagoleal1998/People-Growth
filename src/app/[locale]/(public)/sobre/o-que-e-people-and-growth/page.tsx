@@ -5,6 +5,7 @@ import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { extractH2Headings, renderMarkdownLite } from "@/lib/markdown-lite";
 import { pickLocale } from "@/lib/locale-content";
+import { InstitutionalToc } from "@/components/InstitutionalToc";
 import { INSTITUTIONAL_DEFAULTS } from "@/lib/institutional-defaults";
 
 export const revalidate = 300;
@@ -68,16 +69,7 @@ export default async function OQueEPeopleAndGrowthPage() {
         <div className="container-xl" style={{ maxWidth: "1040px" }}>
           <div className="oque-layout">
             {headings.length > 1 && (
-              <nav className="oque-toc" aria-label={locale === "en" ? "On this page" : "Nesta página"}>
-                <div className="oque-toc-title">{locale === "en" ? "On this page" : "Nesta página"}</div>
-                <ul>
-                  {headings.map((heading) => (
-                    <li key={heading.id}>
-                      <a href={`#${heading.id}`}>{heading.title}</a>
-                    </li>
-                  ))}
-                </ul>
-              </nav>
+              <InstitutionalToc headings={headings} label={locale === "en" ? "On this page" : "Nesta página"} />
             )}
             <div
               style={{ color: "var(--site-text-secondary)", fontSize: "1.0625rem", lineHeight: 1.75, minWidth: 0 }}
