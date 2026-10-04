@@ -90,21 +90,25 @@ export async function CategoryNav() {
             pointer-events: none;
           }
         }
-        /* Wide desktops: a dark card fixed on the left, matching the social icons
-           on the right (same dark tone, so it reads over light and dark sections).
-           Both columns start at the vertical middle of the screen. */
+        /* Wide desktops: the categories become separate call-to-action buttons,
+           stacked on the left and sliding in from outside the screen one after
+           another. They sit at the vertical middle, like the social icons. */
+        @keyframes category-cta-in {
+          from { opacity: 0; transform: translateX(-160%); }
+          to { opacity: 1; transform: translateX(0); }
+        }
         @media (min-width: 1600px) {
           .category-nav {
             position: fixed;
             top: 50%;
             left: 1.25rem;
-            width: 180px;
+            width: 190px;
             z-index: 40;
-            border: 1px solid rgba(255, 255, 255, 0.08) !important;
-            border-radius: 1rem;
-            padding: 0.875rem 0.625rem 0.625rem;
-            background-color: rgba(13, 27, 42, 0.92) !important;
-            box-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.25);
+            border: none !important;
+            border-radius: 0;
+            padding: 0;
+            background: none !important;
+            box-shadow: none;
           }
           .category-nav .category-nav-wrap { overflow: visible; }
           .category-nav .category-nav-row {
@@ -112,7 +116,7 @@ export async function CategoryNav() {
             align-items: stretch;
             justify-content: flex-start !important;
             overflow: visible !important;
-            gap: 0.125rem !important;
+            gap: 0.5rem !important;
             padding: 0 !important;
             margin: 0 !important;
             max-width: none !important;
@@ -121,12 +125,25 @@ export async function CategoryNav() {
             display: flex;
             align-items: center;
             gap: 0.625rem;
-            padding: 0.5rem 0.625rem;
-            border-radius: 0.5rem;
+            padding: 0.45rem 0.9rem;
+            border-radius: 9999px;
+            background: rgba(13, 27, 42, 0.92) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 22px -10px rgba(15, 23, 42, 0.55);
             font-size: 0.75rem !important;
-            color: rgba(255, 255, 255, 0.8) !important;
-            transition: background-color 0.15s, color 0.15s;
+            color: rgba(255, 255, 255, 0.9) !important;
+            animation: category-cta-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+            transition: transform 0.2s, background-color 0.2s, color 0.2s;
           }
+          .category-nav .category-nav-row a:nth-child(1) { animation-delay: 0.25s; }
+          .category-nav .category-nav-row a:nth-child(2) { animation-delay: 0.37s; }
+          .category-nav .category-nav-row a:nth-child(3) { animation-delay: 0.49s; }
+          .category-nav .category-nav-row a:nth-child(4) { animation-delay: 0.61s; }
+          .category-nav .category-nav-row a:nth-child(5) { animation-delay: 0.73s; }
+          .category-nav .category-nav-row a:nth-child(6) { animation-delay: 0.85s; }
+          .category-nav .category-nav-row a:nth-child(7) { animation-delay: 0.97s; }
+          .category-nav .category-nav-row a:nth-child(8) { animation-delay: 1.0899999999999999s; }
+          .category-nav .category-nav-row a:nth-child(9) { animation-delay: 1.21s; }
           .category-nav .category-nav-row a::before {
             content: "";
             width: 6px;
@@ -135,15 +152,15 @@ export async function CategoryNav() {
             background: linear-gradient(135deg, #4361EE, #06D6A0);
             flex-shrink: 0;
           }
-          .category-nav .category-nav-row a:hover { background: rgba(255, 255, 255, 0.08); color: white !important; }
+          .category-nav .category-nav-row a:hover { background: #4361EE !important; color: white !important; transform: translateX(4px); }
           .category-nav .category-nav-row a.category-nav-columnists {
-            margin-top: 0.5rem;
-            background: #4361EE;
+            background: #4361EE !important;
+            border-color: transparent;
             color: white !important;
             font-weight: 800 !important;
           }
           .category-nav .category-nav-row a.category-nav-columnists::before { background: white; }
-          .category-nav .category-nav-row a.category-nav-columnists:hover { background: #3651d4; color: white !important; }
+          .category-nav .category-nav-row a.category-nav-columnists:hover { background: #3651d4 !important; }
         }
       `}</style>
     </nav>
