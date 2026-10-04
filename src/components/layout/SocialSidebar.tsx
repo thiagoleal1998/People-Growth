@@ -33,8 +33,7 @@ export function SocialSidebar({ instagram, linkedin, whatsapp, youtube, x }: Pro
       style={{
         position: "fixed",
         right: "1.25rem",
-        top: "50%",
-        transform: "translateY(-50%)",
+        top: "10rem",
         zIndex: 40,
         display: "flex",
         flexDirection: "column",

@@ -21,7 +21,6 @@ export async function CategoryNav() {
 
   return (
     <nav className="category-nav" style={{ backgroundColor: "var(--site-surface-alt)", borderBottom: "1px solid var(--site-border)" }}>
-      <div className="category-nav-title">{locale === "en" ? "Categories" : "Categorias"}</div>
       <div className="category-nav-wrap">
       <div
         className="container-xl category-nav-row"
@@ -91,14 +90,12 @@ export async function CategoryNav() {
             pointer-events: none;
           }
         }
-        /* Wide desktops: a card fixed on the left, vertically centred like the
-           social icons on the right, so the two columns mirror each other. */
-        .category-nav-title { display: none; }
+        /* Wide desktops: a card fixed on the left, starting at the same height
+           as the social icons on the right, so the two columns line up. */
         @media (min-width: 1600px) {
           .category-nav {
             position: fixed;
-            top: 50%;
-            transform: translateY(-50%);
+            top: 10rem;
             left: 1.25rem;
             width: 180px;
             z-index: 40;
@@ -107,15 +104,6 @@ export async function CategoryNav() {
             padding: 0.875rem 0.625rem 0.625rem;
             background-color: var(--site-surface) !important;
             box-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.25);
-          }
-          .category-nav .category-nav-title {
-            display: block;
-            padding: 0 0.625rem 0.625rem;
-            font-size: 0.6875rem;
-            font-weight: 800;
-            letter-spacing: 0.08em;
-            text-transform: uppercase;
-            color: var(--site-muted);
           }
           .category-nav .category-nav-wrap { overflow: visible; }
           .category-nav .category-nav-row {
