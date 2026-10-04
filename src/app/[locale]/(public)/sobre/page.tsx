@@ -1,9 +1,12 @@
 import type { Metadata } from "next";
-import { getTranslations } from "next-intl/server";
+import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight, Lightbulb } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import type { Author } from "@/types/database.types";
+import { pickLocale } from "@/lib/locale-content";
+import { INSTITUTIONAL_DEFAULTS } from "@/lib/institutional-defaults";
+import { extractPhilosophyLevels } from "@/lib/philosophy-levels";
 import { FounderCard } from "./FounderCard";
 
 export async function generateMetadata({
@@ -21,17 +24,26 @@ export async function generateMetadata({
 
 export default async function SobrePage() {
   const t = await getTranslations("about");
-
-  const philosophy = [
-    { icon: "🧠", title: t("level1Title"), description: t("level1Desc") },
-    { icon: "🤝", title: t("level2Title"), description: t("level2Desc") },
-    { icon: "👥", title: t("level3Title"), description: t("level3Desc") },
-    { icon: "📈", title: t("level4Title"), description: t("level4Desc") },
-  ];
+  const locale = await getLocale();
 
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
+
+  // The four levels come from the "O que é" text, so this section always matches
+  // that page; the built-in wording is only a fallback if the text can't be read.
+  const { data: essay } = await client.from("institutional_pages").select("body_pt, body_en").eq("slug", "o-que-e-people-and-growth").maybeSingle();
+  const essayBody = pickLocale(locale, essay?.body_pt, essay?.body_en) || (locale === "en" ? INSTITUTIONAL_DEFAULTS["o-que-e-people-and-growth"].bodyEn : INSTITUTIONAL_DEFAULTS["o-que-e-people-and-growth"].bodyPt) || "";
+  const ICONS = ["🧠", "🤝", "👥", "📈"];
+  const extracted = extractPhilosophyLevels(essayBody);
+  const philosophy = extracted.length === 4
+    ? extracted.map((level, i) => ({ icon: ICONS[i], title: level.title, description: level.description }))
+    : [
+        { icon: "🧠", title: t("level1Title"), description: t("level1Desc") },
+        { icon: "🤝", title: t("level2Title"), description: t("level2Desc") },
+        { icon: "👥", title: t("level3Title"), description: t("level3Desc") },
+        { icon: "📈", title: t("level4Title"), description: t("level4Desc") },
+      ];
   const { data: authorsData } = await client
     .from("authors")
     .select("*")
@@ -231,7 +243,7 @@ export default async function SobrePage() {
                 <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--site-text)", marginBottom: "0.5rem" }}>
                   {title}
                 </h3>
-                <p style={{ color: "var(--site-muted)", fontSize: "0.9rem", lineHeight: 1.65 }}>{description}</p>
+                <p style={{ color: "var(--site-muted)", fontSize: "0.9rem", lineHeight: 1.65, display: "-webkit-box", WebkitLineClamp: 5, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{description}</p>
               </div>
             ))}
           </div>
