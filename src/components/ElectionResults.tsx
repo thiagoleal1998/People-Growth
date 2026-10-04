@@ -1,38 +1,82 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { UF_OPTIONS, type TseRace } from "@/lib/tse";
+import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
+import { UF_OPTIONS, shortName, type TseCandidate, type TseRace } from "@/lib/tse";
 
-type Payload = { uf: string; president: TseRace | null; governor: TseRace | null };
+type Payload = { uf: string; president: TseRace | null; governor: TseRace | null; senate: TseRace | null };
+type SideTab = "governor" | "senate";
 
-function RaceRows({ race, limit }: { race: TseRace; limit: number }) {
-  const top = race.candidates.slice(0, limit);
+const ACCENT = "#DD7410";
+
+function CandidatePhoto({ src }: { src: string | null }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-      {top.map((candidate, index) => {
-        const width = Math.min(100, Number(candidate.pct.replace(",", ".")) || 0);
-        return (
-          <div key={`${candidate.name}-${index}`}>
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.5rem", fontSize: "0.875rem" }}>
-              <span style={{ color: "var(--site-text)", fontWeight: index === 0 ? 800 : 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                {candidate.name}
-                <span style={{ color: "var(--site-faint)", fontWeight: 500, marginLeft: "0.375rem", fontSize: "0.75rem" }}>{candidate.party}</span>
-              </span>
-              <span style={{ color: "#4361EE", fontWeight: 800, flexShrink: 0 }}>{candidate.pct}%</span>
-            </div>
-            <div style={{ height: "0.375rem", borderRadius: "9999px", backgroundColor: "var(--site-border)", overflow: "hidden", marginTop: "0.25rem" }}>
-              <div style={{ width: `${width}%`, height: "100%", backgroundColor: index === 0 ? "#4361EE" : "var(--site-faint)" }} />
-            </div>
-          </div>
-        );
-      })}
+    <div style={{ width: "3.5rem", height: "3.5rem", borderRadius: "0.375rem", overflow: "hidden", flexShrink: 0, backgroundColor: "var(--site-surface-alt)" }}>
+      {src && (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={src} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+      )}
     </div>
   );
 }
 
+function CandidateItem({ candidate, leading }: { candidate: TseCandidate; leading: boolean }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", minWidth: 0, flex: "1 1 0", opacity: leading ? 1 : 0.6 }}>
+      <CandidatePhoto src={candidate.photo} />
+      <div style={{ minWidth: 0 }}>
+        <div style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: leading ? 600 : 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+          {shortName(candidate.name)}
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", marginTop: "0.125rem", flexWrap: "wrap" }}>
+          <span style={{ color: ACCENT, fontWeight: 800, fontSize: "0.9375rem" }}>{candidate.pct}%</span>
+          {candidate.elected && (
+            <span style={{ backgroundColor: ACCENT, color: "white", borderRadius: "0.25rem", padding: "0.0625rem 0.375rem", fontSize: "0.6875rem", fontWeight: 700 }}>Eleito</span>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function RaceCard({ race, stateSelect, count }: { race: TseRace | null; stateSelect?: ReactNode; count: number }) {
+  if (!race || race.candidates.length === 0) {
+    return (
+      <div style={cardStyle}>
+        {stateSelect}
+        <div style={{ fontSize: "0.875rem", color: "var(--site-faint)" }}>Resultados indisponíveis no momento.</div>
+      </div>
+    );
+  }
+  return (
+    <div style={cardStyle}>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem", minWidth: "7.5rem", flexShrink: 0 }}>
+        {stateSelect}
+        <div style={{ fontSize: "0.8125rem", color: "var(--site-text-secondary)" }}>{race.sectionsPct}% urnas apuradas</div>
+      </div>
+      <div style={{ display: "flex", gap: "1rem", flex: 1, minWidth: 0, flexWrap: "wrap" }}>
+        {race.candidates.slice(0, count).map((candidate, index) => (
+          <CandidateItem key={`${candidate.name}-${index}`} candidate={candidate} leading={index === 0} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+const cardStyle: CSSProperties = {
+  display: "flex",
+  alignItems: "center",
+  gap: "1rem",
+  flexWrap: "wrap",
+  padding: "1rem 1.125rem",
+  borderRadius: "0.75rem",
+  border: "1px solid var(--site-border-strong)",
+  backgroundColor: "var(--site-card)",
+};
+
 export function ElectionResults({ initial, locale }: { initial: Payload; locale: string }) {
   const [data, setData] = useState<Payload>(initial);
   const [uf, setUf] = useState(initial.uf);
+  const [tab, setTab] = useState<SideTab>("governor");
 
   useEffect(() => {
     let cancelled = false;
@@ -54,66 +98,77 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
     };
   }, [uf]);
 
-  const { president, governor } = data;
-  const updated = president?.updatedAt ?? governor?.updatedAt ?? "";
-  const stateName = UF_OPTIONS.find((option) => option.code === uf)?.name ?? "";
-
+  const { president, governor, senate } = data;
+  const sideRace = tab === "governor" ? governor : senate;
+  const stateSelect = (
+    <select
+      value={uf}
+      onChange={(event) => setUf(event.target.value)}
+      aria-label="Estado"
+      style={{ alignSelf: "flex-start", border: "none", background: "transparent", color: ACCENT, fontWeight: 700, fontSize: "0.9375rem", padding: 0, cursor: "pointer" }}
+    >
+      {UF_OPTIONS.map((option) => (
+        <option key={option.code} value={option.code}>
+          {option.name}
+        </option>
+      ))}
+    </select>
+  );
   return (
-    <section style={{ borderRadius: "1rem", border: "1px solid var(--site-border)", backgroundColor: "var(--site-surface)", padding: "1.25rem 1.5rem", marginBottom: "2rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1rem" }}>
-        <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--site-text)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
-          Eleições 2026 · apuração
-        </h2>
-        <a href={`/${locale}/eleicoes?uf=${uf}`} style={{ color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}>
-          apuração completa →
-        </a>
-      </div>
+    <section style={{ borderTop: `3px solid ${ACCENT}`, paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
+      <h2 style={{ textAlign: "center", fontSize: "clamp(1.375rem, 3vw, 1.75rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem", paddingBottom: "1rem", borderBottom: "1px solid var(--site-border)" }}>
+        Eleições <span style={{ color: "#E8B400", fontWeight: 800 }}>/</span> 2026
+      </h2>
 
-      <div className="election-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }}>
+      <div className="election-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", alignItems: "start" }}>
         <div>
-          <div style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--site-muted)", marginBottom: "0.75rem" }}>Presidente</div>
-          {president && president.candidates.length > 0 ? (
-            <>
-              <RaceRows race={president} limit={4} />
-              <div style={{ fontSize: "0.75rem", color: "var(--site-faint)", marginTop: "0.75rem" }}>{president.sectionsPct}% das seções apuradas</div>
-            </>
-          ) : (
-            <div style={{ fontSize: "0.875rem", color: "var(--site-faint)" }}>Resultados indisponíveis no momento.</div>
-          )}
-        </div>
-
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.75rem" }}>
-            <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--site-muted)" }}>Governador</span>
-            <select
-              value={uf}
-              onChange={(event) => setUf(event.target.value)}
-              aria-label="Estado"
-              style={{ fontSize: "0.8125rem", fontWeight: 600, padding: "0.25rem 0.5rem", borderRadius: "0.5rem", border: "1px solid var(--site-border)", backgroundColor: "var(--site-surface-alt)", color: "var(--site-text)" }}
-            >
-              {UF_OPTIONS.map((option) => (
-                <option key={option.code} value={option.code}>
-                  {option.name}
-                </option>
-              ))}
-            </select>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.75rem", gap: "0.5rem" }}>
+            <span style={{ fontSize: "1.25rem", color: "var(--site-text)" }}>Presidente</span>
+            <a href={`/${locale}/eleicoes?cargo=presidente`} style={{ color: ACCENT, fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600 }}>
+              apuração completa ›
+            </a>
           </div>
-          {governor && governor.candidates.length > 0 ? (
-            <>
-              <RaceRows race={governor} limit={3} />
-              <div style={{ fontSize: "0.75rem", color: "var(--site-faint)", marginTop: "0.75rem" }}>
-                {stateName} · {governor.sectionsPct}% das seções apuradas
-              </div>
-            </>
-          ) : (
-            <div style={{ fontSize: "0.875rem", color: "var(--site-faint)" }}>Resultados indisponíveis no momento.</div>
-          )}
+          <RaceCard race={president} count={2} />
+        </div>
+
+        <div>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", gap: "0.5rem", flexWrap: "wrap" }}>
+            <div style={{ display: "inline-flex", padding: "0.1875rem", borderRadius: "9999px", backgroundColor: "var(--site-surface-alt)" }}>
+              {(["governor", "senate"] as const).map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => setTab(option)}
+                  aria-pressed={tab === option}
+                  style={{
+                    border: "none",
+                    cursor: "pointer",
+                    padding: "0.3125rem 0.9375rem",
+                    borderRadius: "9999px",
+                    fontSize: "0.8125rem",
+                    fontWeight: 600,
+                    color: tab === option ? "var(--site-text)" : "var(--site-muted)",
+                    backgroundColor: tab === option ? "var(--site-card)" : "transparent",
+                    boxShadow: tab === option ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
+                  }}
+                >
+                  {option === "governor" ? "Governador" : "Senado"}
+                </button>
+              ))}
+            </div>
+            <a href={`/${locale}/eleicoes?cargo=${tab === "governor" ? "governador" : "senado"}&uf=${uf}`} style={{ color: ACCENT, fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600 }}>
+              apuração completa ›
+            </a>
+          </div>
+          <RaceCard race={sideRace} count={2} stateSelect={stateSelect} />
         </div>
       </div>
 
-      <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem", paddingTop: "0.75rem", borderTop: "1px solid var(--site-border)", fontSize: "0.7rem", color: "var(--site-faint)" }}>
-        <span>Fonte: Tribunal Superior Eleitoral (TSE)</span>
-        {updated && <span>Atualizado em {updated}</span>}
+      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem", fontSize: "0.6875rem", color: "var(--site-faint)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
+        <span>Fonte: TSE</span>
+        <a href={`/${locale}/eleicoes`} style={{ color: ACCENT, fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600, textTransform: "none", letterSpacing: 0 }}>
+          apuração completa ›
+        </a>
       </div>
 
       <style>{`

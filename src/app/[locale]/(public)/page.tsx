@@ -23,7 +23,7 @@ import { AdBanner } from "@/components/AdBanner";
 import { Reveal } from "@/components/Reveal";
 import { VideoFacade } from "@/components/VideoFacade";
 import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/youtube";
-import { getGovernorRace, getPresidentRace } from "@/lib/tse";
+import { getGovernorRace, getPresidentRace, getSenateRace } from "@/lib/tse";
 import { ElectionResults } from "@/components/ElectionResults";
 import { articleHref } from "@/lib/article-url";
 import { isAuthorPubliclyVisible } from "@/lib/founder-data";
@@ -160,7 +160,7 @@ export default async function HomePage() {
   const mediaEnabled = config.media_enabled !== "false";
   const electionsEnabled = config.tse_widget_enabled !== "false";
   const electionsInitial = electionsEnabled
-    ? { uf: "sp", president: await getPresidentRace(), governor: await getGovernorRace("sp") }
+    ? { uf: "sp", president: await getPresidentRace(), governor: await getGovernorRace("sp"), senate: await getSenateRace("sp") }
     : null;
   const faqEntries = getFaqEntriesFromConfig(config, locale);
   // Articles are ordered by publication date, except where an admin pinned one
