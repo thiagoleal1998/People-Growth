@@ -6,6 +6,8 @@ export type Json =
   | { [key: string]: Json | undefined }
   | Json[];
 
+export type ArticleSource = { label: string; url: string | null };
+
 type ArticleRow = {
   id: string;
   title_pt: string;
@@ -19,6 +21,7 @@ type ArticleRow = {
   cover_image_caption: string | null;
   cover_image_credit: string | null;
   video_url: string | null;
+  sources?: ArticleSource[] | null;
   summary_pt: string | null;
   summary_en: string | null;
   category_id: string | null;

@@ -11,10 +11,11 @@ import { SavedToast } from "@/components/admin/SavedToast";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { alertDialog } from "@/components/admin/dialog-store";
 import { upsertArticle, approveAndSchedule } from "./actions";
-import type { Article, Category, Author } from "@/types/database.types";
+import type { Article, ArticleSource, Category, Author } from "@/types/database.types";
 
 const tabs = [
   { id: "conteudo", label: "Conteúdo" },
+  { id: "fontes", label: "Fontes" },
   { id: "detalhes", label: "Detalhes" },
   { id: "seo", label: "SEO" },
 ] as const;
@@ -48,6 +49,13 @@ export function ArticleForm({
 }) {
   const action = upsertArticle.bind(null, item?.id ?? null);
   const [active, setActive] = useState<TabId>("conteudo");
+  const [sources, setSources] = useState<ArticleSource[]>(item?.sources ?? []);
+  function updateSource(index: number, patch: Partial<ArticleSource>) {
+    setSources((prev) => prev.map((source, i) => (i === index ? { ...source, ...patch } : source)));
+  }
+  function removeSource(index: number) {
+    setSources((prev) => prev.filter((_, i) => i !== index));
+  }
   const [titlePt, setTitlePt] = useState(item?.title_pt ?? "");
   const [excerptPt, setExcerptPt] = useState(item?.excerpt_pt ?? "");
   const [summaryPt, setSummaryPt] = useState(item?.summary_pt ?? "");
@@ -266,6 +274,33 @@ export function ArticleForm({
             <Field label="Vídeo (URL do YouTube)" hint="Opcional — vira o visual principal do artigo, no lugar da imagem de capa. Mesmo assim, cadastre uma imagem de capa na aba Detalhes: ela é usada como miniatura ao compartilhar o link.">
               <Input name="video_url" defaultValue={item?.video_url ?? ""} placeholder="https://www.youtube.com/watch?v=..." />
             </Field>
+          </div>
+
+          <div style={{ display: active === "fontes" ? "block" : "none" }}>
+            <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "1rem", lineHeight: 1.6 }}>
+              Onde você pesquisou para escrever este texto. Elas aparecem no fim do artigo, para o leitor conferir a origem das informações.
+            </p>
+            {sources.map((source, index) => (
+              <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "0.625rem", alignItems: "center", marginBottom: "0.625rem" }}>
+                <Input name="source_label" value={source.label} placeholder="Ex: IBGE, Folha de S.Paulo, Google Trends" onChange={(e) => updateSource(index, { label: e.target.value })} />
+                <Input name="source_url" value={source.url ?? ""} placeholder="https://... (opcional)" onChange={(e) => updateSource(index, { url: e.target.value })} />
+                <button
+                  type="button"
+                  onClick={() => removeSource(index)}
+                  title="Remover fonte"
+                  style={{ padding: "0.5rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", background: "var(--admin-surface)", color: "#ef4444", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer" }}
+                >
+                  Remover
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setSources((prev) => [...prev, { label: "", url: null }])}
+              style={{ padding: "0.5rem 0.875rem", borderRadius: "0.5rem", border: "1px dashed #4361EE", background: "transparent", color: "#4361EE", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+            >
+              + Adicionar fonte
+            </button>
           </div>
 
           <div style={{ display: active === "detalhes" ? "block" : "none" }}>

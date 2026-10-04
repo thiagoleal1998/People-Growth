@@ -8,7 +8,7 @@ import { uploadPublicImage } from "@/lib/supabase/storage";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
 import { calculateReadTime } from "@/lib/markdown-lite";
-import type { Article } from "@/types/database.types";
+import type { Article, ArticleSource } from "@/types/database.types";
 
 // Shared by publishArticle/approveAndSchedule/requestChanges — resolves
 // which login is linked to an author (user_profiles' own RLS only allows
@@ -23,6 +23,13 @@ async function notifyAuthor(authorId: string | null, notification: { title: stri
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (supabase as any).from("notifications").insert({ user_id: authorProfile.id, ...notification });
+}
+
+// Rows come in as parallel source_label / source_url fields; rows without a label are dropped.
+function parseSources(formData: FormData): ArticleSource[] {
+  const labels = formData.getAll("source_label").map((value) => String(value).trim());
+  const urls = formData.getAll("source_url").map((value) => String(value).trim());
+  return labels.map((label, i) => ({ label, url: urls[i] || null })).filter((source) => source.label !== "");
 }
 
 export async function upsertArticle(id: string | null, formData: FormData) {
@@ -79,6 +86,7 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     cover_image_caption: String(formData.get("cover_image_caption") ?? "") || null,
     cover_image_credit: String(formData.get("cover_image_credit") ?? "") || null,
     video_url: String(formData.get("video_url") ?? "").trim() || null,
+    sources: parseSources(formData),
     category_id: categoryId || null,
     format,
     status,

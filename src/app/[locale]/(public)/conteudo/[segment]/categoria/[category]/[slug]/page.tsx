@@ -344,6 +344,7 @@ export default async function ArticlePage({
               coverImageCaption={article.cover_image_caption}
               coverImageCredit={article.cover_image_credit}
               videoEmbedUrl={article.video_url ? toYouTubeEmbedUrl(article.video_url) : null}
+              sources={article.sources}
             />
 
             <ShareButtons title={pickLocale(locale, article.title_pt, article.title_en)} />

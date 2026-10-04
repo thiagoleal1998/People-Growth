@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { List, ChevronDown } from "lucide-react";
 import { TextToSpeechButton } from "./TextToSpeechButton";
+import type { ArticleSource } from "@/types/database.types";
 
 type Props = {
   title: string;
@@ -13,6 +14,7 @@ type Props = {
   coverImageCaption: string | null;
   coverImageCredit: string | null;
   videoEmbedUrl: string | null;
+  sources?: ArticleSource[] | null;
 };
 
 export function ArticleBody({
@@ -24,6 +26,7 @@ export function ArticleBody({
   coverImageCaption,
   coverImageCredit,
   videoEmbedUrl,
+  sources,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -146,6 +149,27 @@ export function ArticleBody({
           style={{ fontSize: "1.0625rem", lineHeight: 1.85, color: "var(--site-text-secondary)" }}
           dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
+
+        {sources && sources.length > 0 && (
+          <section style={{ marginTop: "2.5rem", paddingTop: "1.25rem", borderTop: "2px solid #4361EE" }}>
+            <h2 style={{ fontSize: "0.9375rem", fontWeight: 800, letterSpacing: "0.04em", textTransform: "uppercase", color: "var(--site-text)", marginBottom: "0.875rem" }}>
+              Fontes
+            </h2>
+            <ol style={{ paddingLeft: "1.25rem", margin: 0, display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.9rem", lineHeight: 1.6, color: "var(--site-muted)" }}>
+              {sources.map((source, index) => (
+                <li key={index}>
+                  {source.url ? (
+                    <a href={source.url} target="_blank" rel="noopener noreferrer" style={{ color: "#4361EE", textDecoration: "underline" }}>
+                      {source.label}
+                    </a>
+                  ) : (
+                    source.label
+                  )}
+                </li>
+              ))}
+            </ol>
+          </section>
+        )}
 
         <div style={{ clear: "both" }} />
       </div>

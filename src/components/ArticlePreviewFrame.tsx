@@ -115,6 +115,7 @@ export function ArticlePreviewFrame({ article, author, category }: { article: Ar
           coverImageCaption={article.cover_image_caption}
           coverImageCredit={article.cover_image_credit}
           videoEmbedUrl={article.video_url ? toYouTubeEmbedUrl(article.video_url) : null}
+          sources={article.sources}
         />
       </div>
     </div>
