@@ -115,7 +115,7 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     oldArticle = data as Article | null;
     // Only overwrite published_at when transitioning into "published"; keep existing otherwise.
     const { published_at: _publishedAt, ...updatePayload } = payload;
-    const finalPayload = status === "published" ? payload : updatePayload;
+    const finalPayload = status === "published" && oldArticle?.status !== "published" ? payload : updatePayload;
     // .select() after update is required to actually prove a row was
     // written — RLS silently returns success with zero rows (no error at
     // all) when the policy blocks the write, which looks identical to a
