@@ -43,8 +43,8 @@ export function renderMarkdownLite(text: string): string {
   // makes every downstream regex CRLF-agnostic.
   let html = text
     .replace(/\r\n?/g, "\n")
-    .replace(/^### (.+)$/gm, '<h3 style="font-size:1.25rem;font-weight:800;color:var(--site-text);margin:1.75rem 0 0.875rem">$1</h3>')
-    .replace(/^## (.+)$/gm, '<h2 style="font-size:1.5rem;font-weight:800;color:var(--site-text);margin:2rem 0 1rem">$1</h2>')
+    .replace(/^### (.+)$/gm, '<h3 style="font-size:1.25rem;font-weight:800;color:var(--site-text);margin:1.75rem 0 0.875rem">$1</h3>\n')
+    .replace(/^## (.+)$/gm, '<h2 style="font-size:1.5rem;font-weight:800;color:var(--site-text);margin:2rem 0 1rem">$1</h2>\n')
     // "!video[caption](url)" — a YouTube link pasted inline in the body,
     // shown as a click-to-play thumbnail (same facade pattern as
     // VideoFacade.tsx, re-implemented in plain HTML/inline JS here since

@@ -31,8 +31,8 @@ export function markdownLiteToEditorHtml(text: string): string {
   // single run since "\r" sits between the two "\n" it looks for.
   let html = text
     .replace(/\r\n?/g, "\n")
-    .replace(/^### (.+)$/gm, "<h3>$1</h3>")
-    .replace(/^## (.+)$/gm, "<h2>$1</h2>")
+    .replace(/^### (.+)$/gm, "<h3>$1</h3>\n")
+    .replace(/^## (.+)$/gm, "<h2>$1</h2>\n")
     // "!video[caption](url)" — a YouTube link rendered as a click-to-play
     // thumbnail by renderMarkdownLite. Must run before the image regex
     // since it shares the "[alt](url)" shape.
@@ -71,12 +71,12 @@ export function markdownLiteToEditorHtml(text: string): string {
 
   html = html.replace(/(?:^\d+\.\s+.+$\n?)+/gm, (block) => {
     const items = block.trim().split("\n").map((line) => line.replace(/^\d+\.\s+/, ""));
-    return `<ol>${items.map((i) => `<li>${i}</li>`).join("")}</ol>`;
+    return `<ol>${items.map((i) => `<li>${i}</li>`).join("")}</ol>\n\n`;
   });
 
   html = html.replace(/(?:^-\s+.+$\n?)+/gm, (block) => {
     const items = block.trim().split("\n").map((line) => line.replace(/^-\s+/, ""));
-    return `<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>`;
+    return `<ul>${items.map((i) => `<li>${i}</li>`).join("")}</ul>\n\n`;
   });
 
   const figTokenRe = new RegExp(`^${NUL}FIG\\d+${NUL}$`);
