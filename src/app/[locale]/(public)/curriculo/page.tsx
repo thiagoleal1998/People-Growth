@@ -49,13 +49,6 @@ const experience = [
     highlights: ["30+ empresas atendidas", "500+ alunos treinados", "100+ artigos publicados"],
   },
   {
-    role: "Consultor em Marketing & Growth",
-    company: "Axia Consulting",
-    period: "2021 – 2023",
-    description: "Diagnóstico e reestruturação de estratégias de marketing digital para empresas em fase de crescimento.",
-    highlights: ["Crescimento médio de 40% em leads", "Redução de CAC em 25%", "Implementação de BI para 8 clientes"],
-  },
-  {
     role: "Gerente de Marketing Digital",
     company: "Empresa do Setor",
     period: "2019 – 2021",

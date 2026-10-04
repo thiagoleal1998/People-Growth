@@ -270,12 +270,6 @@ export default async function SobrePage() {
                 icon: "✍️",
                 color: "#FFB703",
               },
-              {
-                name: "Axia Consulting",
-                description: "Projeto de consultoria estratégica focado em transformação digital e crescimento empresarial.",
-                icon: "📊",
-                color: "#4361EE",
-              },
             ].map(({ name, description, icon, color }) => (
               <div
                 key={name}
