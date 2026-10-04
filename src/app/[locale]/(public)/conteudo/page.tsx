@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { createClient } from "@/lib/supabase/server";
 import { pickLocale } from "@/lib/locale-content";
+import { isAuthorPubliclyVisible } from "@/lib/founder-data";
 import { ArticlesExplorer } from "./ArticlesExplorer";
 import type { Article, Category, Tag, Author } from "@/types/database.types";
 
@@ -39,7 +40,7 @@ export default async function MeaSententiePage() {
   const articles = (articlesRes.data ?? []) as Article[];
   const categories = (categoriesRes.data ?? []) as Category[];
   const tags = (tagsRes.data ?? []) as Tag[];
-  const authors = (authorsRes.data ?? []) as Author[];
+  const authors = ((authorsRes.data ?? []) as Author[]).filter(isAuthorPubliclyVisible);
 
   const mostRead = [...articles].sort((a, b) => b.views - a.views).slice(0, 4);
 

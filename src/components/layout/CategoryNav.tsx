@@ -21,6 +21,7 @@ export async function CategoryNav() {
 
   return (
     <nav style={{ backgroundColor: "var(--site-surface-alt)", borderBottom: "1px solid var(--site-border)" }}>
+      <div className="category-nav-wrap">
       <div
         className="container-xl category-nav-row"
         style={{ display: "flex", justifyContent: "safe center", gap: "1.75rem", overflowX: "auto", padding: "0.75rem 0" }}
@@ -59,14 +60,34 @@ export async function CategoryNav() {
           {locale === "en" ? "Columnists" : "Colunistas"}
         </Link>
       </div>
-      {/* On phones the row scrolls sideways: "safe center" keeps the first
-          item reachable (plain "center" clips it off the left edge), and the
-          scrollbar is hidden since swiping is the expected gesture. */}
+      </div>
+      {/* The row scrolls sideways on phones. The wrapper clips its scrollbar
+          (the row is taller than the wrapper by the scrollbar height), so no
+          grey bar shows in any browser, and the right-edge fade signals there
+          is more to swipe to. "safe center" keeps the first item reachable. */}
       <style>{`
-        .category-nav-row { scrollbar-width: none; scroll-padding-inline: 1rem; }
+        .category-nav-wrap { overflow: hidden; position: relative; }
+        .category-nav-row { scrollbar-width: none; scroll-padding-inline: 1rem; margin-bottom: -20px; padding-bottom: calc(0.75rem + 20px) !important; }
         .category-nav-row::-webkit-scrollbar { display: none; }
         @media (max-width: 768px) {
-          .category-nav-row { gap: 1.25rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }
+          .category-nav-row { gap: 0.5rem !important; padding-left: 1rem !important; padding-right: 1rem !important; }
+          .category-nav-row a {
+            padding: 0.4375rem 0.875rem;
+            border-radius: 9999px;
+            background: var(--site-surface);
+            border: 1px solid var(--site-border);
+            font-size: 0.75rem !important;
+          }
+          .category-nav-wrap::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 2.5rem;
+            background: linear-gradient(to right, transparent, var(--site-surface-alt));
+            pointer-events: none;
+          }
         }
       `}</style>
     </nav>

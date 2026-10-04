@@ -20,6 +20,7 @@ import {
   Monitor,
   MessageSquare,
   LogOut,
+  Menu,
   Wrench,
   UserCircle,
   Search,
@@ -95,6 +96,7 @@ export function AdminSidebar({
   // Groups start expanded when the current page is one of their children,
   // so navigating straight to e.g. /admin/promocoes doesn't hide the very
   // link that's active.
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Set<string>>(
     () => new Set(links.filter(isGroup).filter((g) => g.children.some((c) => isLinkActive(pathname, c.href))).map((g) => g.label))
   );
@@ -127,7 +129,24 @@ export function AdminSidebar({
   }
 
   return (
+    <>
+    <div className="admin-mobile-bar">
+      <button type="button" onClick={() => setMobileOpen(true)} aria-label="Abrir menu" style={{ background: "none", border: "none", color: "white", cursor: "pointer", padding: "0.25rem", display: "flex" }}>
+        <Menu size={22} />
+      </button>
+      {logoUrl ? (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img src={logoUrl} alt="People & Growth" style={{ height: "1.75rem", width: "auto" }} />
+      ) : (
+        <span style={{ fontWeight: 800, fontSize: "0.9375rem" }}>People &amp; Growth</span>
+      )}
+    </div>
+    {mobileOpen && <div className="admin-backdrop" onClick={() => setMobileOpen(false)} />}
     <aside
+      className={mobileOpen ? "admin-sidebar admin-sidebar-open" : "admin-sidebar"}
+      onClick={(e) => {
+        if ((e.target as HTMLElement).closest("a")) setMobileOpen(false);
+      }}
       style={{
         width: "240px",
         height: "100%",
@@ -245,7 +264,46 @@ export function AdminSidebar({
         </button>
         <div style={{ padding: "0.5rem 0.875rem 0", fontSize: "0.6875rem", color: "rgba(255,255,255,0.25)" }}>v{APP_VERSION}</div>
       </div>
+      <style>{`
+        .admin-mobile-bar { display: none; }
+        .admin-backdrop { display: none; }
+        @media (max-width: 900px) {
+          .admin-mobile-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.875rem;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 3.5rem;
+            padding: 0 1rem;
+            background: #0d1b2a;
+            color: white;
+            z-index: 150;
+          }
+          .admin-sidebar {
+            position: fixed !important;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            z-index: 200;
+            width: 260px !important;
+            transform: translateX(-100%);
+            transition: transform 0.25s ease;
+          }
+          .admin-sidebar.admin-sidebar-open { transform: none; }
+          .admin-backdrop {
+            display: block;
+            position: fixed;
+            inset: 0;
+            background: rgba(15, 23, 42, 0.5);
+            z-index: 190;
+          }
+        }
+      `}</style>
     </aside>
+    </>
   );
 }
 

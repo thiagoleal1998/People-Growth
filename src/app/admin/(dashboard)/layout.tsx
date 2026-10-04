@@ -35,14 +35,20 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   }
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+    <div className="admin-shell" style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       <AdminSidebar
         logoUrl={logoUrl}
         userName={userName ?? profile?.email}
         userPhoto={userPhoto}
         counts={{ comentarios: pendingComments ?? 0, leads: newLeads ?? 0, chamados: (newErrors ?? 0) + (openTickets ?? 0), resetRequests: pendingResets ?? 0 }}
       />
-      <main className="admin-scroll" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%" }}>{children}</main>
+      <main className="admin-scroll admin-main" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%", minWidth: 0 }}>{children}</main>
+      <style>{`
+        @media (max-width: 900px) {
+          .admin-shell { display: block !important; height: auto !important; overflow: visible !important; }
+          .admin-main { height: auto !important; overflow: visible !important; padding: 4.5rem 1rem 2rem !important; }
+        }
+      `}</style>
     </div>
   );
 }

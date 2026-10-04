@@ -26,6 +26,10 @@ export function TextToSpeechButton({ text, title, fill }: { text: string; title:
     }
     const utterance = new SpeechSynthesisUtterance(`${title}. ${text}`);
     utterance.lang = "pt-BR";
+    // Without an explicit voice, phones often pick one that can't read
+    // Portuguese or stay silent; choose an installed pt-BR voice when there is one.
+    const voices = window.speechSynthesis.getVoices();
+    utterance.voice = voices.find((v) => v.lang === "pt-BR") ?? voices.find((v) => v.lang.startsWith("pt")) ?? null;
     utterance.onend = () => setSpeaking(false);
     utterance.onerror = () => setSpeaking(false);
     window.speechSynthesis.cancel();

@@ -179,6 +179,7 @@ export default async function ArticlePage({
 
       {/* Header */}
       <section
+        className="article-hero"
         style={{
           background: "linear-gradient(135deg, #0d1b2a 0%, #1a1f3e 100%)",
           paddingTop: "6rem",
@@ -186,6 +187,14 @@ export default async function ArticlePage({
           color: "white",
         }}
       >
+        {/* Phones already get the navbar offset from the layout, so the hero
+            doesn't need its own large top gap there. */}
+        <style>{`
+          @media (max-width: 768px) {
+            .article-hero { padding-top: 1.5rem !important; padding-bottom: 2.5rem !important; }
+            .article-body-section { padding-top: 1.5rem !important; }
+          }
+        `}</style>
         <div className="container-xl" style={{ maxWidth: "800px" }}>
           <Link
             href="/conteudo"
@@ -249,7 +258,7 @@ export default async function ArticlePage({
       </section>
 
       {/* Content */}
-      <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
+      <section className="section-padding article-body-section" style={{ backgroundColor: "var(--site-bg)" }}>
         <div
           className="container-xl article-detail-grid"
           style={{
@@ -376,7 +385,7 @@ export default async function ArticlePage({
                     </div>
                   )}
                   {author.bio_pt && (
-                    <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: "0.625rem" }}>
+                    <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: "0.625rem", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
                       {pickLocale(locale, author.bio_pt, author.bio_en)}
                     </p>
                   )}

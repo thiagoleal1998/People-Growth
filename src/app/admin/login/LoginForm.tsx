@@ -111,7 +111,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
 
       <style>{`
         @media (max-width: 860px) {
-          .login-brand-panel { display: none; }
+          .login-brand-panel { display: none !important; }
           .login-mobile-logo { display: block !important; }
         }
       `}</style>
