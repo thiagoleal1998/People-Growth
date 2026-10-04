@@ -21,6 +21,7 @@ export async function CategoryNav() {
 
   return (
     <nav className="category-nav" style={{ backgroundColor: "var(--site-surface-alt)", borderBottom: "1px solid var(--site-border)" }}>
+      <div className="category-nav-title">{locale === "en" ? "Categories" : "Categorias"}</div>
       <div className="category-nav-wrap">
       <div
         className="container-xl category-nav-row"
@@ -46,6 +47,7 @@ export async function CategoryNav() {
         ))}
         <Link
           href="/conteudo/colunistas"
+          className="category-nav-columnists"
           style={{
             flexShrink: 0,
             fontSize: "0.8125rem",
@@ -89,20 +91,31 @@ export async function CategoryNav() {
             pointer-events: none;
           }
         }
-        /* Wide desktops: the categories become a fixed column on the left, in
-           the space beside the content, so they stay in view while scrolling.
-           Narrower screens keep the horizontal row. */
+        /* Wide desktops: a card fixed on the left, vertically centred like the
+           social icons on the right, so the two columns mirror each other. */
+        .category-nav-title { display: none; }
         @media (min-width: 1600px) {
           .category-nav {
             position: fixed;
-            top: 7.5rem;
-            left: 0.75rem;
-            width: 170px;
+            top: 50%;
+            transform: translateY(-50%);
+            left: 1.25rem;
+            width: 180px;
             z-index: 40;
             border: 1px solid var(--site-border) !important;
-            border-radius: 0.75rem;
-            padding: 0.5rem;
+            border-radius: 1rem;
+            padding: 0.875rem 0.625rem 0.625rem;
             background-color: var(--site-surface) !important;
+            box-shadow: 0 10px 30px -12px rgba(15, 23, 42, 0.25);
+          }
+          .category-nav .category-nav-title {
+            display: block;
+            padding: 0 0.625rem 0.625rem;
+            font-size: 0.6875rem;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: var(--site-muted);
           }
           .category-nav .category-nav-wrap { overflow: visible; }
           .category-nav .category-nav-row {
@@ -110,17 +123,38 @@ export async function CategoryNav() {
             align-items: stretch;
             justify-content: flex-start !important;
             overflow: visible !important;
-            gap: 0 !important;
+            gap: 0.125rem !important;
             padding: 0 !important;
             margin: 0 !important;
             max-width: none !important;
           }
           .category-nav .category-nav-row a {
-            padding: 0.5rem 0.75rem;
+            display: flex;
+            align-items: center;
+            gap: 0.625rem;
+            padding: 0.5rem 0.625rem;
             border-radius: 0.5rem;
             font-size: 0.75rem !important;
+            color: var(--site-text-secondary) !important;
+            transition: background-color 0.15s, color 0.15s;
           }
-          .category-nav .category-nav-row a:hover { background: rgba(67,97,238,0.08); color: #4361EE !important; }
+          .category-nav .category-nav-row a::before {
+            content: "";
+            width: 6px;
+            height: 6px;
+            border-radius: 9999px;
+            background: linear-gradient(135deg, #4361EE, #06D6A0);
+            flex-shrink: 0;
+          }
+          .category-nav .category-nav-row a:hover { background: rgba(67, 97, 238, 0.09); color: #4361EE !important; }
+          .category-nav .category-nav-row a.category-nav-columnists {
+            margin-top: 0.5rem;
+            background: #4361EE;
+            color: white !important;
+            font-weight: 800 !important;
+          }
+          .category-nav .category-nav-row a.category-nav-columnists::before { background: white; }
+          .category-nav .category-nav-row a.category-nav-columnists:hover { background: #3651d4; color: white !important; }
         }
       `}</style>
     </nav>
