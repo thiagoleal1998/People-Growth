@@ -146,12 +146,12 @@ export default async function HomePage() {
   const heroVideoUrl = config.hero_video_url ? toYouTubeEmbedUrl(config.hero_video_url) : "";
   const heroVideoThumbnail = config.hero_video_url ? getYouTubeThumbnail(config.hero_video_url) : null;
   const featuredVideoUrl = config.featured_video_url ? toYouTubeEmbedUrl(config.featured_video_url) : "";
-  const liveStreamUrl = config.live_stream_url ? toYouTubeEmbedUrl(config.live_stream_url) : "";
-  const shortsVideoUrl = config.shorts_video_url ? toYouTubeEmbedUrl(config.shorts_video_url) : "";
-  const isLive = config.is_live === "true" && Boolean(liveStreamUrl);
-  // When nothing is on air, the same box shows the last broadcast as a replay.
-  const liveBoxUrl = isLive ? config.live_stream_url : config.live_replay_url;
-  const showLiveBox = Boolean(liveBoxUrl);
+  // The admin picks whether the box is labelled "Ao vivo" or "Replay"; the
+  // video follows that choice, and the box shows only when is_live is on.
+  const liveBoxIsReplay = config.live_box_type === "replay";
+  const liveBoxUrl = liveBoxIsReplay ? config.live_replay_url : config.live_stream_url;
+  const showLiveBox = config.is_live === "true" && Boolean(liveBoxUrl);
+  const isLive = !liveBoxIsReplay;
   const mediaEnabled = config.media_enabled !== "false";
   const faqEntries = getFaqEntriesFromConfig(config, locale);
   const [featured, ...rest] = allArticles;

@@ -1,5 +1,5 @@
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader, Field, Input, SubmitButton, SectionGrid, SectionCard, FieldGrid } from "@/components/admin/ui";
+import { PageHeader, Field, Input, Select, SubmitButton, SectionGrid, SectionCard, FieldGrid } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { updateSiteConfig } from "./actions";
@@ -117,11 +117,17 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
             </SectionCard>
 
             <SectionCard title="Transmissão ao vivo" subtitle="Controla a caixa AO VIVO que aparece na home durante a transmissão de sábado." wide>
-              <Field label="Estamos ao vivo agora?" hint="Ative só durante a transmissão — a caixa AO VIVO some da home quando desativado.">
+              <Field label="Mostrar a caixa na home?" hint="Desative para tirar a caixa da home.">
                 <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
                   <input type="checkbox" name="is_live" defaultChecked={values.is_live === "true"} />
-                  Sim, mostrar a caixa AO VIVO na home
+                  Sim, mostrar a caixa na home
                 </label>
+              </Field>
+              <Field label="Tipo da caixa" hint="Ao vivo mostra a URL da live e o selo AO VIVO; Replay mostra a URL do replay e o título Replay.">
+                <Select name="live_box_type" defaultValue={values.live_box_type === "replay" ? "replay" : "live"}>
+                  <option value="live">Ao vivo</option>
+                  <option value="replay">Replay</option>
+                </Select>
               </Field>
               <FieldGrid>
                 {liveFields.map(({ key, label, placeholder }) => (
