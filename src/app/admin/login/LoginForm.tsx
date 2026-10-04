@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, Loader2, Sparkles, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { APP_VERSION } from "@/lib/version";
@@ -10,7 +10,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
   const [mode, setMode] = useState<"login" | "forgot">("login");
 
   return (
-    <div style={{ minHeight: "100vh", display: "flex" }}>
+    <div className="login-root" style={{ minHeight: "100vh", display: "flex" }}>
       <div className="login-brand-panel" style={{ flex: "1 1 50%", background: "linear-gradient(135deg, #0d1b2a 0%, #162236 50%, #1a1f3e 100%)", position: "relative", overflow: "hidden", padding: "3rem", display: "flex", flexDirection: "column", justifyContent: "center", alignItems: "center" }}>
         <div
           style={{
@@ -83,10 +83,10 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
           )}
         </div>
 
-        <div style={{ position: "absolute", left: "3rem", bottom: "1.5rem", color: "rgba(255,255,255,0.25)", fontSize: "0.75rem" }}>v{APP_VERSION}</div>
+        <div className="login-version" style={{ position: "absolute", left: "3rem", bottom: "1.5rem", color: "rgba(255,255,255,0.25)", fontSize: "0.75rem" }}>v{APP_VERSION}</div>
       </div>
 
-      <div style={{ flex: "1 1 50%", position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f8fafc", padding: "1.5rem" }}>
+      <div className="login-form-panel" style={{ flex: "1 1 50%", position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f8fafc", padding: "1.5rem" }}>
         <div style={{ position: "absolute", width: "26rem", height: "26rem", borderRadius: "50%", background: "#4361EE", opacity: 0.06, filter: "blur(100px)", top: "-8rem", left: "-8rem", pointerEvents: "none" }} />
         <div style={{ position: "absolute", width: "20rem", height: "20rem", borderRadius: "50%", background: "#06D6A0", opacity: 0.06, filter: "blur(100px)", bottom: "-6rem", right: "-6rem", pointerEvents: "none" }} />
         <div style={{ position: "relative", width: "100%", maxWidth: "360px" }}>
@@ -111,8 +111,12 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
 
       <style>{`
         @media (max-width: 860px) {
-          .login-brand-panel { display: none !important; }
-          .login-mobile-logo { display: block !important; }
+          .login-root { flex-direction: column; min-height: auto !important; }
+          .login-brand-panel { display: flex !important; flex: none !important; padding: 2.5rem 1.5rem !important; justify-content: flex-start !important; }
+          .login-version { position: static !important; margin-top: 2rem; }
+          .login-brand-panel h1 { font-size: 1.75rem !important; }
+          .login-form-panel { flex: none !important; padding: 2rem 1.25rem 2.5rem !important; }
+          .login-mobile-logo { display: none !important; }
         }
       `}</style>
     </div>
@@ -123,6 +127,12 @@ function LoginFields({ onForgotPassword }: { onForgotPassword: () => void }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const emailRef = useRef<HTMLInputElement>(null);
+  // Autofocus on phones scrolls the page past the brand panel on load, so the
+  // email field is focused only where there is room for the panel above it.
+  useEffect(() => {
+    if (window.matchMedia("(min-width: 861px)").matches) emailRef.current?.focus();
+  }, []);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -162,9 +172,9 @@ function LoginFields({ onForgotPassword }: { onForgotPassword: () => void }) {
         E-mail
       </label>
       <input
+        ref={emailRef}
         type="email"
         required
-        autoFocus
         value={email}
         onChange={(e) => setEmail(e.target.value)}
         style={{
