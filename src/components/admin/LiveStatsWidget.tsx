@@ -43,7 +43,7 @@ export function LiveStatsWidget() {
         <h2 style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)" }}>Ao vivo agora</h2>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1.5rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
           <div style={{ width: "2.75rem", height: "2.75rem", borderRadius: "0.75rem", backgroundColor: "rgba(67,97,238,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
             <Eye size={18} color="#4361EE" />

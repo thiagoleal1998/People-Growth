@@ -47,6 +47,8 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
         @media (max-width: 900px) {
           .admin-shell { display: block !important; height: auto !important; overflow: visible !important; }
           .admin-main { height: auto !important; overflow: visible !important; padding: 4.5rem 1rem 2rem !important; }
+          /* Wide tables scroll sideways inside themselves instead of being cut off. */
+          .admin-main table { display: block; overflow-x: auto; max-width: 100%; }
         }
       `}</style>
     </div>

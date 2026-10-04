@@ -214,7 +214,7 @@ export function DangerButton({ children, ...props }: React.ButtonHTMLAttributes<
 
 export function SectionGrid({ children }: { children: ReactNode }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(440px, 1fr))", gap: "1.25rem", alignItems: "start" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(440px, 100%), 1fr))", gap: "1.25rem", alignItems: "start" }}>
       {children}
     </div>
   );
@@ -242,7 +242,7 @@ export function SectionCard({ title, subtitle, children, wide }: { title: string
 
 export function FieldGrid({ children }: { children: ReactNode }) {
   return (
-    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "0 1.5rem" }}>
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "0 1.5rem" }}>
       {children}
     </div>
   );

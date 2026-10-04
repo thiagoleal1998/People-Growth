@@ -517,7 +517,7 @@ export default async function HomePage() {
 
       {/* Columnists strip */}
       {visibleColumnists.length > 0 && (
-        <section style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #4361EE", borderBottom: "1px solid var(--site-border)" }}>
+        <section className="columnist-section" style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #4361EE", borderBottom: "1px solid var(--site-border)" }}>
           <div className="container-xl" style={{ padding: "1.25rem 0", maxWidth: "1180px", margin: "0 auto" }}>
           <div className="columnist-grid">
             {visibleColumnists.map((author) => {
@@ -571,6 +571,7 @@ export default async function HomePage() {
           {/* Phones get a horizontal swipe row of tall cards instead of a
               stacked list of small rows — the photo becomes the card. */}
           <style>{`
+            @media (max-width: 768px) { .columnist-section { overflow-x: hidden; } }
             .columnist-grid {
               display: grid;
               grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));

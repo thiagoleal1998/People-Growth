@@ -88,7 +88,7 @@ export default async function DiagnosticoDetailPage({ params }: { params: Promis
       )}
 
       <h3 style={{ fontSize: "1rem", fontWeight: 700, color: "var(--admin-text)", margin: "1.5rem 0 0.75rem" }}>Marcos da estratégia</h3>
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "1.25rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(160px, 100%), 1fr))", gap: "1.25rem" }}>
         {[
           { title: "Curto prazo (0-2 anos)", items: milestones?.short ?? [] },
           { title: "Médio prazo (2-5 anos)", items: milestones?.medium ?? [] },

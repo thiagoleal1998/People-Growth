@@ -47,7 +47,7 @@ export default async function AdminDashboard() {
 
       <LiveStatsWidget />
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "1.25rem", marginBottom: "2.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1.25rem", marginBottom: "2.5rem" }}>
         {stats.map(({ label, value, icon: Icon, color }) => (
           <div key={label} style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--admin-border)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
             <div style={{ width: "2.5rem", height: "2.5rem", borderRadius: "0.75rem", backgroundColor: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>

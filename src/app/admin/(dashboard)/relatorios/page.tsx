@@ -554,14 +554,14 @@ export default async function RelatoriosPage({
 
           {chamadosStats && (
             <>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.25rem", marginBottom: "1.5rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))", gap: "1.25rem", marginBottom: "1.5rem" }}>
                 <StatCard icon={Ticket} label="Chamados internos" value={chamadosStats.totalTickets.toLocaleString("pt-BR")} color="#4361EE" />
                 <StatCard icon={Ticket} label="Chamados em aberto" value={chamadosStats.openTickets.toLocaleString("pt-BR")} color="#cc9200" />
                 <StatCard icon={Bug} label="Erros reportados" value={chamadosStats.totalErrors.toLocaleString("pt-BR")} color="#dc2626" />
                 <StatCard icon={Bug} label="Erros pendentes" value={chamadosStats.pendingErrors.toLocaleString("pt-BR")} color="#cc9200" />
               </div>
 
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))", gap: "1.25rem" }}>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(420px, 100%), 1fr))", gap: "1.25rem" }}>
                 <Card>
                   <div style={{ padding: "1.5rem" }}>
                     <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "1.25rem" }}>Chamados internos — por status</h2>
@@ -833,7 +833,7 @@ export default async function RelatoriosPage({
         </form>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "1.25rem", marginBottom: "1.5rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))", gap: "1.25rem", marginBottom: "1.5rem" }}>
         <StatCard icon={Eye} label="Visualizações de página" value={totalViews.toLocaleString("pt-BR")} color="#4361EE" />
         <StatCard icon={Users} label="Visitantes únicos" value={uniqueVisitors.toLocaleString("pt-BR")} color="#06D6A0" />
         <StatCard icon={MousePointerClick} label="Cliques em anúncios" value={totalClicks.toLocaleString("pt-BR")} color="#FFB703" />
@@ -841,7 +841,7 @@ export default async function RelatoriosPage({
         <StatCard icon={MoveDown} label="Quanto da página é vista, em média" value={avgScrollDepth != null ? `${avgScrollDepth}%` : "—"} color="#06D6A0" />
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(420px, 1fr))", gap: "1.25rem", marginBottom: "1.25rem" }}>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(420px, 100%), 1fr))", gap: "1.25rem", marginBottom: "1.25rem" }}>
         <Card>
           <div style={{ padding: "1.5rem" }}>
             <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "1.25rem" }}>Páginas mais acessadas</h2>
