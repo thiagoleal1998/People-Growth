@@ -121,7 +121,12 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     oldArticle = data as Article | null;
     // Only overwrite published_at when transitioning into "published"; keep existing otherwise.
     const { published_at: _publishedAt, ...updatePayload } = payload;
-    const finalPayload = status === "published" && oldArticle?.status !== "published" ? payload : updatePayload;
+    // Going live for the first time takes today's date; an article that was already published
+    // before (sent back for approval after an edit) keeps the date it had.
+    const finalPayload =
+      status === "published" && oldArticle?.status !== "published"
+        ? { ...payload, published_at: oldArticle?.published_at ?? payload.published_at }
+        : updatePayload;
     // .select() after update is required to actually prove a row was
     // written — RLS silently returns success with zero rows (no error at
     // all) when the policy blocks the write, which looks identical to a
@@ -170,13 +175,35 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
   redirect(`/admin/artigos/${articleId}?saved=1`);
 }
 
+// Sets an article's place on the home straight from the list, without opening the editor.
+// The slot is exclusive: whichever article held it before loses it.
+export async function setHomeSlot(formData: FormData) {
+  const id = String(formData.get("id") ?? "");
+  if (!id) return;
+  const slot = parseHomeSlot(formData);
+  const supabase = await createClient();
+  const profile = await getCurrentProfile();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { data: article } = await client.from("articles").select("title_pt").eq("id", id).single();
+  if (slot) await client.from("articles").update({ home_slot: null }).eq("home_slot", slot).neq("id", id);
+  await client.from("articles").update({ home_slot: slot }).eq("id", id);
+  if (profile) {
+    await logActivity({ userId: profile.id, userEmail: profile.email, action: "update", entityType: "artigo", entityLabel: `${article?.title_pt ?? ""} (posição na home)` });
+  }
+  revalidatePath("/admin/artigos");
+  revalidatePath("/[locale]", "page");
+}
+
 export async function publishArticle(id: string) {
   const supabase = await createClient();
   const profile = await getCurrentProfile();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const { data: article } = await client.from("articles").select("title_pt, author_id").eq("id", id).single();
-  await client.from("articles").update({ status: "published", published_at: new Date().toISOString() }).eq("id", id);
+  const { data: article } = await client.from("articles").select("title_pt, author_id, published_at").eq("id", id).single();
+  // The publish date is set once, on the first publication. An article sent back
+  // for approval after an edit keeps its original date, so it does not jump to the top.
+  await client.from("articles").update({ status: "published", published_at: article?.published_at ?? new Date().toISOString() }).eq("id", id);
   if (profile) {
     await logActivity({ userId: profile.id, userEmail: profile.email, action: "publish", entityType: "artigo", entityLabel: article?.title_pt });
   }

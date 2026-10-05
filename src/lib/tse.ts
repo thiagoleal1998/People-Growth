@@ -29,6 +29,9 @@ export type TseCandidate = {
   pct: string;
   elected: boolean;
   inRunoff: boolean;
+  // Set when the candidacy is not clean, for example "Anulado sub judice": the votes
+  // are counted but annulled, and the TSE says why.
+  irregular: string | null;
   // Deputies only: would be elected at the votes counted so far (not yet the TSE's result).
   projected: boolean;
   photo: string | null;
@@ -60,7 +63,7 @@ export type TseRace = {
 
 // e is "s" for both the elected and the candidates in a runoff, so the TSE's status
 // text (st: "Eleito", "2º turno", "Não eleito") is what tells them apart.
-type RawCandidate = { sqcand?: string; nmu?: string; nm?: string; vap?: string; pvap?: string; e?: string; st?: string };
+type RawCandidate = { sqcand?: string; nmu?: string; nm?: string; vap?: string; pvap?: string; e?: string; st?: string; dvt?: string };
 
 type RawFile = {
   tf?: string;
@@ -180,6 +183,7 @@ function parseRace(file: RawFile, office: string, election: string, scope: strin
         pct: cand.pvap ?? "0,00",
         elected: (cand.st ?? "").startsWith("Eleito"),
         inRunoff: (cand.st ?? "").includes("2º"),
+        irregular: cand.dvt && cand.dvt !== "Válido" ? cand.dvt : null,
         projected: projected.has(cand.sqcand ?? ""),
         photo: cand.sqcand ? `${BASE}/${election}/fotos/${scope}/${cand.sqcand}.jpeg` : null,
       }))

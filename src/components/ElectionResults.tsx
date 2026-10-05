@@ -89,6 +89,91 @@ function RaceCard({ race, stateSelect, count, runoff }: { race: TseRace | null; 
   );
 }
 
+// A state picker styled as a pill with a list that opens below it, in place of the
+// browser's own dropdown.
+function StateDropdown({ value, onChange }: { value: string; onChange: (uf: string) => void }) {
+  const [open, setOpen] = useState(false);
+  const current = UF_OPTIONS.find((option) => option.code === value)?.name ?? "";
+  return (
+    <div style={{ position: "relative", alignSelf: "flex-start" }}>
+      <button
+        type="button"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        onClick={() => setOpen((previous) => !previous)}
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "0.5rem",
+          padding: "0.375rem 0.75rem",
+          borderRadius: "9999px",
+          border: "1px solid var(--site-border-strong)",
+          backgroundColor: "var(--site-card)",
+          color: BRAND,
+          fontWeight: 700,
+          fontSize: "0.875rem",
+          cursor: "pointer",
+          boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+        }}
+      >
+        {current}
+        <span aria-hidden style={{ fontSize: "0.7rem", transform: open ? "rotate(180deg)" : "none", transition: "transform 150ms" }}>▾</span>
+      </button>
+      {open && (
+        <ul
+          role="listbox"
+          aria-label="Estado"
+          style={{
+            position: "absolute",
+            top: "calc(100% + 0.375rem)",
+            left: 0,
+            zIndex: 40,
+            width: "210px",
+            maxHeight: "260px",
+            overflowY: "auto",
+            margin: 0,
+            padding: "0.375rem",
+            listStyle: "none",
+            borderRadius: "0.75rem",
+            border: "1px solid var(--site-border-strong)",
+            backgroundColor: "var(--site-card)",
+            boxShadow: "0 12px 30px rgba(0,0,0,0.18)",
+          }}
+        >
+          {UF_OPTIONS.map((option) => (
+            <li key={option.code}>
+              <button
+                type="button"
+                role="option"
+                aria-selected={option.code === value}
+                onClick={() => {
+                  onChange(option.code);
+                  setOpen(false);
+                }}
+                style={{
+                  display: "block",
+                  width: "100%",
+                  textAlign: "left",
+                  padding: "0.4375rem 0.625rem",
+                  borderRadius: "0.5rem",
+                  border: "none",
+                  cursor: "pointer",
+                  fontSize: "0.875rem",
+                  fontWeight: option.code === value ? 800 : 500,
+                  color: option.code === value ? BRAND : "var(--site-text-secondary)",
+                  backgroundColor: option.code === value ? `${BRAND}14` : "transparent",
+                }}
+              >
+                {option.name}
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export function ElectionResults({ initial, locale }: { initial: Payload; locale: string }) {
   const [data, setData] = useState<Payload>(initial);
   const [uf, setUf] = useState(initial.uf);
@@ -118,20 +203,7 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
   const sideRace = tab === "governor" ? governor : senate;
   const presidentRunoff = raceStatus(president, true).kind === "runoff";
   const sideRunoff = raceStatus(sideRace, tab === "governor").kind === "runoff";
-  const stateSelect = (
-    <select
-      value={uf}
-      onChange={(event) => setUf(event.target.value)}
-      aria-label="Estado"
-      style={{ alignSelf: "flex-start", border: "none", background: "transparent", color: BRAND, fontWeight: 700, fontSize: "0.9375rem", padding: 0, cursor: "pointer" }}
-    >
-      {UF_OPTIONS.map((option) => (
-        <option key={option.code} value={option.code}>
-          {option.name}
-        </option>
-      ))}
-    </select>
-  );
+  const stateSelect = <StateDropdown value={uf} onChange={setUf} />;
 
   return (
     <section style={{ borderTop: `3px solid ${BRAND}`, paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>

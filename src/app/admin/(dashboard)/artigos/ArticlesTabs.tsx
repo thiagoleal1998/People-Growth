@@ -4,7 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { Edit, Eye, Check, MessageSquareWarning } from "lucide-react";
 import { Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
-import { deleteArticle, publishArticle, approveAndSchedule } from "./actions";
+import { deleteArticle, publishArticle, approveAndSchedule, setHomeSlot } from "./actions";
 import type { Article } from "@/types/database.types";
 
 const statusConfig: Record<Article["status"], { label: string; tone: "success" | "warning" | "neutral" }> = {
@@ -122,7 +122,25 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
                     )}
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.875rem" }}>{a.views.toLocaleString("pt-BR")}</td>
-                  <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.8125rem" }}>{homeSlotLabel(a.home_slot)}</td>
+                  <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.8125rem" }}>
+                    {/* Changing the select saves straight away: the home slot can be set without opening the article. */}
+                    <form action={setHomeSlot} style={{ margin: 0 }}>
+                      <input type="hidden" name="id" value={a.id} />
+                      <select
+                        name="home_slot"
+                        defaultValue={a.home_slot ?? ""}
+                        aria-label={`Posição na home de ${a.title_pt}`}
+                        onChange={(event) => event.currentTarget.form?.requestSubmit()}
+                        style={{ padding: "0.3rem 0.5rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border)", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)", fontSize: "0.8125rem" }}
+                      >
+                        <option value="">{homeSlotLabel(null)}</option>
+                        <option value="principal">Principal</option>
+                        <option value="secundario_1">Secundário 1</option>
+                        <option value="secundario_2">Secundário 2</option>
+                        <option value="secundario_3">Secundário 3</option>
+                      </select>
+                    </form>
+                  </td>
                   <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem" }}>{formatDate(a.created_at)}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>

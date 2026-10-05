@@ -25,6 +25,7 @@ import { VideoFacade } from "@/components/VideoFacade";
 import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/youtube";
 import { getGovernorRace, getPresidentRace, getSenateRace } from "@/lib/tse";
 import { ElectionResults } from "@/components/ElectionResults";
+import { ElectionBanner } from "@/components/ElectionBanner";
 import { articleHref } from "@/lib/article-url";
 import { isAuthorPubliclyVisible } from "@/lib/founder-data";
 import type { Article, Author, Testimonial, MediaItem, Category } from "@/types/database.types";
@@ -224,6 +225,11 @@ export default async function HomePage() {
       {electionsInitial && (
         <div className="container-xl" style={{ maxWidth: "1180px", margin: "0 auto", paddingTop: "1.5rem" }}>
           <ElectionResults initial={electionsInitial} locale={locale} />
+          {electionsInitial.president && (
+            <div style={{ marginTop: "2rem" }}>
+              <ElectionBanner president={electionsInitial.president} locale={locale} />
+            </div>
+          )}
         </div>
       )}
 

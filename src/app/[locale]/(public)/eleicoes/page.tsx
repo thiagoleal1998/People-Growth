@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import type { ReactNode } from "react";
 import {
   UF_OPTIONS,
   formatName,
@@ -18,11 +19,13 @@ import {
   type TseTotals,
 } from "@/lib/tse";
 import { getBrazilMap, type BrazilMap } from "@/lib/brazil-map";
+import { Link } from "@/i18n/navigation";
 import { BrazilFlag } from "@/components/BrazilFlag";
 import { BrazilStateMap, type MapLegendItem, type RunoffState, type StateWinner } from "@/components/BrazilStateMap";
 import { ElectionTag } from "@/components/ElectionTag";
 import { ElectionPopup, type PopupPerson } from "@/components/ElectionPopup";
 import { StateMenu } from "@/components/StateMenu";
+import { GovernorSummary, PartyBars, StateResultsList, type StateRow } from "@/components/ElectionSummaries";
 
 export const revalidate = 60;
 
@@ -153,6 +156,7 @@ function BigRow({ candidate, leading, runoffFinalist }: { candidate: TseCandidat
             <span style={{ fontWeight: leading ? 800 : 600, fontSize: "1.0625rem", color: "var(--site-text)" }}>{formatName(candidate.name)}</span>
             {candidate.elected && <ElectionTag kind="elected" />}
             {runoffFinalist && <ElectionTag kind="runoff" />}
+            {candidate.irregular && <ElectionTag kind="irregular" />}
           </div>
           <div style={{ fontSize: "0.75rem", fontWeight: 700, color, textTransform: "uppercase", marginTop: "0.125rem" }}>{candidate.party}</div>
         </div>
@@ -179,6 +183,7 @@ function CompactRow({ candidate, projected }: { candidate: TseCandidate; project
           <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{formatName(candidate.name)}</span>
           {candidate.elected && <ElectionTag kind="elected" />}
           {!candidate.elected && projected && candidate.projected && <ElectionTag kind="projected" />}
+          {candidate.irregular && <ElectionTag kind="irregular" />}
         </div>
         <span style={{ fontSize: "0.7rem", fontWeight: 700, color, textTransform: "uppercase" }}>{candidate.party}</span>
       </div>
@@ -202,8 +207,10 @@ function StatusBanner({ status }: { status: RaceStatus }) {
   );
 }
 
-// The arithmetic of the count, shown next to the status for the majority races.
+// The arithmetic of the count, shown while the count is still open. Once every
+// section is counted the result is final and the line is dropped.
 function OutlookLine({ race }: { race: TseRace }) {
+  if (Number(race.sectionsPct.replace(",", ".")) >= 100) return null;
   const outlook = secondRoundOutlook(race);
   const text =
     outlook.kind === "decided"
@@ -215,6 +222,21 @@ function OutlookLine({ race }: { race: TseRace }) {
     <p style={{ fontSize: "0.8125rem", color: "var(--site-text-secondary)", marginBottom: "0.75rem" }}>
       {text} <span style={{ color: "var(--site-faint)" }}>(cálculo pelas seções apuradas)</span>
     </p>
+  );
+}
+
+// Candidacies whose votes were annulled (for example, sub judice). They stay in the list
+// with a tag, and are named here so they can be compared.
+function IrregularNote({ race }: { race: TseRace }) {
+  const irregular = race.candidates.filter((candidate) => candidate.irregular);
+  if (irregular.length === 0) return null;
+  return (
+    <div style={{ padding: "0.75rem 1rem", borderRadius: "0.625rem", backgroundColor: "var(--site-surface-alt)", fontSize: "0.8125rem", color: "var(--site-text-secondary)", marginBottom: "0.75rem" }}>
+      <strong style={{ color: "var(--site-text)" }}>
+        {irregular.length === 1 ? "Candidatura sob judice" : `${irregular.length} candidaturas sob judice`}:
+      </strong>{" "}
+      {irregular.map((candidate) => `${formatName(candidate.name)} (${candidate.party}, ${candidate.pct}% — ${candidate.irregular?.toLowerCase()})`).join("; ")}. Os votos aparecem apurados, mas foram anulados.
+    </div>
   );
 }
 
@@ -264,6 +286,7 @@ function MainCard({ title, race, cargo, status }: { title: string; race: TseRace
         <>
           <StatusBanner status={status} />
           {MAJORITY.includes(cargo) && <OutlookLine race={race} />}
+          <IrregularNote race={race} />
           {race.candidates.slice(0, 5).map((candidate, index) => (
             <BigRow key={`${candidate.name}-${index}`} candidate={candidate} leading={index === 0} runoffFinalist={isRunoffFinalist(candidate, index, runoff)} />
           ))}
@@ -287,6 +310,7 @@ function DeputyBody({ race }: { race: TseRace }) {
   const { list, projected } = deputyList(race);
   return (
     <>
+      <IrregularNote race={race} />
       <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--site-text)", margin: "0.25rem 0" }}>
         {projected ? `Projetados (${list.length} de ${race.seats} vagas)` : `Eleitos (${list.length})`}
       </h3>
@@ -315,16 +339,15 @@ function DeputyBody({ race }: { race: TseRace }) {
 // Each state's result for the map. For governador a state can go to a runoff of its
 // own, so those are marked. For presidente the runoff is national, so the states are
 // only coloured by who leads them.
-function stateMapData(races: [string, TseRace | null][], perStateRunoff: boolean): { winners: Record<string, StateWinner>; runoffStates: RunoffState[]; legend: MapLegendItem[] } {
+function stateMapData(rows: StateRow[]): { winners: Record<string, StateWinner>; runoffStates: RunoffState[]; legend: MapLegendItem[] } {
   const winners: Record<string, StateWinner> = {};
   const runoffStates: RunoffState[] = [];
   const legend = new Map<string, MapLegendItem>();
-  for (const [uf, race] of races) {
+  for (const { uf, race, status } of rows) {
     const top = race?.candidates[0];
     if (!race || !top) continue;
     const second = race.candidates[1];
-    const status = raceStatus(race, perStateRunoff);
-    const runoff = perStateRunoff && status.kind === "runoff";
+    const runoff = status.kind === "runoff";
     const outcome = status.kind === "elected" ? `Eleito: ${formatName(status.names[0])}` : runoff ? "2º turno" : "em apuração";
     const detail = `1º ${formatName(top.name)} (${top.party}) ${top.pct}%${second ? ` · 2º ${formatName(second.name)} (${second.party}) ${second.pct}%` : ""}`;
     const color = partyColor(top.party);
@@ -333,6 +356,10 @@ function stateMapData(races: [string, TseRace | null][], perStateRunoff: boolean
     if (runoff && second) runoffStates.push({ uf, text: `${formatName(top.name)} x ${formatName(second.name)}` });
   }
   return { winners, runoffStates, legend: [...legend.values()] };
+}
+
+async function allStates(fetchState: (uf: string) => Promise<TseRace | null>): Promise<[string, TseRace | null][]> {
+  return Promise.all(UF_OPTIONS.map(async (option) => [option.code, await fetchState(option.code)] as [string, TseRace | null]));
 }
 
 export default async function EleicoesPage({ searchParams }: { searchParams: Promise<{ uf?: string; cargo?: string }> }) {
@@ -384,17 +411,59 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
     }
   }
 
-  // The map is drawn for presidente and governador, state by state.
+  // Per-state data: the map and the state lists for presidente and governador, and the
+  // whole-country tallies for senado, Câmara and Assembleia.
   let map: BrazilMap | null = null;
-  let mapData: ReturnType<typeof stateMapData> | null = null;
+  let stateRows: StateRow[] = [];
+  let countryRows: [string, TseRace | null][] = [];
   if (cargo === "presidente" || cargo === "governador") {
-    const ufs = UF_OPTIONS.map((option) => option.code);
     const [brazilMap, perState] = await Promise.all([
       getBrazilMap(),
-      Promise.all(ufs.map(async (code) => [code, cargo === "presidente" ? await getPresidentRaceInState(code) : await getGovernorRace(code)] as [string, TseRace | null])),
+      allStates(cargo === "presidente" ? getPresidentRaceInState : getGovernorRace),
     ]);
     map = brazilMap;
-    mapData = stateMapData(perState, cargo === "governador");
+    stateRows = perState.map(([code, race]) => ({ uf: code, race, status: raceStatus(race, cargo === "governador") }));
+  } else {
+    countryRows = await allStates(
+      cargo === "senado" ? getSenateRace : cargo === "federal" ? getFederalDeputyRace : getStateDeputyRace
+    );
+  }
+  const mapData = map && stateRows.length > 0 ? stateMapData(stateRows) : null;
+
+  // Extra sections, per race.
+  let extras: ReactNode = null;
+  if (cargo === "presidente" && stateRows.length > 0) {
+    extras = <StateResultsList title="Resultado por estado — Presidente" subtitle="Quem lidera e quem é o segundo em cada estado. O segundo turno é nacional." rows={stateRows} />;
+  } else if (cargo === "governador" && stateRows.length > 0) {
+    extras = (
+      <>
+        <GovernorSummary rows={stateRows} />
+        <StateResultsList title="Resultado por estado — Governador" subtitle="Cada estado tem a própria disputa. Estados em 2º turno aparecem com a tag." rows={stateRows} />
+      </>
+    );
+  } else if (cargo === "senado") {
+    const counts = new Map<string, number>();
+    for (const [, race] of countryRows) for (const c of race?.candidates.filter((x) => x.elected) ?? []) counts.set(c.party, (counts.get(c.party) ?? 0) + 1);
+    extras = <PartyBars title="Eleitos por partido — Senado" subtitle="Senadores eleitos em todo o país, por partido." items={[...counts].map(([party, count]) => ({ party, count }))} />;
+  } else if (cargo === "federal" || cargo === "estadual") {
+    const counts = new Map<string, number>();
+    let projected = false;
+    let seats = 0;
+    for (const [, race] of countryRows) {
+      if (!race) continue;
+      seats += race.seats;
+      const { list, projected: isProjected } = deputyList(race);
+      projected = projected || isProjected;
+      for (const c of list) counts.set(c.party, (counts.get(c.party) ?? 0) + 1);
+    }
+    extras = (
+      <PartyBars
+        title={cargo === "federal" ? "Eleitos por partido — Câmara dos deputados" : "Eleitos por partido — Assembleias"}
+        subtitle={`${seats} vagas em todo o país.`}
+        items={[...counts].map(([party, count]) => ({ party, count }))}
+        note={projected ? "Projeção pelos votos apurados até agora." : undefined}
+      />
+    );
   }
 
   const sideCard = (option: Cargo) => <SideCard key={option} title={races[option].title} race={races[option].race} status={races[option].status} uf={uf} cargo={option} />;
@@ -402,6 +471,9 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
   return (
     <section className="section-padding eleicoes-page" style={{ backgroundColor: "var(--site-bg)", minHeight: "70vh" }}>
       <div className="container-xl" style={{ maxWidth: "1280px" }}>
+        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", marginBottom: "1rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}>
+          ← Voltar para o início
+        </Link>
         <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem" }}>
           <div style={{ color: BRAND, fontWeight: 700, fontSize: "0.9375rem", marginBottom: "0.25rem" }}>Eleições 2026</div>
           <h1 style={{ display: "flex", alignItems: "center", gap: "0.75rem", fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>
@@ -459,6 +531,7 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
                 <BrazilStateMap map={map} winners={mapData.winners} legend={mapData.legend} runoffStates={mapData.runoffStates} />
               </div>
             )}
+            {extras}
           </div>
 
           <aside className="eleicoes-right" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
