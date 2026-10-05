@@ -29,7 +29,7 @@ export function StateResultsList({ title, subtitle, rows }: { title: string; sub
           const top = race?.candidates[0];
           const second = race?.candidates[1];
           return (
-            <div key={uf} style={{ display: "grid", gridTemplateColumns: "140px minmax(0, 1fr)", gap: "0.75rem", alignItems: "start" }}>
+            <div key={uf} style={{ display: "flex", flexDirection: "column", gap: "0.5rem", paddingBottom: "0.875rem", borderBottom: "1px solid var(--site-border)" }}>
               <div>
                 <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--site-text)" }}>{ufName(uf)}</div>
                 <div style={{ marginTop: "0.25rem" }}>

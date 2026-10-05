@@ -150,7 +150,7 @@ function BigRow({ candidate, leading, runoffFinalist }: { candidate: TseCandidat
   return (
     <div style={{ padding: "0.875rem 0", borderTop: "1px solid var(--site-border)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
-        <Photo src={candidate.photo} size={68} color={color} />
+        <Photo src={candidate.photo} size={56} color={color} />
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
             <span style={{ fontWeight: leading ? 800 : 600, fontSize: "1.0625rem", color: "var(--site-text)" }}>{formatName(candidate.name)}</span>
@@ -173,7 +173,7 @@ function BigRow({ candidate, leading, runoffFinalist }: { candidate: TseCandidat
 }
 
 // Deputies: one line per person, no photo or bar, so hundreds of names stay readable.
-function CompactRow({ candidate, projected }: { candidate: TseCandidate; projected: boolean }) {
+function CompactRow({ candidate }: { candidate: TseCandidate }) {
   const color = partyColor(candidate.party);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", padding: "0.5rem 0", borderTop: "1px solid var(--site-border)" }}>
@@ -182,7 +182,6 @@ function CompactRow({ candidate, projected }: { candidate: TseCandidate; project
         <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", flexWrap: "wrap", minWidth: 0 }}>
           <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{formatName(candidate.name)}</span>
           {candidate.elected && <ElectionTag kind="elected" />}
-          {!candidate.elected && projected && candidate.projected && <ElectionTag kind="projected" />}
           {candidate.irregular && <ElectionTag kind="irregular" />}
         </div>
         <span style={{ fontSize: "0.7rem", fontWeight: 700, color, textTransform: "uppercase" }}>{candidate.party}</span>
@@ -227,16 +226,36 @@ function OutlookLine({ race }: { race: TseRace }) {
 
 // Candidacies whose votes were annulled (for example, sub judice). They stay in the list
 // with a tag, and are named here so they can be compared.
+// Few cases are listed in full; when there are many (deputies), the list folds away.
 function IrregularNote({ race }: { race: TseRace }) {
   const irregular = race.candidates.filter((candidate) => candidate.irregular);
   if (irregular.length === 0) return null;
+  const title = irregular.length === 1 ? "Candidatura sob judice" : `${irregular.length} candidaturas sob judice`;
+  const box = { padding: "0.75rem 1rem", borderRadius: "0.625rem", backgroundColor: "var(--site-surface-alt)", fontSize: "0.8125rem", color: "var(--site-text-secondary)", marginBottom: "0.75rem" } as const;
+  const list = (
+    <ul style={{ margin: "0.5rem 0 0", paddingLeft: "1.125rem", display: "flex", flexDirection: "column", gap: "0.25rem" }}>
+      {irregular.map((candidate, index) => (
+        <li key={`${candidate.name}-${index}`}>
+          {formatName(candidate.name)} — {candidate.party}, {candidate.pct}%
+        </li>
+      ))}
+    </ul>
+  );
+  if (irregular.length <= 3) {
+    return (
+      <div style={box}>
+        <strong style={{ color: "var(--site-text)" }}>{title}.</strong> Os votos aparecem apurados, mas foram anulados.
+        {list}
+      </div>
+    );
+  }
   return (
-    <div style={{ padding: "0.75rem 1rem", borderRadius: "0.625rem", backgroundColor: "var(--site-surface-alt)", fontSize: "0.8125rem", color: "var(--site-text-secondary)", marginBottom: "0.75rem" }}>
-      <strong style={{ color: "var(--site-text)" }}>
-        {irregular.length === 1 ? "Candidatura sob judice" : `${irregular.length} candidaturas sob judice`}:
-      </strong>{" "}
-      {irregular.map((candidate) => `${formatName(candidate.name)} (${candidate.party}, ${candidate.pct}% — ${candidate.irregular?.toLowerCase()})`).join("; ")}. Os votos aparecem apurados, mas foram anulados.
-    </div>
+    <details style={box}>
+      <summary style={{ cursor: "pointer", listStyle: "none", fontWeight: 700, color: "var(--site-text)" }}>
+        {title}. Os votos aparecem apurados, mas foram anulados. <span style={{ color: BRAND }}>Ver lista ⌄</span>
+      </summary>
+      {list}
+    </details>
   );
 }
 
@@ -322,14 +341,14 @@ function DeputyBody({ race }: { race: TseRace }) {
       {list.length === 0 ? (
         <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.5rem 0" }}>Nenhum eleito divulgado ainda.</p>
       ) : (
-        list.map((candidate, index) => <CompactRow key={`${candidate.name}-${index}`} candidate={candidate} projected={projected} />)
+        list.map((candidate, index) => <CompactRow key={`${candidate.name}-${index}`} candidate={candidate} />)
       )}
       <details style={{ marginTop: "1rem", borderTop: "1px solid var(--site-border)" }}>
         <summary style={{ cursor: "pointer", textAlign: "center", padding: "0.875rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", listStyle: "none" }}>
           Mais votados ({Math.min(50, race.candidates.length)} de {race.candidates.length}) ⌄
         </summary>
         {race.candidates.slice(0, 50).map((candidate, index) => (
-          <CompactRow key={`${candidate.name}-top-${index}`} candidate={candidate} projected={false} />
+          <CompactRow key={`${candidate.name}-top-${index}`} candidate={candidate} />
         ))}
       </details>
     </>

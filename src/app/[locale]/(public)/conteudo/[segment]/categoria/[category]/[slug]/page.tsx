@@ -317,7 +317,7 @@ export default async function ArticlePage({
                 </div>
 
                 {(author.linkedin_url || author.instagram_url || author.whatsapp_url) && (
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", minWidth: 0 }}>
                     <span style={{ color: "var(--site-muted)", fontSize: "0.8125rem", fontWeight: 600 }}>{locale === "en" ? "Follow on social media" : "Siga nas redes"}</span>
                     <div style={{ display: "flex", gap: "0.625rem" }}>
                       {author.linkedin_url && (
