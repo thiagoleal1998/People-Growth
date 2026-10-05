@@ -12,7 +12,7 @@ const BRAND = "#4361EE";
 
 function CandidatePhoto({ src, color }: { src: string | null; color: string }) {
   return (
-    <div style={{ width: "3.5rem", height: "3.5rem", borderRadius: "0.375rem", overflow: "hidden", flexShrink: 0, backgroundColor: "var(--site-surface-alt)", boxShadow: `0 0 0 2px ${color}` }}>
+    <div className="election-photo" style={{ width: "3.5rem", height: "3.5rem", borderRadius: "0.375rem", overflow: "hidden", flexShrink: 0, backgroundColor: "var(--site-surface-alt)", boxShadow: `0 0 0 2px ${color}` }}>
       {src && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -74,12 +74,12 @@ function RaceCard({ race, stateSelect, count }: { race: TseRace | null; stateSel
     );
   }
   return (
-    <div style={cardStyle}>
-      <div style={{ display: "flex", flexDirection: "column", gap: "0.375rem", minWidth: "7.5rem", flexShrink: 0 }}>
+    <div style={cardStyle} className="election-card">
+      <div className="election-stat" style={{ display: "flex", flexDirection: "column", gap: "0.375rem", minWidth: "7.5rem", flexShrink: 0 }}>
         {stateSelect}
         <div style={{ fontSize: "0.8125rem", color: "var(--site-text-secondary)" }}>{race.sectionsPct}% urnas apuradas</div>
       </div>
-      <div style={{ display: "flex", gap: "1rem", flex: 1, minWidth: 0, flexWrap: "wrap" }}>
+      <div className="election-candidates" style={{ display: "flex", gap: "1rem", flex: 1, minWidth: 0, flexWrap: "wrap" }}>
         {race.candidates.slice(0, count).map((candidate, index) => (
           <CandidateItem key={`${candidate.name}-${index}`} candidate={candidate} leading={index === 0} />
         ))}
@@ -202,6 +202,11 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
       <style>{`
         @media (max-width: 640px) {
           .election-grid { grid-template-columns: 1fr !important; }
+          .election-card { flex-direction: column; align-items: stretch; gap: 0.75rem; padding: 0.875rem; }
+          .election-stat { min-width: 0 !important; flex-direction: row !important; justify-content: space-between; align-items: center; flex-wrap: wrap; }
+          .election-candidates { display: grid !important; grid-template-columns: 1fr 1fr; gap: 0.75rem !important; }
+          .election-candidates > div { min-width: 0; }
+          .election-photo { width: 3rem !important; height: 3rem !important; }
         }
       `}</style>
     </section>
