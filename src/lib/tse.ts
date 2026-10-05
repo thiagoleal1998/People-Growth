@@ -22,7 +22,16 @@ export const UF_OPTIONS = [
   { code: "sp", name: "São Paulo" }, { code: "se", name: "Sergipe" }, { code: "to", name: "Tocantins" },
 ];
 
-export type TseCandidate = { name: string; party: string; votes: number; pct: string; elected: boolean; photo: string | null };
+export type TseCandidate = {
+  name: string;
+  party: string;
+  votes: number;
+  pct: string;
+  elected: boolean;
+  // Deputies only: would be elected at the votes counted so far (not yet the TSE's result).
+  projected: boolean;
+  photo: string | null;
+};
 
 export type TseTotals = {
   valid: string;
@@ -40,6 +49,8 @@ export type TseTotals = {
 
 export type TseRace = {
   candidates: TseCandidate[];
+  // Seats up for election: 1 for presidente or governador, 2 for senado, the state's quota for deputies.
+  seats: number;
   sectionsPct: string;
   totals: TseTotals | null;
   updatedAt: string;
@@ -57,7 +68,12 @@ type RawFile = {
   s?: { pst?: string };
   // Electorate-level counts: te = electors, c = voters who showed up, a = abstentions.
   e?: { te?: string; c?: string; a?: string };
-  carg?: { cd: string | number; agr?: { par?: { sg?: string; cand?: RawCandidate[] }[] }[] }[];
+  carg?: {
+    cd: string | number;
+    nv?: string;
+    qe?: string;
+    agr?: { par?: { sg?: string; tvtn?: string; cand?: RawCandidate[] }[] }[];
+  }[];
 };
 
 // Approximate colours for the parties' usual identity, used for everything that
@@ -103,10 +119,54 @@ function percent(part: number, total: number): string {
   return ((part / total) * 100).toFixed(2).replace(".", ",");
 }
 
+type RawCarg = NonNullable<RawFile["carg"]>[number];
+
+// Deputies are elected by proportion. Each party (or federation) wins one seat per
+// full quotient of votes; leftover seats go to the highest averages (votes divided
+// by seats already won, plus one). Inside each legenda the most-voted candidates
+// win, but only those with at least 10% of the quotient. Computed on the votes
+// counted so far, so it moves until the TSE publishes the final result.
+function projectDeputies(carg: RawCarg): Set<string> {
+  const seatsTotal = Number(carg.nv ?? 0);
+  const quotient = Number((carg.qe ?? "0").replace(",", ".")) || 0;
+  const elected = new Set<string>();
+  if (!seatsTotal || !quotient) return elected;
+  const legendas = (carg.agr ?? []).map((agr) => {
+    const pars = agr.par ?? [];
+    const votes = pars.reduce((sum, par) => sum + Number(par.tvtn ?? 0), 0);
+    const candidates = pars.flatMap((par) => (par.cand ?? []).map((cand) => ({ id: cand.sqcand ?? "", votes: Number(cand.vap ?? 0) })));
+    return { votes, candidates, seats: Math.floor(votes / quotient) };
+  });
+  let remaining = seatsTotal - legendas.reduce((sum, legenda) => sum + legenda.seats, 0);
+  while (remaining > 0) {
+    let best: (typeof legendas)[number] | null = null;
+    let bestAverage = 0;
+    for (const legenda of legendas) {
+      const average = legenda.votes / (legenda.seats + 1);
+      if (average > bestAverage) {
+        bestAverage = average;
+        best = legenda;
+      }
+    }
+    if (!best) break;
+    best.seats += 1;
+    remaining -= 1;
+  }
+  for (const legenda of legendas) {
+    legenda.candidates
+      .filter((candidate) => candidate.votes >= quotient * 0.1)
+      .sort((a, b) => b.votes - a.votes)
+      .slice(0, legenda.seats)
+      .forEach((candidate) => candidate.id && elected.add(candidate.id));
+  }
+  return elected;
+}
+
 function parseRace(file: RawFile, office: string, election: string, scope: string): TseRace | null {
   // The TSE writes the office code as a number in some files and text in others.
   const carg = (file.carg ?? []).find((c) => String(c.cd) === office);
   if (!carg) return null;
+  const projected = office === "6" || office === "7" ? projectDeputies(carg) : new Set<string>();
   const candidates: TseCandidate[] = (carg.agr ?? [])
     .flatMap((agr) => agr.par ?? [])
     .flatMap((par) =>
@@ -116,6 +176,7 @@ function parseRace(file: RawFile, office: string, election: string, scope: strin
         votes: Number(cand.vap ?? 0),
         pct: cand.pvap ?? "0,00",
         elected: cand.e === "s",
+        projected: projected.has(cand.sqcand ?? ""),
         photo: cand.sqcand ? `${BASE}/${election}/fotos/${scope}/${cand.sqcand}.jpeg` : null,
       }))
     )
@@ -147,6 +208,7 @@ function parseRace(file: RawFile, office: string, election: string, scope: strin
 
   return {
     candidates,
+    seats: Number(carg.nv ?? 0),
     sectionsPct: file.s?.pst ?? "0,00",
     totals,
     updatedAt: [file.dt, file.ht].filter(Boolean).join(" "),

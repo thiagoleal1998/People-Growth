@@ -19,7 +19,9 @@ import {
 } from "@/lib/tse";
 import { getBrazilMap, type BrazilMap } from "@/lib/brazil-map";
 import { BrazilFlag } from "@/components/BrazilFlag";
-import { BrazilStateMap, type MapLegendItem, type StateWinner } from "@/components/BrazilStateMap";
+import { BrazilStateMap, type MapLegendItem, type RunoffState, type StateWinner } from "@/components/BrazilStateMap";
+import { ElectionTag } from "@/components/ElectionTag";
+import { ElectionPopup, type PopupPerson } from "@/components/ElectionPopup";
 
 export const revalidate = 60;
 
@@ -36,8 +38,8 @@ const CARGO_LABEL: Record<Cargo, string> = {
   presidente: "Presidente",
   governador: "Governador",
   senado: "Senado",
-  federal: "Dep. federal",
-  estadual: "Dep. estadual",
+  federal: "Câmara",
+  estadual: "Assembleia",
 };
 const CARGO_EXPLAINED: Record<Cargo, string> = {
   presidente:
@@ -70,20 +72,29 @@ function Photo({ src, size, color }: { src: string | null; size: number; color: 
   );
 }
 
-function ElectedBadge({ color }: { color: string }) {
-  return <span style={{ backgroundColor: color, color: "white", borderRadius: "0.25rem", padding: "0.0625rem 0.375rem", fontSize: "0.6875rem", fontWeight: 700 }}>Eleito</span>;
+// Deputies: who is elected by the TSE's flag, or, until the flags come out, who the
+// proportional count puts in the seats so far.
+function deputyList(race: TseRace): { list: TseCandidate[]; projected: boolean } {
+  const elected = race.candidates.filter((candidate) => candidate.elected);
+  if (elected.length > 0) return { list: elected, projected: false };
+  return { list: race.candidates.filter((candidate) => candidate.projected), projected: true };
 }
 
-function SideCard({ title, race, uf, cargo }: { title: string; race: TseRace | null; uf: string; cargo: Cargo }) {
+// The top two get "2º Turno" tags in a runoff; nobody is greyed out.
+function SideCard({ title, race, status, uf, cargo }: { title: string; race: TseRace | null; status: RaceStatus; uf: string; cargo: Cargo }) {
   const isDeputy = cargo === "federal" || cargo === "estadual";
-  const elected = race?.candidates.filter((candidate) => candidate.elected) ?? [];
-  // Deputies have hundreds of candidates, so the card shows who was elected instead.
-  const shown = isDeputy ? elected : (race?.candidates ?? []);
+  const deputies = race && isDeputy ? deputyList(race) : null;
+  const shown = deputies ? deputies.list : (race?.candidates ?? []);
+  const runoff = status.kind === "runoff";
   return (
     <div style={cardStyle}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.5rem", marginBottom: "0.75rem" }}>
         <span style={{ fontWeight: 800, fontSize: "0.9375rem", color: "var(--site-text)" }}>{title}</span>
-        {race && <span style={{ fontSize: "0.8125rem", color: "var(--site-muted)", whiteSpace: "nowrap" }}>{isDeputy ? `${elected.length} eleitos` : `${race.sectionsPct}%`}</span>}
+        {race && (
+          <span style={{ fontSize: "0.8125rem", color: "var(--site-muted)", whiteSpace: "nowrap" }}>
+            {deputies ? `${shown.length} ${deputies.projected ? "projetados" : "eleitos"}` : `${race.sectionsPct}%`}
+          </span>
+        )}
       </div>
       {!race || race.candidates.length === 0 ? (
         <p style={{ color: "var(--site-faint)", fontSize: "0.875rem" }}>Resultados indisponíveis no momento.</p>
@@ -94,19 +105,21 @@ function SideCard({ title, race, uf, cargo }: { title: string; race: TseRace | n
           {shown.slice(0, 3).map((candidate, index) => {
             const color = partyColor(candidate.party);
             return (
-              <div key={`${candidate.name}-${index}`} style={{ display: "flex", alignItems: "center", gap: "0.625rem", opacity: index === 0 || isDeputy ? 1 : 0.7 }}>
+              <div key={`${candidate.name}-${index}`} style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
                 <Photo src={candidate.photo} size={44} color={color} />
                 <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: "0.875rem", fontWeight: index === 0 ? 700 : 500, color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {shortName(candidate.name)}
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", minWidth: 0, flexWrap: "wrap" }}>
+                    <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shortName(candidate.name)}</span>
+                    {candidate.elected && <ElectionTag kind="elected" color={color} />}
+                    {!candidate.elected && deputies?.projected && <ElectionTag kind="projected" />}
+                    {!candidate.elected && !deputies && runoff && index < 2 && <ElectionTag kind="runoff" />}
                   </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", flexWrap: "wrap", marginTop: "0.125rem" }}>
+                  <div style={{ marginTop: "0.125rem" }}>
                     {isDeputy ? (
                       <span style={{ fontSize: "0.75rem", fontWeight: 700, color, textTransform: "uppercase" }}>{candidate.party}</span>
                     ) : (
                       <span style={{ fontWeight: 800, fontSize: "0.875rem", color }}>{candidate.pct}%</span>
                     )}
-                    {candidate.elected && !isDeputy && <ElectedBadge color={color} />}
                   </div>
                 </div>
               </div>
@@ -116,25 +129,26 @@ function SideCard({ title, race, uf, cargo }: { title: string; race: TseRace | n
       )}
       {race && race.candidates.length > 0 && (
         <a href={`?cargo=${cargo}&uf=${uf}`} style={{ display: "block", textAlign: "center", marginTop: "1rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}>
-          {isDeputy ? "Ver todos os eleitos" : "Apuração Completa"}
+          {isDeputy ? "Ver todos" : "Apuração Completa"}
         </a>
       )}
     </div>
   );
 }
 
-function BigRow({ candidate, leading }: { candidate: TseCandidate; leading: boolean }) {
+function BigRow({ candidate, leading, runoff }: { candidate: TseCandidate; leading: boolean; runoff: boolean }) {
   const color = partyColor(candidate.party);
   return (
     <div style={{ padding: "0.875rem 0", borderTop: "1px solid var(--site-border)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
         <Photo src={candidate.photo} size={68} color={color} />
         <div style={{ minWidth: 0, flex: 1 }}>
-          <div style={{ fontWeight: leading ? 800 : 600, fontSize: "1.0625rem", color: "var(--site-text)" }}>{formatName(candidate.name)}</div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.125rem" }}>
-            <span style={{ fontSize: "0.75rem", fontWeight: 700, color, textTransform: "uppercase" }}>{candidate.party}</span>
-            {candidate.elected && <ElectedBadge color={color} />}
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+            <span style={{ fontWeight: leading ? 800 : 600, fontSize: "1.0625rem", color: "var(--site-text)" }}>{formatName(candidate.name)}</span>
+            {candidate.elected && <ElectionTag kind="elected" color={color} />}
+            {!candidate.elected && runoff && <ElectionTag kind="runoff" />}
           </div>
+          <div style={{ fontSize: "0.75rem", fontWeight: 700, color, textTransform: "uppercase", marginTop: "0.125rem" }}>{candidate.party}</div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0 }}>
           <div style={{ fontSize: "1.375rem", fontWeight: 800, color }}>{candidate.pct}%</div>
@@ -149,13 +163,17 @@ function BigRow({ candidate, leading }: { candidate: TseCandidate; leading: bool
 }
 
 // Deputies: one line per person, no photo or bar, so hundreds of names stay readable.
-function CompactRow({ candidate }: { candidate: TseCandidate }) {
+function CompactRow({ candidate, projected }: { candidate: TseCandidate; projected: boolean }) {
   const color = partyColor(candidate.party);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", padding: "0.5rem 0", borderTop: "1px solid var(--site-border)" }}>
       <Photo src={candidate.photo} size={36} color={color} />
       <div style={{ minWidth: 0, flex: 1 }}>
-        <div style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{formatName(candidate.name)}</div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", flexWrap: "wrap", minWidth: 0 }}>
+          <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{formatName(candidate.name)}</span>
+          {candidate.elected && <ElectionTag kind="elected" color={color} />}
+          {!candidate.elected && projected && candidate.projected && <ElectionTag kind="projected" />}
+        </div>
         <span style={{ fontSize: "0.7rem", fontWeight: 700, color, textTransform: "uppercase" }}>{candidate.party}</span>
       </div>
       <div style={{ textAlign: "right", flexShrink: 0, fontSize: "0.8125rem", color: "var(--site-text-secondary)" }}>{candidate.votes.toLocaleString("pt-BR")} votos</div>
@@ -220,7 +238,7 @@ function TotalsGrid({ totals, title }: { totals: TseTotals; title: string }) {
 
 function MainCard({ title, race, cargo, status }: { title: string; race: TseRace | null; cargo: Cargo; status: RaceStatus }) {
   const isDeputy = cargo === "federal" || cargo === "estadual";
-  const elected = race?.candidates.filter((candidate) => candidate.elected) ?? [];
+  const runoff = status.kind === "runoff";
   return (
     <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.75rem" }}>
@@ -235,29 +253,13 @@ function MainCard({ title, race, cargo, status }: { title: string; race: TseRace
       {!race || race.candidates.length === 0 ? (
         <p style={{ color: "var(--site-faint)", fontSize: "0.9rem", padding: "1rem 0" }}>Resultados indisponíveis no momento.</p>
       ) : isDeputy ? (
-        <>
-          <StatusBanner status={status} />
-          <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--site-text)", margin: "0.5rem 0 0.25rem" }}>Eleitos ({elected.length})</h3>
-          {elected.length === 0 ? (
-            <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.5rem 0" }}>Nenhum eleito divulgado ainda.</p>
-          ) : (
-            elected.map((candidate, index) => <CompactRow key={`${candidate.name}-${index}`} candidate={candidate} />)
-          )}
-          <details style={{ marginTop: "1rem", borderTop: "1px solid var(--site-border)" }}>
-            <summary style={{ cursor: "pointer", textAlign: "center", padding: "0.875rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", listStyle: "none" }}>
-              Mais votados ({Math.min(50, race.candidates.length)} de {race.candidates.length}) ⌄
-            </summary>
-            {race.candidates.slice(0, 50).map((candidate, index) => (
-              <CompactRow key={`${candidate.name}-top-${index}`} candidate={candidate} />
-            ))}
-          </details>
-        </>
+        <DeputyBody race={race} />
       ) : (
         <>
           <StatusBanner status={status} />
           {MAJORITY.includes(cargo) && <OutlookLine race={race} />}
           {race.candidates.slice(0, 5).map((candidate, index) => (
-            <BigRow key={`${candidate.name}-${index}`} candidate={candidate} leading={index === 0} />
+            <BigRow key={`${candidate.name}-${index}`} candidate={candidate} leading={index === 0} runoff={runoff && index < 2} />
           ))}
           {race.candidates.length > 5 && (
             <details style={{ borderTop: "1px solid var(--site-border)" }}>
@@ -265,7 +267,7 @@ function MainCard({ title, race, cargo, status }: { title: string; race: TseRace
                 Todos os candidatos ({race.candidates.length}) ⌄
               </summary>
               {race.candidates.slice(5).map((candidate, index) => (
-                <BigRow key={`${candidate.name}-rest-${index}`} candidate={candidate} leading={false} />
+                <BigRow key={`${candidate.name}-rest-${index}`} candidate={candidate} leading={false} runoff={false} />
               ))}
             </details>
           )}
@@ -275,22 +277,55 @@ function MainCard({ title, race, cargo, status }: { title: string; race: TseRace
   );
 }
 
-// Who led each state, for the state map: the top candidate's party colour and name.
-function stateWinners(races: [string, TseRace | null][]): Record<string, StateWinner> {
-  const winners: Record<string, StateWinner> = {};
-  for (const [uf, race] of races) {
-    const top = race?.candidates[0];
-    if (top) winners[uf] = { color: partyColor(top.party), label: `${formatName(top.name)} (${top.party}) ${top.pct}%` };
-  }
-  return winners;
+function DeputyBody({ race }: { race: TseRace }) {
+  const { list, projected } = deputyList(race);
+  return (
+    <>
+      <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--site-text)", margin: "0.25rem 0" }}>
+        {projected ? `Projetados (${list.length} de ${race.seats} vagas)` : `Eleitos (${list.length})`}
+      </h3>
+      {projected && (
+        <p style={{ fontSize: "0.8125rem", color: "var(--site-text-secondary)", marginBottom: "0.5rem" }}>
+          Pela regra proporcional, com os votos apurados até agora. Muda até o resultado final, quando o TSE publica os eleitos.
+        </p>
+      )}
+      {list.length === 0 ? (
+        <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.5rem 0" }}>Nenhum eleito divulgado ainda.</p>
+      ) : (
+        list.map((candidate, index) => <CompactRow key={`${candidate.name}-${index}`} candidate={candidate} projected={projected} />)
+      )}
+      <details style={{ marginTop: "1rem", borderTop: "1px solid var(--site-border)" }}>
+        <summary style={{ cursor: "pointer", textAlign: "center", padding: "0.875rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", listStyle: "none" }}>
+          Mais votados ({Math.min(50, race.candidates.length)} de {race.candidates.length}) ⌄
+        </summary>
+        {race.candidates.slice(0, 50).map((candidate, index) => (
+          <CompactRow key={`${candidate.name}-top-${index}`} candidate={candidate} projected={false} />
+        ))}
+      </details>
+    </>
+  );
 }
 
-function stateLegend(winners: Record<string, StateWinner>): MapLegendItem[] {
-  const seen = new Map<string, MapLegendItem>();
-  for (const winner of Object.values(winners)) {
-    if (!seen.has(winner.color)) seen.set(winner.color, { color: winner.color, label: winner.label.replace(/ \d+,\d+%$/, "") });
+// Each state's result for the map: colour of the leader's party, a tooltip with first
+// and second place, and whether the state is headed to a runoff.
+function stateMapData(races: [string, TseRace | null][]): { winners: Record<string, StateWinner>; runoffStates: RunoffState[]; legend: MapLegendItem[] } {
+  const winners: Record<string, StateWinner> = {};
+  const runoffStates: RunoffState[] = [];
+  const legend = new Map<string, MapLegendItem>();
+  for (const [uf, race] of races) {
+    const top = race?.candidates[0];
+    if (!race || !top) continue;
+    const second = race.candidates[1];
+    const status = raceStatus(race, true);
+    const runoff = status.kind === "runoff";
+    const outcome = status.kind === "elected" ? `Eleito: ${formatName(status.names[0])}` : runoff ? "2º turno" : "em apuração";
+    const detail = `1º ${formatName(top.name)} (${top.party}) ${top.pct}%${second ? ` · 2º ${formatName(second.name)} (${second.party}) ${second.pct}%` : ""}`;
+    const color = partyColor(top.party);
+    winners[uf] = { color, label: `${detail} — ${outcome}`, runoff };
+    if (!legend.has(top.party)) legend.set(top.party, { color, label: `${top.party} · ${formatName(top.name)}` });
+    if (runoff && second) runoffStates.push({ uf, text: `${formatName(top.name)} x ${formatName(second.name)}` });
   }
-  return [...seen.values()];
+  return { winners, runoffStates, legend: [...legend.values()] };
 }
 
 export default async function EleicoesPage({ searchParams }: { searchParams: Promise<{ uf?: string; cargo?: string }> }) {
@@ -310,17 +345,36 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
     presidente: { title: "Presidente", race: president, status: raceStatus(president, true) },
     governador: { title: `Governador — ${stateName}`, race: governor, status: raceStatus(governor, true) },
     senado: { title: `Senado — ${stateName}`, race: senate, status: raceStatus(senate, false) },
-    federal: { title: `Deputados federais — ${stateName}`, race: federal, status: raceStatus(federal, false) },
-    estadual: { title: `Deputados estaduais — ${stateName}`, race: state, status: raceStatus(state, false) },
+    federal: { title: `Câmara dos deputados — ${stateName}`, race: federal, status: raceStatus(federal, false) },
+    estadual: { title: `Assembleia legislativa — ${stateName}`, race: state, status: raceStatus(state, false) },
   };
   const others = CARGOS.filter((option) => option !== cargo);
   const totals = races[cargo].race?.totals ?? null;
   const updated = president?.updatedAt ?? governor?.updatedAt ?? "";
 
-  // The map is only drawn for the two races that are decided by state: presidente
-  // and governador. Each state's own file gives its winner.
+  // Pop-up with who was elected, or who is in the runoff, for the race on screen.
+  const current = races[cargo];
+  let popup: { title: string; subtitle: string; people: PopupPerson[] } | null = null;
+  if (current.race && (cargo === "presidente" || cargo === "governador" || cargo === "senado")) {
+    const race = current.race;
+    if (current.status.kind === "elected") {
+      popup = {
+        title: CARGO_LABEL[cargo],
+        subtitle: cargo === "presidente" ? "Brasil" : stateName,
+        people: race.candidates.filter((c) => c.elected).map((c) => ({ name: formatName(c.name), party: c.party, color: partyColor(c.party), photo: c.photo, tag: "elected" as const })),
+      };
+    } else if (current.status.kind === "runoff") {
+      popup = {
+        title: CARGO_LABEL[cargo],
+        subtitle: cargo === "presidente" ? "Segundo turno — Brasil" : `Segundo turno — ${stateName}`,
+        people: race.candidates.slice(0, 2).map((c) => ({ name: formatName(c.name), party: c.party, color: partyColor(c.party), photo: c.photo, tag: "runoff" as const })),
+      };
+    }
+  }
+
+  // The map is drawn for presidente and governador, state by state.
   let map: BrazilMap | null = null;
-  let winners: Record<string, StateWinner> = {};
+  let mapData: ReturnType<typeof stateMapData> | null = null;
   if (cargo === "presidente" || cargo === "governador") {
     const ufs = UF_OPTIONS.map((option) => option.code);
     const [brazilMap, perState] = await Promise.all([
@@ -328,7 +382,7 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
       Promise.all(ufs.map(async (code) => [code, cargo === "presidente" ? await getPresidentRaceInState(code) : await getGovernorRace(code)] as [string, TseRace | null])),
     ]);
     map = brazilMap;
-    winners = stateWinners(perState);
+    mapData = stateMapData(perState);
   }
 
   return (
@@ -382,22 +436,22 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
                 </button>
               </form>
             )}
-            <MainCard title={races[cargo].title} race={races[cargo].race} cargo={cargo} status={races[cargo].status} />
-            {totals && <TotalsGrid totals={totals} title={races[cargo].title} />}
-            {map && Object.keys(winners).length > 0 && (
+            <MainCard title={current.title} race={current.race} cargo={cargo} status={current.status} />
+            {totals && <TotalsGrid totals={totals} title={current.title} />}
+            {map && mapData && Object.keys(mapData.winners).length > 0 && (
               <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
                 <h3 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.25rem" }}>
                   {cargo === "presidente" ? "Vencedor por estado — Presidente" : "Vencedor por estado — Governador"}
                 </h3>
-                <p style={{ fontSize: "0.8125rem", color: "var(--site-muted)", marginBottom: "1rem" }}>Cada estado na cor do partido de quem lidera a apuração.</p>
-                <BrazilStateMap map={map} winners={winners} legend={stateLegend(winners)} />
+                <p style={{ fontSize: "0.8125rem", color: "var(--site-muted)", marginBottom: "1rem" }}>Passe o cursor em cada estado para ver o 1º e o 2º colocados.</p>
+                <BrazilStateMap map={map} winners={mapData.winners} legend={mapData.legend} runoffStates={mapData.runoffStates} />
               </div>
             )}
           </div>
 
           <aside style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {others.map((option) => (
-              <SideCard key={option} title={races[option].title} race={races[option].race} uf={uf} cargo={option} />
+              <SideCard key={option} title={races[option].title} race={races[option].race} status={races[option].status} uf={uf} cargo={option} />
             ))}
           </aside>
         </div>
@@ -406,6 +460,8 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
           Fonte: Tribunal Superior Eleitoral (TSE), dados públicos de apuração. Malha dos estados: IBGE.
         </p>
       </div>
+
+      {popup && <ElectionPopup storageKey={`eleicoes-popup-${cargo}-${uf}`} title={popup.title} subtitle={popup.subtitle} people={popup.people} />}
 
       <style>{`
         body:has(.eleicoes-page) .category-nav,

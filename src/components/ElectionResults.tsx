@@ -3,6 +3,7 @@
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
 import { UF_OPTIONS, formatName, partyColor, raceStatus, shortName, type RaceStatus, type TseCandidate, type TseRace } from "@/lib/tse";
 import { BrazilFlag } from "@/components/BrazilFlag";
+import { ElectionTag } from "@/components/ElectionTag";
 
 type Payload = { uf: string; president: TseRace | null; governor: TseRace | null; senate: TseRace | null };
 type SideTab = "governor" | "senate";
@@ -21,20 +22,20 @@ function CandidatePhoto({ src, color }: { src: string | null; color: string }) {
   );
 }
 
-function CandidateItem({ candidate, leading }: { candidate: TseCandidate; leading: boolean }) {
+// Nobody is greyed out: in a runoff both finalists keep their full colour and carry a "2º Turno" tag.
+function CandidateItem({ candidate, runoff }: { candidate: TseCandidate; runoff: boolean }) {
   const color = partyColor(candidate.party);
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", minWidth: 0, flex: "1 1 0", opacity: leading ? 1 : 0.6 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", minWidth: 0, flex: "1 1 0" }}>
       <CandidatePhoto src={candidate.photo} color={color} />
       <div style={{ minWidth: 0 }}>
-        <div style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: leading ? 600 : 500, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-          {shortName(candidate.name)}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", minWidth: 0, flexWrap: "wrap" }}>
+          <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shortName(candidate.name)}</span>
+          {candidate.elected && <ElectionTag kind="elected" color={color} />}
+          {!candidate.elected && runoff && <ElectionTag kind="runoff" />}
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", marginTop: "0.125rem", flexWrap: "wrap" }}>
+        <div style={{ marginTop: "0.125rem" }}>
           <span style={{ color, fontWeight: 800, fontSize: "0.9375rem" }}>{candidate.pct}%</span>
-          {candidate.elected && (
-            <span style={{ backgroundColor: color, color: "white", borderRadius: "0.25rem", padding: "0.0625rem 0.375rem", fontSize: "0.6875rem", fontWeight: 700 }}>Eleito</span>
-          )}
         </div>
       </div>
     </div>
@@ -64,7 +65,7 @@ const cardStyle: CSSProperties = {
   backgroundColor: "var(--site-card)",
 };
 
-function RaceCard({ race, stateSelect, count }: { race: TseRace | null; stateSelect?: ReactNode; count: number }) {
+function RaceCard({ race, stateSelect, count, runoff }: { race: TseRace | null; stateSelect?: ReactNode; count: number; runoff: boolean }) {
   if (!race || race.candidates.length === 0) {
     return (
       <div style={cardStyle}>
@@ -81,7 +82,7 @@ function RaceCard({ race, stateSelect, count }: { race: TseRace | null; stateSel
       </div>
       <div className="election-candidates" style={{ display: "flex", gap: "1rem", flex: 1, minWidth: 0, flexWrap: "wrap" }}>
         {race.candidates.slice(0, count).map((candidate, index) => (
-          <CandidateItem key={`${candidate.name}-${index}`} candidate={candidate} leading={index === 0} />
+          <CandidateItem key={`${candidate.name}-${index}`} candidate={candidate} runoff={runoff && index < 2} />
         ))}
       </div>
     </div>
@@ -115,6 +116,8 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
 
   const { president, governor, senate } = data;
   const sideRace = tab === "governor" ? governor : senate;
+  const presidentRunoff = raceStatus(president, true).kind === "runoff";
+  const sideRunoff = raceStatus(sideRace, tab === "governor").kind === "runoff";
   const stateSelect = (
     <select
       value={uf}
@@ -147,7 +150,7 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
               apuração completa ›
             </a>
           </div>
-          <RaceCard race={president} count={2} />
+          <RaceCard race={president} count={2} runoff={presidentRunoff} />
           <StatusLine status={raceStatus(president, true)} />
         </div>
 
@@ -180,7 +183,7 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
               apuração completa ›
             </a>
           </div>
-          <RaceCard race={sideRace} count={2} stateSelect={stateSelect} />
+          <RaceCard race={sideRace} count={2} stateSelect={stateSelect} runoff={sideRunoff} />
           <StatusLine status={raceStatus(sideRace, tab === "governor")} />
         </div>
       </div>
