@@ -24,7 +24,19 @@ export const UF_OPTIONS = [
 
 export type TseCandidate = { name: string; party: string; votes: number; pct: string; elected: boolean; photo: string | null };
 
-export type TseTotals = { valid: string; validPct: string; blank: string; blankPct: string; nulls: string; nullPct: string };
+export type TseTotals = {
+  valid: string;
+  validPct: string;
+  blank: string;
+  blankPct: string;
+  nulls: string;
+  nullPct: string;
+  present: string;
+  presentPct: string;
+  abstained: string;
+  abstainedPct: string;
+  validVotes: number;
+};
 
 export type TseRace = {
   candidates: TseCandidate[];
@@ -40,10 +52,11 @@ type RawFile = {
   tf?: string;
   dt?: string;
   ht?: string;
-  tv?: string;
-  vvc?: string;
-  vb?: string;
+  // v holds the vote counts: tv voters who showed up, vvc valid votes, vb blank votes.
+  v?: { tv?: string; vvc?: string; vb?: string };
   s?: { pst?: string };
+  // Electorate-level counts: te = electors, c = voters who showed up, a = abstentions.
+  e?: { te?: string; c?: string; a?: string };
   carg?: { cd: string | number; agr?: { par?: { sg?: string; cand?: RawCandidate[] }[] }[] }[];
 };
 
@@ -108,10 +121,13 @@ function parseRace(file: RawFile, office: string, election: string, scope: strin
     )
     .sort((a, b) => b.votes - a.votes);
 
-  const total = Number(file.tv ?? 0);
-  const valid = Number(file.vvc ?? 0);
-  const blank = Number(file.vb ?? 0);
+  // Brancos and nulos are shares of the voters who showed up; válidos is what is left.
+  const total = Number(file.v?.tv ?? 0);
+  const valid = Number(file.v?.vvc ?? 0);
+  const blank = Number(file.v?.vb ?? 0);
   const nulls = Math.max(0, total - valid - blank);
+  const electorate = Number(file.e?.te ?? 0);
+  const abstained = Number(file.e?.a ?? Math.max(0, electorate - total));
   const totals: TseTotals | null =
     total > 0
       ? {
@@ -121,6 +137,11 @@ function parseRace(file: RawFile, office: string, election: string, scope: strin
           blankPct: percent(blank, total),
           nulls: nulls.toLocaleString("pt-BR"),
           nullPct: percent(nulls, total),
+          present: total.toLocaleString("pt-BR"),
+          presentPct: percent(total, electorate),
+          abstained: abstained.toLocaleString("pt-BR"),
+          abstainedPct: percent(abstained, electorate),
+          validVotes: valid,
         }
       : null;
 
@@ -146,6 +167,13 @@ async function fetchJson(url: string): Promise<RawFile | null> {
 export async function getPresidentRace(): Promise<TseRace | null> {
   const file = await fetchJson(`${BASE}/${FEDERAL_ELECTION}/dados/br/br-c0001-e00${FEDERAL_ELECTION}-u.json`);
   return file ? parseRace(file, "1", FEDERAL_ELECTION, "br") : null;
+}
+
+// The presidential vote as counted in one state, for the state map.
+export async function getPresidentRaceInState(uf: string): Promise<TseRace | null> {
+  if (!UF_OPTIONS.some((option) => option.code === uf)) return null;
+  const file = await fetchJson(`${BASE}/${FEDERAL_ELECTION}/dados/${uf}/${uf}-c0001-e00${FEDERAL_ELECTION}-u.json`);
+  return file ? parseRace(file, "1", FEDERAL_ELECTION, uf) : null;
 }
 
 // Governor, senator and both kinds of deputy share the state-election folder;
@@ -183,10 +211,27 @@ export function raceStatus(race: TseRace | null, hasRunoff: boolean): RaceStatus
   if (!race || race.candidates.length === 0) return { kind: "open" };
   const elected = race.candidates.filter((candidate) => candidate.elected);
   if (elected.length > 0) return { kind: "elected", names: elected.map((candidate) => candidate.name) };
-  const counted = Number(race.sectionsPct.replace(",", ".")) >= 100;
-  const topPct = Number(race.candidates[0].pct.replace(",", "."));
-  if (hasRunoff && counted && topPct < 50 && race.candidates.length >= 2) {
+  if (hasRunoff && race.candidates.length >= 2 && secondRoundOutlook(race).kind === "runoff") {
     return { kind: "runoff", names: [race.candidates[0].name, race.candidates[1].name] };
   }
   return { kind: "open" };
+}
+
+export type Outlook = { kind: "decided"; name: string } | { kind: "runoff" } | { kind: "open" };
+
+// The arithmetic of the count so far. The votes still to come are estimated from
+// the share of sections counted, assuming the rest of the valid vote looks like
+// what is in. A candidate is decided when even their current votes are over half
+// of the estimated total; a runoff is certain when nobody can still reach half.
+export function secondRoundOutlook(race: TseRace | null): Outlook {
+  if (!race || !race.totals || race.candidates.length === 0) return { kind: "open" };
+  const counted = Number(race.sectionsPct.replace(",", ".")) / 100;
+  if (counted <= 0) return { kind: "open" };
+  const validCounted = race.totals.validVotes;
+  const estimatedTotal = validCounted / counted;
+  const remaining = estimatedTotal - validCounted;
+  const sure = race.candidates.find((candidate) => candidate.votes / estimatedTotal > 0.5);
+  if (sure) return { kind: "decided", name: sure.name };
+  const anyCanReachHalf = race.candidates.some((candidate) => (candidate.votes + remaining) / estimatedTotal > 0.5);
+  return anyCanReachHalf ? { kind: "open" } : { kind: "runoff" };
 }

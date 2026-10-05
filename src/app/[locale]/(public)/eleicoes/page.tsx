@@ -5,16 +5,21 @@ import {
   getFederalDeputyRace,
   getGovernorRace,
   getPresidentRace,
+  getPresidentRaceInState,
   getSenateRace,
   getStateDeputyRace,
   partyColor,
   raceStatus,
+  secondRoundOutlook,
   shortName,
   type RaceStatus,
   type TseCandidate,
   type TseRace,
+  type TseTotals,
 } from "@/lib/tse";
+import { getBrazilMap, type BrazilMap } from "@/lib/brazil-map";
 import { BrazilFlag } from "@/components/BrazilFlag";
+import { BrazilStateMap, type MapLegendItem, type StateWinner } from "@/components/BrazilStateMap";
 
 export const revalidate = 60;
 
@@ -45,6 +50,7 @@ const CARGO_EXPLAINED: Record<Cargo, string> = {
   estadual:
     "Deputados não têm segundo turno. As vagas são divididas entre partidos e federações conforme os votos de cada legenda, e dentro de cada partido são eleitos os candidatos mais votados.",
 };
+const MAJORITY: Cargo[] = ["presidente", "governador"];
 
 const cardStyle = {
   borderRadius: "0.75rem",
@@ -72,12 +78,12 @@ function SideCard({ title, race, uf, cargo }: { title: string; race: TseRace | n
   const isDeputy = cargo === "federal" || cargo === "estadual";
   const elected = race?.candidates.filter((candidate) => candidate.elected) ?? [];
   // Deputies have hundreds of candidates, so the card shows who was elected instead.
-  const shown = isDeputy ? (elected.length > 0 ? elected : []) : (race?.candidates ?? []);
+  const shown = isDeputy ? elected : (race?.candidates ?? []);
   return (
     <div style={cardStyle}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.5rem", marginBottom: "0.75rem" }}>
         <span style={{ fontWeight: 800, fontSize: "0.9375rem", color: "var(--site-text)" }}>{title}</span>
-        {race && <span style={{ fontSize: "0.8125rem", color: "var(--site-muted)" }}>{isDeputy ? `${elected.length} eleitos` : `${race.sectionsPct}%`}</span>}
+        {race && <span style={{ fontSize: "0.8125rem", color: "var(--site-muted)", whiteSpace: "nowrap" }}>{isDeputy ? `${elected.length} eleitos` : `${race.sectionsPct}%`}</span>}
       </div>
       {!race || race.candidates.length === 0 ? (
         <p style={{ color: "var(--site-faint)", fontSize: "0.875rem" }}>Resultados indisponíveis no momento.</p>
@@ -108,14 +114,9 @@ function SideCard({ title, race, uf, cargo }: { title: string; race: TseRace | n
           })}
         </div>
       )}
-      {!isDeputy && race && race.candidates.length > 0 && (
+      {race && race.candidates.length > 0 && (
         <a href={`?cargo=${cargo}&uf=${uf}`} style={{ display: "block", textAlign: "center", marginTop: "1rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}>
-          Apuração Completa
-        </a>
-      )}
-      {isDeputy && race && race.candidates.length > 0 && (
-        <a href={`?cargo=${cargo}&uf=${uf}`} style={{ display: "block", textAlign: "center", marginTop: "1rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}>
-          Ver todos os eleitos
+          {isDeputy ? "Ver todos os eleitos" : "Apuração Completa"}
         </a>
       )}
     </div>
@@ -177,6 +178,46 @@ function StatusBanner({ status }: { status: RaceStatus }) {
   );
 }
 
+// The arithmetic of the count, shown next to the status for the majority races.
+function OutlookLine({ race }: { race: TseRace }) {
+  const outlook = secondRoundOutlook(race);
+  const text =
+    outlook.kind === "decided"
+      ? `Vitória matematicamente garantida no 1º turno: ${formatName(outlook.name)}.`
+      : outlook.kind === "runoff"
+        ? "Segundo turno matematicamente garantido: ninguém mais consegue chegar a 50% dos votos válidos."
+        : "Ainda é possível decidir no 1º turno.";
+  return (
+    <p style={{ fontSize: "0.8125rem", color: "var(--site-text-secondary)", marginBottom: "0.75rem" }}>
+      {text} <span style={{ color: "var(--site-faint)" }}>(cálculo pelas seções apuradas)</span>
+    </p>
+  );
+}
+
+function TotalsGrid({ totals, title }: { totals: TseTotals; title: string }) {
+  const items = [
+    { label: "Votos válidos", value: totals.valid, pct: totals.validPct },
+    { label: "Brancos", value: totals.blank, pct: totals.blankPct },
+    { label: "Nulos", value: totals.nulls, pct: totals.nullPct },
+    { label: "Comparecimento", value: totals.present, pct: totals.presentPct },
+    { label: "Abstenção", value: totals.abstained, pct: totals.abstainedPct },
+  ];
+  return (
+    <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
+      <h3 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1rem" }}>Totais — {title}</h3>
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: "1rem 1.5rem" }}>
+        {items.map(({ label, value, pct }) => (
+          <div key={label}>
+            <div style={{ fontSize: "0.8125rem", color: "var(--site-muted)" }}>{label}</div>
+            <div style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginTop: "0.125rem" }}>{value}</div>
+            <div style={{ fontSize: "0.8125rem", color: "var(--site-faint)", marginTop: "0.125rem" }}>{pct}%</div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function MainCard({ title, race, cargo, status }: { title: string; race: TseRace | null; cargo: Cargo; status: RaceStatus }) {
   const isDeputy = cargo === "federal" || cargo === "estadual";
   const elected = race?.candidates.filter((candidate) => candidate.elected) ?? [];
@@ -214,6 +255,7 @@ function MainCard({ title, race, cargo, status }: { title: string; race: TseRace
       ) : (
         <>
           <StatusBanner status={status} />
+          {MAJORITY.includes(cargo) && <OutlookLine race={race} />}
           {race.candidates.slice(0, 5).map((candidate, index) => (
             <BigRow key={`${candidate.name}-${index}`} candidate={candidate} leading={index === 0} />
           ))}
@@ -227,26 +269,28 @@ function MainCard({ title, race, cargo, status }: { title: string; race: TseRace
               ))}
             </details>
           )}
-          {race.totals && (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: "0.5rem", marginTop: "1rem", padding: "1rem", borderRadius: "0.625rem", backgroundColor: "var(--site-surface-alt)", textAlign: "center" }}>
-              {[
-                { label: "Brancos", value: race.totals.blank, pct: race.totals.blankPct },
-                { label: "Nulos", value: race.totals.nulls, pct: race.totals.nullPct },
-                { label: "Válidos", value: race.totals.valid, pct: race.totals.validPct },
-              ].map(({ label, value, pct }) => (
-                <div key={label}>
-                  <div style={{ fontSize: "0.75rem", color: "var(--site-muted)" }}>{label}</div>
-                  <div style={{ fontSize: "0.8125rem", color: "var(--site-text-secondary)", marginTop: "0.125rem" }}>{value}</div>
-                  <div style={{ fontSize: "1rem", fontWeight: 800, color: "var(--site-text)", marginTop: "0.125rem" }}>{pct}%</div>
-                </div>
-              ))}
-            </div>
-          )}
         </>
       )}
-
     </div>
   );
+}
+
+// Who led each state, for the state map: the top candidate's party colour and name.
+function stateWinners(races: [string, TseRace | null][]): Record<string, StateWinner> {
+  const winners: Record<string, StateWinner> = {};
+  for (const [uf, race] of races) {
+    const top = race?.candidates[0];
+    if (top) winners[uf] = { color: partyColor(top.party), label: `${formatName(top.name)} (${top.party}) ${top.pct}%` };
+  }
+  return winners;
+}
+
+function stateLegend(winners: Record<string, StateWinner>): MapLegendItem[] {
+  const seen = new Map<string, MapLegendItem>();
+  for (const winner of Object.values(winners)) {
+    if (!seen.has(winner.color)) seen.set(winner.color, { color: winner.color, label: winner.label.replace(/ \d+,\d+%$/, "") });
+  }
+  return [...seen.values()];
 }
 
 export default async function EleicoesPage({ searchParams }: { searchParams: Promise<{ uf?: string; cargo?: string }> }) {
@@ -270,10 +314,25 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
     estadual: { title: `Deputados estaduais — ${stateName}`, race: state, status: raceStatus(state, false) },
   };
   const others = CARGOS.filter((option) => option !== cargo);
+  const totals = races[cargo].race?.totals ?? null;
   const updated = president?.updatedAt ?? governor?.updatedAt ?? "";
 
+  // The map is only drawn for the two races that are decided by state: presidente
+  // and governador. Each state's own file gives its winner.
+  let map: BrazilMap | null = null;
+  let winners: Record<string, StateWinner> = {};
+  if (cargo === "presidente" || cargo === "governador") {
+    const ufs = UF_OPTIONS.map((option) => option.code);
+    const [brazilMap, perState] = await Promise.all([
+      getBrazilMap(),
+      Promise.all(ufs.map(async (code) => [code, cargo === "presidente" ? await getPresidentRaceInState(code) : await getGovernorRace(code)] as [string, TseRace | null])),
+    ]);
+    map = brazilMap;
+    winners = stateWinners(perState);
+  }
+
   return (
-    <section className="section-padding" style={{ backgroundColor: "var(--site-bg)", minHeight: "70vh" }}>
+    <section className="section-padding eleicoes-page" style={{ backgroundColor: "var(--site-bg)", minHeight: "70vh" }}>
       <div className="container-xl" style={{ maxWidth: "1180px" }}>
         <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem" }}>
           <div style={{ color: BRAND, fontWeight: 700, fontSize: "0.9375rem", marginBottom: "0.25rem" }}>Eleições 2026</div>
@@ -306,9 +365,9 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
         </nav>
 
         <div className="eleicoes-grid" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 300px", gap: "1.5rem", alignItems: "start" }}>
-          <div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             {cargo !== "presidente" && (
-              <form method="get" style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.875rem" }}>
+              <form method="get" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <input type="hidden" name="cargo" value={cargo} />
                 <label htmlFor="uf" style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--site-text)" }}>Estado</label>
                 <select id="uf" name="uf" defaultValue={uf} style={{ padding: "0.375rem 0.5rem", borderRadius: "0.5rem", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", color: "var(--site-text)" }}>
@@ -324,6 +383,16 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
               </form>
             )}
             <MainCard title={races[cargo].title} race={races[cargo].race} cargo={cargo} status={races[cargo].status} />
+            {totals && <TotalsGrid totals={totals} title={races[cargo].title} />}
+            {map && Object.keys(winners).length > 0 && (
+              <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
+                <h3 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.25rem" }}>
+                  {cargo === "presidente" ? "Vencedor por estado — Presidente" : "Vencedor por estado — Governador"}
+                </h3>
+                <p style={{ fontSize: "0.8125rem", color: "var(--site-muted)", marginBottom: "1rem" }}>Cada estado na cor do partido de quem lidera a apuração.</p>
+                <BrazilStateMap map={map} winners={winners} legend={stateLegend(winners)} />
+              </div>
+            )}
           </div>
 
           <aside style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
@@ -334,11 +403,13 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
         </div>
 
         <p style={{ fontSize: "0.75rem", color: "var(--site-faint)", marginTop: "1.5rem" }}>
-          Fonte: Tribunal Superior Eleitoral (TSE), dados públicos de apuração.
+          Fonte: Tribunal Superior Eleitoral (TSE), dados públicos de apuração. Malha dos estados: IBGE.
         </p>
       </div>
 
       <style>{`
+        body:has(.eleicoes-page) .category-nav,
+        body:has(.eleicoes-page) .social-sidebar { display: none !important; }
         @media (max-width: 860px) {
           .eleicoes-grid { grid-template-columns: 1fr !important; }
         }
