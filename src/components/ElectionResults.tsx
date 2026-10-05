@@ -43,7 +43,9 @@ function CandidateItem({ candidate, leading }: { candidate: TseCandidate; leadin
 
 // The line under each card: who won, or the runoff pairing. Nothing while the count is open.
 function StatusLine({ status }: { status: RaceStatus }) {
-  if (status.kind === "open") return null;
+  if (status.kind === "open") {
+    return <div style={{ marginTop: "0.5rem", fontSize: "0.8125rem", color: "var(--site-muted)" }}>Apuração em andamento</div>;
+  }
   const text =
     status.kind === "elected"
       ? `${status.names.length > 1 ? "Eleitos" : "Eleito"}: ${status.names.map(formatName).join(" e ")}`
@@ -182,6 +184,13 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
           <StatusLine status={raceStatus(sideRace, tab === "governor")} />
         </div>
       </div>
+
+      <p style={{ marginTop: "1rem", padding: "0.75rem 1rem", borderRadius: "0.625rem", backgroundColor: "var(--site-surface-alt)", fontSize: "0.8125rem", lineHeight: 1.55, color: "var(--site-text-secondary)" }}>
+        <strong style={{ color: BRAND }}>O que é o segundo turno?</strong> Se nenhum candidato passar de 50% dos votos válidos (brancos e nulos não contam), os dois mais votados disputam um segundo turno, em 25 de outubro de 2026.{" "}
+        <a href={`/${locale}/eleicoes?cargo=presidente`} style={{ color: BRAND, fontWeight: 700, textDecoration: "none" }}>
+          Veja a apuração ›
+        </a>
+      </p>
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem", marginTop: "1rem", fontSize: "0.6875rem", color: "var(--site-faint)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
         <span>Fonte: TSE</span>

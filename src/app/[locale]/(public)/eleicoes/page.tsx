@@ -187,6 +187,10 @@ function MainCard({ title, race, cargo, status }: { title: string; race: TseRace
         {race && <span style={{ fontSize: "0.875rem", color: "var(--site-muted)" }}>{race.sectionsPct}% urnas apuradas</span>}
       </div>
 
+      <p style={{ marginBottom: "1rem", padding: "0.75rem 1rem", borderRadius: "0.625rem", backgroundColor: "var(--site-surface-alt)", fontSize: "0.8125rem", lineHeight: 1.55, color: "var(--site-text-secondary)" }}>
+        {CARGO_EXPLAINED[cargo]}
+      </p>
+
       {!race || race.candidates.length === 0 ? (
         <p style={{ color: "var(--site-faint)", fontSize: "0.9rem", padding: "1rem 0" }}>Resultados indisponíveis no momento.</p>
       ) : isDeputy ? (
@@ -241,9 +245,6 @@ function MainCard({ title, race, cargo, status }: { title: string; race: TseRace
         </>
       )}
 
-      <p style={{ marginTop: "1rem", padding: "0.75rem 0.875rem", borderRadius: "0.5rem", backgroundColor: "var(--site-surface-alt)", fontSize: "0.8125rem", lineHeight: 1.55, color: "var(--site-text-secondary)" }}>
-        {CARGO_EXPLAINED[cargo]}
-      </p>
     </div>
   );
 }
