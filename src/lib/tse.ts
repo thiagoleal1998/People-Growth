@@ -148,14 +148,45 @@ export async function getPresidentRace(): Promise<TseRace | null> {
   return file ? parseRace(file, "1", FEDERAL_ELECTION, "br") : null;
 }
 
-export async function getGovernorRace(uf: string): Promise<TseRace | null> {
+// Governor, senator and both kinds of deputy share the state-election folder;
+// the office code (cd) in the file tells them apart: 3 governor, 5 senator,
+// 6 federal deputy, 7 state deputy.
+async function getStateElectionRace(uf: string, office: string): Promise<TseRace | null> {
   if (!UF_OPTIONS.some((option) => option.code === uf)) return null;
-  const file = await fetchJson(`${BASE}/${STATE_ELECTION}/dados/${uf}/${uf}-c0003-e00${STATE_ELECTION}-u.json`);
-  return file ? parseRace(file, "3", STATE_ELECTION, uf) : null;
+  const file = await fetchJson(`${BASE}/${STATE_ELECTION}/dados/${uf}/${uf}-c${office.padStart(4, "0")}-e00${STATE_ELECTION}-u.json`);
+  return file ? parseRace(file, office, STATE_ELECTION, uf) : null;
+}
+
+export async function getGovernorRace(uf: string): Promise<TseRace | null> {
+  return getStateElectionRace(uf, "3");
 }
 
 export async function getSenateRace(uf: string): Promise<TseRace | null> {
-  if (!UF_OPTIONS.some((option) => option.code === uf)) return null;
-  const file = await fetchJson(`${BASE}/${STATE_ELECTION}/dados/${uf}/${uf}-c0005-e00${STATE_ELECTION}-u.json`);
-  return file ? parseRace(file, "5", STATE_ELECTION, uf) : null;
+  return getStateElectionRace(uf, "5");
+}
+
+export async function getFederalDeputyRace(uf: string): Promise<TseRace | null> {
+  return getStateElectionRace(uf, "6");
+}
+
+export async function getStateDeputyRace(uf: string): Promise<TseRace | null> {
+  return getStateElectionRace(uf, "7");
+}
+
+export type RaceStatus = { kind: "elected"; names: string[] } | { kind: "runoff"; names: [string, string] } | { kind: "open" };
+
+// Who has won, from the TSE's own "elected" flag. Only presidente and governador
+// can go to a second round: a candidate needs more than half of the valid votes,
+// so when the count is complete and nobody reached it, the top two run again.
+// Senators and deputies have no runoff.
+export function raceStatus(race: TseRace | null, hasRunoff: boolean): RaceStatus {
+  if (!race || race.candidates.length === 0) return { kind: "open" };
+  const elected = race.candidates.filter((candidate) => candidate.elected);
+  if (elected.length > 0) return { kind: "elected", names: elected.map((candidate) => candidate.name) };
+  const counted = Number(race.sectionsPct.replace(",", ".")) >= 100;
+  const topPct = Number(race.candidates[0].pct.replace(",", "."));
+  if (hasRunoff && counted && topPct < 50 && race.candidates.length >= 2) {
+    return { kind: "runoff", names: [race.candidates[0].name, race.candidates[1].name] };
+  }
+  return { kind: "open" };
 }

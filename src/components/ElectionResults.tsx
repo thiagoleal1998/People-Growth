@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { UF_OPTIONS, partyColor, shortName, type TseCandidate, type TseRace } from "@/lib/tse";
+import { UF_OPTIONS, formatName, partyColor, raceStatus, shortName, type RaceStatus, type TseCandidate, type TseRace } from "@/lib/tse";
 import { BrazilFlag } from "@/components/BrazilFlag";
 
 type Payload = { uf: string; president: TseRace | null; governor: TseRace | null; senate: TseRace | null };
@@ -39,6 +39,16 @@ function CandidateItem({ candidate, leading }: { candidate: TseCandidate; leadin
       </div>
     </div>
   );
+}
+
+// The line under each card: who won, or the runoff pairing. Nothing while the count is open.
+function StatusLine({ status }: { status: RaceStatus }) {
+  if (status.kind === "open") return null;
+  const text =
+    status.kind === "elected"
+      ? `${status.names.length > 1 ? "Eleitos" : "Eleito"}: ${status.names.map(formatName).join(" e ")}`
+      : `Segundo turno: ${status.names.map(formatName).join(" x ")}`;
+  return <div style={{ marginTop: "0.5rem", fontSize: "0.8125rem", fontWeight: 700, color: BRAND }}>{text}</div>;
 }
 
 const cardStyle: CSSProperties = {
@@ -136,6 +146,7 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
             </a>
           </div>
           <RaceCard race={president} count={2} />
+          <StatusLine status={raceStatus(president, true)} />
         </div>
 
         <div>
@@ -168,6 +179,7 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
             </a>
           </div>
           <RaceCard race={sideRace} count={2} stateSelect={stateSelect} />
+          <StatusLine status={raceStatus(sideRace, tab === "governor")} />
         </div>
       </div>
 
