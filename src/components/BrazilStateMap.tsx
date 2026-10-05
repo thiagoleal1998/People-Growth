@@ -49,7 +49,7 @@ export function BrazilStateMap({
         ))}
       </div>
       <p style={{ textAlign: "center", fontSize: "0.75rem", color: "var(--site-muted)", marginTop: "0.5rem" }}>
-        Cor: partido de quem lidera. Contorno tracejado: vai para o 2º turno.
+        {runoffStates.length > 0 ? "Cor: partido de quem lidera. Contorno tracejado: vai para o 2º turno." : "Cor: partido de quem lidera em cada estado."}
       </p>
 
       {runoffStates.length > 0 && (

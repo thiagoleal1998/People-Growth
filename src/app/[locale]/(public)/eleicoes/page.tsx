@@ -22,6 +22,7 @@ import { BrazilFlag } from "@/components/BrazilFlag";
 import { BrazilStateMap, type MapLegendItem, type RunoffState, type StateWinner } from "@/components/BrazilStateMap";
 import { ElectionTag } from "@/components/ElectionTag";
 import { ElectionPopup, type PopupPerson } from "@/components/ElectionPopup";
+import { StateMenu } from "@/components/StateMenu";
 
 export const revalidate = 60;
 
@@ -72,15 +73,20 @@ function Photo({ src, size, color }: { src: string | null; size: number; color: 
   );
 }
 
-// Deputies: who is elected by the TSE's flag, or, until the flags come out, who the
-// proportional count puts in the seats so far.
+// Deputies: who the TSE marks as elected, or, until then, who the proportional count
+// puts in the seats so far.
 function deputyList(race: TseRace): { list: TseCandidate[]; projected: boolean } {
   const elected = race.candidates.filter((candidate) => candidate.elected);
   if (elected.length > 0) return { list: elected, projected: false };
   return { list: race.candidates.filter((candidate) => candidate.projected), projected: true };
 }
 
-// The top two get "2º Turno" tags in a runoff; nobody is greyed out.
+// In a runoff the finalists are the ones the TSE marks as "2º turno", or the top two
+// while the arithmetic is still the only evidence. Nobody is greyed out.
+function isRunoffFinalist(candidate: TseCandidate, index: number, runoff: boolean): boolean {
+  return !candidate.elected && (candidate.inRunoff || (runoff && index < 2));
+}
+
 function SideCard({ title, race, status, uf, cargo }: { title: string; race: TseRace | null; status: RaceStatus; uf: string; cargo: Cargo }) {
   const isDeputy = cargo === "federal" || cargo === "estadual";
   const deputies = race && isDeputy ? deputyList(race) : null;
@@ -110,9 +116,9 @@ function SideCard({ title, race, status, uf, cargo }: { title: string; race: Tse
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", minWidth: 0, flexWrap: "wrap" }}>
                     <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shortName(candidate.name)}</span>
-                    {candidate.elected && <ElectionTag kind="elected" color={color} />}
+                    {candidate.elected && <ElectionTag kind="elected" />}
                     {!candidate.elected && deputies?.projected && <ElectionTag kind="projected" />}
-                    {!candidate.elected && !deputies && runoff && index < 2 && <ElectionTag kind="runoff" />}
+                    {!deputies && isRunoffFinalist(candidate, index, runoff) && <ElectionTag kind="runoff" />}
                   </div>
                   <div style={{ marginTop: "0.125rem" }}>
                     {isDeputy ? (
@@ -136,7 +142,7 @@ function SideCard({ title, race, status, uf, cargo }: { title: string; race: Tse
   );
 }
 
-function BigRow({ candidate, leading, runoff }: { candidate: TseCandidate; leading: boolean; runoff: boolean }) {
+function BigRow({ candidate, leading, runoffFinalist }: { candidate: TseCandidate; leading: boolean; runoffFinalist: boolean }) {
   const color = partyColor(candidate.party);
   return (
     <div style={{ padding: "0.875rem 0", borderTop: "1px solid var(--site-border)" }}>
@@ -145,8 +151,8 @@ function BigRow({ candidate, leading, runoff }: { candidate: TseCandidate; leadi
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
             <span style={{ fontWeight: leading ? 800 : 600, fontSize: "1.0625rem", color: "var(--site-text)" }}>{formatName(candidate.name)}</span>
-            {candidate.elected && <ElectionTag kind="elected" color={color} />}
-            {!candidate.elected && runoff && <ElectionTag kind="runoff" />}
+            {candidate.elected && <ElectionTag kind="elected" />}
+            {runoffFinalist && <ElectionTag kind="runoff" />}
           </div>
           <div style={{ fontSize: "0.75rem", fontWeight: 700, color, textTransform: "uppercase", marginTop: "0.125rem" }}>{candidate.party}</div>
         </div>
@@ -171,7 +177,7 @@ function CompactRow({ candidate, projected }: { candidate: TseCandidate; project
       <div style={{ minWidth: 0, flex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", flexWrap: "wrap", minWidth: 0 }}>
           <span style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{formatName(candidate.name)}</span>
-          {candidate.elected && <ElectionTag kind="elected" color={color} />}
+          {candidate.elected && <ElectionTag kind="elected" />}
           {!candidate.elected && projected && candidate.projected && <ElectionTag kind="projected" />}
         </div>
         <span style={{ fontSize: "0.7rem", fontWeight: 700, color, textTransform: "uppercase" }}>{candidate.party}</span>
@@ -259,7 +265,7 @@ function MainCard({ title, race, cargo, status }: { title: string; race: TseRace
           <StatusBanner status={status} />
           {MAJORITY.includes(cargo) && <OutlookLine race={race} />}
           {race.candidates.slice(0, 5).map((candidate, index) => (
-            <BigRow key={`${candidate.name}-${index}`} candidate={candidate} leading={index === 0} runoff={runoff && index < 2} />
+            <BigRow key={`${candidate.name}-${index}`} candidate={candidate} leading={index === 0} runoffFinalist={isRunoffFinalist(candidate, index, runoff)} />
           ))}
           {race.candidates.length > 5 && (
             <details style={{ borderTop: "1px solid var(--site-border)" }}>
@@ -267,7 +273,7 @@ function MainCard({ title, race, cargo, status }: { title: string; race: TseRace
                 Todos os candidatos ({race.candidates.length}) ⌄
               </summary>
               {race.candidates.slice(5).map((candidate, index) => (
-                <BigRow key={`${candidate.name}-rest-${index}`} candidate={candidate} leading={false} runoff={false} />
+                <BigRow key={`${candidate.name}-rest-${index}`} candidate={candidate} leading={false} runoffFinalist={isRunoffFinalist(candidate, index + 5, runoff)} />
               ))}
             </details>
           )}
@@ -306,9 +312,10 @@ function DeputyBody({ race }: { race: TseRace }) {
   );
 }
 
-// Each state's result for the map: colour of the leader's party, a tooltip with first
-// and second place, and whether the state is headed to a runoff.
-function stateMapData(races: [string, TseRace | null][]): { winners: Record<string, StateWinner>; runoffStates: RunoffState[]; legend: MapLegendItem[] } {
+// Each state's result for the map. For governador a state can go to a runoff of its
+// own, so those are marked. For presidente the runoff is national, so the states are
+// only coloured by who leads them.
+function stateMapData(races: [string, TseRace | null][], perStateRunoff: boolean): { winners: Record<string, StateWinner>; runoffStates: RunoffState[]; legend: MapLegendItem[] } {
   const winners: Record<string, StateWinner> = {};
   const runoffStates: RunoffState[] = [];
   const legend = new Map<string, MapLegendItem>();
@@ -316,8 +323,8 @@ function stateMapData(races: [string, TseRace | null][]): { winners: Record<stri
     const top = race?.candidates[0];
     if (!race || !top) continue;
     const second = race.candidates[1];
-    const status = raceStatus(race, true);
-    const runoff = status.kind === "runoff";
+    const status = raceStatus(race, perStateRunoff);
+    const runoff = perStateRunoff && status.kind === "runoff";
     const outcome = status.kind === "elected" ? `Eleito: ${formatName(status.names[0])}` : runoff ? "2º turno" : "em apuração";
     const detail = `1º ${formatName(top.name)} (${top.party}) ${top.pct}%${second ? ` · 2º ${formatName(second.name)} (${second.party}) ${second.pct}%` : ""}`;
     const color = partyColor(top.party);
@@ -348,7 +355,9 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
     federal: { title: `Câmara dos deputados — ${stateName}`, race: federal, status: raceStatus(federal, false) },
     estadual: { title: `Assembleia legislativa — ${stateName}`, race: state, status: raceStatus(state, false) },
   };
-  const others = CARGOS.filter((option) => option !== cargo);
+  // Governador and senado sit on the left; the two houses of deputies on the right.
+  const leftCargos = (["presidente", "governador", "senado"] as Cargo[]).filter((option) => option !== cargo);
+  const rightCargos = (["federal", "estadual"] as Cargo[]).filter((option) => option !== cargo);
   const totals = races[cargo].race?.totals ?? null;
   const updated = president?.updatedAt ?? governor?.updatedAt ?? "";
 
@@ -357,17 +366,20 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
   let popup: { title: string; subtitle: string; people: PopupPerson[] } | null = null;
   if (current.race && (cargo === "presidente" || cargo === "governador" || cargo === "senado")) {
     const race = current.race;
+    const person = (c: TseCandidate, tag: "elected" | "runoff"): PopupPerson => ({ name: formatName(c.name), party: c.party, color: partyColor(c.party), photo: c.photo, tag });
     if (current.status.kind === "elected") {
       popup = {
         title: CARGO_LABEL[cargo],
         subtitle: cargo === "presidente" ? "Brasil" : stateName,
-        people: race.candidates.filter((c) => c.elected).map((c) => ({ name: formatName(c.name), party: c.party, color: partyColor(c.party), photo: c.photo, tag: "elected" as const })),
+        people: race.candidates.filter((c) => c.elected).map((c) => person(c, "elected")),
       };
     } else if (current.status.kind === "runoff") {
+      const finalists = race.candidates.filter((c) => c.inRunoff);
+      const pair = finalists.length >= 2 ? finalists.slice(0, 2) : race.candidates.slice(0, 2);
       popup = {
         title: CARGO_LABEL[cargo],
         subtitle: cargo === "presidente" ? "Segundo turno — Brasil" : `Segundo turno — ${stateName}`,
-        people: race.candidates.slice(0, 2).map((c) => ({ name: formatName(c.name), party: c.party, color: partyColor(c.party), photo: c.photo, tag: "runoff" as const })),
+        people: pair.map((c) => person(c, "runoff")),
       };
     }
   }
@@ -382,12 +394,14 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
       Promise.all(ufs.map(async (code) => [code, cargo === "presidente" ? await getPresidentRaceInState(code) : await getGovernorRace(code)] as [string, TseRace | null])),
     ]);
     map = brazilMap;
-    mapData = stateMapData(perState);
+    mapData = stateMapData(perState, cargo === "governador");
   }
+
+  const sideCard = (option: Cargo) => <SideCard key={option} title={races[option].title} race={races[option].race} status={races[option].status} uf={uf} cargo={option} />;
 
   return (
     <section className="section-padding eleicoes-page" style={{ backgroundColor: "var(--site-bg)", minHeight: "70vh" }}>
-      <div className="container-xl" style={{ maxWidth: "1180px" }}>
+      <div className="container-xl" style={{ maxWidth: "1280px" }}>
         <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem" }}>
           <div style={{ color: BRAND, fontWeight: 700, fontSize: "0.9375rem", marginBottom: "0.25rem" }}>Eleições 2026</div>
           <h1 style={{ display: "flex", alignItems: "center", gap: "0.75rem", fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>
@@ -397,45 +411,36 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
           {updated && <p style={{ color: "var(--site-muted)", fontSize: "0.8125rem", marginTop: "0.375rem" }}>Atualizado em {updated}</p>}
         </header>
 
-        <nav style={{ display: "flex", justifyContent: "center", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.5rem" }}>
-          {CARGOS.map((option) => (
-            <a
-              key={option}
-              href={`?cargo=${option}&uf=${uf}`}
-              aria-current={option === cargo ? "page" : undefined}
-              style={{
-                padding: "0.5rem 1.125rem",
-                borderRadius: "0.5rem",
-                border: `1px solid ${option === cargo ? BRAND : "var(--site-border-strong)"}`,
-                color: option === cargo ? BRAND : "var(--site-text-secondary)",
-                fontWeight: 700,
-                fontSize: "0.875rem",
-                textDecoration: "none",
-              }}
-            >
-              {CARGO_LABEL[option]}
-            </a>
-          ))}
-        </nav>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.25rem" }}>
+          <nav style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+            {CARGOS.map((option) => (
+              <a
+                key={option}
+                href={`?cargo=${option}&uf=${uf}`}
+                aria-current={option === cargo ? "page" : undefined}
+                style={{
+                  padding: "0.5rem 1.125rem",
+                  borderRadius: "0.5rem",
+                  border: `1px solid ${option === cargo ? BRAND : "var(--site-border-strong)"}`,
+                  color: option === cargo ? BRAND : "var(--site-text-secondary)",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  textDecoration: "none",
+                }}
+              >
+                {CARGO_LABEL[option]}
+              </a>
+            ))}
+          </nav>
+          <StateMenu cargo={cargo} uf={uf} />
+        </div>
 
-        <div className="eleicoes-grid" style={{ display: "grid", gridTemplateColumns: "minmax(0, 1fr) 300px", gap: "1.5rem", alignItems: "start" }}>
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-            {cargo !== "presidente" && (
-              <form method="get" style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <input type="hidden" name="cargo" value={cargo} />
-                <label htmlFor="uf" style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--site-text)" }}>Estado</label>
-                <select id="uf" name="uf" defaultValue={uf} style={{ padding: "0.375rem 0.5rem", borderRadius: "0.5rem", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", color: "var(--site-text)" }}>
-                  {UF_OPTIONS.map((option) => (
-                    <option key={option.code} value={option.code}>
-                      {option.name}
-                    </option>
-                  ))}
-                </select>
-                <button type="submit" style={{ padding: "0.375rem 0.75rem", borderRadius: "0.5rem", border: "none", backgroundColor: BRAND, color: "white", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>
-                  Ver
-                </button>
-              </form>
-            )}
+        <div className="eleicoes-grid">
+          <aside className="eleicoes-left" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {leftCargos.map(sideCard)}
+          </aside>
+
+          <div className="eleicoes-main" style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: 0 }}>
             <MainCard title={current.title} race={current.race} cargo={cargo} status={current.status} />
             {totals && <TotalsGrid totals={totals} title={current.title} />}
             {map && mapData && Object.keys(mapData.winners).length > 0 && (
@@ -443,16 +448,21 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
                 <h3 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.25rem" }}>
                   {cargo === "presidente" ? "Vencedor por estado — Presidente" : "Vencedor por estado — Governador"}
                 </h3>
+                {cargo === "presidente" && (
+                  <p style={{ fontSize: "0.8125rem", color: "var(--site-text-secondary)", marginBottom: "0.5rem" }}>
+                    {races.presidente.status.kind === "runoff"
+                      ? `Segundo turno nacional: ${races.presidente.status.names.map(formatName).join(" x ")}.`
+                      : "A apuração nacional ainda não define o segundo turno."}
+                  </p>
+                )}
                 <p style={{ fontSize: "0.8125rem", color: "var(--site-muted)", marginBottom: "1rem" }}>Passe o cursor em cada estado para ver o 1º e o 2º colocados.</p>
                 <BrazilStateMap map={map} winners={mapData.winners} legend={mapData.legend} runoffStates={mapData.runoffStates} />
               </div>
             )}
           </div>
 
-          <aside style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {others.map((option) => (
-              <SideCard key={option} title={races[option].title} race={races[option].race} status={races[option].status} uf={uf} cargo={option} />
-            ))}
+          <aside className="eleicoes-right" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+            {rightCargos.map(sideCard)}
           </aside>
         </div>
 
@@ -466,8 +476,15 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
       <style>{`
         body:has(.eleicoes-page) .category-nav,
         body:has(.eleicoes-page) .social-sidebar { display: none !important; }
-        @media (max-width: 860px) {
-          .eleicoes-grid { grid-template-columns: 1fr !important; }
+        .eleicoes-grid { display: flex; flex-direction: column; gap: 1.5rem; }
+        .eleicoes-main { order: 0; }
+        .eleicoes-left { order: 1; }
+        .eleicoes-right { order: 2; }
+        @media (min-width: 1100px) {
+          .eleicoes-grid { display: grid; grid-template-columns: 250px minmax(0, 1fr) 250px; gap: 1.5rem; align-items: start; }
+          .eleicoes-left { grid-column: 1; grid-row: 1; order: 0; }
+          .eleicoes-main { grid-column: 2; grid-row: 1; order: 0; }
+          .eleicoes-right { grid-column: 3; grid-row: 1; order: 0; }
         }
       `}</style>
     </section>

@@ -28,6 +28,7 @@ export type TseCandidate = {
   votes: number;
   pct: string;
   elected: boolean;
+  inRunoff: boolean;
   // Deputies only: would be elected at the votes counted so far (not yet the TSE's result).
   projected: boolean;
   photo: string | null;
@@ -57,7 +58,9 @@ export type TseRace = {
   final: boolean;
 };
 
-type RawCandidate = { sqcand?: string; nmu?: string; nm?: string; vap?: string; pvap?: string; e?: string };
+// e is "s" for both the elected and the candidates in a runoff, so the TSE's status
+// text (st: "Eleito", "2º turno", "Não eleito") is what tells them apart.
+type RawCandidate = { sqcand?: string; nmu?: string; nm?: string; vap?: string; pvap?: string; e?: string; st?: string };
 
 type RawFile = {
   tf?: string;
@@ -175,7 +178,8 @@ function parseRace(file: RawFile, office: string, election: string, scope: strin
         party: par.sg ?? "",
         votes: Number(cand.vap ?? 0),
         pct: cand.pvap ?? "0,00",
-        elected: cand.e === "s",
+        elected: (cand.st ?? "").startsWith("Eleito"),
+        inRunoff: (cand.st ?? "").includes("2º"),
         projected: projected.has(cand.sqcand ?? ""),
         photo: cand.sqcand ? `${BASE}/${election}/fotos/${scope}/${cand.sqcand}.jpeg` : null,
       }))
@@ -271,10 +275,16 @@ export type RaceStatus = { kind: "elected"; names: string[] } | { kind: "runoff"
 // Senators and deputies have no runoff.
 export function raceStatus(race: TseRace | null, hasRunoff: boolean): RaceStatus {
   if (!race || race.candidates.length === 0) return { kind: "open" };
+  // Whoever the TSE marks as elected wins. A majority race is only decided in the
+  // first round by the TSE's marking, or when the arithmetic leaves no doubt.
   const elected = race.candidates.filter((candidate) => candidate.elected);
   if (elected.length > 0) return { kind: "elected", names: elected.map((candidate) => candidate.name) };
-  if (hasRunoff && race.candidates.length >= 2 && secondRoundOutlook(race).kind === "runoff") {
-    return { kind: "runoff", names: [race.candidates[0].name, race.candidates[1].name] };
+  if (hasRunoff) {
+    const flagged = race.candidates.filter((candidate) => candidate.inRunoff);
+    if (flagged.length >= 2) return { kind: "runoff", names: [flagged[0].name, flagged[1].name] };
+    if (race.candidates.length >= 2 && secondRoundOutlook(race).kind === "runoff") {
+      return { kind: "runoff", names: [race.candidates[0].name, race.candidates[1].name] };
+    }
   }
   return { kind: "open" };
 }
