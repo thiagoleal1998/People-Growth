@@ -358,6 +358,7 @@ export default async function HomePage() {
                       <Link
                         key={article.id}
                         href={articleHref(article, article.categories?.slug)}
+                        className="more-news-row"
                         style={{
                           display: "flex",
                           gap: "1rem",
@@ -369,6 +370,7 @@ export default async function HomePage() {
                       >
                         {i % 2 === 0 && article.cover_image && (
                           <div
+                            className="more-news-img"
                             style={{
                               width: "110px",
                               height: "80px",
@@ -543,6 +545,9 @@ export default async function HomePage() {
             @media (max-width: 560px) {
               .home-featured-link { flex-direction: column; }
               .home-featured-link > div:first-child { width: 100% !important; height: 200px !important; }
+              /* Phones: photo on top, title and excerpt underneath. */
+              .more-news-row { flex-direction: column !important; gap: 0.75rem !important; }
+              .more-news-img { width: 100% !important; height: 180px !important; }
             }
             .live-dot { animation: live-pulse 1.4s ease-in-out infinite; }
             @keyframes live-pulse {
