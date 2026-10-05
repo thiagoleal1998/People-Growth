@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { UF_OPTIONS, formatName, getGovernorRace, getPresidentRace, getSenateRace, shortName, type TseCandidate, type TseRace } from "@/lib/tse";
+import { UF_OPTIONS, formatName, getGovernorRace, getPresidentRace, getSenateRace, partyColor, shortName, type TseCandidate, type TseRace } from "@/lib/tse";
+import { BrazilFlag } from "@/components/BrazilFlag";
 
 export const revalidate = 60;
 
@@ -8,7 +9,8 @@ export const metadata: Metadata = {
   description: "Apuração das eleições de 2026 com os dados oficiais do Tribunal Superior Eleitoral.",
 };
 
-const ACCENT = "#DD7410";
+// People & Growth's own colour. Candidates use their party's colour instead.
+const BRAND = "#4361EE";
 const CARGOS = ["presidente", "governador", "senado"] as const;
 type Cargo = (typeof CARGOS)[number];
 const CARGO_LABEL: Record<Cargo, string> = { presidente: "Presidente", governador: "Governador", senado: "Senado" };
@@ -20,9 +22,9 @@ const cardStyle = {
   padding: "1rem 1.125rem",
 } as const;
 
-function Photo({ src, size }: { src: string | null; size: number }) {
+function Photo({ src, size, color }: { src: string | null; size: number; color: string }) {
   return (
-    <div style={{ width: size, height: size, borderRadius: "0.375rem", overflow: "hidden", flexShrink: 0, backgroundColor: "var(--site-surface-alt)" }}>
+    <div style={{ width: size, height: size, borderRadius: "0.375rem", overflow: "hidden", flexShrink: 0, backgroundColor: "var(--site-surface-alt)", boxShadow: `0 0 0 2px ${color}` }}>
       {src && (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={src} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
@@ -43,24 +45,27 @@ function SideCard({ title, race, uf, cargo }: { title: string; race: TseRace | n
       ) : (
         <>
           <div style={{ display: "flex", flexDirection: "column", gap: "0.75rem" }}>
-            {race.candidates.slice(0, 3).map((candidate, index) => (
-              <div key={`${candidate.name}-${index}`} style={{ display: "flex", alignItems: "center", gap: "0.625rem", opacity: index === 0 ? 1 : 0.7 }}>
-                <Photo src={candidate.photo} size={44} />
-                <div style={{ minWidth: 0, flex: 1 }}>
-                  <div style={{ fontSize: "0.875rem", fontWeight: index === 0 ? 700 : 500, color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-                    {shortName(candidate.name)}
-                  </div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", flexWrap: "wrap", marginTop: "0.125rem" }}>
-                    <span style={{ fontWeight: 800, fontSize: "0.875rem", color: ACCENT }}>{candidate.pct}%</span>
-                    {candidate.elected && (
-                      <span style={{ backgroundColor: ACCENT, color: "white", borderRadius: "0.25rem", padding: "0.0625rem 0.375rem", fontSize: "0.6875rem", fontWeight: 700 }}>Eleito</span>
-                    )}
+            {race.candidates.slice(0, 3).map((candidate, index) => {
+              const color = partyColor(candidate.party);
+              return (
+                <div key={`${candidate.name}-${index}`} style={{ display: "flex", alignItems: "center", gap: "0.625rem", opacity: index === 0 ? 1 : 0.7 }}>
+                  <Photo src={candidate.photo} size={44} color={color} />
+                  <div style={{ minWidth: 0, flex: 1 }}>
+                    <div style={{ fontSize: "0.875rem", fontWeight: index === 0 ? 700 : 500, color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                      {shortName(candidate.name)}
+                    </div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", flexWrap: "wrap", marginTop: "0.125rem" }}>
+                      <span style={{ fontWeight: 800, fontSize: "0.875rem", color }}>{candidate.pct}%</span>
+                      {candidate.elected && (
+                        <span style={{ backgroundColor: color, color: "white", borderRadius: "0.25rem", padding: "0.0625rem 0.375rem", fontSize: "0.6875rem", fontWeight: 700 }}>Eleito</span>
+                      )}
+                    </div>
                   </div>
                 </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
-          <a href={`?cargo=${cargo}&uf=${uf}`} style={{ display: "block", textAlign: "center", marginTop: "1rem", color: ACCENT, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}>
+          <a href={`?cargo=${cargo}&uf=${uf}`} style={{ display: "block", textAlign: "center", marginTop: "1rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}>
             Apuração Completa
           </a>
         </>
@@ -70,32 +75,33 @@ function SideCard({ title, race, uf, cargo }: { title: string; race: TseRace | n
 }
 
 function BigRow({ candidate, leading }: { candidate: TseCandidate; leading: boolean }) {
+  const color = partyColor(candidate.party);
   return (
     <div style={{ padding: "0.875rem 0", borderTop: "1px solid var(--site-border)" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
-        <Photo src={candidate.photo} size={68} />
+        <Photo src={candidate.photo} size={68} color={color} />
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ fontWeight: leading ? 800 : 600, fontSize: "1.0625rem", color: "var(--site-text)" }}>{formatName(candidate.name)}</div>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginTop: "0.125rem" }}>
-            <span style={{ fontSize: "0.75rem", color: "var(--site-muted)", textTransform: "uppercase" }}>{candidate.party}</span>
+            <span style={{ fontSize: "0.75rem", fontWeight: 700, color, textTransform: "uppercase" }}>{candidate.party}</span>
             {candidate.elected && (
-              <span style={{ backgroundColor: ACCENT, color: "white", borderRadius: "0.25rem", padding: "0.0625rem 0.4375rem", fontSize: "0.6875rem", fontWeight: 700 }}>Eleito</span>
+              <span style={{ backgroundColor: color, color: "white", borderRadius: "0.25rem", padding: "0.0625rem 0.4375rem", fontSize: "0.6875rem", fontWeight: 700 }}>Eleito</span>
             )}
           </div>
         </div>
         <div style={{ textAlign: "right", flexShrink: 0 }}>
-          <div style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)" }}>{candidate.pct}%</div>
+          <div style={{ fontSize: "1.375rem", fontWeight: 800, color }}>{candidate.pct}%</div>
           <div style={{ fontSize: "0.75rem", color: "var(--site-muted)" }}>{candidate.votes.toLocaleString("pt-BR")} votos</div>
         </div>
       </div>
       <div style={{ height: "0.4375rem", borderRadius: "9999px", backgroundColor: "var(--site-border-strong)", overflow: "hidden", marginTop: "0.75rem" }}>
-        <div style={{ width: `${Math.min(100, Number(candidate.pct.replace(",", ".")) || 0)}%`, height: "100%", backgroundColor: leading ? ACCENT : "var(--site-faint)" }} />
+        <div style={{ width: `${Math.min(100, Number(candidate.pct.replace(",", ".")) || 0)}%`, height: "100%", backgroundColor: color }} />
       </div>
     </div>
   );
 }
 
-function MainCard({ title, race, cargo }: { title: string; race: TseRace | null; cargo: Cargo }) {
+function MainCard({ title, race }: { title: string; race: TseRace | null }) {
   return (
     <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.5rem" }}>
@@ -112,7 +118,7 @@ function MainCard({ title, race, cargo }: { title: string; race: TseRace | null;
           ))}
           {race.candidates.length > 5 && (
             <details style={{ borderTop: "1px solid var(--site-border)" }}>
-              <summary style={{ cursor: "pointer", textAlign: "center", padding: "0.875rem", color: ACCENT, fontWeight: 700, fontSize: "0.875rem", listStyle: "none" }}>
+              <summary style={{ cursor: "pointer", textAlign: "center", padding: "0.875rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", listStyle: "none" }}>
                 Todos os candidatos ({race.candidates.length}) ⌄
               </summary>
               {race.candidates.slice(5).map((candidate, index) => (
@@ -159,9 +165,12 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
   return (
     <section className="section-padding" style={{ backgroundColor: "var(--site-bg)", minHeight: "70vh" }}>
       <div className="container-xl" style={{ maxWidth: "1180px" }}>
-        <header style={{ borderBottom: `2px solid ${ACCENT}`, paddingBottom: "1rem", marginBottom: "1.5rem" }}>
-          <div style={{ color: ACCENT, fontWeight: 700, fontSize: "0.9375rem", marginBottom: "0.25rem" }}>Eleições 2026</div>
-          <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>Apuração das eleições</h1>
+        <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem" }}>
+          <div style={{ color: BRAND, fontWeight: 700, fontSize: "0.9375rem", marginBottom: "0.25rem" }}>Eleições 2026</div>
+          <h1 style={{ display: "flex", alignItems: "center", gap: "0.75rem", fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>
+            <BrazilFlag width={40} />
+            <span>Apuração das eleições</span>
+          </h1>
           {updated && <p style={{ color: "var(--site-muted)", fontSize: "0.8125rem", marginTop: "0.375rem" }}>Atualizado em {updated}</p>}
         </header>
 
@@ -174,8 +183,8 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
               style={{
                 padding: "0.5rem 1.125rem",
                 borderRadius: "0.5rem",
-                border: `1px solid ${option === cargo ? ACCENT : "var(--site-border-strong)"}`,
-                color: option === cargo ? ACCENT : "var(--site-text-secondary)",
+                border: `1px solid ${option === cargo ? BRAND : "var(--site-border-strong)"}`,
+                color: option === cargo ? BRAND : "var(--site-text-secondary)",
                 fontWeight: 700,
                 fontSize: "0.875rem",
                 textDecoration: "none",
@@ -199,12 +208,12 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
                     </option>
                   ))}
                 </select>
-                <button type="submit" style={{ padding: "0.375rem 0.75rem", borderRadius: "0.5rem", border: "none", backgroundColor: ACCENT, color: "white", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>
+                <button type="submit" style={{ padding: "0.375rem 0.75rem", borderRadius: "0.5rem", border: "none", backgroundColor: BRAND, color: "white", fontWeight: 700, fontSize: "0.85rem", cursor: "pointer" }}>
                   Ver
                 </button>
               </form>
             )}
-            <MainCard title={races[cargo].title} race={races[cargo].race} cargo={cargo} />
+            <MainCard title={races[cargo].title} race={races[cargo].race} />
           </div>
 
           <aside style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>

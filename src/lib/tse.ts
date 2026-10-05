@@ -47,6 +47,23 @@ type RawFile = {
   carg?: { cd: string | number; agr?: { par?: { sg?: string; cand?: RawCandidate[] }[] }[] }[];
 };
 
+// Approximate colours for the parties' usual identity, used for everything that
+// belongs to a candidate. Unknown siglas fall back to a neutral grey.
+const PARTY_COLORS: Record<string, string> = {
+  PT: "#E0201B", PL: "#0B3C8C", PSOL: "#F5B800", PSDB: "#0072BC", MDB: "#00874A", PSD: "#F28C00",
+  UNIÃO: "#0055A5", PP: "#0B5CAD", PSB: "#E1251B", PDT: "#15803D", REPUBLICANOS: "#1E6FB8",
+  PODE: "#7B2D8E", PCDOB: "#B91C1C", PV: "#3BA33B", AVANTE: "#0099CC", SOLIDARIEDADE: "#F28C28",
+  NOVO: "#F26A21", PSTU: "#B30000", PCO: "#8B0000", PRD: "#6D28D9", DC: "#2563EB", PMB: "#0E7490",
+  AGIR: "#0F766E", MISSÃO: "#334155", PRTB: "#1D4ED8", PSC: "#0A7D3B", PMN: "#A16207", PCB: "#7F1D1D",
+};
+const NEUTRAL_PARTY_COLOR = "#64748B";
+
+// Federations come as "PT/PC do B/PV": the first party gives the colour.
+export function partyColor(party: string): string {
+  const sigla = party.split("/")[0].trim().toUpperCase();
+  return PARTY_COLORS[sigla] ?? NEUTRAL_PARTY_COLOR;
+}
+
 const LOWERCASE_WORDS = new Set(["de", "da", "do", "das", "dos", "e"]);
 
 // The TSE writes names in capitals ("FLAVIO BOLSONARO"); show them in title case.
