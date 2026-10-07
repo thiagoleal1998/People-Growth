@@ -146,6 +146,17 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     await client.from("articles").update({ home_slot: null }).eq("home_slot", payload.home_slot).neq("id", articleId);
   }
 
+  // Additional categories (beyond the primary category_id above): replace the
+  // whole set on every save, same approach as the home slot. The primary
+  // category is excluded even if it was somehow submitted as an extra one too.
+  if (!saveError && articleId) {
+    const extraCategoryIds = [...new Set(formData.getAll("extra_category_ids").map((value) => String(value)).filter((cid) => cid && cid !== categoryId))];
+    await client.from("article_categories").delete().eq("article_id", articleId);
+    if (extraCategoryIds.length > 0) {
+      await client.from("article_categories").insert(extraCategoryIds.map((category_id) => ({ article_id: articleId, category_id })));
+    }
+  }
+
   // A failed write (e.g. a duplicate slug) must never look like a success —
   // this used to redirect to ?saved=1 unconditionally regardless of error.
   if (saveError) {

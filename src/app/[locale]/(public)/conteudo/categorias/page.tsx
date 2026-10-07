@@ -20,14 +20,27 @@ export default async function CategoriasPage() {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data: categoriesData }, { data: articlesData }] = await Promise.all([
+  const [{ data: categoriesData }, { data: articlesData }, { data: extraData }] = await Promise.all([
     client.from("categories").select("*"),
-    client.from("articles").select("category_id").eq("status", "published").not("category_id", "is", null),
+    client.from("articles").select("id, category_id").eq("status", "published"),
+    client.from("article_categories").select("article_id, category_id"),
   ]);
   const categories = (categoriesData ?? []) as Category[];
-  const counts = new Map<string, number>();
-  for (const { category_id } of (articlesData ?? []) as { category_id: string }[]) {
-    counts.set(category_id, (counts.get(category_id) ?? 0) + 1);
+  const published = (articlesData ?? []) as { id: string; category_id: string | null }[];
+  const publishedIds = new Set(published.map((a) => a.id));
+  // One article can count for more than one category now (its primary one, plus any
+  // additional categories from article_categories), so each category's count is the
+  // number of distinct published articles listed under it, not the number of rows.
+  const counts = new Map<string, Set<string>>();
+  const addToCategory = (categoryId: string, articleId: string) => {
+    if (!counts.has(categoryId)) counts.set(categoryId, new Set());
+    counts.get(categoryId)!.add(articleId);
+  };
+  for (const article of published) {
+    if (article.category_id) addToCategory(article.category_id, article.id);
+  }
+  for (const row of (extraData ?? []) as { article_id: string; category_id: string }[]) {
+    if (publishedIds.has(row.article_id)) addToCategory(row.category_id, row.article_id);
   }
   const withArticles = categories
     .filter((category) => counts.has(category.id))
@@ -52,7 +65,9 @@ export default async function CategoriasPage() {
             </div>
           ) : (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(220px, 100%), 1fr))", gap: "1rem" }}>
-              {withArticles.map((category) => (
+              {withArticles.map((category) => {
+                const count = counts.get(category.id)?.size ?? 0;
+                return (
                 <Link
                   key={category.id}
                   href={{ pathname: "/conteudo/categoria/[slug]", params: { slug: category.slug } }}
@@ -81,10 +96,11 @@ export default async function CategoriasPage() {
                     {pickLocale(locale, category.name_pt, category.name_en)}
                   </span>
                   <div style={{ fontSize: "0.8125rem", color: "var(--site-muted)" }}>
-                    {counts.get(category.id)} {locale === "en" ? (counts.get(category.id) === 1 ? "article" : "articles") : counts.get(category.id) === 1 ? "artigo" : "artigos"}
+                    {count} {locale === "en" ? (count === 1 ? "article" : "articles") : count === 1 ? "artigo" : "artigos"}
                   </div>
                 </Link>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>

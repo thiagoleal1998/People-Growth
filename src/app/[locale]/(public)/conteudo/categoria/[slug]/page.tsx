@@ -19,20 +19,34 @@ async function getCategoryData(slug: string) {
   const { data: category } = await client.from("categories").select("*").eq("slug", slug).single();
   if (!category) return null;
 
-  const [{ data: articlesData }, { data: authorsData }] = await Promise.all([
+  // An article lists here either because this is its primary category, or because
+  // it was additionally tagged with it (article_categories) — merged and de-duped
+  // below, since the same article could in principle match both.
+  const [{ data: primaryData }, { data: extraRows }, { data: authorsData }, { data: allCategoriesData }] = await Promise.all([
     client
       .from("articles")
       .select("*")
       .eq("category_id", category.id)
       .eq("status", "published")
       .order("published_at", { ascending: false }),
+    client.from("article_categories").select("article_id").eq("category_id", category.id),
     client.from("authors").select("*"),
+    client.from("categories").select("*"),
   ]);
+
+  const extraIds = ((extraRows ?? []) as { article_id: string }[]).map((row) => row.article_id);
+  const { data: extraData } =
+    extraIds.length > 0 ? await client.from("articles").select("*").in("id", extraIds).eq("status", "published") : { data: [] };
+
+  const byId = new Map<string, Article>();
+  for (const article of [...((primaryData ?? []) as Article[]), ...((extraData ?? []) as Article[])]) byId.set(article.id, article);
+  const articles = [...byId.values()].sort((a, b) => (b.published_at ?? "").localeCompare(a.published_at ?? ""));
 
   return {
     category: category as Category,
-    articles: (articlesData ?? []) as Article[],
+    articles,
     authorById: new Map(((authorsData ?? []) as Author[]).map((a) => [a.id, a])),
+    categoryById: new Map(((allCategoriesData ?? []) as Category[]).map((c) => [c.id, c])),
   };
 }
 
@@ -51,7 +65,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
   if (!result) notFound();
 
-  const { category, articles, authorById } = result;
+  const { category, articles, authorById, categoryById } = result;
   const tNav = await getTranslations({ locale, namespace: "nav" });
   const tc = await getTranslations({ locale, namespace: "common" });
 
@@ -93,7 +107,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
               {articles.map((article) => (
                 <Link
                   key={article.id}
-                  href={articleHref(article, category.slug)}
+                  href={articleHref(article, article.category_id ? categoryById.get(article.category_id)?.slug : null)}
                   style={{ display: "block", textDecoration: "none" }}
                   className="hover-card"
                 >

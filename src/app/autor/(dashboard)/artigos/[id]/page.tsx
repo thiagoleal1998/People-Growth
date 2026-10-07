@@ -19,12 +19,22 @@ export default async function EditarArtigoAutorPage({
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data: item }, { data: categoriesData }] = await Promise.all([
+  const [{ data: item }, { data: categoriesData }, { data: extraCategoriesData }] = await Promise.all([
     client.from("articles").select("*").eq("id", id).eq("author_id", profile.author_id).single(),
     client.from("categories").select("*").order("name_pt"),
+    client.from("article_categories").select("category_id").eq("article_id", id),
   ]);
 
   if (!item) notFound();
 
-  return <AuthorArticleForm item={item as Article} categories={(categoriesData ?? []) as Category[]} imageError={imageError} saveError={saveError} saved={saved === "1"} />;
+  return (
+    <AuthorArticleForm
+      item={item as Article}
+      categories={(categoriesData ?? []) as Category[]}
+      extraCategoryIds={((extraCategoriesData ?? []) as { category_id: string }[]).map((row) => row.category_id)}
+      imageError={imageError}
+      saveError={saveError}
+      saved={saved === "1"}
+    />
+  );
 }

@@ -16,10 +16,11 @@ export default async function EditarArtigoPage({
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data: item }, { data: categoriesData }, { data: authorsData }] = await Promise.all([
+  const [{ data: item }, { data: categoriesData }, { data: authorsData }, { data: extraCategoriesData }] = await Promise.all([
     client.from("articles").select("*").eq("id", id).single(),
     client.from("categories").select("*").order("name_pt"),
     client.from("authors").select("*").order("name"),
+    client.from("article_categories").select("category_id").eq("article_id", id),
   ]);
 
   if (!item) notFound();
@@ -29,6 +30,7 @@ export default async function EditarArtigoPage({
       item={item as Article}
       categories={(categoriesData ?? []) as Category[]}
       authors={(authorsData ?? []) as Author[]}
+      extraCategoryIds={((extraCategoriesData ?? []) as { category_id: string }[]).map((row) => row.category_id)}
       imageError={imageError}
       saveError={saveError}
       saved={saved === "1"}

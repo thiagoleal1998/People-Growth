@@ -132,6 +132,18 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
     articleId = data?.id ?? null;
   }
 
+  // Additional categories (beyond the primary category_id above): replace the
+  // whole set on every save. RLS ("Authors manage categories of their own
+  // articles") checks the article's real author_id, not a client-supplied one.
+  if (!saveError && articleId) {
+    const primaryCategoryId = String(formData.get("category_id") ?? "");
+    const extraCategoryIds = [...new Set(formData.getAll("extra_category_ids").map((value) => String(value)).filter((cid) => cid && cid !== primaryCategoryId))];
+    await client.from("article_categories").delete().eq("article_id", articleId);
+    if (extraCategoryIds.length > 0) {
+      await client.from("article_categories").insert(extraCategoryIds.map((category_id) => ({ article_id: articleId, category_id })));
+    }
+  }
+
   // A failed write (e.g. a duplicate slug) must never look like a success —
   // this used to redirect to ?saved=1 unconditionally regardless of error.
   if (saveError) {

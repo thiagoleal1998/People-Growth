@@ -56,7 +56,7 @@ function slugifyPreview(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-export function AuthorArticleForm({ item, categories, imageError, saveError, saved }: { item?: Article; categories: Category[]; imageError?: string; saveError?: string; saved?: boolean }) {
+export function AuthorArticleForm({ item, categories, extraCategoryIds, imageError, saveError, saved }: { item?: Article; categories: Category[]; extraCategoryIds?: string[]; imageError?: string; saveError?: string; saved?: boolean }) {
   const action = upsertOwnArticle.bind(null, item?.id ?? null);
   const [active, setActive] = useState<TabId>("conteudo");
   const [titlePt, setTitlePt] = useState(item?.title_pt ?? "");
@@ -70,6 +70,10 @@ export function AuthorArticleForm({ item, categories, imageError, saveError, sav
   const [slug, setSlug] = useState(item?.slug ?? "");
   const [format, setFormat] = useState<Article["format"]>(item?.format ?? "opiniao");
   const [categoryId, setCategoryId] = useState(item?.category_id ?? "");
+  const [extraCategories, setExtraCategories] = useState<string[]>(extraCategoryIds ?? []);
+  function toggleExtraCategory(id: string) {
+    setExtraCategories((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
+  }
   const [translating, setTranslating] = useState(false);
   const [generatingExcerpt, setGeneratingExcerpt] = useState(false);
   const contentPtRef = useRef<MarkdownEditorHandle>(null);
@@ -316,13 +320,36 @@ export function AuthorArticleForm({ item, categories, imageError, saveError, sav
                 <option value="noticia">Notícia</option>
               </Select>
             </Field>
-            <Field label="Categoria">
-              <Select name="category_id" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+            <Field label="Categoria principal">
+              <Select
+                name="category_id"
+                value={categoryId}
+                onChange={(e) => {
+                  setCategoryId(e.target.value);
+                  setExtraCategories((prev) => prev.filter((id) => id !== e.target.value));
+                }}
+              >
                 <option value="">Sem categoria</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>{c.name_pt}</option>
                 ))}
               </Select>
+            </Field>
+            <Field label="Categorias adicionais" hint="O artigo também aparece listado nelas, além da principal — útil quando o tema cruza mais de uma área.">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
+                {categories.filter((c) => c.id !== categoryId).map((c) => (
+                  <label key={c.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                    <input
+                      type="checkbox"
+                      name="extra_category_ids"
+                      value={c.id}
+                      checked={extraCategories.includes(c.id)}
+                      onChange={() => toggleExtraCategory(c.id)}
+                    />
+                    {c.name_pt}
+                  </label>
+                ))}
+              </div>
             </Field>
             <Field label="Imagem de capa" hint="PNG, JPG ou WEBP — convertida automaticamente para WebP e comprimida para menos de 1MB.">
               {item?.cover_image && (

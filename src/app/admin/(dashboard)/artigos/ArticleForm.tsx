@@ -37,6 +37,7 @@ export function ArticleForm({
   item,
   categories,
   authors,
+  extraCategoryIds,
   imageError,
   saveError,
   saved,
@@ -44,6 +45,7 @@ export function ArticleForm({
   item?: Article;
   categories: Category[];
   authors: Author[];
+  extraCategoryIds?: string[];
   imageError?: string;
   saveError?: string;
   saved?: boolean;
@@ -73,6 +75,10 @@ export function ArticleForm({
   const [slug, setSlug] = useState(item?.slug ?? "");
   const [format, setFormat] = useState<Article["format"]>(item?.format ?? "noticia");
   const [categoryId, setCategoryId] = useState(item?.category_id ?? "");
+  const [extraCategories, setExtraCategories] = useState<string[]>(extraCategoryIds ?? []);
+  function toggleExtraCategory(id: string) {
+    setExtraCategories((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
+  }
   const [translating, setTranslating] = useState(false);
   const [generatingExcerpt, setGeneratingExcerpt] = useState(false);
   const [approving, startApproving] = useTransition();
@@ -384,13 +390,36 @@ export function ArticleForm({
                   <option value="opiniao">Opinião (Mea Sententia)</option>
                 </Select>
               </Field>
-              <Field label="Categoria" hint="Também define a URL do artigo (junto com o tipo de conteúdo acima).">
-                <Select name="category_id" value={categoryId} onChange={(e) => setCategoryId(e.target.value)}>
+              <Field label="Categoria principal" hint="Também define a URL do artigo (junto com o tipo de conteúdo acima).">
+                <Select
+                  name="category_id"
+                  value={categoryId}
+                  onChange={(e) => {
+                    setCategoryId(e.target.value);
+                    setExtraCategories((prev) => prev.filter((id) => id !== e.target.value));
+                  }}
+                >
                   <option value="">Sem categoria</option>
                   {categories.map((c) => (
                     <option key={c.id} value={c.id}>{c.name_pt}</option>
                   ))}
                 </Select>
+              </Field>
+              <Field label="Categorias adicionais" hint="O artigo também aparece listado nelas, além da principal — útil quando o tema cruza mais de uma área.">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
+                  {categories.filter((c) => c.id !== categoryId).map((c) => (
+                    <label key={c.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                      <input
+                        type="checkbox"
+                        name="extra_category_ids"
+                        value={c.id}
+                        checked={extraCategories.includes(c.id)}
+                        onChange={() => toggleExtraCategory(c.id)}
+                      />
+                      {c.name_pt}
+                    </label>
+                  ))}
+                </div>
               </Field>
               <Field label="Autor">
                 <Select name="author_id" defaultValue={item?.author_id ?? ""}>

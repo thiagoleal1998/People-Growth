@@ -23,13 +23,20 @@ export async function CategoryNav() {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data: categoriesData }, { data: articlesData }] = await Promise.all([
+  const [{ data: categoriesData }, { data: articlesData }, { data: extraData }] = await Promise.all([
     client.from("categories").select("*"),
-    client.from("articles").select("category_id").eq("status", "published").not("category_id", "is", null),
+    client.from("articles").select("id, category_id").eq("status", "published"),
+    client.from("article_categories").select("article_id, category_id"),
   ]);
   const categories = (categoriesData ?? []) as Category[];
-  // A category with no published article yet has nothing to show, so it stays hidden.
-  const categoryIdsWithArticles = new Set((articlesData ?? []).map((a: { category_id: string }) => a.category_id));
+  const published = (articlesData ?? []) as { id: string; category_id: string | null }[];
+  const publishedIds = new Set(published.map((a) => a.id));
+  // A category with no published article yet has nothing to show, so it stays hidden —
+  // whether the article's primary category or one of its additional ones (article_categories).
+  const categoryIdsWithArticles = new Set(published.flatMap((a) => (a.category_id ? [a.category_id] : [])));
+  for (const row of (extraData ?? []) as { article_id: string; category_id: string }[]) {
+    if (publishedIds.has(row.article_id)) categoryIdsWithArticles.add(row.category_id);
+  }
   const eligible = categories.filter((c) => categoryIdsWithArticles.has(c.id));
 
   if (eligible.length === 0) return null;
