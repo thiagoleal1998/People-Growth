@@ -78,6 +78,24 @@
   background: var(--admin-border-strong);
 }
 
+.admin-select {
+  appearance: none;
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  background-image: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.admin-select:hover {
+  border-color: var(--admin-muted);
+}
+
+.admin-select:focus {
+  outline: none;
+  border-color: #4361ee;
+  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+}
+
 .comment-details summary {
   list-style: none;
   cursor: pointer;

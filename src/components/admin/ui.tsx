@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { useFormStatus } from "react-dom";
-import { Trash2, Loader2, RefreshCw } from "lucide-react";
+import { Trash2, Loader2, RefreshCw, ChevronDown } from "lucide-react";
 import type { ReactNode } from "react";
 import { confirmDialog } from "./dialog-store";
 
@@ -89,9 +89,9 @@ export function Badge({ children, tone = "neutral" }: { children: ReactNode; ton
 export const fieldLabelStyle = { display: "block", fontSize: "0.8rem", fontWeight: 600, color: "var(--admin-text-secondary)", marginBottom: "0.375rem" } as const;
 export const fieldControlStyle = { width: "100%", padding: "0.625rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.9rem", boxSizing: "border-box" as const, fontFamily: "inherit", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" };
 
-export function Field({ label, children, hint }: { label: string; children: ReactNode; hint?: string }) {
+export function Field({ label, children, hint, full }: { label: string; children: ReactNode; hint?: string; full?: boolean }) {
   return (
-    <div style={{ marginBottom: "1.125rem" }}>
+    <div style={{ marginBottom: "1.125rem", gridColumn: full ? "1 / -1" : undefined }}>
       <label style={fieldLabelStyle}>{label}</label>
       {children}
       {hint && <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.25rem" }}>{hint}</div>}
@@ -107,8 +107,17 @@ export function Textarea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
   return <textarea {...props} style={{ ...fieldControlStyle, resize: "vertical", ...props.style }} />;
 }
 
-export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>) {
-  return <select {...props} style={{ ...fieldControlStyle, cursor: "pointer", ...props.style }} />;
+export function Select({ className, style, ...props }: React.SelectHTMLAttributes<HTMLSelectElement>) {
+  return (
+    <div style={{ position: "relative" }}>
+      <select
+        {...props}
+        className={["admin-select", className].filter(Boolean).join(" ")}
+        style={{ ...fieldControlStyle, cursor: "pointer", paddingRight: "2.25rem", ...style }}
+      />
+      <ChevronDown size={16} style={{ position: "absolute", right: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--admin-muted)", pointerEvents: "none" }} />
+    </div>
+  );
 }
 
 export function FormShell({

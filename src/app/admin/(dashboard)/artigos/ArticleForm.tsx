@@ -151,7 +151,7 @@ export function ArticleForm({
   const previewUrl = `peoplegrowth.com.br › conteudo › ${formatSegment} › categoria › ${categorySlug} › ${slug || slugifyPreview(titlePt) || "..."}`;
 
   return (
-    <div style={{ maxWidth: "900px" }}>
+    <div style={{ maxWidth: "1100px" }}>
       <SavedToast show={Boolean(saved)} />
       <div style={{ marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
         <div>
@@ -410,8 +410,8 @@ export function ArticleForm({
                   ))}
                 </Select>
               </Field>
-              <Field label="Categorias adicionais" hint="O artigo também aparece listado nelas, além da principal — útil quando o tema cruza mais de uma área.">
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
+              <Field full label="Categorias adicionais" hint="O artigo também aparece listado nelas, além da principal — útil quando o tema cruza mais de uma área.">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.625rem 1.75rem" }}>
                   {categories.filter((c) => c.id !== categoryId).map((c) => (
                     <label key={c.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
                       <input
@@ -441,8 +441,8 @@ export function ArticleForm({
                   ))}
                 </Select>
               </Field>
-              <Field label="Coautores" hint="Para textos colaborativos — aparecem junto do autor principal na assinatura do artigo.">
-                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
+              <Field full label="Coautores" hint="Para textos colaborativos — aparecem junto do autor principal na assinatura do artigo.">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.625rem 1.75rem" }}>
                   {authors.filter((a) => a.id !== authorId).map((a) => (
                     <label key={a.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
                       <input
