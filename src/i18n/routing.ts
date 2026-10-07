@@ -34,6 +34,10 @@ export const routing = defineRouting({
       pt: "/conteudo/categoria/[slug]",
       en: "/content/category/[slug]",
     },
+    "/conteudo/categorias": {
+      pt: "/conteudo/categorias",
+      en: "/content/categories",
+    },
     "/cursos": { pt: "/cursos", en: "/courses" },
     "/laboratorio-ia": { pt: "/laboratorio-ia", en: "/ai-lab" },
     "/recursos": { pt: "/recursos", en: "/resources" },

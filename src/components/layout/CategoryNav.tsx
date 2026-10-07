@@ -4,20 +4,40 @@ import { createClient } from "@/lib/supabase/server";
 import { pickLocale } from "@/lib/locale-content";
 import type { Category } from "@/types/database.types";
 
-const order = ["negocios", "marketing", "ia", "politica", "esporte", "economia", "cultura", "meio-ambiente"];
+// How many categories the bar shows at once — kept at today's count on purpose,
+// so adding more categories later doesn't widen the bar. The rest become reachable
+// through "Outras categorias" instead.
+const MAX_SHOWN = 8;
+
+function shuffled<T>(items: T[]): T[] {
+  const arr = [...items];
+  for (let i = arr.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [arr[i], arr[j]] = [arr[j], arr[i]];
+  }
+  return arr;
+}
 
 export async function CategoryNav() {
   const locale = await getLocale();
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any).from("categories").select("*");
-  const categories = (data ?? []) as Category[];
+  const client = supabase as any;
+  const [{ data: categoriesData }, { data: articlesData }] = await Promise.all([
+    client.from("categories").select("*"),
+    client.from("articles").select("category_id").eq("status", "published").not("category_id", "is", null),
+  ]);
+  const categories = (categoriesData ?? []) as Category[];
+  // A category with no published article yet has nothing to show, so it stays hidden.
+  const categoryIdsWithArticles = new Set((articlesData ?? []).map((a: { category_id: string }) => a.category_id));
+  const eligible = categories.filter((c) => categoryIdsWithArticles.has(c.id));
 
-  const sorted = order
-    .map((slug) => categories.find((c) => c.slug === slug))
-    .filter((c): c is Category => Boolean(c));
+  if (eligible.length === 0) return null;
 
-  if (sorted.length === 0) return null;
+  // A different random pick and order each time the bar renders — only once there
+  // are more eligible categories than fit does the rest need "Outras categorias".
+  const sorted = shuffled(eligible).slice(0, MAX_SHOWN);
+  const hasMore = eligible.length > MAX_SHOWN;
 
   return (
     <nav className="category-nav" style={{ backgroundColor: "var(--site-surface-alt)", borderBottom: "1px solid var(--site-border)" }}>
@@ -44,6 +64,24 @@ export async function CategoryNav() {
             {pickLocale(locale, category.name_pt, category.name_en)}
           </Link>
         ))}
+        {hasMore && (
+          <Link
+            href="/conteudo/categorias"
+            style={{
+              flexShrink: 0,
+              fontSize: "0.8125rem",
+              fontWeight: 700,
+              letterSpacing: "0.03em",
+              textTransform: "uppercase",
+              color: "var(--site-text-secondary)",
+              textDecoration: "none",
+              whiteSpace: "nowrap",
+            }}
+          >
+            {locale === "en" ? "Other categories" : "Outras categorias"}
+          </Link>
+        )}
+        {/* Fixed on purpose: unlike the categories above, this one never moves or gets shuffled out. */}
         <Link
           href="/conteudo/colunistas"
           className="category-nav-columnists"
