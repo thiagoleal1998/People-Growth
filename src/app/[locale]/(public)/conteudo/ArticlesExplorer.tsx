@@ -310,13 +310,15 @@ export function ArticlesExplorer({
               {categoriesLabel}
             </h3>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              {/* The site's own blue, not each category's stored colour — a calmer,
+                  more institutional look than a chip per hue. */}
               {categoriesWithArticles.map((category) => (
                 <Link
                   key={category.id}
                   href={{ pathname: "/conteudo/categoria/[slug]", params: { slug: category.slug } }}
                   style={{
-                    backgroundColor: `${category.color ?? "#4361EE"}18`,
-                    color: category.color ?? "#4361EE",
+                    backgroundColor: "rgba(67,97,238,0.1)",
+                    color: "#4361EE",
                     padding: "0.3rem 0.75rem",
                     borderRadius: "9999px",
                     fontSize: "0.8125rem",
