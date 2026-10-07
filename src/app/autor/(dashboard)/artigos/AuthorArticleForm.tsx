@@ -11,7 +11,7 @@ import { SavedToast } from "@/components/admin/SavedToast";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { alertDialog } from "@/components/admin/dialog-store";
 import { upsertOwnArticle } from "./actions";
-import type { Article, Category } from "@/types/database.types";
+import type { Article, Author, Category } from "@/types/database.types";
 
 const tabs = [
   { id: "conteudo", label: "Conteúdo" },
@@ -56,7 +56,7 @@ function slugifyPreview(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-export function AuthorArticleForm({ item, categories, extraCategoryIds, imageError, saveError, saved }: { item?: Article; categories: Category[]; extraCategoryIds?: string[]; imageError?: string; saveError?: string; saved?: boolean }) {
+export function AuthorArticleForm({ item, categories, otherAuthors, extraCategoryIds, coauthorIds, imageError, saveError, saved }: { item?: Article; categories: Category[]; otherAuthors?: Author[]; extraCategoryIds?: string[]; coauthorIds?: string[]; imageError?: string; saveError?: string; saved?: boolean }) {
   const action = upsertOwnArticle.bind(null, item?.id ?? null);
   const [active, setActive] = useState<TabId>("conteudo");
   const [titlePt, setTitlePt] = useState(item?.title_pt ?? "");
@@ -73,6 +73,10 @@ export function AuthorArticleForm({ item, categories, extraCategoryIds, imageErr
   const [extraCategories, setExtraCategories] = useState<string[]>(extraCategoryIds ?? []);
   function toggleExtraCategory(id: string) {
     setExtraCategories((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
+  }
+  const [coauthors, setCoauthors] = useState<string[]>(coauthorIds ?? []);
+  function toggleCoauthor(id: string) {
+    setCoauthors((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
   }
   const [translating, setTranslating] = useState(false);
   const [generatingExcerpt, setGeneratingExcerpt] = useState(false);
@@ -351,6 +355,24 @@ export function AuthorArticleForm({ item, categories, extraCategoryIds, imageErr
                 ))}
               </div>
             </Field>
+            {otherAuthors && otherAuthors.length > 0 && (
+              <Field label="Colaboradores" hint="Para textos escritos em conjunto — aparecem junto com você na assinatura do artigo.">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
+                  {otherAuthors.map((a) => (
+                    <label key={a.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                      <input
+                        type="checkbox"
+                        name="coauthor_ids"
+                        value={a.id}
+                        checked={coauthors.includes(a.id)}
+                        onChange={() => toggleCoauthor(a.id)}
+                      />
+                      {a.name}
+                    </label>
+                  ))}
+                </div>
+              </Field>
+            )}
             <Field label="Imagem de capa" hint="PNG, JPG ou WEBP — convertida automaticamente para WebP e comprimida para menos de 1MB.">
               {item?.cover_image && (
                 // eslint-disable-next-line @next/next/no-img-element

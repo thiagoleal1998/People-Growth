@@ -24,7 +24,7 @@ const cardStyle: React.CSSProperties = {
  * uses), select any passage to attach a note about it, and either approve
  * or send the compiled notes back to the author — no bouncing between the
  * list, a separate preview tab, and a bare prompt() for feedback. */
-export function ArticleReview({ article, author, category }: { article: Article; author: Author | null; category: Category | null }) {
+export function ArticleReview({ article, author, coauthors, category }: { article: Article; author: Author | null; coauthors?: Author[]; category: Category | null }) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
@@ -142,7 +142,7 @@ export function ArticleReview({ article, author, category }: { article: Article;
           <ArrowLeft size={14} /> Voltar para a lista
         </Link>
         <div ref={containerRef} onMouseUp={handleMouseUp}>
-          <ArticlePreviewFrame article={article} author={author} category={category} />
+          <ArticlePreviewFrame article={article} author={author} coauthors={coauthors} category={category} />
         </div>
       </div>
 

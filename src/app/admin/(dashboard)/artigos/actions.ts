@@ -73,6 +73,10 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
   const format = (String(formData.get("format") ?? "noticia")) as Article["format"];
   const scheduledFor = String(formData.get("scheduled_for") ?? "").trim() || null;
 
+  if (status === "scheduled" && !scheduledFor) {
+    throw new Error("Defina a data e hora de publicação para agendar o artigo.");
+  }
+
   // Normalize any "\r\n" that might still slip through — the markdown-lite
   // renderer's paragraph/list/quote splitting only recognizes plain "\n\n".
   const contentPt = String(formData.get("content_pt") ?? "").replace(/\r\n?/g, "\n");
@@ -154,6 +158,16 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     await client.from("article_categories").delete().eq("article_id", articleId);
     if (extraCategoryIds.length > 0) {
       await client.from("article_categories").insert(extraCategoryIds.map((category_id) => ({ article_id: articleId, category_id })));
+    }
+  }
+
+  // Co-authors (collaborative pieces): same replace-the-whole-set approach,
+  // excluding the primary author even if somehow submitted as a co-author too.
+  if (!saveError && articleId) {
+    const coauthorIds = [...new Set(formData.getAll("coauthor_ids").map((value) => String(value)).filter((aid) => aid && aid !== authorId))];
+    await client.from("article_coauthors").delete().eq("article_id", articleId);
+    if (coauthorIds.length > 0) {
+      await client.from("article_coauthors").insert(coauthorIds.map((author_id) => ({ article_id: articleId, author_id })));
     }
   }
 

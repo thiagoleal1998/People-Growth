@@ -18,7 +18,7 @@ import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import { articleHref, articlePath, FORMAT_SEGMENT, UNCATEGORIZED_SEGMENT } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
 import { aiDisclosureText } from "@/lib/ai-disclosure";
-import { aboutAuthorLabel, isAuthorPubliclyVisible } from "@/lib/founder-data";
+import { aboutAuthorLabel, isAuthorPubliclyVisible, joinAuthorNames } from "@/lib/founder-data";
 import type { Article, Category, Author, Comment } from "@/types/database.types";
 import { HideSideRails } from "@/components/HideSideRails";
 
@@ -47,16 +47,22 @@ async function getArticle(slug: string) {
     .single();
   if (!article) return null;
 
-  const [categoryRes, authorRes, commentsRes, allAuthorsRes] = await Promise.all([
+  const [categoryRes, authorRes, commentsRes, allAuthorsRes, coauthorsRes] = await Promise.all([
     article.category_id ? client.from("categories").select("*").eq("id", article.category_id).single() : Promise.resolve({ data: null }),
     article.author_id ? client.from("authors").select("*").eq("id", article.author_id).single() : Promise.resolve({ data: null }),
     client.from("comments").select("*").eq("article_id", article.id).eq("status", "approved").order("created_at", { ascending: false }),
     client.from("authors").select("*"),
+    client.from("article_coauthors").select("author_id").eq("article_id", article.id),
   ]);
   // Used to show "Por {autor}" on each "Leia também" card below — a
   // separate fetch of every author rather than a join, matching the same
   // pattern already used on the homepage/category/search listings.
   const authorById = new Map(((allAuthorsRes.data ?? []) as Author[]).map((a) => [a.id, a]));
+  // Collaborative pieces: primary author plus any co-authors, resolved
+  // through the same authorById map rather than a second roundtrip.
+  const coauthors = ((coauthorsRes.data ?? []) as { author_id: string }[])
+    .map((row) => authorById.get(row.author_id))
+    .filter((a): a is Author => Boolean(a));
 
   let related: ArticleWithCategory[] = [];
   if (article.category_id) {
@@ -86,6 +92,7 @@ async function getArticle(slug: string) {
     article: article as ArticleWithCategory,
     category: categoryRes.data as Category | null,
     author: authorRes.data as Author | null,
+    coauthors,
     comments: (commentsRes.data ?? []) as Comment[],
     related,
     authorById,
@@ -110,6 +117,7 @@ export async function generateMetadata({
   const title = pickLocale(locale, result.article.seo_title_pt, result.article.seo_title_en) || pickLocale(locale, result.article.title_pt, result.article.title_en);
   const description = pickLocale(locale, result.article.seo_desc_pt, result.article.seo_desc_en) || pickLocale(locale, result.article.excerpt_pt, result.article.excerpt_en) || undefined;
   const images = result.article.cover_image ? [{ url: result.article.cover_image, width: 1200, height: 630 }] : undefined;
+  const allAuthorNames = [result.author, ...result.coauthors].filter((a): a is Author => Boolean(a)).map((a) => a.name);
 
   return {
     title,
@@ -120,7 +128,7 @@ export async function generateMetadata({
       description,
       images,
       publishedTime: result.article.published_at ?? undefined,
-      authors: result.author ? [result.author.name] : undefined,
+      authors: allAuthorNames.length > 0 ? allAuthorNames : undefined,
     },
     twitter: {
       card: "summary_large_image",
@@ -144,7 +152,12 @@ export default async function ArticlePage({
   const tc = await getTranslations({ locale, namespace: "common" });
   const tNav = await getTranslations({ locale, namespace: "nav" });
 
-  const { article, category: categoryRow, author, comments, related, authorById } = result;
+  const { article, category: categoryRow, author, coauthors, comments, related, authorById } = result;
+  // Primary author plus any co-authors, in that order, de-duplicated —
+  // used everywhere the article's byline/credits are shown.
+  const allAuthors = [author, ...coauthors]
+    .filter((a): a is Author => Boolean(a))
+    .filter((a, i, arr) => arr.findIndex((b) => b.id === a.id) === i);
 
   // Self-healing canonical URL: if the format/category in the address bar
   // doesn't match this article's actual data (stale link, category changed
@@ -171,7 +184,7 @@ export default async function ArticlePage({
     image: article.cover_image ? [article.cover_image] : undefined,
     datePublished: article.published_at ?? article.created_at,
     dateModified: article.updated_at ?? article.published_at ?? article.created_at,
-    author: author ? { "@type": "Person", name: author.name, url: `${siteUrl}/conteudo/autor/${author.slug}` } : undefined,
+    author: allAuthors.length > 0 ? allAuthors.map((a) => ({ "@type": "Person", name: a.name, url: `${siteUrl}/conteudo/autor/${a.slug}` })) : undefined,
     publisher: {
       "@type": "Organization",
       name: "People & Growth",
@@ -264,7 +277,7 @@ export default async function ArticlePage({
                 <Clock size={14} /> {article.read_time} {tc("minutes")}
               </span>
             )}
-            {author && <span>{tc("by")} {author.name}</span>}
+            {allAuthors.length > 0 && <span>{tc("by")} {joinAuthorNames(allAuthors.map((a) => a.name), locale)}</span>}
           </div>
         </div>
       </section>
@@ -283,13 +296,12 @@ export default async function ArticlePage({
         >
           {/* Article body */}
           <article>
-            {author && (
+            {allAuthors.length > 0 && (
               <div
                 style={{
                   display: "flex",
                   alignItems: "center",
-                  justifyContent: "space-between",
-                  gap: "1rem",
+                  gap: "1.75rem",
                   flexWrap: "wrap",
                   padding: "1rem 0",
                   marginBottom: "1.75rem",
@@ -297,51 +309,47 @@ export default async function ArticlePage({
                   borderBottom: "1px solid var(--site-border)",
                 }}
               >
-                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
-                  <div
-                    style={{
-                      width: "2.75rem",
-                      height: "2.75rem",
-                      borderRadius: "50%",
-                      flexShrink: 0,
-                      background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
-                    }}
-                  />
-                  <div>
-                    <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "0.9375rem" }}>{author.name}</div>
-                    {isAuthorPubliclyVisible(author) && (
-                      <Link
-                        href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
-                        style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
-                      >
-                        {aboutAuthorLabel(author.gender, locale)} <ChevronRight size={14} />
-                      </Link>
-                    )}
-                  </div>
-                </div>
-
-                {(author.linkedin_url || author.instagram_url || author.whatsapp_url) && (
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", minWidth: 0 }}>
-                    <span style={{ color: "var(--site-muted)", fontSize: "0.8125rem", fontWeight: 600 }}>{locale === "en" ? "Follow on social media" : "Siga nas redes"}</span>
-                    <div style={{ display: "flex", gap: "0.625rem" }}>
-                      {author.linkedin_url && (
-                        <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={{ color: "var(--site-text)" }}>
-                          <Linkedin size={17} />
-                        </a>
-                      )}
-                      {author.instagram_url && (
-                        <a href={author.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "var(--site-text)" }}>
-                          <Instagram size={17} />
-                        </a>
-                      )}
-                      {author.whatsapp_url && (
-                        <a href={author.whatsapp_url} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" style={{ color: "var(--site-text)" }}>
-                          <WhatsAppIcon size={17} />
-                        </a>
-                      )}
+                {allAuthors.map((a) => (
+                  <div key={a.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                    <div
+                      style={{
+                        width: "2.75rem",
+                        height: "2.75rem",
+                        borderRadius: "50%",
+                        flexShrink: 0,
+                        background: a.photo_url ? `url(${a.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                      }}
+                    />
+                    <div>
+                      <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "0.9375rem" }}>{a.name}</div>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                        {isAuthorPubliclyVisible(a) && (
+                          <Link
+                            href={{ pathname: "/sobre/[slug]", params: { slug: a.slug } }}
+                            style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
+                          >
+                            {aboutAuthorLabel(a.gender, locale)} <ChevronRight size={14} />
+                          </Link>
+                        )}
+                        {a.linkedin_url && (
+                          <a href={a.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={{ color: "var(--site-text)" }}>
+                            <Linkedin size={15} />
+                          </a>
+                        )}
+                        {a.instagram_url && (
+                          <a href={a.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "var(--site-text)" }}>
+                            <Instagram size={15} />
+                          </a>
+                        )}
+                        {a.whatsapp_url && (
+                          <a href={a.whatsapp_url} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" style={{ color: "var(--site-text)" }}>
+                            <WhatsAppIcon size={15} />
+                          </a>
+                        )}
+                      </div>
                     </div>
                   </div>
-                )}
+                ))}
               </div>
             )}
 

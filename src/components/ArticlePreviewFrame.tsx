@@ -4,7 +4,7 @@ import { ArticleBody } from "@/components/ArticleBody";
 import { renderMarkdownLite, stripMarkdownLite } from "@/lib/markdown-lite";
 import { aiDisclosureText } from "@/lib/ai-disclosure";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
-import { aboutAuthorLabel } from "@/lib/founder-data";
+import { aboutAuthorLabel, joinAuthorNames } from "@/lib/founder-data";
 import type { Article, Category, Author } from "@/types/database.types";
 
 const statusLabel: Record<Article["status"], string> = {
@@ -17,9 +17,10 @@ const statusLabel: Record<Article["status"], string> = {
 /** Renders a draft/pending article exactly the way it'll look on the
  * public site, reusing the same ArticleBody component — so what the
  * author/admin sees here is what actually ships, not an approximation. */
-export function ArticlePreviewFrame({ article, author, category }: { article: Article; author: Author | null; category: Category | null }) {
+export function ArticlePreviewFrame({ article, author, coauthors, category }: { article: Article; author: Author | null; coauthors?: Author[]; category: Category | null }) {
   const previewAiText = aiDisclosureText(article.ai_usage, "pt");
   const previewAiDisclosure = previewAiText ? { title: "Declaração sobre o uso de inteligência artificial", text: previewAiText } : null;
+  const allAuthors = [author, ...(coauthors ?? [])].filter((a): a is Author => Boolean(a));
   return (
     <div>
       <div
@@ -74,38 +75,43 @@ export function ArticlePreviewFrame({ article, author, category }: { article: Ar
               <Clock size={14} /> {article.read_time} min de leitura
             </span>
           )}
-          {author && <span>Por {author.name}</span>}
+          {allAuthors.length > 0 && <span>Por {joinAuthorNames(allAuthors.map((a) => a.name), "pt")}</span>}
         </div>
       </div>
 
       <div style={{ backgroundColor: "var(--site-bg)", borderRadius: "0 0 1rem 1rem", padding: "2.5rem", border: "1px solid var(--site-border)", borderTop: "none" }}>
-        {author && (
+        {allAuthors.length > 0 && (
           <div
             style={{
               display: "flex",
               alignItems: "center",
-              gap: "0.75rem",
+              gap: "1.75rem",
+              flexWrap: "wrap",
               padding: "1rem 0",
               marginBottom: "1.75rem",
               borderTop: "1px solid var(--site-border)",
               borderBottom: "1px solid var(--site-border)",
             }}
           >
-            <div
-              style={{
-                width: "2.75rem",
-                height: "2.75rem",
-                borderRadius: "50%",
-                flexShrink: 0,
-                background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
-              }}
-            />
-            <div>
-              <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "0.9375rem" }}>{author.name}</div>
-              <div style={{ color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem" }}>
-                {aboutAuthorLabel(author.gender, "pt")}
+            {allAuthors.map((a) => (
+              <div key={a.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                <div
+                  style={{
+                    width: "2.75rem",
+                    height: "2.75rem",
+                    borderRadius: "50%",
+                    flexShrink: 0,
+                    background: a.photo_url ? `url(${a.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                  }}
+                />
+                <div>
+                  <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "0.9375rem" }}>{a.name}</div>
+                  <div style={{ color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem" }}>
+                    {aboutAuthorLabel(a.gender, "pt")}
+                  </div>
+                </div>
               </div>
-            </div>
+            ))}
           </div>
         )}
 

@@ -38,6 +38,7 @@ export function ArticleForm({
   categories,
   authors,
   extraCategoryIds,
+  coauthorIds,
   imageError,
   saveError,
   saved,
@@ -46,6 +47,7 @@ export function ArticleForm({
   categories: Category[];
   authors: Author[];
   extraCategoryIds?: string[];
+  coauthorIds?: string[];
   imageError?: string;
   saveError?: string;
   saved?: boolean;
@@ -78,6 +80,11 @@ export function ArticleForm({
   const [extraCategories, setExtraCategories] = useState<string[]>(extraCategoryIds ?? []);
   function toggleExtraCategory(id: string) {
     setExtraCategories((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
+  }
+  const [authorId, setAuthorId] = useState(item?.author_id ?? "");
+  const [coauthors, setCoauthors] = useState<string[]>(coauthorIds ?? []);
+  function toggleCoauthor(id: string) {
+    setCoauthors((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
   }
   const [translating, setTranslating] = useState(false);
   const [generatingExcerpt, setGeneratingExcerpt] = useState(false);
@@ -364,14 +371,12 @@ export function ArticleForm({
               </Field>
               <Field
                 label="Status"
-                hint={item?.status === "pending" ? 'Para agendar a data pedida pelo autor, use o botão "Aprovar e agendar" abaixo — esse status não é escolhido aqui.' : undefined}
+                hint={item?.status === "pending" ? 'Para agendar a data pedida pelo autor, use o botão "Aprovar e agendar" abaixo — ou escolha "Agendado" aqui para definir a data você mesmo.' : undefined}
               >
                 <Select name="status" defaultValue={item?.status ?? "draft"}>
                   <option value="draft">Rascunho</option>
                   <option value="pending">Pendente (aguardando revisão)</option>
-                  {/* "Agendado" só é alcançado aprovando um pendente (botão abaixo) — só aparece
-                      aqui quando o artigo já está nesse status, pra não sumir ao editar. */}
-                  {item?.status === "scheduled" && <option value="scheduled">Agendado (publica sozinho na data)</option>}
+                  <option value="scheduled">Agendado (publica sozinho na data abaixo)</option>
                   <option value="published">Publicado</option>
                 </Select>
               </Field>
@@ -421,13 +426,36 @@ export function ArticleForm({
                   ))}
                 </div>
               </Field>
-              <Field label="Autor">
-                <Select name="author_id" defaultValue={item?.author_id ?? ""}>
+              <Field label="Autor principal">
+                <Select
+                  name="author_id"
+                  value={authorId}
+                  onChange={(e) => {
+                    setAuthorId(e.target.value);
+                    setCoauthors((prev) => prev.filter((id) => id !== e.target.value));
+                  }}
+                >
                   <option value="">Sem autor definido</option>
                   {authors.map((a) => (
                     <option key={a.id} value={a.id}>{a.name}</option>
                   ))}
                 </Select>
+              </Field>
+              <Field label="Coautores" hint="Para textos colaborativos — aparecem junto do autor principal na assinatura do artigo.">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
+                  {authors.filter((a) => a.id !== authorId).map((a) => (
+                    <label key={a.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                      <input
+                        type="checkbox"
+                        name="coauthor_ids"
+                        value={a.id}
+                        checked={coauthors.includes(a.id)}
+                        onChange={() => toggleCoauthor(a.id)}
+                      />
+                      {a.name}
+                    </label>
+                  ))}
+                </div>
               </Field>
               <Field
                 label="Data de publicação agendada"

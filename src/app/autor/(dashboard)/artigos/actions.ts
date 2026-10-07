@@ -144,6 +144,17 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
     }
   }
 
+  // Co-authors (collaborative pieces): same replace-the-whole-set approach.
+  // RLS ("Authors manage coauthors of their own articles") checks the
+  // article's real author_id, not a client-supplied one.
+  if (!saveError && articleId) {
+    const coauthorIds = [...new Set(formData.getAll("coauthor_ids").map((value) => String(value)).filter((aid) => aid && aid !== profile.author_id))];
+    await client.from("article_coauthors").delete().eq("article_id", articleId);
+    if (coauthorIds.length > 0) {
+      await client.from("article_coauthors").insert(coauthorIds.map((author_id) => ({ article_id: articleId, author_id })));
+    }
+  }
+
   // A failed write (e.g. a duplicate slug) must never look like a success —
   // this used to redirect to ?saved=1 unconditionally regardless of error.
   if (saveError) {

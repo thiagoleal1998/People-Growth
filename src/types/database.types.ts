@@ -67,6 +67,8 @@ type ArticleTagRow = { article_id: string; tag_id: string };
 // articles.category_id (which still decides the article's URL and main badge).
 type ArticleCategoryRow = { article_id: string; category_id: string };
 
+type ArticleCoauthorRow = { article_id: string; author_id: string };
+
 type PortfolioCaseRow = {
   id: string;
   title_pt: string;
@@ -462,6 +464,7 @@ export type Database = {
       tags: { Row: TagRow; Insert: Omit<TagRow, "id" | "created_at">; Update: Partial<Omit<TagRow, "id" | "created_at">>; Relationships: [] };
       article_tags: { Row: ArticleTagRow; Insert: ArticleTagRow; Update: Partial<ArticleTagRow>; Relationships: [] };
       article_categories: { Row: ArticleCategoryRow; Insert: ArticleCategoryRow; Update: Partial<ArticleCategoryRow>; Relationships: [] };
+      article_coauthors: { Row: ArticleCoauthorRow; Insert: ArticleCoauthorRow; Update: Partial<ArticleCoauthorRow>; Relationships: [] };
       portfolio_cases: { Row: PortfolioCaseRow; Insert: Omit<PortfolioCaseRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<PortfolioCaseRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       services: { Row: ServiceRow; Insert: Omit<ServiceRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<ServiceRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       testimonials: { Row: TestimonialRow; Insert: Omit<TestimonialRow, "id" | "created_at">; Update: Partial<Omit<TestimonialRow, "id" | "created_at">>; Relationships: [] };
@@ -504,6 +507,7 @@ export type Article = ArticleRow;
 export type Category = CategoryRow;
 export type Tag = TagRow;
 export type ArticleCategory = ArticleCategoryRow;
+export type ArticleCoauthor = ArticleCoauthorRow;
 export type PortfolioCase = PortfolioCaseRow;
 export type Service = ServiceRow;
 export type Testimonial = TestimonialRow;

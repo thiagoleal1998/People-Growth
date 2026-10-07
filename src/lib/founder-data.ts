@@ -34,6 +34,15 @@ export function parseMilestones(text: string | null): Milestone[] {
     .filter((m) => m.year && m.label);
 }
 
+// "A, B e C" (or "A, B and C" in English) for a collaborative piece's byline —
+// falls back to "" for an empty list so callers can just check truthiness.
+export function joinAuthorNames(names: string[], locale: string): string {
+  if (names.length === 0) return "";
+  if (names.length === 1) return names[0];
+  const and = locale === "en" ? "and" : "e";
+  return `${names.slice(0, -1).join(", ")} ${and} ${names[names.length - 1]}`;
+}
+
 export function bioParagraphs(text: string | null) {
   return (text ?? "")
     .split(/\r?\n\r?\n/)
