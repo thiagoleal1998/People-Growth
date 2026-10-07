@@ -1,11 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Trash2 } from "lucide-react";
+import { Trash2, Mail, KeyRound } from "lucide-react";
 import type { UserProfile, Author } from "@/types/database.types";
 import { formatUserId } from "@/lib/display-id";
-import { confirmDialog } from "@/components/admin/dialog-store";
-import { updateUserRole, updateUserAuthorLink, deleteUser } from "./actions";
+import { confirmDialog, promptDialog, alertDialog } from "@/components/admin/dialog-store";
+import { updateUserRole, updateUserAuthorLink, deleteUser, updateUserEmail, resetUserPassword } from "./actions";
 
 export function UsersClient({ users, authors }: { users: UserProfile[]; authors: Author[] }) {
   const [, startTransition] = useTransition();
@@ -23,7 +23,7 @@ export function UsersClient({ users, authors }: { users: UserProfile[]; authors:
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                {["ID", "E-mail", "Papel", "Vinculado ao autor", ""].map((h) => (
+                {["ID", "E-mail", "Papel", "Vinculado ao autor", "Ações"].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -76,18 +76,61 @@ export function UsersClient({ users, authors }: { users: UserProfile[]; authors:
                     )}
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <button
-                      onClick={async () => {
-                        if (await confirmDialog(`Remover o acesso de ${u.email}? A pessoa não conseguirá mais entrar.`, { danger: true, confirmText: "Remover" })) {
-                          setItems((prev) => prev.filter((i) => i.id !== u.id));
-                          startTransition(() => deleteUser(u.id));
-                        }
-                      }}
-                      style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}
-                      title="Remover acesso"
-                    >
-                      <Trash2 size={15} />
-                    </button>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                      <button
+                        onClick={async () => {
+                          const newEmail = await promptDialog(`Novo e-mail para ${u.email}:`, u.email);
+                          if (!newEmail || newEmail.trim() === u.email) return;
+                          setItems((prev) => prev.map((i) => (i.id === u.id ? { ...i, email: newEmail.trim() } : i)));
+                          startTransition(async () => {
+                            try {
+                              await updateUserEmail(u.id, newEmail.trim());
+                            } catch (err) {
+                              setItems((prev) => prev.map((i) => (i.id === u.id ? { ...i, email: u.email } : i)));
+                              await alertDialog(err instanceof Error ? err.message : "Erro ao trocar o e-mail.");
+                            }
+                          });
+                        }}
+                        style={{ color: "var(--admin-muted)", background: "none", border: "none", cursor: "pointer" }}
+                        title="Trocar e-mail"
+                      >
+                        <Mail size={15} />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          const newPassword = await promptDialog(`Nova senha para ${u.email} (mínimo 6 caracteres):`, "");
+                          if (!newPassword) return;
+                          if (newPassword.length < 6) {
+                            await alertDialog("A senha precisa ter pelo menos 6 caracteres.");
+                            return;
+                          }
+                          startTransition(async () => {
+                            try {
+                              await resetUserPassword(u.id, newPassword, null);
+                              await alertDialog(`Senha de ${u.email} atualizada.`);
+                            } catch (err) {
+                              await alertDialog(err instanceof Error ? err.message : "Erro ao trocar a senha.");
+                            }
+                          });
+                        }}
+                        style={{ color: "var(--admin-muted)", background: "none", border: "none", cursor: "pointer" }}
+                        title="Trocar senha"
+                      >
+                        <KeyRound size={15} />
+                      </button>
+                      <button
+                        onClick={async () => {
+                          if (await confirmDialog(`Remover o acesso de ${u.email}? A pessoa não conseguirá mais entrar.`, { danger: true, confirmText: "Remover" })) {
+                            setItems((prev) => prev.filter((i) => i.id !== u.id));
+                            startTransition(() => deleteUser(u.id));
+                          }
+                        }}
+                        style={{ color: "#ef4444", background: "none", border: "none", cursor: "pointer" }}
+                        title="Remover acesso"
+                      >
+                        <Trash2 size={15} />
+                      </button>
+                    </div>
                   </td>
                 </tr>
               ))}

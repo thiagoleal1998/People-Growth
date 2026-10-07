@@ -1,37 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
-import { PageHeader, Field, Input, Select, SubmitButton, SectionGrid, SectionCard, FieldGrid } from "@/components/admin/ui";
+import { PageHeader } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
-import { ErrorBanner } from "@/components/admin/ErrorBanner";
-import { updateSiteConfig } from "./actions";
-
-const contactFields: { key: string; label: string; placeholder?: string }[] = [
-  { key: "contact_email", label: "E-mail de contato" },
-  { key: "whatsapp", label: "WhatsApp", placeholder: "+55 11 99999-9999" },
-  { key: "linkedin", label: "LinkedIn (URL)" },
-  { key: "instagram", label: "Instagram (URL)" },
-  { key: "youtube", label: "YouTube (URL do canal)" },
-  { key: "x", label: "X / Twitter (URL)" },
-  { key: "calendly_url", label: "Link de agendamento (Calendly)" },
-];
-
-const homeContentFields: { key: string; label: string; placeholder?: string }[] = [
-  { key: "hero_photo", label: "Foto de destaque (URL da imagem)" },
-  { key: "hero_video_url", label: "Vídeo institucional (topo da home, ao lado do título — URL do YouTube)", placeholder: "https://www.youtube.com/watch?v=..." },
-  { key: "featured_video_url", label: "Vídeo em destaque (URL de embed do YouTube)", placeholder: "https://www.youtube.com/embed/..." },
-  { key: "shorts_video_url", label: "Vídeo vertical (Shorts, URL de embed do YouTube)", placeholder: "https://www.youtube.com/shorts/..." },
-];
-
-const weatherFields: { key: string; label: string; placeholder?: string }[] = [
-  { key: "weather_city_name", label: "Cidade exibida", placeholder: "São Paulo" },
-  { key: "weather_lat", label: "Latitude", placeholder: "-23.5505" },
-  { key: "weather_lon", label: "Longitude", placeholder: "-46.6333" },
-];
-
-const liveFields: { key: string; label: string; placeholder?: string }[] = [
-  { key: "live_stream_url", label: "Live (URL de embed do YouTube)", placeholder: "https://www.youtube.com/embed/live_stream?channel=..." },
-  { key: "live_caption_pt", label: "Legenda da live", placeholder: "Ex: Thiago Leal comenta os principais temas da semana" },
-  { key: "live_replay_url", label: "Replay (URL do YouTube) — aparece na mesma caixa quando não estiver ao vivo", placeholder: "https://www.youtube.com/watch?v=..." },
-];
+import { ConfiguracoesTabs } from "./ConfiguracoesTabs";
+import type { Category } from "@/types/database.types";
 
 type SiteConfigRow = { key: string; value: string | null };
 
@@ -39,127 +10,40 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
   const { saved, logoError, faviconError } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = (await (supabase as any).from("site_config").select("*")) as { data: SiteConfigRow[] | null };
+  const client = supabase as any;
+  const [{ data }, { data: categoriesData }, { data: articlesData }, { data: extraCategoriesData }] = await Promise.all([
+    client.from("site_config").select("*") as Promise<{ data: SiteConfigRow[] | null }>,
+    client.from("categories").select("*").order("name_pt"),
+    client.from("articles").select("id, category_id"),
+    client.from("article_categories").select("article_id, category_id"),
+  ]);
   const values = Object.fromEntries((data ?? []).map((row) => [row.key, row.value ?? ""]));
+  const categories = (categoriesData ?? []) as Category[];
+
+  // How many articles sit under each category — shown so deleting one isn't a
+  // guess, and counting both an article's primary category and any additional
+  // ones, same as the public category pages. Every article counts here, not
+  // only published ones, since this is about what a delete would affect.
+  const articleCounts: Record<string, number> = {};
+  const counted = new Map<string, Set<string>>();
+  const bump = (categoryId: string, articleId: string) => {
+    if (!counted.has(categoryId)) counted.set(categoryId, new Set());
+    counted.get(categoryId)!.add(articleId);
+  };
+  for (const article of (articlesData ?? []) as { id: string; category_id: string | null }[]) {
+    if (article.category_id) bump(article.category_id, article.id);
+  }
+  for (const row of (extraCategoriesData ?? []) as { article_id: string; category_id: string }[]) {
+    bump(row.category_id, row.article_id);
+  }
+  for (const [categoryId, ids] of counted) articleCounts[categoryId] = ids.size;
 
   return (
     <div>
       <SavedToast show={saved === "1"} />
       <PageHeader title="Configurações" subtitle="Identidade visual, contato e conteúdo exibido no site público" />
 
-      <form action={updateSiteConfig} style={{ maxWidth: "1400px" }}>
-        <div style={{ marginBottom: "1.5rem" }}>
-          <SectionGrid>
-            <SectionCard title="Identidade visual" subtitle="Logo e favicon usados em todo o site público.">
-              <FieldGrid>
-                <Field label="Logo do cabeçalho" hint="Aparece ao lado do nome People & Growth no topo do site. PNG, JPG, WEBP, SVG ou GIF, até 5MB.">
-                  {values.logo_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={values.logo_url}
-                      alt="Logo atual"
-                      style={{ height: "2.5rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.25rem" }}
-                    />
-                  )}
-                  <input className="admin-file-input" type="file" name="logo_file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" />
-                  <ErrorBanner message={logoError} />
-                </Field>
-
-                <Field label="Favicon" hint="Ícone que aparece na aba do navegador. Ideal: PNG ou SVG quadrado, fundo transparente.">
-                  {values.favicon_url && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img
-                      src={values.favicon_url}
-                      alt="Favicon atual"
-                      style={{ height: "2rem", width: "2rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.25rem" }}
-                    />
-                  )}
-                  <input className="admin-file-input" type="file" name="favicon_file" accept="image/png,image/x-icon,image/svg+xml" />
-                  <ErrorBanner message={faviconError} />
-                </Field>
-              </FieldGrid>
-            </SectionCard>
-
-            <SectionCard title="Dados técnicos do site" subtitle="Usado em SEO, compartilhamentos e links absolutos gerados pelo sistema.">
-              <Field label="URL do site" hint="Ex: https://people-growth.vercel.app — sem barra no final.">
-                <Input name="site_url" defaultValue={values.site_url ?? ""} />
-              </Field>
-            </SectionCard>
-
-            <SectionCard title="Contato & redes sociais" subtitle="Informações que aparecem no rodapé e na página de contato do site." wide>
-              <FieldGrid>
-                {contactFields.map(({ key, label, placeholder }) => (
-                  <Field key={key} label={label}>
-                    <Input name={key} defaultValue={values[key] ?? ""} placeholder={placeholder} />
-                  </Field>
-                ))}
-              </FieldGrid>
-            </SectionCard>
-
-            <SectionCard title="Conteúdo em destaque na home" subtitle="Foto e vídeos exibidos na página inicial do site." wide>
-              <FieldGrid>
-                {homeContentFields.map(({ key, label, placeholder }) => (
-                  <Field key={key} label={label}>
-                    <Input name={key} defaultValue={values[key] ?? ""} placeholder={placeholder} />
-                  </Field>
-                ))}
-              </FieldGrid>
-            </SectionCard>
-
-            <SectionCard title="Barra de topo" subtitle='Cotação de dólar/euro, previsão do tempo e busca, exibidas acima do menu em todo o site. Encontre a latitude/longitude da cidade em latlong.net.' wide>
-              <FieldGrid>
-                {weatherFields.map(({ key, label, placeholder }) => (
-                  <Field key={key} label={label}>
-                    <Input name={key} defaultValue={values[key] ?? ""} placeholder={placeholder} />
-                  </Field>
-                ))}
-              </FieldGrid>
-            </SectionCard>
-
-            <SectionCard title="Transmissão ao vivo" subtitle="Controla a caixa AO VIVO que aparece na home durante a transmissão de sábado." wide>
-              <Field label="Mostrar a caixa na home?" hint="Desative para tirar a caixa da home.">
-                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
-                  <input type="checkbox" name="is_live" defaultChecked={values.is_live === "true"} />
-                  Sim, mostrar a caixa na home
-                </label>
-              </Field>
-              <Field label="Tipo da caixa" hint="Ao vivo mostra a URL da live e o selo AO VIVO; Replay mostra a URL do replay e o título Replay.">
-                <Select name="live_box_type" defaultValue={values.live_box_type === "replay" ? "replay" : "live"}>
-                  <option value="live">Ao vivo</option>
-                  <option value="replay">Replay</option>
-                </Select>
-              </Field>
-              <FieldGrid>
-                {liveFields.map(({ key, label, placeholder }) => (
-                  <Field key={key} label={label}>
-                    <Input name={key} defaultValue={values[key] ?? ""} placeholder={placeholder} />
-                  </Field>
-                ))}
-              </FieldGrid>
-            </SectionCard>
-
-            <SectionCard title="Eleições 2026" subtitle="Bloco de apuração na home, com os dados oficiais do TSE." wide>
-              <Field label="Mostrar o bloco de eleições na home?" hint="Desative depois da eleição para tirar o bloco da home. A página /eleicoes continua disponível.">
-                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
-                  <input type="checkbox" name="tse_widget_enabled" defaultChecked={values.tse_widget_enabled !== "false"} />
-                  Sim, mostrar o bloco de eleições
-                </label>
-              </Field>
-            </SectionCard>
-
-            <SectionCard title="Seção Na Mídia" subtitle="Controla se a seção “Na Mídia” aparece no site." wide>
-              <Field label="Mostrar a seção Na Mídia?" hint="Desative para ocultar a seção na home, o link no menu/rodapé e a página /na-midia, sem apagar as menções cadastradas.">
-                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
-                  <input type="checkbox" name="media_enabled" defaultChecked={values.media_enabled !== "false"} />
-                  Sim, mostrar a seção Na Mídia
-                </label>
-              </Field>
-            </SectionCard>
-          </SectionGrid>
-        </div>
-
-        <SubmitButton>Salvar alterações</SubmitButton>
-      </form>
+      <ConfiguracoesTabs values={values} categories={categories} articleCounts={articleCounts} logoError={logoError} faviconError={faviconError} />
     </div>
   );
 }

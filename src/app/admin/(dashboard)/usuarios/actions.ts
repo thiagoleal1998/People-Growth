@@ -76,6 +76,30 @@ export async function deleteUser(id: string) {
   revalidatePath("/admin/usuarios");
 }
 
+export async function updateUserEmail(id: string, newEmail: string) {
+  const email = newEmail.trim();
+  if (!email) throw new Error("Informe um e-mail.");
+
+  const actor = await getCurrentProfile();
+  const admin = await createAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = admin as any;
+  const { data: target } = await client.from("user_profiles").select("email").eq("id", id).single();
+
+  // auth.users is the login record PostgREST never exposes for RLS — only the
+  // Auth Admin API (service-role) can change it. user_profiles.email is a cached
+  // copy read all over the admin UI, so it has to be kept in sync by hand here.
+  const { error } = await admin.auth.admin.updateUserById(id, { email });
+  if (error) throw error;
+  await client.from("user_profiles").update({ email }).eq("id", id);
+
+  if (actor) {
+    await logActivity({ userId: actor.id, userEmail: actor.email, action: "update", entityType: "usuário", entityLabel: `E-mail alterado: ${target?.email} → ${email}` });
+  }
+
+  revalidatePath("/admin/usuarios");
+}
+
 export async function resetUserPassword(userId: string, newPassword: string, requestId: string | null) {
   if (newPassword.length < 6) {
     throw new Error("A senha precisa ter pelo menos 6 caracteres.");

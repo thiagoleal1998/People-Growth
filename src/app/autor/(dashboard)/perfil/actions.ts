@@ -6,6 +6,19 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { uploadPublicImage } from "@/lib/supabase/storage";
 
+// Thrown rather than redirected — called directly from a small standalone form
+// (ChangePasswordCard), not the big profile form, so a mistake here never
+// discards whatever is mid-typed in the rest of the profile page.
+export async function changeOwnPassword(newPassword: string) {
+  const profile = await getCurrentProfile();
+  if (!profile) throw new Error("Sessão expirada. Atualize a página e entre novamente.");
+  if (newPassword.length < 6) throw new Error("A senha precisa ter pelo menos 6 caracteres.");
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.updateUser({ password: newPassword });
+  if (error) throw new Error(error.message);
+}
+
 export async function updateOwnAuthorProfile(formData: FormData) {
   const profile = await getCurrentProfile();
   if (!profile?.author_id) {

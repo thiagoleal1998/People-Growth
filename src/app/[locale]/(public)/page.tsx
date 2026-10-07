@@ -161,6 +161,7 @@ export default async function HomePage() {
   const showLiveBox = config.is_live === "true" && Boolean(liveBoxUrl);
   const isLive = !liveBoxIsReplay;
   const mediaEnabled = config.media_enabled !== "false";
+  const testimonialsEnabled = config.testimonials_enabled !== "false";
   const electionsEnabled = config.tse_widget_enabled !== "false";
   const electionsInitial = electionsEnabled
     ? { uf: "sp", president: await getPresidentRace(), governor: await getGovernorRace("sp"), senate: await getSenateRace("sp") }
@@ -971,7 +972,7 @@ export default async function HomePage() {
       )}
 
       {/* Testimonials */}
-      {testimonials.length > 0 && (
+      {testimonialsEnabled && testimonials.length > 0 && (
         <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
           <div className="container-xl">
             <Reveal>
