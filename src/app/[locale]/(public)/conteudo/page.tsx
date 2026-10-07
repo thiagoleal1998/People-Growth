@@ -30,17 +30,30 @@ export default async function MeaSententiePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const [articlesRes, categoriesRes, tagsRes, authorsRes] = await Promise.all([
+  const [articlesRes, categoriesRes, tagsRes, authorsRes, extraCategoriesRes] = await Promise.all([
     client.from("articles").select("*").eq("status", "published").order("published_at", { ascending: false }),
     client.from("categories").select("*"),
     client.from("tags").select("*"),
     client.from("authors").select("*").eq("status", "active").order("order"),
+    client.from("article_categories").select("article_id, category_id"),
   ]);
 
   const articles = (articlesRes.data ?? []) as Article[];
   const categories = (categoriesRes.data ?? []) as Category[];
   const tags = (tagsRes.data ?? []) as Tag[];
   const authors = ((authorsRes.data ?? []) as Author[]).filter(isAuthorPubliclyVisible);
+
+  // Categories shown in the sidebar: same "must have a published article" rule as the
+  // home bar and /conteudo/categorias — counting both an article's primary category
+  // and any additional ones (article_categories).
+  const publishedIds = new Set(articles.map((a) => a.id));
+  const categoryIdsWithArticles = new Set(articles.flatMap((a) => (a.category_id ? [a.category_id] : [])));
+  for (const row of (extraCategoriesRes.data ?? []) as { article_id: string; category_id: string }[]) {
+    if (publishedIds.has(row.article_id)) categoryIdsWithArticles.add(row.category_id);
+  }
+  const categoriesWithArticles = categories
+    .filter((c) => categoryIdsWithArticles.has(c.id))
+    .sort((a, b) => pickLocale(locale, a.name_pt, a.name_en).localeCompare(pickLocale(locale, b.name_pt, b.name_en), locale));
 
   const mostRead = [...articles].sort((a, b) => b.views - a.views).slice(0, 4);
 
@@ -155,12 +168,14 @@ export default async function MeaSententiePage() {
             <ArticlesExplorer
               articles={articles}
               categories={categories}
+              categoriesWithArticles={categoriesWithArticles}
               tags={tags}
               authors={authors}
               mostRead={mostRead}
               searchPlaceholder={t("search")}
               noResultsText={t("noResults")}
               tagsLabel={t("tags")}
+              categoriesLabel={t("categories")}
             />
           )}
         </div>

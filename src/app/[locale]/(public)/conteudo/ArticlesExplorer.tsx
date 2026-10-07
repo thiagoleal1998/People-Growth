@@ -105,21 +105,25 @@ function ArticleRow({ article, category, author }: { article: Article; category:
 export function ArticlesExplorer({
   articles,
   categories,
+  categoriesWithArticles,
   tags,
   authors,
   mostRead,
   searchPlaceholder,
   noResultsText,
   tagsLabel,
+  categoriesLabel,
 }: {
   articles: Article[];
   categories: Category[];
+  categoriesWithArticles: Category[];
   tags: Tag[];
   authors: Author[];
   mostRead: Article[];
   searchPlaceholder: string;
   noResultsText: string;
   tagsLabel: string;
+  categoriesLabel: string;
 }) {
   const locale = useLocale();
   const t = useTranslations("newsletter");
@@ -291,6 +295,41 @@ export function ArticlesExplorer({
             />
           </div>
         </div>
+
+        {/* Categories */}
+        {categoriesWithArticles.length > 0 && (
+          <div
+            style={{
+              backgroundColor: "var(--site-card)",
+              borderRadius: "1rem",
+              padding: "1.5rem",
+              border: "1px solid var(--site-border)",
+            }}
+          >
+            <h3 style={{ fontWeight: 700, color: "var(--site-text)", marginBottom: "1rem", fontSize: "0.9375rem" }}>
+              {categoriesLabel}
+            </h3>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
+              {categoriesWithArticles.map((category) => (
+                <Link
+                  key={category.id}
+                  href={{ pathname: "/conteudo/categoria/[slug]", params: { slug: category.slug } }}
+                  style={{
+                    backgroundColor: `${category.color ?? "#4361EE"}18`,
+                    color: category.color ?? "#4361EE",
+                    padding: "0.3rem 0.75rem",
+                    borderRadius: "9999px",
+                    fontSize: "0.8125rem",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                  }}
+                >
+                  {pickLocale(locale, category.name_pt, category.name_en)}
+                </Link>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Most read */}
         {mostRead.length > 0 && (
