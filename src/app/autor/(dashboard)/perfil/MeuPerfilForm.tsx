@@ -7,6 +7,7 @@ import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { ImageCropper } from "@/components/admin/ImageCropper";
 import { parseMilestones } from "@/lib/founder-data";
 import { updateOwnAuthorProfile } from "./actions";
+import { ChangePasswordCard } from "./ChangePasswordCard";
 import type { Author } from "@/types/database.types";
 
 const tabs = [
@@ -14,6 +15,7 @@ const tabs = [
   { id: "destaque", label: "Destaque" },
   { id: "bio", label: "Bio e trajetória" },
   { id: "redes", label: "Redes sociais" },
+  { id: "seguranca", label: "Segurança" },
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -48,8 +50,10 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
 
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "1.5rem", alignItems: "start" }} className="perfil-grid">
-      <form action={updateOwnAuthorProfile} style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid #eef1f4", padding: "1.75rem" }}>
-        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.5rem", borderBottom: "1px solid #eef1f4", paddingBottom: "1.125rem" }}>
+      <div>
+        {/* Outside the form on purpose — it also switches ChangePasswordCard below,
+            which has its own standalone action and isn't part of this form at all. */}
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.25rem" }}>
           {tabs.map((tab) => (
             <button
               key={tab.id}
@@ -70,6 +74,14 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
             </button>
           ))}
         </div>
+
+      {/* Shown, not unmounted, when on another tab — so a photo already cropped
+          (its File only lives in the DOM input, not in React state) survives a
+          trip through the other tabs instead of silently being lost. */}
+      <div style={{ display: active === "seguranca" ? "block" : "none" }}>
+        <ChangePasswordCard />
+      </div>
+      <form action={updateOwnAuthorProfile} style={{ display: active === "seguranca" ? "none" : "block", backgroundColor: "white", borderRadius: "1rem", border: "1px solid #eef1f4", padding: "1.75rem" }}>
 
         <div style={{ display: active === "foto" ? "block" : "none" }}>
         <Field label="Foto" hint="PNG, JPG ou WEBP. É a foto usada na tira de colunistas da home e na sua página de perfil. Depois de escolher o arquivo, dá pra ajustar o posicionamento e o zoom antes de salvar.">
@@ -164,6 +176,7 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
 
         <SubmitButton>Salvar alterações</SubmitButton>
       </form>
+      </div>
 
       <div style={{ position: "sticky", top: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
         <div style={{ backgroundColor: "#f8fafc", borderRadius: "1rem", border: "1px solid #eef1f4", padding: "1.25rem" }}>

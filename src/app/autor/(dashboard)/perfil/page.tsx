@@ -43,7 +43,6 @@ export default async function MeuPerfilPage({
         </div>
       )}
 
-      <ChangePasswordCard />
       <MeuPerfilForm author={author} photoError={photoError} />
     </div>
   );
