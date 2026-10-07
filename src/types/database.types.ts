@@ -439,6 +439,21 @@ type ContentCalendarItemRow = {
   updated_at: string;
 };
 
+type AnnouncementRow = {
+  id: string;
+  title: string;
+  body: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type AnnouncementReadRow = {
+  announcement_id: string;
+  user_id: string;
+  read_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -476,6 +491,8 @@ export type Database = {
       promo_search_rules: { Row: PromoSearchRuleRow; Insert: Omit<PromoSearchRuleRow, "id" | "created_at">; Update: Partial<Omit<PromoSearchRuleRow, "id" | "created_at">>; Relationships: [] };
       leadership_assessments: { Row: LeadershipAssessmentRow; Insert: Omit<LeadershipAssessmentRow, "id" | "created_at">; Update: Partial<Omit<LeadershipAssessmentRow, "id" | "created_at">>; Relationships: [] };
       content_calendar_items: { Row: ContentCalendarItemRow; Insert: Omit<ContentCalendarItemRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<ContentCalendarItemRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      announcements: { Row: AnnouncementRow; Insert: Omit<AnnouncementRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AnnouncementRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      announcement_reads: { Row: AnnouncementReadRow; Insert: Omit<AnnouncementReadRow, "read_at">; Update: Partial<AnnouncementReadRow>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -515,3 +532,5 @@ export type LeadershipAssessment = LeadershipAssessmentRow;
 export type AdEvent = AdEventRow;
 export type InstitutionalPage = InstitutionalPageRow;
 export type ContentCalendarItem = ContentCalendarItemRow;
+export type Announcement = AnnouncementRow;
+export type AnnouncementRead = AnnouncementReadRow;

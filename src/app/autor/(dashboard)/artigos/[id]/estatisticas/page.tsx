@@ -54,7 +54,7 @@ export default async function EstatisticasArtigoPage({ params }: { params: Promi
   return (
     <div>
       <div style={{ marginBottom: "1.5rem" }}>
-        <Link href="/autor" style={{ color: "#64748b", fontSize: "0.875rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
+        <Link href="/autor/artigos" style={{ color: "#64748b", fontSize: "0.875rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
           <ArrowLeft size={14} /> Meus artigos
         </Link>
         <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "#0d1b2a", marginTop: "0.5rem" }}>{typedArticle.title_pt}</h1>

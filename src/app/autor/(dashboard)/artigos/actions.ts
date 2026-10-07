@@ -174,6 +174,7 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
   }
 
   revalidatePath("/autor");
+  revalidatePath("/autor/artigos");
   revalidatePath("/admin/artigos");
 
   if (imageError && articleId) {
@@ -195,4 +196,5 @@ export async function deleteOwnArticle(id: string) {
   await client.from("articles").delete().eq("id", id).eq("author_id", profile.author_id);
   await logActivity({ userId: profile.id, userEmail: profile.email, action: "delete", entityType: "artigo", entityLabel: article?.title_pt });
   revalidatePath("/autor");
+  revalidatePath("/autor/artigos");
 }

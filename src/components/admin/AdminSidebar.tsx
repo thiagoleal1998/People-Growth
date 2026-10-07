@@ -57,6 +57,7 @@ const links: NavItem[] = [
   { href: "/admin/servicos", label: "Serviços", icon: Wrench },
   { href: "/admin/leads", label: "Leads / CRM", icon: Users, countKey: "leads" },
   { href: "/admin/chamados", label: "Chamados", icon: LifeBuoy, countKey: "chamados" },
+  { href: "/admin/comunicados", label: "Comunicados", icon: Megaphone },
   {
     label: "Marketing",
     icon: Megaphone,

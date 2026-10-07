@@ -1,122 +1,130 @@
 import Link from "next/link";
-import { Plus, Edit, BarChart3 } from "lucide-react";
+import { FileText, Eye, Clock, MessageCircle, Megaphone, Newspaper } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
-import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
-import { SavedToast } from "@/components/admin/SavedToast";
-import { deleteOwnArticle } from "./artigos/actions";
-import type { Article } from "@/types/database.types";
-
-const statusConfig: Record<Article["status"], { label: string; tone: "success" | "warning" | "neutral" }> = {
-  draft: { label: "Rascunho", tone: "neutral" },
-  pending: { label: "Aguardando Aprovação", tone: "warning" },
-  scheduled: { label: "Agendado", tone: "warning" },
-  published: { label: "Publicado", tone: "success" },
-};
+import type { Announcement, Article, Author } from "@/types/database.types";
 
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleDateString("pt-BR");
+  return new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit" });
 }
 
-export default async function AutorHomePage({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string }> }) {
-  const { saved, error } = await searchParams;
+export default async function AutorHomePage() {
   const profile = await getCurrentProfile();
-
-  if (!profile?.author_id) {
-    return (
-      <div>
-        <PageHeader title="Meus artigos" />
-        <Card>
-          <EmptyState text="Seu login ainda não está vinculado a um perfil de autor. Peça a um admin para vincular em Admin → Usuários." />
-        </Card>
-      </div>
-    );
-  }
-
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any)
-    .from("articles")
-    .select("*")
-    .eq("author_id", profile.author_id)
-    .order("created_at", { ascending: false });
-  const articles = (data ?? []) as Article[];
+  const client = supabase as any;
 
-  const commentCounts = new Map<string, number>();
-  if (articles.length > 0) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const { data: commentsData } = await (supabase as any)
+  const [{ data: ownArticlesData }, { data: announcementsData }, { data: newsData }, { data: authorsData }] = await Promise.all([
+    profile?.author_id ? client.from("articles").select("*").eq("author_id", profile.author_id) : Promise.resolve({ data: [] }),
+    client.from("announcements").select("*").order("created_at", { ascending: false }).limit(3),
+    client.from("articles").select("*").eq("status", "published").order("published_at", { ascending: false }).limit(6),
+    client.from("authors").select("id, name"),
+  ]);
+
+  const ownArticles = (ownArticlesData ?? []) as Article[];
+  const announcements = (announcementsData ?? []) as Announcement[];
+  const news = (newsData ?? []) as Article[];
+  const authorNameById = new Map(((authorsData ?? []) as Pick<Author, "id" | "name">[]).map((a) => [a.id, a.name]));
+  const ownName = profile?.author_id ? authorNameById.get(profile.author_id) : undefined;
+
+  let pendingComments = 0;
+  if (ownArticles.length > 0) {
+    const { count } = await client
       .from("comments")
-      .select("article_id")
-      .eq("status", "approved")
-      .in("article_id", articles.map((a) => a.id));
-    for (const c of (commentsData ?? []) as { article_id: string }[]) {
-      commentCounts.set(c.article_id, (commentCounts.get(c.article_id) ?? 0) + 1);
-    }
+      .select("id", { count: "exact", head: true })
+      .in("article_id", ownArticles.map((a) => a.id))
+      .eq("status", "pending");
+    pendingComments = count ?? 0;
   }
+
+  const published = ownArticles.filter((a) => a.status === "published");
+  const totalViews = ownArticles.reduce((sum, a) => sum + a.views, 0);
+  const drafting = ownArticles.filter((a) => a.status === "draft" || a.status === "pending").length;
+
+  const stats = [
+    { label: "Artigos publicados", value: published.length, icon: FileText, color: "#4361EE" },
+    { label: "Visualizações totais", value: totalViews, icon: Eye, color: "#06D6A0" },
+    { label: "Rascunhos e pendentes", value: drafting, icon: Clock, color: "#FFB703" },
+    { label: "Comentários a revisar", value: pendingComments, icon: MessageCircle, color: "#4361EE" },
+  ];
 
   return (
     <div>
-      <SavedToast show={saved === "1"} />
-      {error && (
-        <div style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#dc2626", padding: "0.75rem 1rem", borderRadius: "0.625rem", fontSize: "0.875rem", marginBottom: "1.25rem" }}>
-          {error}
+      <div style={{ marginBottom: "2rem" }}>
+        <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.25rem" }}>
+          {ownName ? `Olá, ${ownName.split(" ")[0]}!` : "Painel do autor"}
+        </h1>
+        <p style={{ color: "var(--admin-muted)", fontSize: "0.9375rem" }}>O resumo do seu trabalho e as novidades da People &amp; Growth.</p>
+      </div>
+
+      {profile?.author_id && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1.25rem", marginBottom: "2rem" }}>
+          {stats.map(({ label, value, icon: Icon, color }) => (
+            <div key={label} style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--admin-border)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+              <div style={{ width: "2.5rem", height: "2.5rem", borderRadius: "0.75rem", backgroundColor: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>
+                <Icon size={18} color={color} />
+              </div>
+              <div style={{ fontWeight: 900, fontSize: "2rem", color: "var(--admin-text)", lineHeight: 1, marginBottom: "0.25rem" }}>{value.toLocaleString("pt-BR")}</div>
+              <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", fontWeight: 600 }}>{label}</div>
+            </div>
+          ))}
         </div>
       )}
-      <PageHeader
-        title="Meus artigos"
-        subtitle={`${articles.length} artigo${articles.length === 1 ? "" : "s"}`}
-        action={<PrimaryLinkButton href="/autor/artigos/novo"><Plus size={16} /> Novo artigo</PrimaryLinkButton>}
-      />
 
-      <Card>
-        {articles.length === 0 ? (
-          <EmptyState text="Você ainda não escreveu nenhum artigo." />
-        ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ backgroundColor: "#f8fafc" }}>
-                {["Título", "Formato", "Status", "Visualizações", "Comentários", "Data", ""].map((h) => (
-                  <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "#64748b", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {articles.map((a) => (
-                <tr key={a.id} style={{ borderTop: "1px solid #f1f5f9" }}>
-                  <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "#0d1b2a", fontSize: "0.875rem", maxWidth: "320px" }}>
-                    <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{a.title_pt}</div>
-                  </td>
-                  <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <Badge tone={a.format === "opiniao" ? "warning" : "neutral"}>{a.format === "opiniao" ? "Mea Sententia" : "Notícia"}</Badge>
-                  </td>
-                  <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <Badge tone={statusConfig[a.status].tone}>{statusConfig[a.status].label}</Badge>
-                    {a.scheduled_for && (a.status === "pending" || a.status === "scheduled") && (
-                      <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "0.25rem" }}>
-                        {a.status === "scheduled" ? "Vai ao ar em " : "Data pedida: "}
-                        {new Date(a.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
-                      </div>
-                    )}
-                  </td>
-                  <td style={{ padding: "0.875rem 1.25rem", color: "#475569", fontSize: "0.875rem" }}>{a.views.toLocaleString("pt-BR")}</td>
-                  <td style={{ padding: "0.875rem 1.25rem", color: "#475569", fontSize: "0.875rem" }}>{commentCounts.get(a.id) ?? 0}</td>
-                  <td style={{ padding: "0.875rem 1.25rem", color: "#94a3b8", fontSize: "0.8125rem" }}>{formatDate(a.created_at)}</td>
-                  <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <Link href={`/autor/artigos/${a.id}/estatisticas`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Estatísticas"><BarChart3 size={15} /></Link>
-                      <Link href={`/autor/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
-                      {a.status !== "published" && a.status !== "scheduled" && (
-                        <ConfirmDeleteButton confirmText={`Excluir o artigo "${a.title_pt}"?`} onDelete={deleteOwnArticle.bind(null, a.id)} />
-                      )}
-                    </div>
-                  </td>
-                </tr>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem" }} className="autor-home-grid">
+        {/* Comunicados */}
+        <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
+          <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--admin-border-strong)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Megaphone size={17} color="#4361EE" /> Comunicados
+            </h2>
+            <Link href="/autor/comunicados" style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Ver todos →</Link>
+          </div>
+          {announcements.length === 0 ? (
+            <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum comunicado por enquanto.</div>
+          ) : (
+            <div>
+              {announcements.map((item) => (
+                <div key={item.id} style={{ padding: "1rem 1.5rem", borderTop: "1px solid var(--admin-border)" }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--admin-text)" }}>{item.title}</div>
+                  <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.25rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.body}</div>
+                  <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.375rem" }}>{formatDate(item.created_at)}</div>
+                </div>
               ))}
-            </tbody>
-          </table>
-        )}
-      </Card>
+            </div>
+          )}
+        </div>
+
+        {/* Site news */}
+        <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
+          <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--admin-border-strong)" }}>
+            <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Newspaper size={17} color="#06D6A0" /> Novidades no site
+            </h2>
+          </div>
+          {news.length === 0 ? (
+            <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum artigo publicado ainda.</div>
+          ) : (
+            <div>
+              {news.map((item) => (
+                <div key={item.id} style={{ padding: "0.875rem 1.5rem", borderTop: "1px solid var(--admin-border)" }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--admin-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title_pt}</div>
+                  <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.25rem" }}>
+                    {item.author_id && authorNameById.get(item.author_id) ? `${authorNameById.get(item.author_id)} · ` : ""}
+                    {item.published_at && formatDate(item.published_at)}
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      <style>{`
+        @media (max-width: 860px) {
+          .autor-home-grid { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }

@@ -9,7 +9,17 @@ import { parseMilestones } from "@/lib/founder-data";
 import { updateOwnAuthorProfile } from "./actions";
 import type { Author } from "@/types/database.types";
 
+const tabs = [
+  { id: "foto", label: "Foto e identidade" },
+  { id: "destaque", label: "Destaque" },
+  { id: "bio", label: "Bio e trajetória" },
+  { id: "redes", label: "Redes sociais" },
+] as const;
+
+type TabId = (typeof tabs)[number]["id"];
+
 export function MeuPerfilForm({ author, photoError }: { author: Author | null; photoError?: string }) {
+  const [active, setActive] = useState<TabId>("foto");
   const [photoPreview, setPhotoPreview] = useState<string | null>(author?.photo_url ?? null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [taglinePt, setTaglinePt] = useState(author?.tagline_pt ?? "");
@@ -39,6 +49,29 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
   return (
     <div style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "1.5rem", alignItems: "start" }} className="perfil-grid">
       <form action={updateOwnAuthorProfile} style={{ backgroundColor: "white", borderRadius: "1rem", border: "1px solid #eef1f4", padding: "1.75rem" }}>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.5rem", borderBottom: "1px solid #eef1f4", paddingBottom: "1.125rem" }}>
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActive(tab.id)}
+              style={{
+                padding: "0.4375rem 0.875rem",
+                borderRadius: "0.5rem",
+                border: `1px solid ${active === tab.id ? "#4361EE" : "#e2e8f0"}`,
+                backgroundColor: active === tab.id ? "rgba(67,97,238,0.08)" : "white",
+                color: active === tab.id ? "#4361EE" : "#64748b",
+                fontWeight: 700,
+                fontSize: "0.8125rem",
+                cursor: "pointer",
+              }}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ display: active === "foto" ? "block" : "none" }}>
         <Field label="Foto" hint="PNG, JPG ou WEBP. É a foto usada na tira de colunistas da home e na sua página de perfil. Depois de escolher o arquivo, dá pra ajustar o posicionamento e o zoom antes de salvar.">
           {photoPreview && (
             // eslint-disable-next-line @next/next/no-img-element
@@ -68,7 +101,9 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
             <option value="prefiro_nao_dizer">Prefiro não dizer</option>
           </Select>
         </Field>
+        </div>
 
+        <div style={{ display: active === "destaque" ? "block" : "none" }}>
         <Field
           label="Frase de destaque (PT)"
           hint={`Aparece na home, embaixo do seu nome na tira de colunistas — substitui o cargo ali. Ex: "Estratégia, dados e IA para negócios que querem crescer de verdade". ${taglineRemaining} caractere${taglineRemaining === 1 ? "" : "s"} restante${taglineRemaining === 1 ? "" : "s"}.`}
@@ -91,7 +126,9 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
         <Field label="Cargo (EN)" hint="Mesma ideia, em inglês.">
           <Input name="role_en" defaultValue={author?.role_en ?? ""} />
         </Field>
+        </div>
 
+        <div style={{ display: active === "bio" ? "block" : "none" }}>
         <Field
           label="Bio (PT)"
           hint='Um parágrafo maior sobre você, exibido na sua página "Sobre" completa. Ex: "Empreendedor e especialista em growth, ajudo empresas a crescerem com dados e tecnologia há mais de 10 anos."'
@@ -111,7 +148,9 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
         <Field label="Trajetória / Marcos (EN)" hint='Mesmo formato: "Year | Description", uma por linha.'>
           <Textarea name="milestones_en" rows={4} defaultValue={author?.milestones_en ?? ""} />
         </Field>
+        </div>
 
+        <div style={{ display: active === "redes" ? "block" : "none" }}>
         <Field label="LinkedIn (URL)" hint="Link completo do seu perfil.">
           <Input name="linkedin_url" defaultValue={author?.linkedin_url ?? ""} placeholder="https://linkedin.com/in/seu-usuario" />
         </Field>
@@ -121,6 +160,7 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
         <Field label="WhatsApp (URL)" hint="Link completo, ex: https://wa.me/5511999999999">
           <Input name="whatsapp_url" defaultValue={author?.whatsapp_url ?? ""} placeholder="https://wa.me/5511999999999" />
         </Field>
+        </div>
 
         <SubmitButton>Salvar alterações</SubmitButton>
       </form>

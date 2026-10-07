@@ -35,9 +35,19 @@ export default async function AuthorDashboardLayout({ children }: { children: Re
     }
   }
 
+  // Unread = every announcement minus the ones this person already has a read
+  // receipt for — a rough count rather than a NOT EXISTS join, same trade-off
+  // as the rest of this file's counts.
+  let unreadAnnouncements = 0;
+  if (profile?.id) {
+    const { count: totalCount } = await client.from("announcements").select("id", { count: "exact", head: true });
+    const { count: readCount } = await client.from("announcement_reads").select("announcement_id", { count: "exact", head: true }).eq("user_id", profile.id);
+    unreadAnnouncements = Math.max(0, (totalCount ?? 0) - (readCount ?? 0));
+  }
+
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      <AuthorSidebar logoUrl={logoUrl} pendingComments={pendingComments} />
+      <AuthorSidebar logoUrl={logoUrl} pendingComments={pendingComments} unreadAnnouncements={unreadAnnouncements} />
       <main className="admin-scroll" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%" }}>{children}</main>
     </div>
   );

@@ -155,7 +155,7 @@ export function AuthorArticleForm({ item, categories, extraCategoryIds, imageErr
       <SavedToast show={Boolean(saved)} />
       <div style={{ marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
         <div>
-          <Link href="/autor" style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>
+          <Link href="/autor/artigos" style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>
             &larr; Voltar
           </Link>
           <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--admin-text)", marginTop: "0.5rem" }}>
