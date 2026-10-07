@@ -29,7 +29,9 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     const [{ data }, { data: authorsData }] = await Promise.all([
       client
         .from("articles")
-        .select("*, categories(slug)")
+        // "categories!category_id" disambiguates the embed now that articles has a
+        // second FK path to categories through article_categories (multi-category).
+        .select("*, categories!category_id(slug)")
         .eq("status", "published")
         .or(`title_pt.ilike.%${query}%,excerpt_pt.ilike.%${query}%,content_pt.ilike.%${query}%,title_en.ilike.%${query}%,excerpt_en.ilike.%${query}%,content_en.ilike.%${query}%`)
         .order("published_at", { ascending: false })

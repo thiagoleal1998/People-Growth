@@ -43,7 +43,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const { data } = await client
     .from("articles")
-    .select("slug, format, updated_at, published_at, categories(slug)")
+    // "categories!category_id" disambiguates the embed now that articles has a second
+    // FK path to categories through the article_categories join table (multi-category).
+    .select("slug, format, updated_at, published_at, categories!category_id(slug)")
     .eq("status", "published");
 
   type ArticleRow = Pick<Article, "slug" | "format" | "updated_at" | "published_at"> & { categories: { slug: string } | null };

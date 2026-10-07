@@ -21,7 +21,9 @@ export default async function PublicidadePage({ searchParams }: { searchParams: 
     client.from("ads").select("*").order("created_at", { ascending: false }),
     client.from("ad_events").select("ad_id, event_type").gte("created_at", since),
     client.from("ad_targets").select("ad_id, article_id"),
-    client.from("articles").select("slug, format, categories(slug)").eq("status", "published").order("published_at", { ascending: false }).limit(1).maybeSingle(),
+    // "categories!category_id" disambiguates the embed now that articles has a second
+    // FK path to categories through the article_categories join table (multi-category).
+    client.from("articles").select("slug, format, categories!category_id(slug)").eq("status", "published").order("published_at", { ascending: false }).limit(1).maybeSingle(),
   ]);
 
   const ads = (adsData ?? []) as Ad[];
@@ -37,7 +39,7 @@ export default async function PublicidadePage({ searchParams }: { searchParams: 
   let targetedArticlesById = new Map<string, ArticleRef>();
   const targetedIds = Array.from(new Set(Array.from(targetsByAd.values()).flat()));
   if (targetedIds.length > 0) {
-    const { data: targetedArticles } = await client.from("articles").select("id, slug, format, categories(slug)").in("id", targetedIds);
+    const { data: targetedArticles } = await client.from("articles").select("id, slug, format, categories!category_id(slug)").in("id", targetedIds);
     targetedArticlesById = new Map(((targetedArticles ?? []) as ArticleRef[]).map((a) => [a.id, a]));
   }
 

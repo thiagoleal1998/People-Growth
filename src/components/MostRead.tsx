@@ -16,7 +16,11 @@ export async function MostRead({ excludeId, limit = 5 }: { excludeId?: string; l
   const client = supabase as any;
   const { data } = await client
     .from("articles")
-    .select("id, slug, title_pt, title_en, views, format, categories(slug)")
+    // "categories!category_id" disambiguates the embed: articles now has two FK
+    // paths to categories (the direct category_id, and the article_categories
+    // join table added for multi-category tagging), which PostgREST otherwise
+    // refuses as an ambiguous relationship.
+    .select("id, slug, title_pt, title_en, views, format, categories!category_id(slug)")
     .eq("status", "published")
     .order("views", { ascending: false })
     .limit(limit + (excludeId ? 1 : 0));

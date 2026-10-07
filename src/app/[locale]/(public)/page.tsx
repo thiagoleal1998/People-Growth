@@ -111,7 +111,9 @@ export default async function HomePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
   const [{ data: articlesData }, { data: authorsData }, { data: configData }, { data: testimonialsData }, { data: mediaData }] = await Promise.all([
-    client.from("articles").select("*, categories(slug)").eq("status", "published").order("published_at", { ascending: false }),
+    // "categories!category_id" disambiguates the embed now that articles has a second
+    // FK path to categories through the article_categories join table (multi-category).
+    client.from("articles").select("*, categories!category_id(slug)").eq("status", "published").order("published_at", { ascending: false }),
     client.from("authors").select("*").eq("status", "active").order("order"),
     client.from("site_config").select("*"),
     client.from("testimonials").select("*").eq("status", "active").order("order"),

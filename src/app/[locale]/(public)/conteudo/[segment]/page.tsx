@@ -26,7 +26,9 @@ export default async function LegacyArticleRedirect({
   const client = supabase as any;
   const { data: article } = await client
     .from("articles")
-    .select("slug, format, categories(slug)")
+    // "categories!category_id" disambiguates the embed now that articles has a second
+    // FK path to categories through the article_categories join table (multi-category).
+    .select("slug, format, categories!category_id(slug)")
     .eq("slug", slug)
     .eq("status", "published")
     .single();

@@ -35,9 +35,13 @@ async function getArticle(slug: string) {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
+  // "categories!category_id" disambiguates every embed below: articles now has a
+  // second FK path to categories through the article_categories join table (added
+  // for multi-category tagging), which PostgREST otherwise refuses to embed as an
+  // ambiguous relationship.
   const { data: article } = await client
     .from("articles")
-    .select("*, categories(slug)")
+    .select("*, categories!category_id(slug)")
     .eq("slug", slug)
     .eq("status", "published")
     .single();
@@ -58,7 +62,7 @@ async function getArticle(slug: string) {
   if (article.category_id) {
     const { data } = await client
       .from("articles")
-      .select("*, categories(slug)")
+      .select("*, categories!category_id(slug)")
       .eq("status", "published")
       .eq("category_id", article.category_id)
       .neq("id", article.id)
@@ -69,7 +73,7 @@ async function getArticle(slug: string) {
   if (related.length < 3) {
     const { data } = await client
       .from("articles")
-      .select("*, categories(slug)")
+      .select("*, categories!category_id(slug)")
       .eq("status", "published")
       .neq("id", article.id)
       .order("published_at", { ascending: false })

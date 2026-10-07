@@ -13,7 +13,9 @@ export async function GET() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any)
     .from("articles")
-    .select("title_pt, slug, format, excerpt_pt, published_at, categories(slug)")
+    // "categories!category_id" disambiguates the embed now that articles has a second
+    // FK path to categories through the article_categories join table (multi-category).
+    .select("title_pt, slug, format, excerpt_pt, published_at, categories!category_id(slug)")
     .eq("status", "published")
     .order("published_at", { ascending: false })
     .limit(30);
