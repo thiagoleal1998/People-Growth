@@ -12,7 +12,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit" });
 }
 
-const cardStyle = { backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" } as const;
+const cardStyle = { backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", borderTop: "3px solid #4361EE", overflow: "hidden" } as const;
 const cardHeaderStyle = { padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--admin-border-strong)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" } as const;
 
 export default async function AutorHomePage() {
@@ -74,11 +74,19 @@ export default async function AutorHomePage() {
 
   return (
     <div>
-      <div style={{ marginBottom: "2rem" }}>
-        <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.25rem" }}>
+      <div
+        style={{
+          background: "linear-gradient(135deg, #4361EE 0%, #2f49c7 100%)",
+          borderRadius: "1.25rem",
+          padding: "2rem 2.25rem",
+          marginBottom: "1.5rem",
+          boxShadow: "0 12px 30px -12px rgba(67,97,238,0.5)",
+        }}
+      >
+        <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "white", marginBottom: "0.375rem" }}>
           {ownName ? `Olá, ${ownName.split(" ")[0]}!` : "Painel do autor"}
         </h1>
-        <p style={{ color: "var(--admin-muted)", fontSize: "0.9375rem" }}>O resumo do seu trabalho e as novidades da People &amp; Growth.</p>
+        <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.9375rem" }}>O resumo do seu trabalho e as novidades da People &amp; Growth.</p>
       </div>
 
       {profile?.author_id && (
@@ -165,7 +173,7 @@ export default async function AutorHomePage() {
             <Video size={17} color="#4361EE" /> Últimos vídeos
           </h2>
         </div>
-        <div style={{ padding: "1.5rem", display: "grid", gridTemplateColumns: "1fr 220px", gap: "1.25rem" }} className="autor-videos-grid">
+        <div style={{ padding: "1.5rem", display: "grid", gridTemplateColumns: "minmax(0, 480px) 220px", gap: "1.25rem" }} className="autor-videos-grid">
           <div>
             <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "0.625rem" }}>Vídeo em destaque</div>
             {featuredVideoUrl ? (
