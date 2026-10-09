@@ -44,6 +44,7 @@ const tabs = [
   { id: "topo", label: "Barra de topo" },
   { id: "live", label: "Transmissão ao vivo" },
   { id: "eleicoes", label: "Eleições 2026" },
+  { id: "esportes", label: "Esportes" },
   { id: "categorias", label: "Categorias" },
   { id: "secoes", label: "Seções do site" },
 ] as const;
@@ -198,6 +199,20 @@ export function ConfiguracoesTabs({
               <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
                 <input type="checkbox" name="tse_widget_enabled" defaultChecked={values.tse_widget_enabled !== "false"} />
                 Sim, mostrar o bloco de eleições
+              </label>
+            </Field>
+          </div>
+        </div>
+
+        <div style={{ display: active === "esportes" ? "block" : "none" }}>
+          <div style={panelStyle}>
+            <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginBottom: "1.125rem" }}>
+              Tabela do Brasileirão e jogos ao vivo na home, via API-Football (requer a variável de ambiente API_FOOTBALL_KEY configurada).
+            </p>
+            <Field label="Mostrar o bloco de esportes na home?" hint="A página /esportes continua disponível mesmo com o bloco desligado.">
+              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                <input type="checkbox" name="sports_widget_enabled" defaultChecked={values.sports_widget_enabled !== "false"} />
+                Sim, mostrar o bloco de esportes
               </label>
             </Field>
           </div>

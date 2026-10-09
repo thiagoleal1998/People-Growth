@@ -45,6 +45,7 @@ export const routing = defineRouting({
     "/na-midia": { pt: "/na-midia", en: "/in-the-media" },
     "/ferramentas": { pt: "/ferramentas", en: "/tools" },
     "/depoimentos": { pt: "/depoimentos", en: "/testimonials" },
+    "/esportes": { pt: "/esportes", en: "/sports" },
     "/faq": { pt: "/faq", en: "/faq" },
     "/contato": { pt: "/contato", en: "/contact" },
     "/cookies": { pt: "/cookies", en: "/cookies" },

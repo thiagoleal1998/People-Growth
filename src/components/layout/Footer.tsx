@@ -16,9 +16,10 @@ type FooterProps = {
   youtube?: string;
   x?: string;
   mediaEnabled?: boolean;
+  sportsEnabled?: boolean;
 };
 
-export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, youtube, x, mediaEnabled = true }: FooterProps) {
+export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, youtube, x, mediaEnabled = true, sportsEnabled = true }: FooterProps) {
   const t = useTranslations("footer");
   const nav = useTranslations("nav");
   const year = new Date().getFullYear();
@@ -156,9 +157,10 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
                 { key: "portfolio", href: "/portfolio" as const },
                 { key: "newsletter", href: "/conteudo" as const },
                 { key: "media", href: "/na-midia" as const },
+                { key: "sports", href: "/esportes" as const },
                 { key: "contact", href: "/contato" as const },
               ]
-                .filter((l) => mediaEnabled || l.key !== "media")
+                .filter((l) => (mediaEnabled || l.key !== "media") && (sportsEnabled || l.key !== "sports"))
                 .map(({ key, href }) => (
                 <li key={key}>
                   <Link

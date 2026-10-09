@@ -15,14 +15,15 @@ const navLinks = [
   { key: "courses", href: "/cursos" as const },
   { key: "resources", href: "/recursos" as const },
   { key: "media", href: "/na-midia" as const },
+  { key: "sports", href: "/esportes" as const },
   { key: "contact", href: "/contato" as const },
 ];
 
-export function Navbar({ logoUrl, mediaEnabled = true }: { logoUrl?: string | null; mediaEnabled?: boolean }) {
+export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: { logoUrl?: string | null; mediaEnabled?: boolean; sportsEnabled?: boolean }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const visibleNavLinks = mediaEnabled ? navLinks : navLinks.filter((l) => l.key !== "media");
+  const visibleNavLinks = navLinks.filter((l) => (mediaEnabled || l.key !== "media") && (sportsEnabled || l.key !== "sports"));
 
   return (
     <header
