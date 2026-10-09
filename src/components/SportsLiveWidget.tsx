@@ -6,12 +6,16 @@ import { COMPETITIONS, type Fixture } from "@/lib/sports";
 const BRAND = "#4361EE";
 
 function statusLabel(fixture: Fixture, locale: string): string {
-  if (fixture.status !== "live") return fixture.statusShort;
-  if (fixture.statusShort === "HT") return locale === "en" ? "Half-time" : "Intervalo";
-  return fixture.elapsed ? `${fixture.elapsed}'` : (locale === "en" ? "Live" : "Ao vivo");
+  if (fixture.status === "live") {
+    if (fixture.statusShort === "HT") return locale === "en" ? "Half-time" : "Intervalo";
+    return fixture.elapsed ? `${fixture.elapsed}'` : locale === "en" ? "Live" : "Ao vivo";
+  }
+  if (fixture.status === "finished") return locale === "en" ? "Final" : "Encerrado";
+  return fixture.statusShort;
 }
 
 function MatchRow({ fixture, locale }: { fixture: Fixture; locale: string }) {
+  const isLive = fixture.status === "live";
   return (
     <div
       style={{
@@ -28,8 +32,8 @@ function MatchRow({ fixture, locale }: { fixture: Fixture; locale: string }) {
         style={{
           fontSize: "0.6875rem",
           fontWeight: 800,
-          color: "#DC2626",
-          backgroundColor: "rgba(220,38,38,0.1)",
+          color: isLive ? "#DC2626" : "var(--site-muted)",
+          backgroundColor: isLive ? "rgba(220,38,38,0.1)" : "var(--site-surface-alt)",
           padding: "0.1875rem 0.5rem",
           borderRadius: "9999px",
           flexShrink: 0,
@@ -55,8 +59,10 @@ function MatchRow({ fixture, locale }: { fixture: Fixture; locale: string }) {
 // API route every minute — same skeleton as ElectionResults.tsx,
 // LiveStatsWidget.tsx and NotificationBell.tsx. The route itself only ever
 // hits the real API while a match window is open, so polling here costs
-// nothing extra outside live windows.
-export function SportsLiveWidget({ initial, locale }: { initial: Fixture[]; locale: string }) {
+// nothing extra outside live windows. When nothing is live — most of any
+// given day — it falls back to showing the current round's finished results
+// instead of just saying there's nothing to see.
+export function SportsLiveWidget({ initial, roundResults = [], locale }: { initial: Fixture[]; roundResults?: Fixture[]; locale: string }) {
   const [live, setLive] = useState<Fixture[]>(initial);
 
   useEffect(() => {
@@ -79,19 +85,25 @@ export function SportsLiveWidget({ initial, locale }: { initial: Fixture[]; loca
     };
   }, []);
 
-  if (live.length === 0) {
-    return (
-      <div style={{ fontSize: "0.875rem", color: "var(--site-faint)", padding: "1rem 0" }}>
-        {locale === "en" ? "No live matches right now." : "Nenhum jogo ao vivo agora."}
-      </div>
-    );
-  }
+  const showingLive = live.length > 0;
+  const shown = showingLive ? live : roundResults;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
-      {live.map((fixture) => (
-        <MatchRow key={fixture.id} fixture={fixture} locale={locale} />
-      ))}
+    <div>
+      <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--site-text)", marginBottom: "0.75rem" }}>
+        {showingLive ? (locale === "en" ? "Live now" : "Ao vivo agora") : locale === "en" ? "Round results" : "Resultados da rodada"}
+      </div>
+      {shown.length === 0 ? (
+        <div style={{ fontSize: "0.875rem", color: "var(--site-faint)", padding: "1rem 0" }}>
+          {locale === "en" ? "No matches right now." : "Nenhum jogo no momento."}
+        </div>
+      ) : (
+        <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+          {shown.map((fixture) => (
+            <MatchRow key={fixture.id} fixture={fixture} locale={locale} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

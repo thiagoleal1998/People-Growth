@@ -26,7 +26,7 @@ import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/yout
 import { getGovernorRace, getPresidentRace, getSenateRace } from "@/lib/tse";
 import { ElectionResults } from "@/components/ElectionResults";
 import { ElectionBanner } from "@/components/ElectionBanner";
-import { getBestStandings, getLiveFixtures, isAnyCompetitionLiveNow } from "@/lib/sports";
+import { getBestStandings, getCurrentRoundFixtures, getLiveFixtures, isAnyCompetitionLiveNow } from "@/lib/sports";
 import { SportsLiveWidget } from "@/components/SportsLiveWidget";
 import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
 import { articleHref } from "@/lib/article-url";
@@ -174,8 +174,15 @@ export default async function HomePage() {
   // pages, falling back to TheSportsDB's top-5 if that ever breaks (see
   // getBestStandings in src/lib/sports.ts). Live scores: API-Football, which
   // can't do standings itself on the free plan (current season is blocked).
+  // roundResults (Série A's current round, finished matches only) is what
+  // the widget shows instead of "sem jogos ao vivo" on a day with no live
+  // match — shares the same scraped page/cache as the standings fetch above.
   const sportsInitial = sportsEnabled
-    ? { standings: await getBestStandings("serie_a"), live: (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [] }
+    ? {
+        standings: await getBestStandings("serie_a"),
+        live: (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [],
+        roundResults: ((await getCurrentRoundFixtures("serie_a")) ?? []).filter((f) => f.status === "finished"),
+      }
     : null;
   const faqEntries = getFaqEntriesFromConfig(config, locale);
   // Articles are ordered by publication date, except where an admin pinned one
@@ -247,39 +254,6 @@ export default async function HomePage() {
         </div>
       )}
 
-      {sportsInitial && (
-        <div className="container-xl" style={{ maxWidth: "1180px", margin: "0 auto", paddingTop: "1.5rem" }}>
-          <section style={{ borderTop: "3px solid #4361EE", paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
-            <h2 style={{ textAlign: "center", fontSize: "clamp(1.375rem, 3vw, 1.75rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem", paddingBottom: "1rem", borderBottom: "1px solid var(--site-border)" }}>
-              Brasileirão
-            </h2>
-            <div className="sports-home-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", alignItems: "start" }}>
-              <div>
-                <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--site-text)", marginBottom: "0.75rem" }}>
-                  {locale === "en" ? "Standings" : "Classificação"}
-                </div>
-                <SportsStandingsSnippet standings={sportsInitial.standings} locale={locale} />
-              </div>
-              <div>
-                <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--site-text)", marginBottom: "0.75rem" }}>
-                  {locale === "en" ? "Live now" : "Ao vivo agora"}
-                </div>
-                <SportsLiveWidget initial={sportsInitial.live ?? []} locale={locale} />
-              </div>
-            </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
-              <Link href="/esportes" style={{ color: "#4361EE", fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600 }}>
-                {locale === "en" ? "See all competitions ›" : "Ver todas as competições ›"}
-              </Link>
-            </div>
-            <style>{`
-              @media (max-width: 640px) {
-                .sports-home-grid { grid-template-columns: 1fr !important; }
-              }
-            `}</style>
-          </section>
-        </div>
-      )}
 
       {/* News lead — UOL-style front page block */}
       {featured && (
@@ -604,6 +578,37 @@ export default async function HomePage() {
             }
           `}</style>
         </section>
+      )}
+
+      {sportsInitial && (
+        <div className="container-xl" style={{ maxWidth: "1180px", margin: "0 auto", paddingTop: "1.5rem" }}>
+          <section style={{ borderTop: "3px solid #4361EE", paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
+            <h2 style={{ textAlign: "center", fontSize: "clamp(1.375rem, 3vw, 1.75rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem", paddingBottom: "1rem", borderBottom: "1px solid var(--site-border)" }}>
+              Brasileirão
+            </h2>
+            <div className="sports-home-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", alignItems: "start" }}>
+              <div>
+                <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--site-text)", marginBottom: "0.75rem" }}>
+                  {locale === "en" ? "Standings" : "Classificação"}
+                </div>
+                <SportsStandingsSnippet standings={sportsInitial.standings} locale={locale} />
+              </div>
+              <div>
+                <SportsLiveWidget initial={sportsInitial.live ?? []} roundResults={sportsInitial.roundResults} locale={locale} />
+              </div>
+            </div>
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
+              <Link href="/esportes" style={{ color: "#4361EE", fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600 }}>
+                {locale === "en" ? "See all competitions ›" : "Ver todas as competições ›"}
+              </Link>
+            </div>
+            <style>{`
+              @media (max-width: 640px) {
+                .sports-home-grid { grid-template-columns: 1fr !important; }
+              }
+            `}</style>
+          </section>
+        </div>
       )}
 
       {/* Columnists strip */}
