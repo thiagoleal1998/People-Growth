@@ -7,13 +7,23 @@
 // deliberately generous `revalidate`; see the "live" functions below for how
 // that budget is protected.
 //
-// NOTE: the league ids in COMPETITIONS and the parsers in this file follow
-// API-Football's documented v3 response shape, but have not been exercised
-// against a live response yet (no API key was available while writing this).
-// Once API_FOOTBALL_KEY is set, confirm the ids with a one-off call to
-// `/leagues?search=brasil` and adjust COMPETITIONS if any are off, and
-// sanity-check the parsers against a real `/standings` and `/fixtures`
-// response.
+// Competition ids in COMPETITIONS were confirmed against a real
+// `/leagues?country=Brazil` / `/leagues?search=libertadores` response (71,
+// 72, 73, 13) — not guessed.
+//
+// IMPORTANT, confirmed against the live API: the free plan rejects every
+// endpoint that takes a `season` param for the current (2026) season —
+// `/standings`, `/fixtures?league=&season=`, `/teams?league=&season=`,
+// `/fixtures?team=&season=` all return `{"errors":{"plan":"Free plans do not
+// have access to this season, try from 2022 to 2024."}}`. Only two endpoints
+// work on the free plan without a season at all: `/fixtures?live=all` and
+// `/fixtures?date=YYYY-MM-DD` (no league/team param — has to be filtered by
+// league id client-side). getStandings/getCompetitionFixtures(next/last)/
+// getCompetitionTeams/getTeamFixtures below are season-scoped and will
+// return null on the free plan — they're kept here, typed and ready, for
+// whenever this is upgraded to a paid plan (or swapped for another source)
+// that unlocks the current season; nothing calls them right now (see the
+// pages that would use them for why).
 
 const API_FOOTBALL_HOST = process.env.API_FOOTBALL_HOST || "v3.football.api-sports.io";
 const API_BASE = `https://${API_FOOTBALL_HOST}`;
@@ -180,16 +190,18 @@ function parseFixture(f: RawFixture, competition: Competition): Fixture {
   };
 }
 
+// Season-scoped — blocked on the free plan for the current season (see the
+// file header). Not called from any page right now; kept for when this is
+// upgraded or pointed at a different source.
 export async function getStandings(competition: Competition): Promise<StandingRow[] | null> {
   const { apiLeagueId } = COMPETITIONS[competition];
   const data = await fetchFootballApi<RawStandingsResponse>("/standings", { league: apiLeagueId, season: currentSeason() }, STANDINGS_CACHE_SECONDS);
   return parseStandings(data);
 }
 
-// Also the source of the "is anything live right now" gate (see
-// isAnyCompetitionLiveNow) — callers asking for "upcoming"/"recent" games and
-// the gate both read from this same 3h-cached call, so the gate never costs
-// an extra request of its own.
+// Season-scoped — blocked on the free plan for the current season. Not
+// called from any page right now (see getTodayFixtures for the free-plan
+// substitute used for "today's games" and the live gate).
 export async function getCompetitionFixtures(competition: Competition, opts: { date?: string; next?: number; last?: number } = {}): Promise<Fixture[] | null> {
   const { apiLeagueId } = COMPETITIONS[competition];
   const params: Record<string, string | number> = { league: apiLeagueId, season: currentSeason() };
@@ -214,6 +226,8 @@ export async function getLiveFixtures(): Promise<Fixture[] | null> {
     .map((f) => parseFixture(f, competitionByLeagueId.get(f.league.id)!));
 }
 
+// Season-scoped — blocked on the free plan for the current season. Not
+// called from any page right now.
 export async function getCompetitionTeams(competition: Competition): Promise<Team[] | null> {
   const { apiLeagueId } = COMPETITIONS[competition];
   const data = await fetchFootballApi<RawTeamsResponse>("/teams", { league: apiLeagueId, season: currentSeason() }, TEAMS_CACHE_SECONDS);
@@ -221,8 +235,28 @@ export async function getCompetitionTeams(competition: Competition): Promise<Tea
   return data.response.map((t) => ({ id: t.team.id, name: t.team.name, logo: t.team.logo ?? null }));
 }
 
+// Season-scoped — blocked on the free plan for the current season. Not
+// called from any page right now.
 export async function getTeamFixtures(teamId: number): Promise<Fixture[] | null> {
   const data = await fetchFootballApi<RawFixturesResponse>("/fixtures", { team: teamId, season: currentSeason() }, TEAM_FIXTURES_CACHE_SECONDS);
+  if (!data?.response) return null;
+  const competitionByLeagueId = new Map(COMPETITION_ORDER.map((key) => [COMPETITIONS[key].apiLeagueId, key]));
+  return data.response
+    .filter((f) => competitionByLeagueId.has(f.league.id))
+    .map((f) => parseFixture(f, competitionByLeagueId.get(f.league.id)!));
+}
+
+// The free-plan substitute for "today's fixtures per competition": /fixtures
+// with only a `date` (no league, no season) is NOT season-gated — confirmed
+// against the live API — but it returns every match worldwide for that date,
+// so results are filtered down to our 4 competitions here. This is the
+// source for both "jogos de hoje" and the live-match gate below, at the cost
+// of one global call rather than one per competition.
+const TODAY_CACHE_SECONDS = 10800; // 3h
+
+export async function getTodayFixtures(): Promise<Fixture[] | null> {
+  const today = new Date().toISOString().slice(0, 10);
+  const data = await fetchFootballApi<RawFixturesResponse>("/fixtures", { date: today }, TODAY_CACHE_SECONDS);
   if (!data?.response) return null;
   const competitionByLeagueId = new Map(COMPETITION_ORDER.map((key) => [COMPETITIONS[key].apiLeagueId, key]));
   return data.response
@@ -237,13 +271,10 @@ export async function getTeamFixtures(teamId: number): Promise<Fixture[] | null>
 const LIVE_WINDOW_MS = 150 * 60 * 1000;
 
 export async function isAnyCompetitionLiveNow(): Promise<boolean> {
-  const today = new Date().toISOString().slice(0, 10);
-  const results = await Promise.all(COMPETITION_ORDER.map((competition) => getCompetitionFixtures(competition, { date: today })));
+  const fixtures = await getTodayFixtures();
   const now = Date.now();
-  return results.some((fixtures) =>
-    (fixtures ?? []).some((f) => {
-      const kickoff = new Date(f.date).getTime();
-      return now >= kickoff && now <= kickoff + LIVE_WINDOW_MS;
-    })
-  );
+  return (fixtures ?? []).some((f) => {
+    const kickoff = new Date(f.date).getTime();
+    return now >= kickoff && now <= kickoff + LIVE_WINDOW_MS;
+  });
 }

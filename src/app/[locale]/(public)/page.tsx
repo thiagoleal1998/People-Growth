@@ -26,8 +26,7 @@ import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/yout
 import { getGovernorRace, getPresidentRace, getSenateRace } from "@/lib/tse";
 import { ElectionResults } from "@/components/ElectionResults";
 import { ElectionBanner } from "@/components/ElectionBanner";
-import { getStandings, getLiveFixtures, isAnyCompetitionLiveNow } from "@/lib/sports";
-import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
+import { getLiveFixtures, isAnyCompetitionLiveNow } from "@/lib/sports";
 import { SportsLiveWidget } from "@/components/SportsLiveWidget";
 import { articleHref } from "@/lib/article-url";
 import { isAuthorPubliclyVisible } from "@/lib/founder-data";
@@ -170,9 +169,10 @@ export default async function HomePage() {
     ? { uf: "sp", president: await getPresidentRace(), governor: await getGovernorRace("sp"), senate: await getSenateRace("sp") }
     : null;
   const sportsEnabled = config.sports_widget_enabled !== "false";
-  const sportsInitial = sportsEnabled
-    ? { standings: await getStandings("serie_a"), live: (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [] }
-    : null;
+  // Standings/upcoming games aren't shown yet — API-Football's free plan
+  // blocks every season-scoped endpoint for the current season, so only
+  // live scores (which need no season) are actually available right now.
+  const sportsInitial = sportsEnabled ? { live: (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [] } : null;
   const faqEntries = getFaqEntriesFromConfig(config, locale);
   // Articles are ordered by publication date, except where an admin pinned one
   // to a home slot: that one takes its slot regardless of date. Editing an
@@ -247,30 +247,19 @@ export default async function HomePage() {
         <div className="container-xl" style={{ maxWidth: "1180px", margin: "0 auto", paddingTop: "1.5rem" }}>
           <section style={{ borderTop: "3px solid #4361EE", paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
             <h2 style={{ textAlign: "center", fontSize: "clamp(1.375rem, 3vw, 1.75rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem", paddingBottom: "1rem", borderBottom: "1px solid var(--site-border)" }}>
-              Brasileirão
+              Futebol — ao vivo
             </h2>
-            <div className="sports-home-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", alignItems: "start" }}>
-              <div>
-                <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--site-text)", marginBottom: "0.75rem" }}>
-                  {locale === "en" ? "Standings" : "Classificação"}
-                </div>
-                <SportsStandingsSnippet standings={sportsInitial.standings} locale={locale} />
-              </div>
-              <div>
-                <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--site-text)", marginBottom: "0.75rem" }}>
-                  {locale === "en" ? "Live now" : "Ao vivo agora"}
-                </div>
-                <SportsLiveWidget initial={sportsInitial.live ?? []} locale={locale} />
-              </div>
+            <div className="sports-home-grid" style={{ maxWidth: "640px", margin: "0 auto" }}>
+              <SportsLiveWidget initial={sportsInitial.live ?? []} locale={locale} />
             </div>
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
               <Link href="/esportes" style={{ color: "#4361EE", fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600 }}>
-                {locale === "en" ? "See all competitions ›" : "Ver todas as competições ›"}
+                {locale === "en" ? "See competitions ›" : "Ver competições ›"}
               </Link>
             </div>
             <style>{`
               @media (max-width: 640px) {
-                .sports-home-grid { grid-template-columns: 1fr !important; }
+                .sports-home-grid { width: 100%; }
               }
             `}</style>
           </section>

@@ -207,7 +207,7 @@ export function ConfiguracoesTabs({
         <div style={{ display: active === "esportes" ? "block" : "none" }}>
           <div style={panelStyle}>
             <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginBottom: "1.125rem" }}>
-              Tabela do Brasileirão e jogos ao vivo na home, via API-Football (requer a variável de ambiente API_FOOTBALL_KEY configurada).
+              Jogos ao vivo do Brasileirão e outras competições na home, via API-Football (requer a variável de ambiente API_FOOTBALL_KEY configurada). Tabela e próximos jogos ainda não — o plano grátis da API só libera isso para temporadas antigas.
             </p>
             <Field label="Mostrar o bloco de esportes na home?" hint="A página /esportes continua disponível mesmo com o bloco desligado.">
               <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
