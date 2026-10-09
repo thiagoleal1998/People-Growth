@@ -2,11 +2,13 @@ import { Link } from "@/i18n/navigation";
 import type { StandingRow } from "@/lib/sports";
 
 const BRAND = "#4361EE";
+const SNIPPET_ROWS = 6;
 
 // Server-rendered from data the home page already fetched — no fetch of its
-// own, same role ElectionBanner.tsx plays for the election block. Top 5
-// only — that's the free data source's own limit (see src/lib/sports.ts),
-// disclosed in the heading rather than hidden.
+// own, same role ElectionBanner.tsx plays for the election block. Shows the
+// top rows only for space, same as any home teaser — the full table (all 20
+// teams) is on /esportes; see src/lib/sports.ts's getBestStandings for where
+// this data actually comes from.
 export function SportsStandingsSnippet({ standings, locale }: { standings: StandingRow[] | null; locale: string }) {
   if (!standings || standings.length === 0) {
     return (
@@ -39,7 +41,7 @@ export function SportsStandingsSnippet({ standings, locale }: { standings: Stand
           </tr>
         </thead>
         <tbody>
-          {standings.map((row) => (
+          {standings.slice(0, SNIPPET_ROWS).map((row) => (
             <tr key={row.teamId} style={{ borderTop: "1px solid var(--site-border)" }}>
               <td style={{ padding: "0.5rem", fontWeight: 700, color: "var(--site-text-secondary)" }}>{row.rank}</td>
               <td style={{ padding: "0.5rem", color: "var(--site-text)", fontWeight: 600, display: "flex", alignItems: "center", gap: "0.5rem" }}>

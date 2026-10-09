@@ -3,8 +3,8 @@ import { Link } from "@/i18n/navigation";
 import {
   COMPETITIONS,
   COMPETITION_ORDER,
-  getLastResult,
-  getStandingsTop5,
+  getBestStandings,
+  getCurrentRoundFixtures,
   getTodayFixtures,
   type Competition,
   type Fixture,
@@ -14,8 +14,8 @@ import {
 export const revalidate = 180;
 
 export const metadata: Metadata = {
-  title: "Esportes — jogos ao vivo do Brasileirão",
-  description: "Jogos ao vivo e de hoje do Brasileirão Série A e B, Copa do Brasil e Libertadores.",
+  title: "Esportes — tabela e jogos do Brasileirão",
+  description: "Classificação completa, jogos da rodada e placar ao vivo do Brasileirão Série A e B, Copa do Brasil e Libertadores.",
 };
 
 // Portuguese-only, same as /eleicoes — Brazilian competition data for a
@@ -38,7 +38,7 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0", borderTop: "1px solid var(--site-border)" }}>
       <div style={{ width: "4.5rem", flexShrink: 0, fontSize: "0.75rem", color: isLive ? "#DC2626" : "var(--site-muted)", fontWeight: isLive ? 800 : 600 }}>
-        {isLive ? (fixture.elapsed ? `${fixture.elapsed}'` : "Ao vivo") : dateLabel.split(" ")[0] ?? dateLabel}
+        {isLive ? (fixture.elapsed ? `${fixture.elapsed}'` : "Ao vivo") : dateLabel.split(",")[0] ?? dateLabel}
       </div>
       <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
         <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textAlign: "right" }}>
@@ -63,49 +63,53 @@ function ComingSoonNote({ text }: { text: string }) {
   );
 }
 
-function StandingsTop5({ standings }: { standings: StandingRow[] | null }) {
+function StandingsTable({ standings }: { standings: StandingRow[] | null }) {
   if (!standings || standings.length === 0) {
     return <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Classificação indisponível no momento.</p>;
   }
-  const updatedAt = standings[0]?.updatedAt;
-  const updatedLabel = updatedAt
-    ? new Date(updatedAt.replace(" ", "T")).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
-    : null;
-
   return (
-    <>
-      {updatedLabel && <div style={{ fontSize: "0.75rem", color: "var(--site-faint)", marginBottom: "0.5rem" }}>Atualizado em {updatedLabel}</div>}
+    <div style={{ overflowX: "auto" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
-      <thead>
-        <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
-          <th style={{ padding: "0.375rem 0.5rem" }}>#</th>
-          <th style={{ padding: "0.375rem 0.5rem" }}>Clube</th>
-          <th style={{ padding: "0.375rem 0.5rem", textAlign: "center" }}>J</th>
-          <th style={{ padding: "0.375rem 0.5rem", textAlign: "center" }}>SG</th>
-          <th style={{ padding: "0.375rem 0.5rem", textAlign: "center" }}>Pts</th>
-        </tr>
-      </thead>
-      <tbody>
-        {standings.map((row) => (
-          <tr key={row.teamId} style={{ borderTop: "1px solid var(--site-border)" }}>
-            <td style={{ padding: "0.5rem", fontWeight: 700, color: "var(--site-text-secondary)" }}>{row.rank}</td>
-            <td style={{ padding: "0.5rem", color: "var(--site-text)", fontWeight: 600 }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                {row.teamLogo && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={row.teamLogo} alt="" width={18} height={18} style={{ objectFit: "contain" }} />
-                )}
-                {row.teamName}
-              </div>
-            </td>
-            <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.played}</td>
-            <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsDiff}</td>
-            <td style={{ padding: "0.5rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{row.points}</td>
+        <thead>
+          <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
+            <th style={{ padding: "0.5rem" }}>#</th>
+            <th style={{ padding: "0.5rem" }}>Clube</th>
+            <th style={{ padding: "0.5rem", textAlign: "center" }}>J</th>
+            <th style={{ padding: "0.5rem", textAlign: "center" }}>V</th>
+            <th style={{ padding: "0.5rem", textAlign: "center" }}>E</th>
+            <th style={{ padding: "0.5rem", textAlign: "center" }}>D</th>
+            <th style={{ padding: "0.5rem", textAlign: "center" }}>GP</th>
+            <th style={{ padding: "0.5rem", textAlign: "center" }}>GC</th>
+            <th style={{ padding: "0.5rem", textAlign: "center" }}>SG</th>
+            <th style={{ padding: "0.5rem", textAlign: "center" }}>Pts</th>
           </tr>
-        ))}
-      </tbody>
-    </table>
-    </>
+        </thead>
+        <tbody>
+          {standings.map((row) => (
+            <tr key={row.teamId} style={{ borderTop: "1px solid var(--site-border)" }}>
+              <td style={{ padding: "0.5rem", fontWeight: 700, color: "var(--site-text-secondary)" }}>{row.rank}</td>
+              <td style={{ padding: "0.5rem", color: "var(--site-text)", fontWeight: 600 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  {row.teamLogo && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={row.teamLogo} alt="" width={20} height={20} style={{ objectFit: "contain", flexShrink: 0 }} />
+                  )}
+                  <span>{row.teamName}</span>
+                </div>
+              </td>
+              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.played}</td>
+              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.win}</td>
+              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.draw}</td>
+              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.lose}</td>
+              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsFor}</td>
+              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsAgainst}</td>
+              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsDiff}</td>
+              <td style={{ padding: "0.5rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{row.points}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
   );
 }
 
@@ -118,16 +122,16 @@ export default async function EsportesPage({
   const competition: Competition = COMPETITION_ORDER.includes(rawCompeticao as Competition) ? (rawCompeticao as Competition) : "serie_a";
   const info = COMPETITIONS[competition];
 
-  const [allToday, standings, lastResult] = await Promise.all([
+  const [allToday, standings, roundFixtures] = await Promise.all([
     getTodayFixtures(),
-    info.format === "table" ? getStandingsTop5(competition) : Promise.resolve(null),
-    getLastResult(competition),
+    info.format === "table" ? getBestStandings(competition) : Promise.resolve(null),
+    getCurrentRoundFixtures(competition),
   ]);
   const todayFixtures = (allToday ?? []).filter((f) => f.competition === competition);
 
   return (
     <section className="section-padding esportes-page" style={{ backgroundColor: "var(--site-bg)", minHeight: "70vh" }}>
-      <div className="container-xl" style={{ maxWidth: "900px" }}>
+      <div className="container-xl" style={{ maxWidth: "1000px" }}>
         <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", marginBottom: "1rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}>
           ← Voltar para o início
         </Link>
@@ -158,41 +162,46 @@ export default async function EsportesPage({
         </nav>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-          <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Jogos de hoje</h2>
-            {todayFixtures.length === 0 ? (
-              <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Nenhum jogo desta competição hoje.</p>
-            ) : (
+          {todayFixtures.length > 0 && (
+            <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
+              <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Jogos de hoje</h2>
               <div>
                 {todayFixtures.map((fixture) => (
                   <FixtureRow key={fixture.id} fixture={fixture} />
                 ))}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {info.format === "table" && (
             <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
-              <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.25rem" }}>Classificação — Top 5</h2>
-              <p style={{ fontSize: "0.75rem", color: "var(--site-faint)", marginBottom: "0.75rem" }}>
-                Só os 5 primeiros — é o limite da fonte gratuita usada para a tabela completa.
-              </p>
-              <StandingsTop5 standings={standings} />
+              <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Classificação</h2>
+              <StandingsTable standings={standings} />
             </div>
           )}
 
           <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
-            <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Último resultado</h2>
-            {lastResult ? <FixtureRow fixture={lastResult} /> : <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Nenhum resultado disponível.</p>}
+            <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Jogos da rodada</h2>
+            {roundFixtures && roundFixtures.length > 0 ? (
+              <div>
+                {roundFixtures.map((fixture) => (
+                  <FixtureRow key={fixture.id} fixture={fixture} />
+                ))}
+              </div>
+            ) : (
+              <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Jogos indisponíveis no momento.</p>
+            )}
           </div>
 
           <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
-            <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Próximos jogos e jogos por clube</h2>
-            <ComingSoonNote text="Em breve — ainda não temos uma fonte gratuita confiável pra lista de próximos jogos de vários dias ou pra filtrar por clube." />
+            <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Jogos por clube</h2>
+            <ComingSoonNote text="Em breve — ainda não temos uma forma confiável de filtrar o histórico de jogos por clube." />
           </div>
         </div>
 
-        <p style={{ fontSize: "0.75rem", color: "var(--site-faint)", marginTop: "1.5rem" }}>Fontes: API-Football (ao vivo e hoje) e TheSportsDB (classificação e último resultado).</p>
+        <p style={{ fontSize: "0.75rem", color: "var(--site-faint)", marginTop: "1.5rem" }}>
+          Fontes: API-Football (ao vivo e hoje) e api-futebol.com.br (classificação completa e jogos da rodada).
+        </p>
       </div>
 
       <style>{`

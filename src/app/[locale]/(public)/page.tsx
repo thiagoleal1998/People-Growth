@@ -26,7 +26,7 @@ import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/yout
 import { getGovernorRace, getPresidentRace, getSenateRace } from "@/lib/tse";
 import { ElectionResults } from "@/components/ElectionResults";
 import { ElectionBanner } from "@/components/ElectionBanner";
-import { getLiveFixtures, getStandingsTop5, isAnyCompetitionLiveNow } from "@/lib/sports";
+import { getBestStandings, getLiveFixtures, isAnyCompetitionLiveNow } from "@/lib/sports";
 import { SportsLiveWidget } from "@/components/SportsLiveWidget";
 import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
 import { articleHref } from "@/lib/article-url";
@@ -170,11 +170,12 @@ export default async function HomePage() {
     ? { uf: "sp", president: await getPresidentRace(), governor: await getGovernorRace("sp"), senate: await getSenateRace("sp") }
     : null;
   const sportsEnabled = config.sports_widget_enabled !== "false";
-  // Standings come from TheSportsDB (top 5 only — the free tier's own cap,
-  // see src/lib/sports.ts); live scores come from API-Football, which can't
-  // do standings itself on the free plan (current season is blocked there).
+  // Standings: the full table, scraped from api-futebol.com.br's public
+  // pages, falling back to TheSportsDB's top-5 if that ever breaks (see
+  // getBestStandings in src/lib/sports.ts). Live scores: API-Football, which
+  // can't do standings itself on the free plan (current season is blocked).
   const sportsInitial = sportsEnabled
-    ? { standings: await getStandingsTop5("serie_a"), live: (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [] }
+    ? { standings: await getBestStandings("serie_a"), live: (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [] }
     : null;
   const faqEntries = getFaqEntriesFromConfig(config, locale);
   // Articles are ordered by publication date, except where an admin pinned one
@@ -255,7 +256,7 @@ export default async function HomePage() {
             <div className="sports-home-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", alignItems: "start" }}>
               <div>
                 <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--site-text)", marginBottom: "0.75rem" }}>
-                  {locale === "en" ? "Standings (top 5)" : "Classificação (top 5)"}
+                  {locale === "en" ? "Standings" : "Classificação"}
                 </div>
                 <SportsStandingsSnippet standings={sportsInitial.standings} locale={locale} />
               </div>

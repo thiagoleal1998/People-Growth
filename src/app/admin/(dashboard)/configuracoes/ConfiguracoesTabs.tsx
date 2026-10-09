@@ -207,7 +207,7 @@ export function ConfiguracoesTabs({
         <div style={{ display: active === "esportes" ? "block" : "none" }}>
           <div style={panelStyle}>
             <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginBottom: "1.125rem" }}>
-              Jogos ao vivo (API-Football) e classificação top 5 (TheSportsDB) do Brasileirão na home — requer as variáveis de ambiente API_FOOTBALL_KEY e, opcionalmente, THESPORTSDB_KEY. Tabela completa e próximos jogos de vários dias ainda não têm fonte gratuita confiável.
+              Jogos ao vivo (API-Football, requer a variável de ambiente API_FOOTBALL_KEY) e classificação completa (lida de páginas públicas do api-futebol.com.br) do Brasileirão na home. Jogos por clube ainda não têm fonte gratuita confiável.
             </p>
             <Field label="Mostrar o bloco de esportes na home?" hint="A página /esportes continua disponível mesmo com o bloco desligado.">
               <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>

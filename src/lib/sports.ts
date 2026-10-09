@@ -1,5 +1,5 @@
-// Football scores/standings, combining two free sources — confirmed against
-// both live APIs with real calls, not assumed from docs:
+// Football scores/standings, combining three free sources — confirmed against
+// all three live, with real calls, not assumed from docs:
 //
 // 1) API-Football (api-sports.io), used either directly (API_FOOTBALL_HOST
 //    unset) or through the RapidAPI gateway (API_FOOTBALL_HOST set to e.g.
@@ -31,11 +31,32 @@
 //    Brazilian competitions. A paid TheSportsDB Patreon key (thesportsdb.com,
 //    from ~US$9/mo) would lift this cap if ever needed.
 //
+// 3) api-futebol.com.br's own PUBLIC marketing pages (not their paid API,
+//    which needs a key and starts around R$99/mo per competition — these
+//    are the free pages they publish for SEO/lead-gen, the same kind of
+//    page a browser or Google would show). Confirmed by direct fetch: full,
+//    accurate standings (all 20 teams, matching CBF's own site and
+//    Wikipedia's CBF-sourced numbers exactly) and the full current round's
+//    match cards with real scores, dates and venues — neither available
+//    free anywhere else found. This is NOT an API contract — there's no
+//    published endpoint, no SLA, and the markup could change on any
+//    redesign, same risk class as the open-source scrapers already doing
+//    this against CBF's own site (e.g. github.com/lohxx/brasileirao). Kept
+//    deliberately low-volume and identified honestly (a real User-Agent
+//    naming this site, a 30-minute cache) rather than disguised as a
+//    browser — this is reading the same public page anyone can open, not
+//    bypassing a paywall or a search engine's anti-bot defenses.
+//
 // Competition ids were confirmed against real API responses, not guessed —
 // API-Football via `/leagues?country=Brazil` / `/leagues?search=libertadores`
 // (71/72/73/13); TheSportsDB via team records' strLeague2/3 fields (e.g.
 // Flamengo's own record lists its competitions directly) since TheSportsDB's
-// own league-search endpoints are capped the same way (4351/4404/4725/4501).
+// own league-search endpoints are capped the same way (4351/4404/4725/4501);
+// api-futebol.com.br's URL slugs confirmed by following redirects from each
+// competition's base URL (campeonato-brasileiro / campeonato-brasileiro-serie-b
+// / copa-do-brasil / copa-libertadores-da-america).
+
+import * as cheerio from "cheerio";
 
 const API_FOOTBALL_HOST = process.env.API_FOOTBALL_HOST || "v3.football.api-sports.io";
 const API_BASE = `https://${API_FOOTBALL_HOST}`;
@@ -63,6 +84,13 @@ const THESPORTSDB_LEAGUE_IDS: Record<Competition, number> = {
   serie_b: 4404,
   copa_do_brasil: 4725,
   libertadores: 4501,
+};
+
+const SCRAPE_SLUGS: Record<Competition, string> = {
+  serie_a: "campeonato-brasileiro",
+  serie_b: "campeonato-brasileiro-serie-b",
+  copa_do_brasil: "copa-do-brasil",
+  libertadores: "copa-libertadores-da-america",
 };
 
 export type StandingRow = {
@@ -417,4 +445,143 @@ export async function getLastResult(competition: Competition): Promise<Fixture |
   const data = await fetchSportsDb<RawSportsDbEventsResponse>(`/eventspastleague.php?id=${leagueId}`, SPORTSDB_RESULTS_CACHE_SECONDS);
   const event = data?.events?.[0];
   return event ? parseSportsDbEvent(event, competition) : null;
+}
+
+// --- api-futebol.com.br: full standings + current round, scraped from their
+// public pages (not their paid API) — see the file header for why and for
+// the honesty/politeness choices (identified User-Agent, 30-min cache).
+
+const SCRAPE_CACHE_SECONDS = 1800; // 30min — a public page, not a rate-limited API; still deliberately not hammered
+const SCRAPE_USER_AGENT = "Mozilla/5.0 (compatible; PeopleAndGrowthBot/1.0; +https://peopleandgrowth.com.br)";
+
+async function fetchScrapedHtml(url: string): Promise<{ html: string; finalUrl: string } | null> {
+  try {
+    const res = await fetch(url, { headers: { "User-Agent": SCRAPE_USER_AGENT }, next: { revalidate: SCRAPE_CACHE_SECONDS } });
+    if (!res.ok) return null;
+    return { html: await res.text(), finalUrl: res.url };
+  } catch {
+    return null;
+  }
+}
+
+// Stable-enough numeric id for a team/match we only know by name or URL slug
+// (this source doesn't expose the same numeric ids API-Football/TheSportsDB
+// do) — only used for React keys and the Fixture/StandingRow type's shape,
+// never to cross-reference against the other two sources.
+function hashString(s: string): number {
+  let h = 0;
+  for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0;
+  return Math.abs(h);
+}
+
+// Full (all 20 teams) current-season standings — see getStandingsTop5 for
+// the capped alternative this exists alongside. Only meaningful for
+// serie_a/serie_b (COMPETITIONS[x].format === "table").
+export async function getFullStandings(competition: Competition): Promise<StandingRow[] | null> {
+  const slug = SCRAPE_SLUGS[competition];
+  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${currentSeason()}`);
+  if (!page) return null;
+  const $ = cheerio.load(page.html);
+  const rows: StandingRow[] = [];
+  $("table tbody tr").each((index, tr) => {
+    const cells = $(tr)
+      .find("td")
+      .map((_, td) => $(td).text().trim())
+      .get();
+    // Header order confirmed live: #, Time, Pts, J, V, E, D, SG, GP, GC.
+    const teamName = $(tr).find("td").eq(1).find("img").attr("alt") ?? cells[1] ?? "";
+    const teamLogo = $(tr).find("td").eq(1).find("img").attr("src") ?? null;
+    if (!teamName || cells.length < 10) return;
+    rows.push({
+      rank: Number(cells[0]) || index + 1,
+      teamId: hashString(teamName),
+      teamName,
+      teamLogo,
+      points: Number(cells[2]) || 0,
+      played: Number(cells[3]) || 0,
+      win: Number(cells[4]) || 0,
+      draw: Number(cells[5]) || 0,
+      lose: Number(cells[6]) || 0,
+      goalsDiff: Number(cells[7]) || 0,
+      goalsFor: Number(cells[8]) || 0,
+      goalsAgainst: Number(cells[9]) || 0,
+      form: null,
+      description: null,
+      updatedAt: null,
+    });
+  });
+  return rows.length > 0 ? rows : null;
+}
+
+const SCRAPE_STATUS_FINISHED = "finalizado";
+const SCRAPE_STATUS_SCHEDULED = "agendado";
+
+// Current round's matches (10 for the league-phase competitions; however
+// many ties are active for the knockout phase of copa_do_brasil/
+// libertadores) — real scores/dates, scraped from the same site. Always the
+// CURRENT round: the site's own URL redirect decides which one that is, so
+// there's no "which round is today" logic to keep in sync here.
+export async function getCurrentRoundFixtures(competition: Competition): Promise<Fixture[] | null> {
+  const slug = SCRAPE_SLUGS[competition];
+  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${currentSeason()}`);
+  if (!page) return null;
+  const $ = cheerio.load(page.html);
+  const fixtures: Fixture[] = [];
+  // Match-card links end in "DD-MM-team-names-ID" — league-phase
+  // competitions (serie_a/serie_b) nest that under a "/partida/" segment,
+  // but the knockout phase (copa_do_brasil/libertadores) nests it directly
+  // under the phase name instead (e.g. "/semi-final/07-10-...-34884"), so
+  // the selector matches the trailing pattern rather than a fixed path
+  // segment — confirmed against both a league round and a Copa do Brasil
+  // semifinal page.
+  const MATCH_HREF_RE = /\/\d{2}-\d{2}-[a-z0-9-]+-\d+$/;
+  $("a[href]").each((_, a) => {
+    const $a = $(a);
+    const href = $a.attr("href") ?? "";
+    if (!MATCH_HREF_RE.test(href)) return;
+    const idMatch = href.match(/-(\d+)$/);
+    const text = $a.text().toLowerCase();
+    const imgs = $a.find("img[alt]");
+    const homeTeamName = $(imgs.get(0)).attr("alt") ?? "";
+    const awayTeamName = $(imgs.get(1)).attr("alt") ?? "";
+    if (!homeTeamName || !awayTeamName) return;
+    const scoreMatch = $a.text().match(/(\d+)\s*[x×]\s*(\d+)/i);
+    const dateMatch = $a.text().match(/(\d{2})\/(\d{2})\s+(\d{2})h(\d{2})/);
+    const status: FixtureStatus = text.includes(SCRAPE_STATUS_FINISHED)
+      ? "finished"
+      : text.includes(SCRAPE_STATUS_SCHEDULED)
+        ? "scheduled"
+        : scoreMatch
+          ? "live"
+          : "other";
+    const date = dateMatch
+      ? `${currentSeason()}-${dateMatch[2]}-${dateMatch[1]}T${dateMatch[3]}:${dateMatch[4]}:00-03:00`
+      : new Date().toISOString();
+    fixtures.push({
+      id: idMatch ? Number(idMatch[1]) : hashString(href),
+      date,
+      round: null,
+      status,
+      statusShort: status,
+      elapsed: null,
+      homeTeamId: hashString(homeTeamName),
+      homeTeamName,
+      homeTeamLogo: $(imgs.get(0)).attr("src") ?? null,
+      awayTeamId: hashString(awayTeamName),
+      awayTeamName,
+      awayTeamLogo: $(imgs.get(1)).attr("src") ?? null,
+      homeGoals: scoreMatch ? Number(scoreMatch[1]) : null,
+      awayGoals: scoreMatch ? Number(scoreMatch[2]) : null,
+      competition,
+    });
+  });
+  return fixtures.length > 0 ? fixtures : null;
+}
+
+// The full scraped table is the real, complete standings — but it's the one
+// reading an undocumented public page, so it's the one most likely to break
+// first. Falls back to TheSportsDB's top-5 (a documented API, just capped)
+// rather than showing nothing if the scrape ever comes back empty.
+export async function getBestStandings(competition: Competition): Promise<StandingRow[] | null> {
+  return (await getFullStandings(competition)) ?? getStandingsTop5(competition);
 }
