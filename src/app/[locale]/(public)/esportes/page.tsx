@@ -67,8 +67,15 @@ function StandingsTop5({ standings }: { standings: StandingRow[] | null }) {
   if (!standings || standings.length === 0) {
     return <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Classificação indisponível no momento.</p>;
   }
+  const updatedAt = standings[0]?.updatedAt;
+  const updatedLabel = updatedAt
+    ? new Date(updatedAt.replace(" ", "T")).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
+    : null;
+
   return (
-    <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
+    <>
+      {updatedLabel && <div style={{ fontSize: "0.75rem", color: "var(--site-faint)", marginBottom: "0.5rem" }}>Atualizado em {updatedLabel}</div>}
+      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
       <thead>
         <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
           <th style={{ padding: "0.375rem 0.5rem" }}>#</th>
@@ -98,6 +105,7 @@ function StandingsTop5({ standings }: { standings: StandingRow[] | null }) {
         ))}
       </tbody>
     </table>
+    </>
   );
 }
 

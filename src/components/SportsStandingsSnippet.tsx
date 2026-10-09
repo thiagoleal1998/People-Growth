@@ -16,8 +16,18 @@ export function SportsStandingsSnippet({ standings, locale }: { standings: Stand
     );
   }
 
+  const updatedAt = standings[0]?.updatedAt;
+  const updatedLabel = updatedAt
+    ? new Date(updatedAt.replace(" ", "T")).toLocaleString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" })
+    : null;
+
   return (
     <div>
+      {updatedLabel && (
+        <div style={{ fontSize: "0.6875rem", color: "var(--site-faint)", marginBottom: "0.5rem" }}>
+          {locale === "en" ? `Updated ${updatedLabel}` : `Atualizado em ${updatedLabel}`}
+        </div>
+      )}
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
         <thead>
           <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>

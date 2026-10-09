@@ -80,6 +80,11 @@ export type StandingRow = {
   goalsDiff: number;
   form: string | null;
   description: string | null;
+  // When the source last recalculated this row — surfaced in the UI because
+  // free standings sources can lag a match or two behind the official
+  // result (confirmed: TheSportsDB's table was briefly a draw short of the
+  // real points total for a couple of teams after a late match).
+  updatedAt: string | null;
 };
 
 export type FixtureStatus = "scheduled" | "live" | "finished" | "postponed" | "other";
@@ -193,6 +198,7 @@ function parseStandings(data: RawStandingsResponse | null): StandingRow[] | null
     goalsDiff: r.goalsDiff,
     form: r.form ?? null,
     description: r.description ?? null,
+    updatedAt: null,
   }));
 }
 
@@ -323,6 +329,7 @@ type RawSportsDbTableRow = {
   intRank: string;
   strForm?: string | null;
   strDescription?: string | null;
+  dateUpdated?: string | null;
 };
 type RawSportsDbTableResponse = { table?: RawSportsDbTableRow[] };
 
@@ -379,6 +386,7 @@ export async function getStandingsTop5(competition: Competition): Promise<Standi
     goalsDiff: Number(r.intGoalDifference),
     form: r.strForm ?? null,
     description: r.strDescription ?? null,
+    updatedAt: r.dateUpdated ?? null,
   }));
 }
 
