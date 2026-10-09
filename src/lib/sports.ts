@@ -1,32 +1,51 @@
-// Football scores/standings from API-Football (api-sports.io), used either
-// directly (API_FOOTBALL_HOST unset) or through the RapidAPI gateway
-// (API_FOOTBALL_HOST set to e.g. "api-football-v1.p.rapidapi.com") — both
-// auth header styles are sent together since only one is ever checked by
-// whichever host actually receives the request. The free plan is 100
-// requests/day, so every call here goes through Next's Data Cache with a
-// deliberately generous `revalidate`; see the "live" functions below for how
-// that budget is protected.
+// Football scores/standings, combining two free sources — confirmed against
+// both live APIs with real calls, not assumed from docs:
 //
-// Competition ids in COMPETITIONS were confirmed against a real
-// `/leagues?country=Brazil` / `/leagues?search=libertadores` response (71,
-// 72, 73, 13) — not guessed.
+// 1) API-Football (api-sports.io), used either directly (API_FOOTBALL_HOST
+//    unset) or through the RapidAPI gateway (API_FOOTBALL_HOST set to e.g.
+//    "api-football-v1.p.rapidapi.com") — both auth header styles are sent
+//    together since only one is ever checked by whichever host actually
+//    receives the request. The free plan is 100 requests/day AND, confirmed
+//    against the live API, rejects every endpoint that takes a `season`
+//    param for the CURRENT (2026) season — `/standings`,
+//    `/fixtures?league=&season=`, `/teams?league=&season=`,
+//    `/fixtures?team=&season=` all return `{"errors":{"plan":"Free plans do
+//    not have access to this season, try from 2022 to 2024."}}`. Only two
+//    endpoints work on the free plan without a season at all:
+//    `/fixtures?live=all` and `/fixtures?date=YYYY-MM-DD` (no league/team
+//    param — filtered by league id client-side). getStandings/
+//    getCompetitionFixtures(next/last)/getCompetitionTeams/getTeamFixtures
+//    below are season-scoped and return null on the free plan — kept here,
+//    typed and ready, for whenever this is upgraded to a paid plan; nothing
+//    calls them right now.
 //
-// IMPORTANT, confirmed against the live API: the free plan rejects every
-// endpoint that takes a `season` param for the current (2026) season —
-// `/standings`, `/fixtures?league=&season=`, `/teams?league=&season=`,
-// `/fixtures?team=&season=` all return `{"errors":{"plan":"Free plans do not
-// have access to this season, try from 2022 to 2024."}}`. Only two endpoints
-// work on the free plan without a season at all: `/fixtures?live=all` and
-// `/fixtures?date=YYYY-MM-DD` (no league/team param — has to be filtered by
-// league id client-side). getStandings/getCompetitionFixtures(next/last)/
-// getCompetitionTeams/getTeamFixtures below are season-scoped and will
-// return null on the free plan — they're kept here, typed and ready, for
-// whenever this is upgraded to a paid plan (or swapped for another source)
-// that unlocks the current season; nothing calls them right now (see the
-// pages that would use them for why).
+// 2) TheSportsDB (thesportsdb.com), used ONLY for what API-Football's free
+//    plan can't do: standings and recent results for the current season.
+//    Confirmed against the live API with the public shared key: works for
+//    the current season (no season-block like API-Football), but every
+//    list-style endpoint is capped at a handful of rows on this key — a
+//    league table comes back top-5 only, "past/next events" come back as a
+//    single match. That's a real, disclosed limitation (see
+//    getStandingsTop5/getLastResult below), not a bug — there's no known
+//    free source for a full 20-team table or a multi-day fixture list for
+//    Brazilian competitions. A paid TheSportsDB Patreon key (thesportsdb.com,
+//    from ~US$9/mo) would lift this cap if ever needed.
+//
+// Competition ids were confirmed against real API responses, not guessed —
+// API-Football via `/leagues?country=Brazil` / `/leagues?search=libertadores`
+// (71/72/73/13); TheSportsDB via team records' strLeague2/3 fields (e.g.
+// Flamengo's own record lists its competitions directly) since TheSportsDB's
+// own league-search endpoints are capped the same way (4351/4404/4725/4501).
 
 const API_FOOTBALL_HOST = process.env.API_FOOTBALL_HOST || "v3.football.api-sports.io";
 const API_BASE = `https://${API_FOOTBALL_HOST}`;
+
+// "3" is TheSportsDB's own public test key, meant for exactly this kind of
+// low-volume free use — THESPORTSDB_KEY overrides it with a real registered
+// key (still free to create, just not capped the same way as the public one
+// for some endpoints) or a paid Patreon key, if either is ever added.
+const THESPORTSDB_KEY = process.env.THESPORTSDB_KEY || "3";
+const THESPORTSDB_BASE = `https://www.thesportsdb.com/api/v1/json/${THESPORTSDB_KEY}`;
 
 export type Competition = "serie_a" | "serie_b" | "copa_do_brasil" | "libertadores";
 
@@ -38,6 +57,13 @@ export const COMPETITIONS: Record<Competition, { apiLeagueId: number; name_pt: s
 };
 
 export const COMPETITION_ORDER: Competition[] = ["serie_a", "serie_b", "copa_do_brasil", "libertadores"];
+
+const THESPORTSDB_LEAGUE_IDS: Record<Competition, number> = {
+  serie_a: 4351,
+  serie_b: 4404,
+  copa_do_brasil: 4725,
+  libertadores: 4501,
+};
 
 export type StandingRow = {
   rank: number;
@@ -277,4 +303,110 @@ export async function isAnyCompetitionLiveNow(): Promise<boolean> {
     const kickoff = new Date(f.date).getTime();
     return now >= kickoff && now <= kickoff + LIVE_WINDOW_MS;
   });
+}
+
+// --- TheSportsDB: standings + recent results for the current season ---
+// (API-Football's free plan can't do either — see the file header.)
+
+type RawSportsDbTableRow = {
+  idTeam: string;
+  strTeam: string;
+  strBadge?: string;
+  intPlayed: string;
+  intWin: string;
+  intDraw: string;
+  intLoss: string;
+  intGoalsFor: string;
+  intGoalsAgainst: string;
+  intGoalDifference: string;
+  intPoints: string;
+  intRank: string;
+  strForm?: string | null;
+  strDescription?: string | null;
+};
+type RawSportsDbTableResponse = { table?: RawSportsDbTableRow[] };
+
+type RawSportsDbEvent = {
+  idEvent: string;
+  dateEvent: string;
+  strTime?: string | null;
+  strStatus?: string | null;
+  strHomeTeam: string;
+  strAwayTeam: string;
+  idHomeTeam: string;
+  idAwayTeam: string;
+  strHomeTeamBadge?: string | null;
+  strAwayTeamBadge?: string | null;
+  intHomeScore?: string | null;
+  intAwayScore?: string | null;
+};
+type RawSportsDbEventsResponse = { events?: RawSportsDbEvent[] | null };
+
+const SPORTSDB_STANDINGS_CACHE_SECONDS = 10800; // 3h
+const SPORTSDB_RESULTS_CACHE_SECONDS = 3600; // 1h
+
+async function fetchSportsDb<T>(path: string, revalidateSeconds: number): Promise<T | null> {
+  try {
+    const res = await fetch(`${THESPORTSDB_BASE}${path}`, { next: { revalidate: revalidateSeconds } });
+    if (!res.ok) return null;
+    return (await res.json()) as T;
+  } catch {
+    return null;
+  }
+}
+
+// TheSportsDB's table endpoint is capped at the top 5 rows on the shared
+// free key — real current-season data, just not the full 20-team table (no
+// known free source gives that). Only meaningful for serie_a/serie_b
+// (COMPETITIONS[x].format === "table"); copa_do_brasil/libertadores don't
+// have a points table to begin with.
+export async function getStandingsTop5(competition: Competition): Promise<StandingRow[] | null> {
+  const leagueId = THESPORTSDB_LEAGUE_IDS[competition];
+  const data = await fetchSportsDb<RawSportsDbTableResponse>(`/lookuptable.php?l=${leagueId}&s=${currentSeason()}`, SPORTSDB_STANDINGS_CACHE_SECONDS);
+  if (!data?.table) return null;
+  return data.table.map((r) => ({
+    rank: Number(r.intRank),
+    teamId: Number(r.idTeam),
+    teamName: r.strTeam,
+    teamLogo: r.strBadge ?? null,
+    points: Number(r.intPoints),
+    played: Number(r.intPlayed),
+    win: Number(r.intWin),
+    draw: Number(r.intDraw),
+    lose: Number(r.intLoss),
+    goalsFor: Number(r.intGoalsFor),
+    goalsAgainst: Number(r.intGoalsAgainst),
+    goalsDiff: Number(r.intGoalDifference),
+    form: r.strForm ?? null,
+    description: r.strDescription ?? null,
+  }));
+}
+
+function parseSportsDbEvent(e: RawSportsDbEvent, competition: Competition): Fixture {
+  return {
+    id: Number(e.idEvent),
+    date: e.strTime ? `${e.dateEvent}T${e.strTime}Z` : e.dateEvent,
+    round: null,
+    status: e.strStatus === "FT" ? "finished" : e.strStatus === "NS" ? "scheduled" : e.strStatus ? "live" : "other",
+    statusShort: e.strStatus ?? "",
+    elapsed: null,
+    homeTeamId: Number(e.idHomeTeam),
+    homeTeamName: e.strHomeTeam,
+    homeTeamLogo: e.strHomeTeamBadge ?? null,
+    awayTeamId: Number(e.idAwayTeam),
+    awayTeamName: e.strAwayTeam,
+    awayTeamLogo: e.strAwayTeamBadge ?? null,
+    homeGoals: e.intHomeScore !== null && e.intHomeScore !== undefined ? Number(e.intHomeScore) : null,
+    awayGoals: e.intAwayScore !== null && e.intAwayScore !== undefined ? Number(e.intAwayScore) : null,
+    competition,
+  };
+}
+
+// TheSportsDB's "past events" endpoint is capped at a single match on the
+// shared free key — the competition's most recent result, not a list.
+export async function getLastResult(competition: Competition): Promise<Fixture | null> {
+  const leagueId = THESPORTSDB_LEAGUE_IDS[competition];
+  const data = await fetchSportsDb<RawSportsDbEventsResponse>(`/eventspastleague.php?id=${leagueId}`, SPORTSDB_RESULTS_CACHE_SECONDS);
+  const event = data?.events?.[0];
+  return event ? parseSportsDbEvent(event, competition) : null;
 }
