@@ -254,6 +254,21 @@ export default async function HomePage() {
         </div>
       )}
 
+      {sportsInitial && (
+        <div className="container-xl" style={{ maxWidth: "1180px", margin: "0 auto", paddingTop: "1.5rem" }}>
+          <section style={{ borderTop: "3px solid #4361EE", paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
+            <h2 style={{ textAlign: "center", fontSize: "clamp(1.375rem, 3vw, 1.75rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem", paddingBottom: "1rem", borderBottom: "1px solid var(--site-border)" }}>
+              Brasileirão
+            </h2>
+            <SportsLiveWidget initial={sportsInitial.live ?? []} roundResults={sportsInitial.roundResults} locale={locale} />
+            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
+              <Link href="/esportes" style={{ color: "#4361EE", fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600 }}>
+                {locale === "en" ? "See all competitions ›" : "Ver todas as competições ›"}
+              </Link>
+            </div>
+          </section>
+        </div>
+      )}
 
       {/* News lead — UOL-style front page block */}
       {featured && (
@@ -522,6 +537,17 @@ export default async function HomePage() {
                   )}
                 </div>
 
+                {sportsInitial && (
+                  <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
+                    <div style={{ backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>
+                      {locale === "en" ? "Standings" : "Classificação"}
+                    </div>
+                    <div style={{ padding: "0.875rem 1rem", backgroundColor: "var(--site-card)" }}>
+                      <SportsStandingsSnippet standings={sportsInitial.standings} locale={locale} />
+                    </div>
+                  </div>
+                )}
+
                 <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
                   <div style={{ backgroundColor: "var(--site-card)", padding: "0.625rem 1rem", display: "flex", alignItems: "center", gap: "0.375rem" }}>
                     <Zap size={16} color="#dc2626" fill="#dc2626" />
@@ -578,37 +604,6 @@ export default async function HomePage() {
             }
           `}</style>
         </section>
-      )}
-
-      {sportsInitial && (
-        <div className="container-xl" style={{ maxWidth: "1180px", margin: "0 auto", paddingTop: "1.5rem" }}>
-          <section style={{ borderTop: "3px solid #4361EE", paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
-            <h2 style={{ textAlign: "center", fontSize: "clamp(1.375rem, 3vw, 1.75rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem", paddingBottom: "1rem", borderBottom: "1px solid var(--site-border)" }}>
-              Brasileirão
-            </h2>
-            <div className="sports-home-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", alignItems: "start" }}>
-              <div>
-                <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--site-text)", marginBottom: "0.75rem" }}>
-                  {locale === "en" ? "Standings" : "Classificação"}
-                </div>
-                <SportsStandingsSnippet standings={sportsInitial.standings} locale={locale} />
-              </div>
-              <div>
-                <SportsLiveWidget initial={sportsInitial.live ?? []} roundResults={sportsInitial.roundResults} locale={locale} />
-              </div>
-            </div>
-            <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
-              <Link href="/esportes" style={{ color: "#4361EE", fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600 }}>
-                {locale === "en" ? "See all competitions ›" : "Ver todas as competições ›"}
-              </Link>
-            </div>
-            <style>{`
-              @media (max-width: 640px) {
-                .sports-home-grid { grid-template-columns: 1fr !important; }
-              }
-            `}</style>
-          </section>
-        </div>
       )}
 
       {/* Columnists strip */}
