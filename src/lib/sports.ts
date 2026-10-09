@@ -516,25 +516,16 @@ export async function getFullStandings(competition: Competition): Promise<Standi
 const SCRAPE_STATUS_FINISHED = "finalizado";
 const SCRAPE_STATUS_SCHEDULED = "agendado";
 
-// Current round's matches (10 for the league-phase competitions; however
-// many ties are active for the knockout phase of copa_do_brasil/
-// libertadores) — real scores/dates, scraped from the same site. Always the
-// CURRENT round: the site's own URL redirect decides which one that is, so
-// there's no "which round is today" logic to keep in sync here.
-export async function getCurrentRoundFixtures(competition: Competition): Promise<Fixture[] | null> {
-  const slug = SCRAPE_SLUGS[competition];
-  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${currentSeason()}`);
-  if (!page) return null;
-  const $ = cheerio.load(page.html);
+// Match-card links end in "DD-MM-team-names-ID" — league-phase competitions
+// (serie_a/serie_b) nest that under a "/partida/" segment, but the knockout
+// phase (copa_do_brasil/libertadores) nests it directly under the phase name
+// instead (e.g. "/semi-final/07-10-...-34884"), so the selector matches the
+// trailing pattern rather than a fixed path segment — confirmed against both
+// a league round and a Copa do Brasil semifinal page.
+const MATCH_HREF_RE = /\/\d{2}-\d{2}-[a-z0-9-]+-\d+$/;
+
+function parseFixturesFromRoundPage($: cheerio.CheerioAPI, competition: Competition): Fixture[] {
   const fixtures: Fixture[] = [];
-  // Match-card links end in "DD-MM-team-names-ID" — league-phase
-  // competitions (serie_a/serie_b) nest that under a "/partida/" segment,
-  // but the knockout phase (copa_do_brasil/libertadores) nests it directly
-  // under the phase name instead (e.g. "/semi-final/07-10-...-34884"), so
-  // the selector matches the trailing pattern rather than a fixed path
-  // segment — confirmed against both a league round and a Copa do Brasil
-  // semifinal page.
-  const MATCH_HREF_RE = /\/\d{2}-\d{2}-[a-z0-9-]+-\d+$/;
   $("a[href]").each((_, a) => {
     const $a = $(a);
     const href = $a.attr("href") ?? "";
@@ -575,7 +566,44 @@ export async function getCurrentRoundFixtures(competition: Competition): Promise
       competition,
     });
   });
-  return fixtures.length > 0 ? fixtures : null;
+  return fixtures;
+}
+
+// The "Rodada anterior" nav arrow's href carries the previous round's
+// number — used to fall back to it when the current round hasn't been
+// played yet (see getCurrentRoundFixtures).
+function previousRoundNumber($: cheerio.CheerioAPI): number | null {
+  const href = $('a[aria-label="Rodada anterior"]').attr("href") ?? "";
+  const match = href.match(/\/rodada\/(\d+)$/);
+  return match ? Number(match[1]) : null;
+}
+
+// Current round's matches (10 for the league-phase competitions; however
+// many ties are active for the knockout phase of copa_do_brasil/
+// libertadores) — real scores/dates, scraped from the same site. "Current"
+// follows the site's own default view, which — confirmed live — advances to
+// the next round as soon as the previous one finishes, even before any of
+// the new round's matches have actually kicked off. When that happens (the
+// "current" round is all `agendado`, nothing finished or live yet), this
+// falls back to the previous round instead, so there's always something to
+// show rather than an all-scheduled round with zero results.
+export async function getCurrentRoundFixtures(competition: Competition): Promise<Fixture[] | null> {
+  const slug = SCRAPE_SLUGS[competition];
+  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${currentSeason()}`);
+  if (!page) return null;
+  const $ = cheerio.load(page.html);
+  const fixtures = parseFixturesFromRoundPage($, competition);
+  if (fixtures.length === 0) return null;
+
+  const hasAnyResult = fixtures.some((f) => f.status === "finished" || f.status === "live");
+  if (hasAnyResult) return fixtures;
+
+  const prevRound = previousRoundNumber($);
+  if (prevRound === null) return fixtures;
+  const prevPage = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${currentSeason()}/rodada/${prevRound}`);
+  if (!prevPage) return fixtures;
+  const prevFixtures = parseFixturesFromRoundPage(cheerio.load(prevPage.html), competition);
+  return prevFixtures.length > 0 ? prevFixtures : fixtures;
 }
 
 // The full scraped table is the real, complete standings — but it's the one
