@@ -35,8 +35,16 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
   const isLive = fixture.status === "live";
   const isFinished = fixture.status === "finished";
   const scoreLabel = isLive || isFinished ? `${fixture.homeGoals ?? 0} – ${fixture.awayGoals ?? 0}` : dateLabel;
+  // Only API-Football fixtures have a real fixture id the detail page (events/
+  // lineups/statistics) can look up — scraped fixtures (api-futebol.com.br,
+  // TheSportsDB) use an unrelated numbering, so those stay unclickable.
+  const Wrapper = fixture.source === "api_football" ? "a" : "div";
+  const wrapperProps = fixture.source === "api_football" ? { href: `/esportes/partida/${fixture.id}` } : {};
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0", borderTop: "1px solid var(--site-border)" }}>
+    <Wrapper
+      {...wrapperProps}
+      style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0", borderTop: "1px solid var(--site-border)", textDecoration: "none" }}
+    >
       <div style={{ width: "4.5rem", flexShrink: 0, fontSize: "0.75rem", color: isLive ? "#DC2626" : "var(--site-muted)", fontWeight: isLive ? 800 : 600 }}>
         {isLive ? (fixture.elapsed ? `${fixture.elapsed}'` : "Ao vivo") : dateLabel.split(",")[0] ?? dateLabel}
       </div>
@@ -51,7 +59,7 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
           {fixture.awayTeamName}
         </span>
       </div>
-    </div>
+    </Wrapper>
   );
 }
 

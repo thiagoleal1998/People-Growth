@@ -32,8 +32,13 @@ function Crest({ src, alt }: { src: string | null; alt: string }) {
 function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
   const isLive = fixture.status === "live";
   const hasScore = fixture.status === "live" || fixture.status === "finished";
+  // Only API-Football fixtures (live matches) have a real fixture id the
+  // detail page can look up — scraped round-results fixtures don't.
+  const Wrapper = fixture.source === "api_football" ? "a" : "div";
+  const wrapperProps = fixture.source === "api_football" ? { href: `/esportes/partida/${fixture.id}` } : {};
   return (
-    <div
+    <Wrapper
+      {...wrapperProps}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -44,6 +49,7 @@ function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
         border: "1px solid var(--site-border-strong)",
         backgroundColor: "var(--site-card)",
         minWidth: 0,
+        textDecoration: "none",
       }}
     >
       <div style={{ fontSize: "0.625rem", color: "var(--site-faint)", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
@@ -68,7 +74,7 @@ function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
         </span>
         <Crest src={fixture.awayTeamLogo} alt={fixture.awayTeamName} />
       </div>
-    </div>
+    </Wrapper>
   );
 }
 

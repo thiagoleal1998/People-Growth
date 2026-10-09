@@ -133,6 +133,12 @@ export type Fixture = {
   homeGoals: number | null;
   awayGoals: number | null;
   competition: Competition;
+  // "api_football" fixtures have a real API-Football fixture id, so
+  // /esportes/partida/[id] (events/lineups/statistics, all fixture-id-scoped
+  // and NOT season-blocked — confirmed live) can look them up. "scraped"
+  // fixtures (TheSportsDB, api-futebol.com.br) use an id from a different
+  // system entirely — never link those to the detail page.
+  source: "api_football" | "scraped";
 };
 
 export type Team = {
@@ -247,6 +253,7 @@ function parseFixture(f: RawFixture, competition: Competition): Fixture {
     homeGoals: f.goals.home,
     awayGoals: f.goals.away,
     competition,
+    source: "api_football",
   };
 }
 
@@ -435,6 +442,7 @@ function parseSportsDbEvent(e: RawSportsDbEvent, competition: Competition): Fixt
     homeGoals: e.intHomeScore !== null && e.intHomeScore !== undefined ? Number(e.intHomeScore) : null,
     awayGoals: e.intAwayScore !== null && e.intAwayScore !== undefined ? Number(e.intAwayScore) : null,
     competition,
+    source: "scraped",
   };
 }
 
@@ -564,6 +572,7 @@ function parseFixturesFromRoundPage($: cheerio.CheerioAPI, competition: Competit
       homeGoals: scoreMatch ? Number(scoreMatch[1]) : null,
       awayGoals: scoreMatch ? Number(scoreMatch[2]) : null,
       competition,
+      source: "scraped",
     });
   });
   return fixtures;
@@ -612,4 +621,147 @@ export async function getCurrentRoundFixtures(competition: Competition): Promise
 // rather than showing nothing if the scrape ever comes back empty.
 export async function getBestStandings(competition: Competition): Promise<StandingRow[] | null> {
   return (await getFullStandings(competition)) ?? getStandingsTop5(competition);
+}
+
+// --- Match detail: events, lineups, statistics for a single fixture ---
+// (src/app/[locale]/(public)/esportes/partida/[id]/page.tsx). Confirmed
+// live: /fixtures?id=, /fixtures/events, /fixtures/lineups and
+// /fixtures/statistics are all scoped by fixture id, not by season — none of
+// them hit the free-plan season block that /standings and the other
+// season-scoped endpoints do. Only usable for fixtures with a real
+// API-Football id (Fixture.source === "api_football"); never call these with
+// an id from the scraped sources, which use an unrelated numbering.
+
+const MATCH_DETAIL_CACHE_SECONDS = 180; // 3min — same cadence as live scores
+
+export type MatchHeader = Fixture & {
+  referee: string | null;
+  venueName: string | null;
+  venueCity: string | null;
+};
+
+type RawFixtureFull = RawFixture & {
+  fixture: RawFixture["fixture"] & { referee?: string | null; venue?: { name?: string | null; city?: string | null } };
+};
+type RawFixturesFullResponse = { response?: RawFixtureFull[] };
+
+export async function getMatchHeader(fixtureId: number): Promise<MatchHeader | null> {
+  const data = await fetchFootballApi<RawFixturesFullResponse>("/fixtures", { id: fixtureId }, MATCH_DETAIL_CACHE_SECONDS);
+  const f = data?.response?.[0];
+  if (!f) return null;
+  const competitionByLeagueId = new Map(COMPETITION_ORDER.map((key) => [COMPETITIONS[key].apiLeagueId, key]));
+  const competition = competitionByLeagueId.get(f.league.id);
+  if (!competition) return null;
+  return {
+    ...parseFixture(f, competition),
+    referee: f.fixture.referee ?? null,
+    venueName: f.fixture.venue?.name ?? null,
+    venueCity: f.fixture.venue?.city ?? null,
+  };
+}
+
+export type MatchEvent = {
+  minute: number;
+  extraMinute: number | null;
+  teamId: number;
+  teamName: string;
+  playerName: string | null;
+  assistName: string | null;
+  type: "goal" | "card" | "subst" | "var" | "other";
+  detail: string;
+};
+
+type RawMatchEvent = {
+  time: { elapsed: number; extra: number | null };
+  team: { id: number; name: string };
+  player: { name: string | null };
+  assist: { name: string | null };
+  type: string;
+  detail: string;
+};
+type RawEventsResponse = { response?: RawMatchEvent[] };
+
+function mapEventType(type: string): MatchEvent["type"] {
+  const lower = type.toLowerCase();
+  if (lower === "goal") return "goal";
+  if (lower === "card") return "card";
+  if (lower === "subst") return "subst";
+  if (lower === "var") return "var";
+  return "other";
+}
+
+export async function getMatchEvents(fixtureId: number): Promise<MatchEvent[] | null> {
+  const data = await fetchFootballApi<RawEventsResponse>("/fixtures/events", { fixture: fixtureId }, MATCH_DETAIL_CACHE_SECONDS);
+  if (!data?.response) return null;
+  return data.response.map((e) => ({
+    minute: e.time.elapsed,
+    extraMinute: e.time.extra,
+    teamId: e.team.id,
+    teamName: e.team.name,
+    playerName: e.player.name ?? null,
+    assistName: e.assist.name ?? null,
+    type: mapEventType(e.type),
+    detail: e.detail,
+  }));
+}
+
+export type LineupPlayer = { id: number; name: string; number: number | null; position: string | null };
+
+export type TeamLineup = {
+  teamId: number;
+  teamName: string;
+  teamLogo: string | null;
+  formation: string | null;
+  coachName: string | null;
+  startXI: LineupPlayer[];
+  substitutes: LineupPlayer[];
+};
+
+type RawLineupPlayer = { player: { id: number; name: string; number: number | null; pos: string | null } };
+type RawLineup = {
+  team: { id: number; name: string; logo?: string };
+  formation: string | null;
+  coach: { name: string | null };
+  startXI: RawLineupPlayer[];
+  substitutes: RawLineupPlayer[];
+};
+type RawLineupsResponse = { response?: RawLineup[] };
+
+export async function getMatchLineups(fixtureId: number): Promise<TeamLineup[] | null> {
+  const data = await fetchFootballApi<RawLineupsResponse>("/fixtures/lineups", { fixture: fixtureId }, MATCH_DETAIL_CACHE_SECONDS);
+  if (!data?.response) return null;
+  return data.response.map((l) => ({
+    teamId: l.team.id,
+    teamName: l.team.name,
+    teamLogo: l.team.logo ?? null,
+    formation: l.formation,
+    coachName: l.coach.name ?? null,
+    startXI: l.startXI.map((p) => ({ id: p.player.id, name: p.player.name, number: p.player.number, position: p.player.pos })),
+    substitutes: l.substitutes.map((p) => ({ id: p.player.id, name: p.player.name, number: p.player.number, position: p.player.pos })),
+  }));
+}
+
+export type TeamStatistics = { teamId: number; teamName: string; stats: { type: string; value: string | number | null }[] };
+
+type RawTeamStatistics = { team: { id: number; name: string }; statistics: { type: string; value: string | number | null }[] };
+type RawStatisticsResponse = { response?: RawTeamStatistics[] };
+
+export async function getMatchStatistics(fixtureId: number): Promise<TeamStatistics[] | null> {
+  const data = await fetchFootballApi<RawStatisticsResponse>("/fixtures/statistics", { fixture: fixtureId }, MATCH_DETAIL_CACHE_SECONDS);
+  if (!data?.response) return null;
+  return data.response.map((s) => ({ teamId: s.team.id, teamName: s.team.name, stats: s.statistics }));
+}
+
+export type MatchDetail = {
+  header: MatchHeader;
+  events: MatchEvent[] | null;
+  lineups: TeamLineup[] | null;
+  statistics: TeamStatistics[] | null;
+};
+
+export async function getMatchDetail(fixtureId: number): Promise<MatchDetail | null> {
+  const header = await getMatchHeader(fixtureId);
+  if (!header) return null;
+  const [events, lineups, statistics] = await Promise.all([getMatchEvents(fixtureId), getMatchLineups(fixtureId), getMatchStatistics(fixtureId)]);
+  return { header, events, lineups, statistics };
 }
