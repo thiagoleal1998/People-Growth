@@ -28,9 +28,11 @@ import { ElectionResults } from "@/components/ElectionResults";
 import { ElectionBanner } from "@/components/ElectionBanner";
 import {
   attachDetailIds,
+  fixturesStartingSoon,
   getBestStandings,
   getCurrentRoundFixtures,
   getLiveFixtures,
+  getUpcomingRoundFixtures,
   isAnyCompetitionLiveNow,
   isRoundResultsFresh,
   type Fixture,
@@ -189,16 +191,28 @@ export default async function HomePage() {
   // Only shown for 24h after the round's last match ends (isRoundResultsFresh)
   // so the home page doesn't keep the same results up for days once they're
   // no longer news — /esportes itself has no such cutoff, this is a home-
-  // page-only decluttering rule.
-  let sportsInitial: { standings: StandingRow[] | null; live: Fixture[] | null; roundResults: Fixture[] } | null = null;
+  // page-only decluttering rule. Once results go stale, the widget falls
+  // back further to "Próximos jogos" — the round's still-scheduled fixtures,
+  // but only once they're within 24h of kickoff (fixturesStartingSoon),
+  // never earlier, so an upcoming match isn't shown a week ahead of time
+  // either. Only fetched when actually needed (nothing live, no fresh
+  // results) since it's an extra request beyond what the rest of this
+  // block already makes.
+  let sportsInitial: { standings: StandingRow[] | null; live: Fixture[] | null; roundResults: Fixture[]; upcoming: Fixture[] } | null = null;
   if (sportsEnabled) {
     const rawRoundFixtures = (await getCurrentRoundFixtures("serie_a")) ?? [];
+    const live = (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [];
+    const resultsFresh = isRoundResultsFresh(rawRoundFixtures);
+    let upcoming: Fixture[] = [];
+    if (!resultsFresh && (!live || live.length === 0)) {
+      const soon = fixturesStartingSoon((await getUpcomingRoundFixtures("serie_a")) ?? []);
+      upcoming = soon.length > 0 ? await attachDetailIds(soon) : [];
+    }
     sportsInitial = {
       standings: await getBestStandings("serie_a"),
-      live: (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [],
-      roundResults: isRoundResultsFresh(rawRoundFixtures)
-        ? await attachDetailIds(rawRoundFixtures.filter((f) => f.status === "finished"))
-        : [],
+      live,
+      roundResults: resultsFresh ? await attachDetailIds(rawRoundFixtures.filter((f) => f.status === "finished")) : [],
+      upcoming,
     };
   }
   const faqEntries = getFaqEntriesFromConfig(config, locale);
@@ -277,7 +291,12 @@ export default async function HomePage() {
             <h2 style={{ textAlign: "center", fontSize: "clamp(1.375rem, 3vw, 1.75rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem", paddingBottom: "1rem", borderBottom: "1px solid var(--site-border)" }}>
               Brasileirão
             </h2>
-            <SportsLiveWidget initial={sportsInitial.live ?? []} roundResults={sportsInitial.roundResults} locale={locale} />
+            <SportsLiveWidget
+              initial={sportsInitial.live ?? []}
+              roundResults={sportsInitial.roundResults}
+              upcomingFixtures={sportsInitial.upcoming}
+              locale={locale}
+            />
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
               <Link href="/esportes" style={{ color: "#4361EE", fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600 }}>
                 {locale === "en" ? "See all competitions ›" : "Ver todas as competições ›"}

@@ -108,7 +108,15 @@ export type StandingRow = {
   goalsAgainst: number;
   goalsDiff: number;
   form: string | null;
+  // Qualification/relegation zone label (e.g. "Libertadores",
+  // "Rebaixamento") — see zoneLabel() for where this comes from.
   description: string | null;
+  // The zone's raw hex color, straight from the scraped page's own per-row
+  // indicator — null when the source has no zone data for this row (every
+  // source except getFullStandings). Kept alongside `description` so the UI
+  // can color-code a row with the exact same color the real site uses,
+  // not a guessed one.
+  zoneColor: string | null;
   // When the source last recalculated this row — surfaced in the UI because
   // free standings sources can lag a match or two behind the official
   // result (confirmed: TheSportsDB's table was briefly a draw short of the
@@ -237,6 +245,7 @@ function parseStandings(data: RawStandingsResponse | null): StandingRow[] | null
     goalsDiff: r.goalsDiff,
     form: r.form ?? null,
     description: r.description ?? null,
+    zoneColor: null,
     updatedAt: null,
   }));
 }
@@ -431,6 +440,7 @@ export async function getStandingsTop5(competition: Competition): Promise<Standi
     goalsDiff: Number(r.intGoalDifference),
     form: r.strForm ?? null,
     description: r.strDescription ?? null,
+    zoneColor: null,
     updatedAt: r.dateUpdated ?? null,
   }));
 }
@@ -493,6 +503,35 @@ function hashString(s: string): number {
   return Math.abs(h);
 }
 
+// The scraped page marks each row's qualification/relegation zone itself
+// with a colored dot (a <span style="background-color:#...">) — confirmed
+// live against the real Série A table: #0000ff on ranks 1-4 (Libertadores
+// group stage), #00ffff on rank 5 (Pré-Libertadores), #008040 on ranks 6-11
+// (Sul-Americana), #ff0000 on ranks 17-20 (Rebaixamento), no span at all on
+// unzoned mid-table rows — and against Série B: #0000ff/#00ffff on ranks
+// 1-6, #ff0000 on ranks 17-20. Reading the color straight from the source
+// instead of hardcoding rank cutoffs means this tracks whatever the real
+// competition rules are for the season, including CBF ranking-dependent
+// Sul-Americana berth counts that can change year to year. Série B's two
+// access-zone shades (#0000ff vs #00ffff) aren't given different labels
+// here — only the 4-team promotion rule is well-established, not a
+// documented reason for the second shade — so the styling still matches
+// the source exactly but the copy only asserts what's actually confirmed.
+function zoneLabel(color: string | null, competition: Competition): string | null {
+  if (!color) return null;
+  if (competition === "serie_a") {
+    if (color === "#0000ff") return "Libertadores";
+    if (color === "#00ffff") return "Pré-Libertadores";
+    if (color === "#008040") return "Sul-Americana";
+    if (color === "#ff0000") return "Rebaixamento";
+  }
+  if (competition === "serie_b") {
+    if (color === "#0000ff" || color === "#00ffff") return "Acesso à Série A";
+    if (color === "#ff0000") return "Rebaixamento";
+  }
+  return null;
+}
+
 // Full (all 20 teams) current-season standings — see getStandingsTop5 for
 // the capped alternative this exists alongside. Only meaningful for
 // serie_a/serie_b (COMPETITIONS[x].format === "table").
@@ -511,6 +550,8 @@ export async function getFullStandings(competition: Competition): Promise<Standi
     const teamName = $(tr).find("td").eq(1).find("img").attr("alt") ?? cells[1] ?? "";
     const teamLogo = $(tr).find("td").eq(1).find("img").attr("src") ?? null;
     if (!teamName || cells.length < 10) return;
+    const zoneStyle = $(tr).find("td").eq(0).find("span").attr("style") ?? "";
+    const zoneColor = zoneStyle.match(/#[0-9a-fA-F]{6}/)?.[0]?.toLowerCase() ?? null;
     rows.push({
       rank: Number(cells[0]) || index + 1,
       teamId: hashString(teamName),
@@ -525,7 +566,8 @@ export async function getFullStandings(competition: Competition): Promise<Standi
       goalsFor: Number(cells[8]) || 0,
       goalsAgainst: Number(cells[9]) || 0,
       form: null,
-      description: null,
+      description: zoneLabel(zoneColor, competition),
+      zoneColor,
       updatedAt: null,
     });
   });
@@ -635,6 +677,22 @@ export async function getCurrentRoundFixtures(competition: Competition): Promise
   return prevFixtures.length > 0 ? prevFixtures : fixtures;
 }
 
+// The site's current-round view's still-scheduled fixtures — deliberately
+// never falls back to the previous round the way getCurrentRoundFixtures
+// does, since that fallback exists specifically to avoid showing an
+// all-scheduled round as "results" (the opposite of what this is for).
+// Used for the home page's "Próximos jogos" fallback once the last round's
+// results have gone stale (see isRoundResultsFresh) and nothing is live —
+// reuses the same cached page fetch as getCurrentRoundFixtures/
+// getFullStandings, no extra request.
+export async function getUpcomingRoundFixtures(competition: Competition): Promise<Fixture[] | null> {
+  const slug = SCRAPE_SLUGS[competition];
+  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${currentSeason()}`);
+  if (!page) return null;
+  const fixtures = parseFixturesFromRoundPage(cheerio.load(page.html), competition).filter((f) => f.status === "scheduled");
+  return fixtures.length > 0 ? fixtures.sort((a, b) => a.date.localeCompare(b.date)) : null;
+}
+
 // The full scraped table is the real, complete standings — but it's the one
 // reading an undocumented public page, so it's the one most likely to break
 // first. Falls back to TheSportsDB's top-5 (a documented API, just capped)
@@ -659,6 +717,20 @@ export function isRoundResultsFresh(fixtures: Fixture[]): boolean {
   if (finishedKickoffs.length === 0) return false;
   const lastKickoff = Math.max(...finishedKickoffs);
   return Date.now() - lastKickoff < ROUND_RESULTS_STALE_HOURS * 60 * 60 * 1000;
+}
+
+// Mirrors isRoundResultsFresh for the other side of a matchday: an upcoming
+// fixture only joins the home page's "Próximos jogos" fallback once it's
+// within 24h of kickoff, never earlier — a scheduled fixture a week out
+// isn't news yet either.
+const UPCOMING_WINDOW_HOURS = 24;
+
+export function fixturesStartingSoon(fixtures: Fixture[]): Fixture[] {
+  const now = Date.now();
+  return fixtures.filter((f) => {
+    const diff = new Date(f.date).getTime() - now;
+    return diff >= 0 && diff <= UPCOMING_WINDOW_HOURS * 60 * 60 * 1000;
+  });
 }
 
 // "Jogos por clube" (full season schedule for one team) needs a different

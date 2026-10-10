@@ -13,6 +13,15 @@ function statusLabel(fixture: Fixture, locale: string): string {
     return fixture.elapsed ? `${fixture.elapsed}'` : locale === "en" ? "Live" : "Ao vivo";
   }
   if (fixture.status === "finished") return locale === "en" ? "Final" : "Encerrado";
+  if (fixture.status === "scheduled") {
+    return new Date(fixture.date).toLocaleString(locale === "en" ? "en-US" : "pt-BR", {
+      timeZone: "America/Sao_Paulo",
+      day: "2-digit",
+      month: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
   return fixture.statusShort;
 }
 
@@ -83,11 +92,23 @@ function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
 // API route every minute — same skeleton as ElectionResults.tsx,
 // LiveStatsWidget.tsx and NotificationBell.tsx. The route itself only ever
 // hits the real API while a match window is open, so polling here costs
-// nothing extra outside live windows. When nothing is live — most of any
-// given day — it falls back to showing the current round's finished results
-// instead of just saying there's nothing to see. Shows 3 cards at a time,
-// auto-rotating through the rest when there are more than 3.
-export function SportsLiveWidget({ initial, roundResults = [], locale }: { initial: Fixture[]; roundResults?: Fixture[]; locale: string }) {
+// nothing extra outside live windows. Falls back through three states when
+// nothing is live: the round's results (while still fresh, see
+// isRoundResultsFresh), then the round's next fixtures (once within 24h of
+// kickoff, see fixturesStartingSoon), then "no matches" — never showing
+// stale results or a far-off fixture just to fill the space. Shows 3 cards
+// at a time, auto-rotating through the rest when there are more than 3.
+export function SportsLiveWidget({
+  initial,
+  roundResults = [],
+  upcomingFixtures = [],
+  locale,
+}: {
+  initial: Fixture[];
+  roundResults?: Fixture[];
+  upcomingFixtures?: Fixture[];
+  locale: string;
+}) {
   const [live, setLive] = useState<Fixture[]>(initial);
   const [offset, setOffset] = useState(0);
 
@@ -112,7 +133,9 @@ export function SportsLiveWidget({ initial, roundResults = [], locale }: { initi
   }, []);
 
   const showingLive = live.length > 0;
-  const shown = showingLive ? live : roundResults;
+  const showingResults = !showingLive && roundResults.length > 0;
+  const showingUpcoming = !showingLive && !showingResults && upcomingFixtures.length > 0;
+  const shown = showingLive ? live : showingResults ? roundResults : showingUpcoming ? upcomingFixtures : [];
 
   // Offset isn't reset when `shown` changes identity (e.g. switching from
   // results to live) — every read of it below is modulo'd against the
@@ -126,11 +149,21 @@ export function SportsLiveWidget({ initial, roundResults = [], locale }: { initi
 
   const visible = Array.from({ length: Math.min(VISIBLE_COUNT, shown.length) }, (_, i) => shown[(offset + i) % shown.length]);
 
+  const heading = showingLive
+    ? locale === "en"
+      ? "Live now"
+      : "Ao vivo agora"
+    : showingUpcoming
+      ? locale === "en"
+        ? "Upcoming matches"
+        : "Próximos jogos"
+      : locale === "en"
+        ? "Round results"
+        : "Resultados da rodada";
+
   return (
     <div>
-      <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--site-text)", marginBottom: "0.75rem", textAlign: "center" }}>
-        {showingLive ? (locale === "en" ? "Live now" : "Ao vivo agora") : locale === "en" ? "Round results" : "Resultados da rodada"}
-      </div>
+      <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--site-text)", marginBottom: "0.75rem", textAlign: "center" }}>{heading}</div>
       {visible.length === 0 ? (
         <div style={{ fontSize: "0.875rem", color: "var(--site-faint)", padding: "1rem 0", textAlign: "center" }}>
           {locale === "en" ? "No matches right now." : "Nenhum jogo no momento."}

@@ -89,48 +89,76 @@ function StandingsTable({ standings }: { standings: StandingRow[] | null }) {
   if (!standings || standings.length === 0) {
     return <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Classificação indisponível no momento.</p>;
   }
+  // Legend entries, in table order — built from whatever zones are actually
+  // present in this data rather than a hardcoded list, so it still makes
+  // sense if getStandingsTop5's fallback (no zone data at all) kicks in.
+  // Deduped by label, not color: Série B uses two shades for the same
+  // "Acesso à Série A" zone (see zoneLabel in sports.ts), and the row
+  // borders below already show that distinction faithfully — the legend
+  // just needs one entry per real label, not one per shade.
+  const legend: { color: string; label: string }[] = [];
+  for (const row of standings) {
+    if (row.zoneColor && row.description && !legend.some((l) => l.label === row.description)) {
+      legend.push({ color: row.zoneColor, label: row.description });
+    }
+  }
   return (
-    <div style={{ overflowX: "auto" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
-        <thead>
-          <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
-            <th style={{ padding: "0.5rem" }}>#</th>
-            <th style={{ padding: "0.5rem" }}>Clube</th>
-            <th style={{ padding: "0.5rem", textAlign: "center" }}>J</th>
-            <th style={{ padding: "0.5rem", textAlign: "center" }}>V</th>
-            <th style={{ padding: "0.5rem", textAlign: "center" }}>E</th>
-            <th style={{ padding: "0.5rem", textAlign: "center" }}>D</th>
-            <th style={{ padding: "0.5rem", textAlign: "center" }}>GP</th>
-            <th style={{ padding: "0.5rem", textAlign: "center" }}>GC</th>
-            <th style={{ padding: "0.5rem", textAlign: "center" }}>SG</th>
-            <th style={{ padding: "0.5rem", textAlign: "center" }}>Pts</th>
-          </tr>
-        </thead>
-        <tbody>
-          {standings.map((row) => (
-            <tr key={row.teamId} style={{ borderTop: "1px solid var(--site-border)" }}>
-              <td style={{ padding: "0.5rem", fontWeight: 700, color: "var(--site-text-secondary)" }}>{row.rank}</td>
-              <td style={{ padding: "0.5rem", color: "var(--site-text)", fontWeight: 600 }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                  {row.teamLogo && (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={row.teamLogo} alt="" width={20} height={20} style={{ objectFit: "contain", flexShrink: 0 }} />
-                  )}
-                  <span>{row.teamName}</span>
-                </div>
-              </td>
-              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.played}</td>
-              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.win}</td>
-              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.draw}</td>
-              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.lose}</td>
-              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsFor}</td>
-              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsAgainst}</td>
-              <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsDiff}</td>
-              <td style={{ padding: "0.5rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{row.points}</td>
+    <div>
+      <div style={{ overflowX: "auto" }}>
+        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
+          <thead>
+            <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
+              <th style={{ padding: "0.5rem" }}>#</th>
+              <th style={{ padding: "0.5rem" }}>Clube</th>
+              <th style={{ padding: "0.5rem", textAlign: "center" }}>J</th>
+              <th style={{ padding: "0.5rem", textAlign: "center" }}>V</th>
+              <th style={{ padding: "0.5rem", textAlign: "center" }}>E</th>
+              <th style={{ padding: "0.5rem", textAlign: "center" }}>D</th>
+              <th style={{ padding: "0.5rem", textAlign: "center" }}>GP</th>
+              <th style={{ padding: "0.5rem", textAlign: "center" }}>GC</th>
+              <th style={{ padding: "0.5rem", textAlign: "center" }}>SG</th>
+              <th style={{ padding: "0.5rem", textAlign: "center" }}>Pts</th>
             </tr>
+          </thead>
+          <tbody>
+            {standings.map((row) => (
+              <tr
+                key={row.teamId}
+                style={{ borderTop: "1px solid var(--site-border)", borderLeft: `3px solid ${row.zoneColor ?? "transparent"}` }}
+              >
+                <td style={{ padding: "0.5rem", fontWeight: 700, color: "var(--site-text-secondary)" }}>{row.rank}</td>
+                <td style={{ padding: "0.5rem", color: "var(--site-text)", fontWeight: 600 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                    {row.teamLogo && (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={row.teamLogo} alt="" width={20} height={20} style={{ objectFit: "contain", flexShrink: 0 }} />
+                    )}
+                    <span>{row.teamName}</span>
+                  </div>
+                </td>
+                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.played}</td>
+                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.win}</td>
+                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.draw}</td>
+                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.lose}</td>
+                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsFor}</td>
+                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsAgainst}</td>
+                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsDiff}</td>
+                <td style={{ padding: "0.5rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{row.points}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+      {legend.length > 0 && (
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "0.875rem", marginTop: "0.875rem", fontSize: "0.75rem", color: "var(--site-muted)" }}>
+          {legend.map((entry) => (
+            <div key={entry.color} style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+              <span style={{ width: "0.625rem", height: "0.625rem", borderRadius: "9999px", backgroundColor: entry.color, flexShrink: 0 }} />
+              {entry.label}
+            </div>
           ))}
-        </tbody>
-      </table>
+        </div>
+      )}
     </div>
   );
 }
