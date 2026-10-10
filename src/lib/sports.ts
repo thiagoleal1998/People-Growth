@@ -57,6 +57,7 @@
 // / copa-do-brasil / copa-libertadores-da-america).
 
 import * as cheerio from "cheerio";
+import { dateKeySaoPaulo } from "@/lib/date-key";
 
 const API_FOOTBALL_HOST = process.env.API_FOOTBALL_HOST || "v3.football.api-sports.io";
 const API_BASE = `https://${API_FOOTBALL_HOST}`;
@@ -322,7 +323,11 @@ export async function getTeamFixtures(teamId: number): Promise<Fixture[] | null>
 const TODAY_CACHE_SECONDS = 10800; // 3h
 
 export async function getTodayFixtures(): Promise<Fixture[] | null> {
-  const today = new Date().toISOString().slice(0, 10);
+  // "Today" in Brazil, not UTC — using toISOString()'s UTC date here used to
+  // create a multi-hour blind window (Brazil is UTC-3, so from ~9pm to
+  // midnight local time, the UTC calendar day is already "tomorrow", and
+  // today's real matches would silently stop showing up).
+  const today = dateKeySaoPaulo(new Date().toISOString());
   const data = await fetchFootballApi<RawFixturesResponse>("/fixtures", { date: today }, TODAY_CACHE_SECONDS);
   if (!data?.response) return null;
   const competitionByLeagueId = new Map(COMPETITION_ORDER.map((key) => [COMPETITIONS[key].apiLeagueId, key]));
