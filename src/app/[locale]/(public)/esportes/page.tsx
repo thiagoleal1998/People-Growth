@@ -5,6 +5,7 @@ import {
   COMPETITION_ORDER,
   attachDetailIds,
   getBestStandings,
+  getClubFixtures,
   getCurrentRoundFixtures,
   getTodayFixtures,
   type Competition,
@@ -126,9 +127,9 @@ function StandingsTable({ standings }: { standings: StandingRow[] | null }) {
 export default async function EsportesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ competicao?: string }>;
+  searchParams: Promise<{ competicao?: string; clube?: string }>;
 }) {
-  const { competicao: rawCompeticao } = await searchParams;
+  const { competicao: rawCompeticao, clube: rawClube } = await searchParams;
   const competition: Competition = COMPETITION_ORDER.includes(rawCompeticao as Competition) ? (rawCompeticao as Competition) : "serie_a";
   const info = COMPETITIONS[competition];
 
@@ -139,6 +140,14 @@ export default async function EsportesPage({
   ]);
   const todayFixtures = (allToday ?? []).filter((f) => f.competition === competition);
   const roundFixtures = rawRoundFixtures ? await attachDetailIds(rawRoundFixtures) : null;
+
+  // Only a club that's actually in this competition's own standings is a
+  // valid choice — besides being the source of the selector list itself,
+  // this keeps a stray/typo'd ?clube= from quietly showing an empty "no
+  // games" state that looks like a bug instead of a bad link.
+  const clube = standings?.some((row) => row.teamName === rawClube) ? (rawClube as string) : null;
+  const rawClubFixtures = clube ? await getClubFixtures(competition, clube) : null;
+  const clubFixtures = rawClubFixtures ? await attachDetailIds(rawClubFixtures) : null;
 
   return (
     <section className="section-padding esportes-page" style={{ backgroundColor: "var(--site-bg)", minHeight: "70vh" }}>
@@ -206,7 +215,45 @@ export default async function EsportesPage({
 
           <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
             <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Jogos por clube</h2>
-            <ComingSoonNote text="Em breve — ainda não temos uma forma confiável de filtrar o histórico de jogos por clube." />
+            {info.format === "table" && standings && standings.length > 0 ? (
+              <>
+                <nav style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginBottom: "1rem" }}>
+                  {standings.map((row) => (
+                    <a
+                      key={row.teamId}
+                      href={`?competicao=${competition}&clube=${encodeURIComponent(row.teamName)}`}
+                      aria-current={row.teamName === clube ? "page" : undefined}
+                      style={{
+                        padding: "0.375rem 0.75rem",
+                        borderRadius: "9999px",
+                        border: `1px solid ${row.teamName === clube ? BRAND : "var(--site-border-strong)"}`,
+                        color: row.teamName === clube ? BRAND : "var(--site-text-secondary)",
+                        fontWeight: 600,
+                        fontSize: "0.8125rem",
+                        textDecoration: "none",
+                      }}
+                    >
+                      {row.teamName}
+                    </a>
+                  ))}
+                </nav>
+                {clube ? (
+                  clubFixtures && clubFixtures.length > 0 ? (
+                    <div>
+                      {clubFixtures.map((fixture) => (
+                        <FixtureRow key={fixture.id} fixture={fixture} />
+                      ))}
+                    </div>
+                  ) : (
+                    <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Jogos indisponíveis no momento.</p>
+                  )
+                ) : (
+                  <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Escolha um clube para ver o calendário completo.</p>
+                )}
+              </>
+            ) : (
+              <ComingSoonNote text="Disponível para o Brasileirão Série A e Série B." />
+            )}
           </div>
         </div>
 

@@ -643,6 +643,89 @@ export async function getBestStandings(competition: Competition): Promise<Standi
   return (await getFullStandings(competition)) ?? getStandingsTop5(competition);
 }
 
+// "Jogos por clube" (full season schedule for one team) needs a different
+// source than the round page: api-futebol.com.br has no per-team page at
+// all (confirmed live — no team links anywhere on the standings/round
+// pages, every guessed URL shape 404s), and API-Football's /fixtures?team=
+// is season-scoped, blocked on the free plan same as /standings. But the
+// standings page's own Next.js payload embeds the WHOLE season's matches —
+// confirmed live: 379 clean, individually JSON.parse-able objects for
+// Série A 2026, not just the current round — so a club's full schedule
+// (past results + upcoming fixtures) is just a filter over that, no extra
+// request beyond the one getFullStandings/getCurrentRoundFixtures already
+// make (same URL, same Data Cache entry).
+const SEASON_MATCH_RE = /\{"round":\d+,"date":"[^"]+","time":"[^"]+".{0,500}?"matchId":"\d+","group":null\}/g;
+
+type ScrapedSeasonMatch = {
+  round: number;
+  date: string;
+  time: string;
+  status: string;
+  homeTeam: { name: string; logo?: string; score: number | null };
+  awayTeam: { name: string; logo?: string; score: number | null };
+  matchId: string;
+};
+
+export async function getSeasonFixtures(competition: Competition): Promise<Fixture[] | null> {
+  const slug = SCRAPE_SLUGS[competition];
+  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${currentSeason()}`);
+  if (!page) return null;
+  const matches = page.html.match(SEASON_MATCH_RE);
+  if (!matches || matches.length === 0) return null;
+
+  const fixtures: Fixture[] = [];
+  for (const raw of matches) {
+    let parsed: ScrapedSeasonMatch;
+    try {
+      parsed = JSON.parse(raw) as ScrapedSeasonMatch;
+    } catch {
+      continue;
+    }
+    // Same UTC-not-BRT quirk as the round page's displayed "DD/MM HHhMM"
+    // text (see parseFixturesFromRoundPage) — this "time" field is the same
+    // raw value, confirmed identical for the same match on both pages.
+    const status: FixtureStatus =
+      parsed.status === SCRAPE_STATUS_FINISHED
+        ? "finished"
+        : parsed.status === SCRAPE_STATUS_SCHEDULED
+          ? "scheduled"
+          : parsed.homeTeam.score !== null
+            ? "live"
+            : "other";
+    fixtures.push({
+      id: Number(parsed.matchId),
+      date: `${parsed.date}T${parsed.time}:00Z`,
+      round: String(parsed.round),
+      status,
+      statusShort: status,
+      elapsed: null,
+      homeTeamId: hashString(parsed.homeTeam.name),
+      homeTeamName: parsed.homeTeam.name,
+      homeTeamLogo: parsed.homeTeam.logo ?? null,
+      awayTeamId: hashString(parsed.awayTeam.name),
+      awayTeamName: parsed.awayTeam.name,
+      awayTeamLogo: parsed.awayTeam.logo ?? null,
+      homeGoals: parsed.homeTeam.score,
+      awayGoals: parsed.awayTeam.score,
+      competition,
+      source: "scraped",
+      detailId: null,
+    });
+  }
+  return fixtures;
+}
+
+// A club's full-season schedule (past results + upcoming fixtures),
+// chronological — only meaningful for serie_a/serie_b (COMPETITIONS[x].
+// format === "table"); Copa do Brasil/Libertadores don't expose this same
+// per-season match list and aren't a fixed round-robin roster to filter by.
+export async function getClubFixtures(competition: Competition, teamName: string): Promise<Fixture[] | null> {
+  const season = await getSeasonFixtures(competition);
+  if (!season) return null;
+  const fixtures = season.filter((f) => f.homeTeamName === teamName || f.awayTeamName === teamName);
+  return fixtures.sort((a, b) => a.date.localeCompare(b.date));
+}
+
 // Scraped fixtures (TheSportsDB, api-futebol.com.br) have no real
 // API-Football id to link to the detail page with. Resolving one via
 // API-Football's date-scoped /fixtures endpoint was tried first, but
