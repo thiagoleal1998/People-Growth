@@ -26,7 +26,16 @@ import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/yout
 import { getGovernorRace, getPresidentRace, getSenateRace } from "@/lib/tse";
 import { ElectionResults } from "@/components/ElectionResults";
 import { ElectionBanner } from "@/components/ElectionBanner";
-import { attachDetailIds, getBestStandings, getCurrentRoundFixtures, getLiveFixtures, isAnyCompetitionLiveNow } from "@/lib/sports";
+import {
+  attachDetailIds,
+  getBestStandings,
+  getCurrentRoundFixtures,
+  getLiveFixtures,
+  isAnyCompetitionLiveNow,
+  isRoundResultsFresh,
+  type Fixture,
+  type StandingRow,
+} from "@/lib/sports";
 import { SportsLiveWidget } from "@/components/SportsLiveWidget";
 import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
 import { articleHref } from "@/lib/article-url";
@@ -177,13 +186,21 @@ export default async function HomePage() {
   // roundResults (Série A's current round, finished matches only) is what
   // the widget shows instead of "sem jogos ao vivo" on a day with no live
   // match — shares the same scraped page/cache as the standings fetch above.
-  const sportsInitial = sportsEnabled
-    ? {
-        standings: await getBestStandings("serie_a"),
-        live: (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [],
-        roundResults: await attachDetailIds(((await getCurrentRoundFixtures("serie_a")) ?? []).filter((f) => f.status === "finished")),
-      }
-    : null;
+  // Only shown for 24h after the round's last match ends (isRoundResultsFresh)
+  // so the home page doesn't keep the same results up for days once they're
+  // no longer news — /esportes itself has no such cutoff, this is a home-
+  // page-only decluttering rule.
+  let sportsInitial: { standings: StandingRow[] | null; live: Fixture[] | null; roundResults: Fixture[] } | null = null;
+  if (sportsEnabled) {
+    const rawRoundFixtures = (await getCurrentRoundFixtures("serie_a")) ?? [];
+    sportsInitial = {
+      standings: await getBestStandings("serie_a"),
+      live: (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [],
+      roundResults: isRoundResultsFresh(rawRoundFixtures)
+        ? await attachDetailIds(rawRoundFixtures.filter((f) => f.status === "finished"))
+        : [],
+    };
+  }
   const faqEntries = getFaqEntriesFromConfig(config, locale);
   // Articles are ordered by publication date, except where an admin pinned one
   // to a home slot: that one takes its slot regardless of date. Editing an

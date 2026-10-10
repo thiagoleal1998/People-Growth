@@ -643,6 +643,24 @@ export async function getBestStandings(competition: Competition): Promise<Standi
   return (await getFullStandings(competition)) ?? getStandingsTop5(competition);
 }
 
+// getCurrentRoundFixtures has no built-in expiry of its own — it just
+// follows the site's own "current round" definition, which can sit on the
+// same finished round for days between matchdays (midweek gaps,
+// international breaks). Left unchecked, the home page's "Resultados da
+// rodada" fallback would show the same results indefinitely instead of
+// just clearing out once they're no longer news. 2h is a safe upper bound
+// for a match's own length (90min + stoppage + half-time), so "last
+// finished kickoff + 2h + 24h" is the round's actual cutoff for staying on
+// the home page.
+const ROUND_RESULTS_STALE_HOURS = 26; // ~2h match length + 24h grace
+
+export function isRoundResultsFresh(fixtures: Fixture[]): boolean {
+  const finishedKickoffs = fixtures.filter((f) => f.status === "finished").map((f) => new Date(f.date).getTime());
+  if (finishedKickoffs.length === 0) return false;
+  const lastKickoff = Math.max(...finishedKickoffs);
+  return Date.now() - lastKickoff < ROUND_RESULTS_STALE_HOURS * 60 * 60 * 1000;
+}
+
 // "Jogos por clube" (full season schedule for one team) needs a different
 // source than the round page: api-futebol.com.br has no per-team page at
 // all (confirmed live — no team links anywhere on the standings/round
