@@ -32,14 +32,14 @@ function Crest({ src, alt }: { src: string | null; alt: string }) {
 function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
   const isLive = fixture.status === "live";
   const hasScore = fixture.status === "live" || fixture.status === "finished";
-  // detailId is set natively for live API-Football fixtures, or resolved
-  // for scraped round-results fixtures via attachDetailIds() before this
-  // ever renders — null means no reliable match was found, stays unclickable.
-  const Wrapper = fixture.detailId !== null ? "a" : "div";
-  const wrapperProps = fixture.detailId !== null ? { href: `/esportes/partida/${fixture.detailId}` } : {};
+  // Every card links out, even a scraped fixture with no resolved detailId —
+  // its own (non-API-Football) id just won't match anything real, which the
+  // match-detail page already handles gracefully (an "indisponível no
+  // momento" message, not a 404) rather than leaving the card dead with
+  // nothing to click at all.
   return (
-    <Wrapper
-      {...wrapperProps}
+    <a
+      href={`/esportes/partida/${fixture.detailId ?? fixture.id}`}
       style={{
         display: "flex",
         flexDirection: "column",
@@ -75,7 +75,7 @@ function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
         </span>
         <Crest src={fixture.awayTeamLogo} alt={fixture.awayTeamName} />
       </div>
-    </Wrapper>
+    </a>
   );
 }
 

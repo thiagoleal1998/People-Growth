@@ -37,32 +37,43 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
   const isLive = fixture.status === "live";
   const isFinished = fixture.status === "finished";
   const scoreLabel = isLive || isFinished ? `${fixture.homeGoals ?? 0} – ${fixture.awayGoals ?? 0}` : dateLabel;
-  // detailId is only set once we have a real API-Football fixture id —
-  // either natively (source === "api_football") or resolved for a scraped
-  // fixture via attachDetailIds(). No detailId means no reliable match to
-  // look up, so the card stays unclickable.
-  const Wrapper = fixture.detailId !== null ? "a" : "div";
-  const wrapperProps = fixture.detailId !== null ? { href: `/esportes/partida/${fixture.detailId}` } : {};
+  // Every card links out, even a scraped fixture with no resolved detailId —
+  // its own (non-API-Football) id just won't match anything real, which the
+  // match-detail page already handles gracefully (an "indisponível no
+  // momento" message, not a 404 — see getMatchDetail's null case there)
+  // rather than leaving the card dead with nothing to click at all.
   return (
-    <Wrapper
-      {...wrapperProps}
+    <a
+      href={`/esportes/partida/${fixture.detailId ?? fixture.id}`}
       style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0", borderTop: "1px solid var(--site-border)", textDecoration: "none" }}
     >
       <div style={{ width: "4.5rem", flexShrink: 0, fontSize: "0.75rem", color: isLive ? "#DC2626" : "var(--site-muted)", fontWeight: isLive ? 800 : 600 }}>
         {isLive ? (fixture.elapsed ? `${fixture.elapsed}'` : "Ao vivo") : dateLabel.split(",")[0] ?? dateLabel}
       </div>
       <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
-        <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, textAlign: "right" }}>
-          {fixture.homeTeamName}
-        </span>
+        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "0.375rem" }}>
+          <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right" }}>
+            {fixture.homeTeamName}
+          </span>
+          {fixture.homeTeamLogo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={fixture.homeTeamLogo} alt="" width={20} height={20} style={{ objectFit: "contain", flexShrink: 0 }} />
+          )}
+        </div>
         <span style={{ fontWeight: 800, color: isLive || isFinished ? BRAND : "var(--site-muted)", fontSize: "0.875rem", flexShrink: 0, minWidth: "3.5rem", textAlign: "center" }}>
           {scoreLabel}
         </span>
-        <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
-          {fixture.awayTeamName}
-        </span>
+        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: "0.375rem" }}>
+          {fixture.awayTeamLogo && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img src={fixture.awayTeamLogo} alt="" width={20} height={20} style={{ objectFit: "contain", flexShrink: 0 }} />
+          )}
+          <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+            {fixture.awayTeamName}
+          </span>
+        </div>
       </div>
-    </Wrapper>
+    </a>
   );
 }
 
@@ -224,6 +235,9 @@ export default async function EsportesPage({
                       href={`?competicao=${competition}&clube=${encodeURIComponent(row.teamName)}`}
                       aria-current={row.teamName === clube ? "page" : undefined}
                       style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.375rem",
                         padding: "0.375rem 0.75rem",
                         borderRadius: "9999px",
                         border: `1px solid ${row.teamName === clube ? BRAND : "var(--site-border-strong)"}`,
@@ -233,6 +247,10 @@ export default async function EsportesPage({
                         textDecoration: "none",
                       }}
                     >
+                      {row.teamLogo && (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={row.teamLogo} alt="" width={16} height={16} style={{ objectFit: "contain", flexShrink: 0 }} />
+                      )}
                       {row.teamName}
                     </a>
                   ))}
