@@ -32,10 +32,11 @@ function Crest({ src, alt }: { src: string | null; alt: string }) {
 function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
   const isLive = fixture.status === "live";
   const hasScore = fixture.status === "live" || fixture.status === "finished";
-  // Only API-Football fixtures (live matches) have a real fixture id the
-  // detail page can look up — scraped round-results fixtures don't.
-  const Wrapper = fixture.source === "api_football" ? "a" : "div";
-  const wrapperProps = fixture.source === "api_football" ? { href: `/esportes/partida/${fixture.id}` } : {};
+  // detailId is set natively for live API-Football fixtures, or resolved
+  // for scraped round-results fixtures via attachDetailIds() before this
+  // ever renders — null means no reliable match was found, stays unclickable.
+  const Wrapper = fixture.detailId !== null ? "a" : "div";
+  const wrapperProps = fixture.detailId !== null ? { href: `/esportes/partida/${fixture.detailId}` } : {};
   return (
     <Wrapper
       {...wrapperProps}

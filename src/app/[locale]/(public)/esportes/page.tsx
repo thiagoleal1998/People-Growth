@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import {
   COMPETITIONS,
   COMPETITION_ORDER,
+  attachDetailIds,
   getBestStandings,
   getCurrentRoundFixtures,
   getTodayFixtures,
@@ -31,15 +32,16 @@ const cardStyle = {
 
 function FixtureRow({ fixture }: { fixture: Fixture }) {
   const date = new Date(fixture.date);
-  const dateLabel = date.toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
+  const dateLabel = date.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
   const isLive = fixture.status === "live";
   const isFinished = fixture.status === "finished";
   const scoreLabel = isLive || isFinished ? `${fixture.homeGoals ?? 0} – ${fixture.awayGoals ?? 0}` : dateLabel;
-  // Only API-Football fixtures have a real fixture id the detail page (events/
-  // lineups/statistics) can look up — scraped fixtures (api-futebol.com.br,
-  // TheSportsDB) use an unrelated numbering, so those stay unclickable.
-  const Wrapper = fixture.source === "api_football" ? "a" : "div";
-  const wrapperProps = fixture.source === "api_football" ? { href: `/esportes/partida/${fixture.id}` } : {};
+  // detailId is only set once we have a real API-Football fixture id —
+  // either natively (source === "api_football") or resolved for a scraped
+  // fixture via attachDetailIds(). No detailId means no reliable match to
+  // look up, so the card stays unclickable.
+  const Wrapper = fixture.detailId !== null ? "a" : "div";
+  const wrapperProps = fixture.detailId !== null ? { href: `/esportes/partida/${fixture.detailId}` } : {};
   return (
     <Wrapper
       {...wrapperProps}
@@ -130,12 +132,13 @@ export default async function EsportesPage({
   const competition: Competition = COMPETITION_ORDER.includes(rawCompeticao as Competition) ? (rawCompeticao as Competition) : "serie_a";
   const info = COMPETITIONS[competition];
 
-  const [allToday, standings, roundFixtures] = await Promise.all([
+  const [allToday, standings, rawRoundFixtures] = await Promise.all([
     getTodayFixtures(),
     info.format === "table" ? getBestStandings(competition) : Promise.resolve(null),
     getCurrentRoundFixtures(competition),
   ]);
   const todayFixtures = (allToday ?? []).filter((f) => f.competition === competition);
+  const roundFixtures = rawRoundFixtures ? await attachDetailIds(rawRoundFixtures) : null;
 
   return (
     <section className="section-padding esportes-page" style={{ backgroundColor: "var(--site-bg)", minHeight: "70vh" }}>

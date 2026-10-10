@@ -134,12 +134,16 @@ export type Fixture = {
   homeGoals: number | null;
   awayGoals: number | null;
   competition: Competition;
-  // "api_football" fixtures have a real API-Football fixture id, so
-  // /esportes/partida/[id] (events/lineups/statistics, all fixture-id-scoped
-  // and NOT season-blocked — confirmed live) can look them up. "scraped"
-  // fixtures (TheSportsDB, api-futebol.com.br) use an id from a different
-  // system entirely — never link those to the detail page.
+  // "api_football" fixtures have a real API-Football fixture id (in `id`),
+  // so /esportes/partida/[id] (events/lineups/statistics, all fixture-id-
+  // scoped and NOT season-blocked — confirmed live) can look them up.
+  // "scraped" fixtures (TheSportsDB, api-futebol.com.br) number matches in
+  // an unrelated system — `id` on its own can't be used for the detail
+  // page. `detailId` is the resolved API-Football id when one was found
+  // (see attachDetailIds), null otherwise — UI should link using `detailId`,
+  // never the raw `id`, for a "scraped" fixture.
   source: "api_football" | "scraped";
+  detailId: number | null;
 };
 
 export type Team = {
@@ -255,6 +259,7 @@ function parseFixture(f: RawFixture, competition: Competition): Fixture {
     awayGoals: f.goals.away,
     competition,
     source: "api_football",
+    detailId: f.fixture.id,
   };
 }
 
@@ -448,6 +453,7 @@ function parseSportsDbEvent(e: RawSportsDbEvent, competition: Competition): Fixt
     awayGoals: e.intAwayScore !== null && e.intAwayScore !== undefined ? Number(e.intAwayScore) : null,
     competition,
     source: "scraped",
+    detailId: null,
   };
 }
 
@@ -558,8 +564,16 @@ function parseFixturesFromRoundPage($: cheerio.CheerioAPI, competition: Competit
         : scoreMatch
           ? "live"
           : "other";
+    // The site's "DD/MM HHhMM" text is the raw UTC timestamp, not Brazil
+    // local time, despite looking like a BRT-formatted string — confirmed
+    // live against API-Football's own fixture time for the same match
+    // (identical date+hour in both, with API-Football's tagged "+00:00").
+    // Tagging it "-03:00" here was a real bug: for any match kicking off
+    // 21:00-23:59 BRT (a common prime-time slot), the UTC hour rolls past
+    // midnight into the next day, so "-03:00" silently shifted the fixture
+    // onto the wrong calendar day.
     const date = dateMatch
-      ? `${currentSeason()}-${dateMatch[2]}-${dateMatch[1]}T${dateMatch[3]}:${dateMatch[4]}:00-03:00`
+      ? `${currentSeason()}-${dateMatch[2]}-${dateMatch[1]}T${dateMatch[3]}:${dateMatch[4]}:00Z`
       : new Date().toISOString();
     fixtures.push({
       id: idMatch ? Number(idMatch[1]) : hashString(href),
@@ -578,6 +592,7 @@ function parseFixturesFromRoundPage($: cheerio.CheerioAPI, competition: Competit
       awayGoals: scoreMatch ? Number(scoreMatch[2]) : null,
       competition,
       source: "scraped",
+      detailId: null,
     });
   });
   return fixtures;
@@ -626,6 +641,107 @@ export async function getCurrentRoundFixtures(competition: Competition): Promise
 // rather than showing nothing if the scrape ever comes back empty.
 export async function getBestStandings(competition: Competition): Promise<StandingRow[] | null> {
   return (await getFullStandings(competition)) ?? getStandingsTop5(competition);
+}
+
+// Scraped fixtures (TheSportsDB, api-futebol.com.br) have no real
+// API-Football id to link to the detail page with. Resolving one via
+// API-Football's date-scoped /fixtures endpoint was tried first, but
+// confirmed live to only ever serve dates from today forward (free plan
+// error message: "try from <today> to <today+2>") — never the past, which
+// is exactly when a "round results" fixture happened. /fixtures/headtohead
+// has no such restriction (confirmed live: returns a team pair's full
+// history, past and future, across every competition and season) — so
+// fixtures are resolved by looking up both teams' numeric API-Football ids
+// below and searching their h2h history for the same calendar day + league.
+// Team ids were resolved once via /teams?search= and cross-checked against
+// /teams?league=&season=2024 (an unblocked past season, also season/date
+// unrestricted) — the search endpoint alone isn't reliable, confirmed live:
+// it returned a stale duplicate record for Atlético-MG ("Atletico Mineiro",
+// id 117, with zero fixtures) instead of the id actually used in fixtures
+// ("Atletico-MG", id 1062) — hardcoded here, keyed by the exact name string
+// api-futebol.com.br's pages use — this mirrors COMPETITIONS/SCRAPE_SLUGS/
+// THESPORTSDB_LEAGUE_IDS elsewhere in this file: a small, stable universe
+// (current Série A + B rosters) verified against the live API rather than
+// guessed, cheaper and far more reliable than fuzzy name matching (which hit
+// real ambiguity live, e.g. "Bragantino" substring-matching both "RB
+// Bragantino" and the unrelated lower-division "Bragantino PA").
+const TEAM_IDS: Record<string, number> = {
+  // Série A 2026
+  Flamengo: 127,
+  Palmeiras: 121,
+  Fluminense: 124,
+  "Athletico-PR": 134,
+  Cruzeiro: 135,
+  Bahia: 118,
+  "Atlético-MG": 1062,
+  Santos: 128,
+  Coritiba: 147,
+  Bragantino: 794,
+  "São Paulo": 126,
+  Vitória: 136,
+  Botafogo: 120,
+  Vasco: 133,
+  Mirassol: 7848,
+  Corinthians: 131,
+  Internacional: 119,
+  Grêmio: 130,
+  Remo: 1198,
+  Chapecoense: 132,
+  // Série B 2026
+  Juventude: 152,
+  "Vila Nova": 142,
+  Novorizontino: 7834,
+  Fortaleza: 154,
+  Criciúma: 140,
+  "Atlético-GO": 144,
+  CRB: 146,
+  Sport: 123,
+  "Operário-PR": 1223,
+  Cuiabá: 1193,
+  Goiás: 151,
+  "São Bernardo": 7865,
+  Náutico: 755,
+  Ceará: 129,
+  "Athletic Club": 13975,
+  "Botafogo-SP": 2618,
+  Avaí: 145,
+  Londrina: 148,
+  "América-MG": 125,
+  "Ponte Preta": 139,
+};
+
+const H2H_CACHE_SECONDS = 21600; // 6h — per team pair, not per fixture, so cheap even daily
+
+export async function attachDetailIds(fixtures: Fixture[]): Promise<Fixture[]> {
+  const unresolved = fixtures.filter((f) => f.source === "scraped" && f.detailId === null);
+  if (unresolved.length === 0) return fixtures;
+
+  const pairs = new Map<string, { home: number; away: number }>();
+  for (const f of unresolved) {
+    const home = TEAM_IDS[f.homeTeamName];
+    const away = TEAM_IDS[f.awayTeamName];
+    if (home && away) pairs.set(`${home}-${away}`, { home, away });
+  }
+
+  const h2hByPair = new Map<string, RawFixture[]>();
+  await Promise.all(
+    [...pairs.entries()].map(async ([key, { home, away }]) => {
+      const data = await fetchFootballApi<RawFixturesResponse>("/fixtures/headtohead", { h2h: `${home}-${away}` }, H2H_CACHE_SECONDS);
+      h2hByPair.set(key, data?.response ?? []);
+    })
+  );
+
+  return fixtures.map((f) => {
+    if (f.source !== "scraped" || f.detailId !== null) return f;
+    const home = TEAM_IDS[f.homeTeamName];
+    const away = TEAM_IDS[f.awayTeamName];
+    if (!home || !away) return f;
+    const candidates = h2hByPair.get(`${home}-${away}`) ?? [];
+    const targetDate = dateKeySaoPaulo(f.date);
+    const leagueId = COMPETITIONS[f.competition].apiLeagueId;
+    const match = candidates.find((raw) => raw.league.id === leagueId && dateKeySaoPaulo(raw.fixture.date) === targetDate);
+    return match ? { ...f, detailId: match.fixture.id } : f;
+  });
 }
 
 // --- Match detail: events, lineups, statistics for a single fixture ---

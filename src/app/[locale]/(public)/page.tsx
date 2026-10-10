@@ -26,7 +26,7 @@ import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/yout
 import { getGovernorRace, getPresidentRace, getSenateRace } from "@/lib/tse";
 import { ElectionResults } from "@/components/ElectionResults";
 import { ElectionBanner } from "@/components/ElectionBanner";
-import { getBestStandings, getCurrentRoundFixtures, getLiveFixtures, isAnyCompetitionLiveNow } from "@/lib/sports";
+import { attachDetailIds, getBestStandings, getCurrentRoundFixtures, getLiveFixtures, isAnyCompetitionLiveNow } from "@/lib/sports";
 import { SportsLiveWidget } from "@/components/SportsLiveWidget";
 import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
 import { articleHref } from "@/lib/article-url";
@@ -181,7 +181,7 @@ export default async function HomePage() {
     ? {
         standings: await getBestStandings("serie_a"),
         live: (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [],
-        roundResults: ((await getCurrentRoundFixtures("serie_a")) ?? []).filter((f) => f.status === "finished"),
+        roundResults: await attachDetailIds(((await getCurrentRoundFixtures("serie_a")) ?? []).filter((f) => f.status === "finished")),
       }
     : null;
   const faqEntries = getFaqEntriesFromConfig(config, locale);

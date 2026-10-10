@@ -226,7 +226,7 @@ export default async function PartidaPage({
   if (!detail) notFound();
   const { header, events, lineups, statistics } = detail;
 
-  const dateLabel = new Date(header.date).toLocaleString("pt-BR", { day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  const dateLabel = new Date(header.date).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
   const isLive = header.status === "live";
   const isFinished = header.status === "finished";
   const hasScore = isLive || isFinished;
