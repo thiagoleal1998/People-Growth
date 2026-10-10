@@ -223,7 +223,31 @@ export default async function PartidaPage({
   if (!Number.isFinite(fixtureId)) notFound();
 
   const detail = await getMatchDetail(fixtureId);
-  if (!detail) notFound();
+  // getMatchDetail returns null both when the id is genuinely bogus and
+  // when the API call itself fails (quota exhausted, network blip, API
+  // down) — fetchFootballApi swallows every failure the same way, by
+  // design, so there's no way to tell those apart here. A hard notFound()
+  // would show "página não encontrada" for what's often just a transient
+  // API hiccup, which reads as "this match doesn't exist" when it does —
+  // same house pattern as the rest of /esportes (StandingsTable,
+  // "Jogos indisponíveis no momento" etc.): show an honest "unavailable
+  // right now" message instead of a 404.
+  if (!detail) {
+    return (
+      <section className="section-padding esportes-page" style={{ backgroundColor: "var(--site-bg)", minHeight: "70vh" }}>
+        <div className="container-xl" style={{ maxWidth: "800px" }}>
+          <Link href="/esportes" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", marginBottom: "1rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}>
+            ← Voltar para Esportes
+          </Link>
+          <div style={cardStyle}>
+            <p style={{ color: "var(--site-faint)", fontSize: "0.9375rem", textAlign: "center", padding: "1rem 0" }}>
+              Informações desta partida indisponíveis no momento.
+            </p>
+          </div>
+        </div>
+      </section>
+    );
+  }
   const { header, events, lineups, statistics } = detail;
 
   const dateLabel = new Date(header.date).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "long", year: "numeric", hour: "2-digit", minute: "2-digit" });
