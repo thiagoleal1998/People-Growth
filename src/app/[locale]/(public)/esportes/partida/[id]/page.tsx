@@ -3,7 +3,9 @@ import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { COMPETITIONS, getMatchDetail, type MatchEvent, type MatchHeader, type TeamLineup, type TeamStatistics } from "@/lib/sports";
 
-export const revalidate = 180;
+// Matches MATCH_DETAIL_CACHE_SECONDS in sports.ts — no point re-rendering
+// this page more often than the data underneath it actually changes.
+export const revalidate = 900;
 
 // Portuguese-only, same as the rest of /esportes.
 const BRAND = "#4361EE";

@@ -164,7 +164,13 @@ export type Team = {
 // reasoning. Easy to retune later without touching any call site.
 const STANDINGS_CACHE_SECONDS = 10800; // 3h — a table only changes after full-time
 const SCHEDULE_CACHE_SECONDS = 10800; // 3h — also doubles as the "is anything live" gate, see isAnyCompetitionLiveNow
-const LIVE_CACHE_SECONDS = 180; // 3min — only ever actually fetched while the gate is open
+// 10min — only ever actually fetched while the gate is open, but even then
+// a 3min window blew the free plan's 100req/day quota on its own: one
+// match's ~150min live window alone cost 150/3 = 50 requests, confirmed
+// live (the quota was found exhausted mid-match with no unusual testing
+// that day). 10min cuts that to 15 requests/match, leaving real headroom
+// for the match-detail page's own calls below.
+const LIVE_CACHE_SECONDS = 600;
 const TEAMS_CACHE_SECONDS = 86400; // 24h — a season's club list barely changes
 const TEAM_FIXTURES_CACHE_SECONDS = 10800; // 3h
 
@@ -926,7 +932,12 @@ export async function attachDetailIds(fixtures: Fixture[]): Promise<Fixture[]> {
 // API-Football id (Fixture.source === "api_football"); never call these with
 // an id from the scraped sources, which use an unrelated numbering.
 
-const MATCH_DETAIL_CACHE_SECONDS = 180; // 3min — same cadence as live scores
+// 15min. getMatchDetail makes 4 separate API calls (header, events,
+// lineups, statistics) every time this cache expires — at the old 3min
+// value that was 4 calls x 50 refreshes over one ~150min match = 200
+// requests, double the free plan's entire 100req/day quota from a single
+// viewed match. 15min cuts that to 4 x 10 = 40 requests/match.
+const MATCH_DETAIL_CACHE_SECONDS = 900;
 
 export type MatchHeader = Fixture & {
   referee: string | null;
