@@ -739,21 +739,39 @@ export function fixturesStartingSoon(fixtures: Fixture[]): Fixture[] {
   });
 }
 
-// A fallback crest source, keyed by team name, for fixtures whose own
-// teamLogo points at API-Football's media.api-sports.io — confirmed live to
-// fail DNS resolution on at least one real viewer's network (while
-// resolving fine via Google's public DNS), so the url is correct but not
-// reliably reachable for everyone. Standings rows' teamLogo comes from
-// api-futebol.com.br's own cdn instead (cdn.api-futebol.com.br), a
-// different domain that resolved fine on the same affected network — so
-// TeamCrest (src/components/TeamCrest.tsx) tries this second source before
-// giving up to a placeholder, rather than just hiding the broken image.
-export function teamLogoMap(standings: StandingRow[] | null): Record<string, string> {
-  const map: Record<string, string> = {};
+// Swaps a fixture's own teamLogo (API-Football's media.api-sports.io, for
+// any "api_football"-sourced fixture) for the scraped equivalent
+// (api-futebol.com.br's cdn.api-futebol.com.br) wherever a reliable match
+// exists — confirmed live: media.api-sports.io fails DNS resolution on at
+// least one real viewer's network while resolving fine via Google's public
+// DNS, so the url is correct but not reliably reachable for everyone.
+// Rather than render it anyway and hope the browser's onerror fires
+// reliably (unconfirmed across browsers/networks — a first attempt at an
+// error-triggered fallback still showed broken icons live), this resolves
+// the known-good source server-side, before the page is even sent, so nothing
+// ever attempts the unreliable domain when a substitute is available.
+//
+// Matched by exact numeric API-Football team id (via TEAM_IDS below), not
+// by name — a name-based attempt silently missed real pairs, e.g.
+// API-Football names this same club "Chapecoense-sc" where the scraped
+// standings page (and TEAM_IDS, keyed off that page's own names) calls it
+// plain "Chapecoense"; matching by id sidesteps every such spelling
+// mismatch entirely. TeamCrest (src/components/TeamCrest.tsx) still keeps
+// an onerror->placeholder fallback underneath, for the remaining case where
+// no scraped match exists (Copa do Brasil/Libertadores opponents outside
+// Série A/B, or getStandingsTop5's capped fallback with no matching row).
+export function withReliableCrests(fixtures: Fixture[], standings: StandingRow[] | null): Fixture[] {
+  const logoByApiId = new Map<number, string>();
   for (const row of standings ?? []) {
-    if (row.teamLogo) map[row.teamName] = row.teamLogo;
+    const apiId = TEAM_IDS[row.teamName];
+    if (apiId && row.teamLogo) logoByApiId.set(apiId, row.teamLogo);
   }
-  return map;
+  if (logoByApiId.size === 0) return fixtures;
+  return fixtures.map((f) => ({
+    ...f,
+    homeTeamLogo: logoByApiId.get(f.homeTeamId) ?? f.homeTeamLogo,
+    awayTeamLogo: logoByApiId.get(f.awayTeamId) ?? f.awayTeamLogo,
+  }));
 }
 
 // "Jogos por clube" (full season schedule for one team) needs a different

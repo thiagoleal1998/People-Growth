@@ -2,29 +2,22 @@
 
 import { useState } from "react";
 
-// Three-stage fallback: the fixture's own logo (often API-Football's
-// media.api-sports.io), then a second source if one's given (usually the
-// scraped standings' cdn.api-futebol.com.br logo — a different domain, so
-// a DNS/CDN problem with one doesn't take down the other), then a plain
-// gradient circle. Needs client state (onError swapping the src) so this
-// is its own small client component, shared by both the home widget
-// (already client) and FixtureRow on /esportes (a Server Component that
-// couldn't otherwise handle image load failures itself).
-export function TeamCrest({
-  src,
-  fallbackSrc,
-  alt,
-  size = 44,
-}: {
-  src: string | null;
-  fallbackSrc?: string | null;
-  alt: string;
-  size?: number;
-}) {
-  const [stage, setStage] = useState<"primary" | "fallback" | "placeholder">(src ? "primary" : fallbackSrc ? "fallback" : "placeholder");
-  const currentSrc = stage === "primary" ? src : stage === "fallback" ? fallbackSrc : null;
+// `src` should already be the best known-reliable logo url by the time it
+// gets here — see withReliableCrests in sports.ts, which swaps a fixture's
+// own API-Football logo (media.api-sports.io, confirmed live to fail DNS
+// on at least one real network) for the scraped equivalent
+// (cdn.api-futebol.com.br) server-side, before the page is even sent. This
+// component's onError->placeholder is just the last-resort safety net for
+// whatever's left over (no scraped match existed, or even the reliable
+// source has a genuine one-off hiccup) — needs client state, so this is its
+// own small client component, shared by both the home widget (already
+// client) and FixtureRow on /esportes (a Server Component that couldn't
+// otherwise handle an image load failure itself).
+export function TeamCrest({ src, alt, size = 44 }: { src: string | null; alt: string; size?: number }) {
+  const [failed, setFailed] = useState(false);
+  const showImage = src && !failed;
 
-  if (!currentSrc) {
+  if (!showImage) {
     return (
       <div
         style={{ width: size, height: size, flexShrink: 0, borderRadius: "50%", background: "linear-gradient(135deg, #4361EE, #06D6A0)" }}
@@ -35,13 +28,13 @@ export function TeamCrest({
   return (
     // eslint-disable-next-line @next/next/no-img-element
     <img
-      src={currentSrc}
+      src={src}
       alt={alt}
       title={alt}
       width={size}
       height={size}
       style={{ objectFit: "contain", flexShrink: 0 }}
-      onError={() => setStage((s) => (s === "primary" && fallbackSrc ? "fallback" : "placeholder"))}
+      onError={() => setFailed(true)}
     />
   );
 }

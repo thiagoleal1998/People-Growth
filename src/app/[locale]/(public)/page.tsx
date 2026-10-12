@@ -36,7 +36,7 @@ import {
   getUpcomingRoundFixtures,
   isAnyCompetitionLiveNow,
   isRoundResultsFresh,
-  teamLogoMap,
+  withReliableCrests,
   type Fixture,
   type StandingRow,
 } from "@/lib/sports";
@@ -211,16 +211,27 @@ export default async function HomePage() {
   // will use.
   let sportsInitial: {
     standings: StandingRow[] | null;
-    live: Fixture[] | null;
+    live: Fixture[];
     today: Fixture[];
     roundResults: Fixture[];
     upcoming: Fixture[];
   } | null = null;
   if (sportsEnabled) {
-    const live = (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [];
-    const hasLive = Boolean(live && live.length > 0);
+    // live/today carry API-Football's own crest urls (media.api-sports.io) —
+    // withReliableCrests swaps those for the scraped standings' equivalent
+    // (a different, confirmed-working domain) wherever a match exists,
+    // before any of this ever reaches the page. roundResults/upcoming are
+    // already scraped-sourced and don't need it.
+    const standings = await getBestStandings("serie_a");
+    const live = withReliableCrests((await isAnyCompetitionLiveNow()) ? ((await getLiveFixtures()) ?? []) : [], standings);
+    const hasLive = live.length > 0;
 
-    const today = hasLive ? [] : ((await getTodayFixtures()) ?? []).filter((f) => f.competition === "serie_a");
+    const today = hasLive
+      ? []
+      : withReliableCrests(
+          ((await getTodayFixtures()) ?? []).filter((f) => f.competition === "serie_a"),
+          standings
+        );
     const hasToday = today.length > 0;
 
     let roundResults: Fixture[] = [];
@@ -235,7 +246,7 @@ export default async function HomePage() {
       }
     }
 
-    sportsInitial = { standings: await getBestStandings("serie_a"), live, today, roundResults, upcoming };
+    sportsInitial = { standings, live, today, roundResults, upcoming };
   }
   const faqEntries = getFaqEntriesFromConfig(config, locale);
   // Articles are ordered by publication date, except where an admin pinned one
@@ -314,11 +325,10 @@ export default async function HomePage() {
               Brasileirão
             </h2>
             <SportsLiveWidget
-              initial={sportsInitial.live ?? []}
+              initial={sportsInitial.live}
               todayFixtures={sportsInitial.today}
               roundResults={sportsInitial.roundResults}
               upcomingFixtures={sportsInitial.upcoming}
-              logoFallbacks={teamLogoMap(sportsInitial.standings)}
               locale={locale}
             />
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>

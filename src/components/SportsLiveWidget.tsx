@@ -26,7 +26,7 @@ function statusLabel(fixture: Fixture, locale: string): string {
   return fixture.statusShort;
 }
 
-function MatchCard({ fixture, locale, logoFallbacks }: { fixture: Fixture; locale: string; logoFallbacks: Record<string, string> }) {
+function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
   const isLive = fixture.status === "live";
   const hasScore = fixture.status === "live" || fixture.status === "finished";
   // Every card links out, even a scraped fixture with no resolved detailId —
@@ -66,11 +66,11 @@ function MatchCard({ fixture, locale, logoFallbacks }: { fixture: Fixture; local
         {statusLabel(fixture, locale)}
       </span>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.625rem" }}>
-        <TeamCrest src={fixture.homeTeamLogo} fallbackSrc={logoFallbacks[fixture.homeTeamName]} alt={fixture.homeTeamName} />
+        <TeamCrest src={fixture.homeTeamLogo} alt={fixture.homeTeamName} />
         <span style={{ fontWeight: 800, color: BRAND, fontSize: "1.0625rem", minWidth: "2.5rem", textAlign: "center" }}>
           {hasScore ? `${fixture.homeGoals ?? 0}–${fixture.awayGoals ?? 0}` : "×"}
         </span>
-        <TeamCrest src={fixture.awayTeamLogo} fallbackSrc={logoFallbacks[fixture.awayTeamName]} alt={fixture.awayTeamName} />
+        <TeamCrest src={fixture.awayTeamLogo} alt={fixture.awayTeamName} />
       </div>
     </a>
   );
@@ -94,14 +94,12 @@ export function SportsLiveWidget({
   todayFixtures = [],
   roundResults = [],
   upcomingFixtures = [],
-  logoFallbacks = {},
   locale,
 }: {
   initial: Fixture[];
   todayFixtures?: Fixture[];
   roundResults?: Fixture[];
   upcomingFixtures?: Fixture[];
-  logoFallbacks?: Record<string, string>;
   locale: string;
 }) {
   const [live, setLive] = useState<Fixture[]>(initial);
@@ -171,7 +169,7 @@ export function SportsLiveWidget({
       ) : (
         <div key={offset} className="sports-carousel-fade" style={{ display: "grid", gridTemplateColumns: `repeat(${visible.length}, minmax(0, 1fr))`, gap: "0.75rem" }}>
           {visible.map((fixture, i) => (
-            <MatchCard key={`${fixture.id}-${i}`} fixture={fixture} locale={locale} logoFallbacks={logoFallbacks} />
+            <MatchCard key={`${fixture.id}-${i}`} fixture={fixture} locale={locale} />
           ))}
         </div>
       )}
