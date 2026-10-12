@@ -739,6 +739,23 @@ export function fixturesStartingSoon(fixtures: Fixture[]): Fixture[] {
   });
 }
 
+// A fallback crest source, keyed by team name, for fixtures whose own
+// teamLogo points at API-Football's media.api-sports.io — confirmed live to
+// fail DNS resolution on at least one real viewer's network (while
+// resolving fine via Google's public DNS), so the url is correct but not
+// reliably reachable for everyone. Standings rows' teamLogo comes from
+// api-futebol.com.br's own cdn instead (cdn.api-futebol.com.br), a
+// different domain that resolved fine on the same affected network — so
+// TeamCrest (src/components/TeamCrest.tsx) tries this second source before
+// giving up to a placeholder, rather than just hiding the broken image.
+export function teamLogoMap(standings: StandingRow[] | null): Record<string, string> {
+  const map: Record<string, string> = {};
+  for (const row of standings ?? []) {
+    if (row.teamLogo) map[row.teamName] = row.teamLogo;
+  }
+  return map;
+}
+
 // "Jogos por clube" (full season schedule for one team) needs a different
 // source than the round page: api-futebol.com.br has no per-team page at
 // all (confirmed live — no team links anywhere on the standings/round

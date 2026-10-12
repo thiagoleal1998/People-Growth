@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { COMPETITIONS, type Fixture } from "@/lib/sports";
+import { TeamCrest } from "@/components/TeamCrest";
 
 const BRAND = "#4361EE";
 const VISIBLE_COUNT = 3;
@@ -25,37 +26,7 @@ function statusLabel(fixture: Fixture, locale: string): string {
   return fixture.statusShort;
 }
 
-// Falls back to the gradient circle not just when there's no logo url at
-// all, but also when a real url fails to actually load (onError) — a team
-// crest can 404/time out/fail DNS on the viewer's own network even when the
-// url itself is correct (confirmed live: media.api-sports.io resolved fine
-// via Google's DNS but not via one viewer's own resolver), and a broken-
-// image icon looks like a site bug when it's really just that one request
-// failing.
-function Crest({ src, alt }: { src: string | null; alt: string }) {
-  const [failed, setFailed] = useState(false);
-  const showImage = src && !failed;
-  return (
-    <div style={{ width: "2.75rem", height: "2.75rem", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      {showImage ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={src}
-          alt={alt}
-          title={alt}
-          width={44}
-          height={44}
-          style={{ objectFit: "contain", maxWidth: "100%", maxHeight: "100%" }}
-          onError={() => setFailed(true)}
-        />
-      ) : (
-        <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "linear-gradient(135deg, #4361EE, #06D6A0)" }} title={alt} />
-      )}
-    </div>
-  );
-}
-
-function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
+function MatchCard({ fixture, locale, logoFallbacks }: { fixture: Fixture; locale: string; logoFallbacks: Record<string, string> }) {
   const isLive = fixture.status === "live";
   const hasScore = fixture.status === "live" || fixture.status === "finished";
   // Every card links out, even a scraped fixture with no resolved detailId —
@@ -95,11 +66,11 @@ function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
         {statusLabel(fixture, locale)}
       </span>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.625rem" }}>
-        <Crest src={fixture.homeTeamLogo} alt={fixture.homeTeamName} />
+        <TeamCrest src={fixture.homeTeamLogo} fallbackSrc={logoFallbacks[fixture.homeTeamName]} alt={fixture.homeTeamName} />
         <span style={{ fontWeight: 800, color: BRAND, fontSize: "1.0625rem", minWidth: "2.5rem", textAlign: "center" }}>
           {hasScore ? `${fixture.homeGoals ?? 0}–${fixture.awayGoals ?? 0}` : "×"}
         </span>
-        <Crest src={fixture.awayTeamLogo} alt={fixture.awayTeamName} />
+        <TeamCrest src={fixture.awayTeamLogo} fallbackSrc={logoFallbacks[fixture.awayTeamName]} alt={fixture.awayTeamName} />
       </div>
     </a>
   );
@@ -123,12 +94,14 @@ export function SportsLiveWidget({
   todayFixtures = [],
   roundResults = [],
   upcomingFixtures = [],
+  logoFallbacks = {},
   locale,
 }: {
   initial: Fixture[];
   todayFixtures?: Fixture[];
   roundResults?: Fixture[];
   upcomingFixtures?: Fixture[];
+  logoFallbacks?: Record<string, string>;
   locale: string;
 }) {
   const [live, setLive] = useState<Fixture[]>(initial);
@@ -198,7 +171,7 @@ export function SportsLiveWidget({
       ) : (
         <div key={offset} className="sports-carousel-fade" style={{ display: "grid", gridTemplateColumns: `repeat(${visible.length}, minmax(0, 1fr))`, gap: "0.75rem" }}>
           {visible.map((fixture, i) => (
-            <MatchCard key={`${fixture.id}-${i}`} fixture={fixture} locale={locale} />
+            <MatchCard key={`${fixture.id}-${i}`} fixture={fixture} locale={locale} logoFallbacks={logoFallbacks} />
           ))}
         </div>
       )}

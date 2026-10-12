@@ -8,10 +8,12 @@ import {
   getClubFixtures,
   getCurrentRoundFixtures,
   getTodayFixtures,
+  teamLogoMap,
   type Competition,
   type Fixture,
   type StandingRow,
 } from "@/lib/sports";
+import { TeamCrest } from "@/components/TeamCrest";
 
 export const revalidate = 180;
 
@@ -31,7 +33,7 @@ const cardStyle = {
   padding: "1rem 1.125rem",
 } as const;
 
-function FixtureRow({ fixture }: { fixture: Fixture }) {
+function FixtureRow({ fixture, logoFallbacks }: { fixture: Fixture; logoFallbacks: Record<string, string> }) {
   const date = new Date(fixture.date);
   const dateLabel = date.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", hour: "2-digit", minute: "2-digit" });
   const isLive = fixture.status === "live";
@@ -55,19 +57,13 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
           <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right" }}>
             {fixture.homeTeamName}
           </span>
-          {fixture.homeTeamLogo && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={fixture.homeTeamLogo} alt="" width={20} height={20} style={{ objectFit: "contain", flexShrink: 0 }} />
-          )}
+          <TeamCrest src={fixture.homeTeamLogo} fallbackSrc={logoFallbacks[fixture.homeTeamName]} alt={fixture.homeTeamName} size={20} />
         </div>
         <span style={{ fontWeight: 800, color: isLive || isFinished ? BRAND : "var(--site-muted)", fontSize: "0.875rem", flexShrink: 0, minWidth: "3.5rem", textAlign: "center" }}>
           {scoreLabel}
         </span>
         <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: "0.375rem" }}>
-          {fixture.awayTeamLogo && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={fixture.awayTeamLogo} alt="" width={20} height={20} style={{ objectFit: "contain", flexShrink: 0 }} />
-          )}
+          <TeamCrest src={fixture.awayTeamLogo} fallbackSrc={logoFallbacks[fixture.awayTeamName]} alt={fixture.awayTeamName} size={20} />
           <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {fixture.awayTeamName}
           </span>
@@ -179,6 +175,7 @@ export default async function EsportesPage({
   ]);
   const todayFixtures = (allToday ?? []).filter((f) => f.competition === competition);
   const roundFixtures = rawRoundFixtures ? await attachDetailIds(rawRoundFixtures) : null;
+  const logoFallbacks = teamLogoMap(standings);
 
   // Only a club that's actually in this competition's own standings is a
   // valid choice — besides being the source of the selector list itself,
@@ -226,7 +223,7 @@ export default async function EsportesPage({
               <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Jogos de hoje</h2>
               <div>
                 {todayFixtures.map((fixture) => (
-                  <FixtureRow key={fixture.id} fixture={fixture} />
+                  <FixtureRow key={fixture.id} fixture={fixture} logoFallbacks={logoFallbacks} />
                 ))}
               </div>
             </div>
@@ -244,7 +241,7 @@ export default async function EsportesPage({
             {roundFixtures && roundFixtures.length > 0 ? (
               <div>
                 {roundFixtures.map((fixture) => (
-                  <FixtureRow key={fixture.id} fixture={fixture} />
+                  <FixtureRow key={fixture.id} fixture={fixture} logoFallbacks={logoFallbacks} />
                 ))}
               </div>
             ) : (
@@ -287,7 +284,7 @@ export default async function EsportesPage({
                   clubFixtures && clubFixtures.length > 0 ? (
                     <div>
                       {clubFixtures.map((fixture) => (
-                        <FixtureRow key={fixture.id} fixture={fixture} />
+                        <FixtureRow key={fixture.id} fixture={fixture} logoFallbacks={logoFallbacks} />
                       ))}
                     </div>
                   ) : (

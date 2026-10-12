@@ -36,6 +36,7 @@ import {
   getUpcomingRoundFixtures,
   isAnyCompetitionLiveNow,
   isRoundResultsFresh,
+  teamLogoMap,
   type Fixture,
   type StandingRow,
 } from "@/lib/sports";
@@ -317,6 +318,7 @@ export default async function HomePage() {
               todayFixtures={sportsInitial.today}
               roundResults={sportsInitial.roundResults}
               upcomingFixtures={sportsInitial.upcoming}
+              logoFallbacks={teamLogoMap(sportsInitial.standings)}
               locale={locale}
             />
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
