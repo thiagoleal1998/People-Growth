@@ -15,12 +15,14 @@
 const ESPN_SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard";
 const ESPN_STANDINGS_URL = "https://site.api.espn.com/apis/v2/sports/football/nfl/standings";
 
-// League shield, verified live against the scoreboard response's own
-// leagues[0].logos — "default" for a light background, "dark" for a dark
-// one. Same media.api-sports.io-style CDN risk as everything else here:
-// render through TeamCrest, never a plain <img>.
-export const NFL_LOGO_URL = "https://a.espncdn.com/i/teamlogos/leagues/500/nfl.png";
-export const NFL_LOGO_URL_DARK = "https://a.espncdn.com/i/teamlogos/leagues/500-dark/nfl.png";
+// League shield — originally espncdn.com (light/dark variants, matching
+// the scoreboard response's own leagues[0].logos), re-hosted on this
+// project's own Supabase Storage bucket instead, same reasoning as
+// COMPETITIONS.logo in sports.ts: no third-party CDN DNS dependency for a
+// handful of static brand images that never change.
+const SPORTS_LOGO_BASE = "https://lqgkxpoyymokrratgabe.supabase.co/storage/v1/object/public/site-assets/sports-logos";
+export const NFL_LOGO_URL = `${SPORTS_LOGO_BASE}/nfl-light.png`;
+export const NFL_LOGO_URL_DARK = `${SPORTS_LOGO_BASE}/nfl-dark.png`;
 
 async function fetchEspn<T>(url: string, revalidateSeconds: number): Promise<T | null> {
   try {

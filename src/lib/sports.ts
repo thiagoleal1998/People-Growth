@@ -71,20 +71,29 @@ const THESPORTSDB_BASE = `https://www.thesportsdb.com/api/v1/json/${THESPORTSDB_
 
 export type Competition = "serie_a" | "serie_b" | "copa_do_brasil" | "libertadores" | "sulamericana";
 
-// `logo` is API-Football's own league badge (/leagues?id=X, verified live
-// for every entry below) — on media.api-sports.io, the same domain
-// confirmed earlier to fail DNS resolution on at least one real network, so
-// anywhere this renders it should go through TeamCrest (its onerror
-// fallback), never a plain <img>.
+// `logo` used to point straight at API-Football's own league badge
+// (media.api-sports.io/football/leagues/{id}.png) — but that's the exact
+// domain already confirmed to fail DNS resolution on at least one real
+// network, and relying on TeamCrest's onerror fallback there still showed
+// broken icons live (unlike the team-crest case, there's no second
+// same-content source to substitute server-side — a league's own crest
+// isn't published anywhere else on api-futebol.com.br's pages). Downloaded
+// each one once (same images, confirmed live against /leagues?id=X) and
+// re-hosted them on this project's own Supabase Storage bucket — the same
+// CDN already relied on for every author photo and article cover on the
+// site — removing the third-party DNS dependency entirely rather than
+// hoping a fallback catches it.
+const SPORTS_LOGO_BASE = "https://lqgkxpoyymokrratgabe.supabase.co/storage/v1/object/public/site-assets/sports-logos";
+
 export const COMPETITIONS: Record<Competition, { apiLeagueId: number; name_pt: string; name_en: string; format: "table" | "list"; logo: string }> = {
-  serie_a: { apiLeagueId: 71, name_pt: "Brasileirão Série A", name_en: "Brasileirão Série A", format: "table", logo: "https://media.api-sports.io/football/leagues/71.png" },
-  serie_b: { apiLeagueId: 72, name_pt: "Brasileirão Série B", name_en: "Brasileirão Série B", format: "table", logo: "https://media.api-sports.io/football/leagues/72.png" },
-  copa_do_brasil: { apiLeagueId: 73, name_pt: "Copa do Brasil", name_en: "Copa do Brasil", format: "list", logo: "https://media.api-sports.io/football/leagues/73.png" },
-  libertadores: { apiLeagueId: 13, name_pt: "Libertadores", name_en: "Copa Libertadores", format: "list", logo: "https://media.api-sports.io/football/leagues/13.png" },
+  serie_a: { apiLeagueId: 71, name_pt: "Brasileirão Série A", name_en: "Brasileirão Série A", format: "table", logo: `${SPORTS_LOGO_BASE}/brasileirao-serie-a.png` },
+  serie_b: { apiLeagueId: 72, name_pt: "Brasileirão Série B", name_en: "Brasileirão Série B", format: "table", logo: `${SPORTS_LOGO_BASE}/brasileirao-serie-b.png` },
+  copa_do_brasil: { apiLeagueId: 73, name_pt: "Copa do Brasil", name_en: "Copa do Brasil", format: "list", logo: `${SPORTS_LOGO_BASE}/copa-do-brasil.png` },
+  libertadores: { apiLeagueId: 13, name_pt: "Libertadores", name_en: "Copa Libertadores", format: "list", logo: `${SPORTS_LOGO_BASE}/libertadores.png` },
   // apiLeagueId=11 confirmed live via /leagues?search=sudamericana ("CONMEBOL
   // Sudamericana"). Knockout-only like Copa do Brasil/Libertadores — no
   // round-robin group table to show at this point in most seasons either.
-  sulamericana: { apiLeagueId: 11, name_pt: "Sul-Americana", name_en: "Copa Sudamericana", format: "list", logo: "https://media.api-sports.io/football/leagues/11.png" },
+  sulamericana: { apiLeagueId: 11, name_pt: "Sul-Americana", name_en: "Copa Sudamericana", format: "list", logo: `${SPORTS_LOGO_BASE}/sulamericana.png` },
 };
 
 export const COMPETITION_ORDER: Competition[] = ["serie_a", "serie_b", "copa_do_brasil", "libertadores", "sulamericana"];
