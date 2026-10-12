@@ -71,15 +71,20 @@ const THESPORTSDB_BASE = `https://www.thesportsdb.com/api/v1/json/${THESPORTSDB_
 
 export type Competition = "serie_a" | "serie_b" | "copa_do_brasil" | "libertadores" | "sulamericana";
 
-export const COMPETITIONS: Record<Competition, { apiLeagueId: number; name_pt: string; name_en: string; format: "table" | "list" }> = {
-  serie_a: { apiLeagueId: 71, name_pt: "Brasileirão Série A", name_en: "Brasileirão Série A", format: "table" },
-  serie_b: { apiLeagueId: 72, name_pt: "Brasileirão Série B", name_en: "Brasileirão Série B", format: "table" },
-  copa_do_brasil: { apiLeagueId: 73, name_pt: "Copa do Brasil", name_en: "Copa do Brasil", format: "list" },
-  libertadores: { apiLeagueId: 13, name_pt: "Libertadores", name_en: "Copa Libertadores", format: "list" },
+// `logo` is API-Football's own league badge (/leagues?id=X, verified live
+// for every entry below) — on media.api-sports.io, the same domain
+// confirmed earlier to fail DNS resolution on at least one real network, so
+// anywhere this renders it should go through TeamCrest (its onerror
+// fallback), never a plain <img>.
+export const COMPETITIONS: Record<Competition, { apiLeagueId: number; name_pt: string; name_en: string; format: "table" | "list"; logo: string }> = {
+  serie_a: { apiLeagueId: 71, name_pt: "Brasileirão Série A", name_en: "Brasileirão Série A", format: "table", logo: "https://media.api-sports.io/football/leagues/71.png" },
+  serie_b: { apiLeagueId: 72, name_pt: "Brasileirão Série B", name_en: "Brasileirão Série B", format: "table", logo: "https://media.api-sports.io/football/leagues/72.png" },
+  copa_do_brasil: { apiLeagueId: 73, name_pt: "Copa do Brasil", name_en: "Copa do Brasil", format: "list", logo: "https://media.api-sports.io/football/leagues/73.png" },
+  libertadores: { apiLeagueId: 13, name_pt: "Libertadores", name_en: "Copa Libertadores", format: "list", logo: "https://media.api-sports.io/football/leagues/13.png" },
   // apiLeagueId=11 confirmed live via /leagues?search=sudamericana ("CONMEBOL
   // Sudamericana"). Knockout-only like Copa do Brasil/Libertadores — no
   // round-robin group table to show at this point in most seasons either.
-  sulamericana: { apiLeagueId: 11, name_pt: "Sul-Americana", name_en: "Copa Sudamericana", format: "list" },
+  sulamericana: { apiLeagueId: 11, name_pt: "Sul-Americana", name_en: "Copa Sudamericana", format: "list", logo: "https://media.api-sports.io/football/leagues/11.png" },
 };
 
 export const COMPETITION_ORDER: Competition[] = ["serie_a", "serie_b", "copa_do_brasil", "libertadores", "sulamericana"];

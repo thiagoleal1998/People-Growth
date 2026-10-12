@@ -15,6 +15,13 @@
 const ESPN_SCOREBOARD_URL = "https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard";
 const ESPN_STANDINGS_URL = "https://site.api.espn.com/apis/v2/sports/football/nfl/standings";
 
+// League shield, verified live against the scoreboard response's own
+// leagues[0].logos — "default" for a light background, "dark" for a dark
+// one. Same media.api-sports.io-style CDN risk as everything else here:
+// render through TeamCrest, never a plain <img>.
+export const NFL_LOGO_URL = "https://a.espncdn.com/i/teamlogos/leagues/500/nfl.png";
+export const NFL_LOGO_URL_DARK = "https://a.espncdn.com/i/teamlogos/leagues/500-dark/nfl.png";
+
 async function fetchEspn<T>(url: string, revalidateSeconds: number): Promise<T | null> {
   try {
     const res = await fetch(url, { next: { revalidate: revalidateSeconds } });

@@ -50,8 +50,9 @@ function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
         textDecoration: "none",
       }}
     >
-      <div style={{ fontSize: "0.625rem", color: "var(--site-faint)", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
-        {COMPETITIONS[fixture.competition].name_pt}
+      <div style={{ display: "flex", alignItems: "center", gap: "0.3125rem", fontSize: "0.625rem", color: "var(--site-faint)", textAlign: "center", overflow: "hidden", maxWidth: "100%" }}>
+        <TeamCrest src={COMPETITIONS[fixture.competition].logo} alt="" size={14} />
+        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{COMPETITIONS[fixture.competition].name_pt}</span>
       </div>
       <span
         style={{

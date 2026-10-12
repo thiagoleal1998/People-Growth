@@ -28,6 +28,7 @@ import { ElectionResults } from "@/components/ElectionResults";
 import { ElectionBanner } from "@/components/ElectionBanner";
 import {
   attachDetailIds,
+  COMPETITIONS,
   defaultWidgetTab,
   getBestStandings,
   getCurrentRoundFixtures,
@@ -41,6 +42,7 @@ import {
 } from "@/lib/sports";
 import { SportsLiveWidget } from "@/components/SportsLiveWidget";
 import { NflPreview } from "@/components/NflPreview";
+import { TeamCrest } from "@/components/TeamCrest";
 import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
 import { articleHref } from "@/lib/article-url";
 import { isAuthorPubliclyVisible } from "@/lib/founder-data";
@@ -302,7 +304,21 @@ export default async function HomePage() {
       {sportsInitial && (
         <div className="container-xl" style={{ maxWidth: "1180px", margin: "0 auto", paddingTop: "1.5rem" }}>
           <section style={{ borderTop: "3px solid #4361EE", paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
-            <h2 style={{ textAlign: "center", fontSize: "clamp(1.375rem, 3vw, 1.75rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem", paddingBottom: "1rem", borderBottom: "1px solid var(--site-border)" }}>
+            <h2
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                gap: "0.625rem",
+                fontSize: "clamp(1.375rem, 3vw, 1.75rem)",
+                fontWeight: 800,
+                color: "var(--site-text)",
+                marginBottom: "1.25rem",
+                paddingBottom: "1rem",
+                borderBottom: "1px solid var(--site-border)",
+              }}
+            >
+              <TeamCrest src={COMPETITIONS.serie_a.logo} alt="" size={32} />
               Brasileirão
             </h2>
             <SportsLiveWidget
@@ -588,9 +604,12 @@ export default async function HomePage() {
 
                 {sportsInitial && (
                   <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
-                    <div style={{ backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1rem" }}>
-                      <div style={{ fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>{locale === "en" ? "Standings" : "Classificação"}</div>
-                      <div style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.75)", marginTop: "0.0625rem" }}>Brasileirão Série A</div>
+                    <div style={{ backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                      <TeamCrest src={COMPETITIONS.serie_a.logo} alt="" size={28} />
+                      <div>
+                        <div style={{ fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>{locale === "en" ? "Standings" : "Classificação"}</div>
+                        <div style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.75)", marginTop: "0.0625rem" }}>Brasileirão Série A</div>
+                      </div>
                     </div>
                     <div style={{ padding: "0.875rem 1rem", backgroundColor: "var(--site-card)" }}>
                       <SportsStandingsSnippet standings={sportsInitial.standings} locale={locale} />

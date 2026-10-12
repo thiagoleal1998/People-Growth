@@ -14,6 +14,7 @@ import {
   type StandingRow,
 } from "@/lib/sports";
 import { TeamCrest } from "@/components/TeamCrest";
+import { NFL_LOGO_URL } from "@/lib/nfl";
 
 export const revalidate = 180;
 
@@ -194,9 +195,12 @@ export default async function EsportesPage({
         <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", marginBottom: "1rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}>
           ← Voltar para o início
         </Link>
-        <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem" }}>
-          <div style={{ color: BRAND, fontWeight: 700, fontSize: "0.9375rem", marginBottom: "0.25rem" }}>Esportes</div>
-          <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>{info.name_pt}</h1>
+        <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.875rem" }}>
+          <TeamCrest src={info.logo} alt="" size={44} />
+          <div>
+            <div style={{ color: BRAND, fontWeight: 700, fontSize: "0.9375rem", marginBottom: "0.25rem" }}>Esportes</div>
+            <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>{info.name_pt}</h1>
+          </div>
         </header>
 
         <nav style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.25rem" }}>
@@ -206,6 +210,9 @@ export default async function EsportesPage({
               href={`?competicao=${option}`}
               aria-current={option === competition ? "page" : undefined}
               style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: "0.5rem",
                 padding: "0.5rem 1.125rem",
                 borderRadius: "0.5rem",
                 border: `1px solid ${option === competition ? BRAND : "var(--site-border-strong)"}`,
@@ -215,12 +222,16 @@ export default async function EsportesPage({
                 textDecoration: "none",
               }}
             >
+              <TeamCrest src={COMPETITIONS[option].logo} alt="" size={20} />
               {COMPETITIONS[option].name_pt}
             </a>
           ))}
           <Link
             href="/nfl"
             style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.5rem",
               padding: "0.5rem 1.125rem",
               borderRadius: "0.5rem",
               border: "1px solid var(--site-border-strong)",
@@ -230,6 +241,7 @@ export default async function EsportesPage({
               textDecoration: "none",
             }}
           >
+            <TeamCrest src={NFL_LOGO_URL} alt="" size={20} />
             NFL
           </Link>
         </nav>

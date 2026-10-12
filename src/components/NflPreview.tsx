@@ -1,13 +1,7 @@
 import { Link } from "@/i18n/navigation";
-import { getCurrentWeekGames, type NflGame } from "@/lib/nfl";
+import { getCurrentWeekGames, NFL_LOGO_URL_DARK, type NflGame } from "@/lib/nfl";
 import { TeamCrest } from "@/components/TeamCrest";
 
-// Verified live against ESPN's scoreboard response (leagues[0].logos) — the
-// "dark" variant (rel: ["full","dark"]) is the one meant to sit on a dark
-// background, which is what this section uses on purpose: a distinct,
-// NFL-themed dark block rather than reusing the Brasileirão section's
-// light blue card style.
-const NFL_LOGO_URL = "https://a.espncdn.com/i/teamlogos/leagues/500-dark/nfl.png";
 const NFL_RED = "#D50A0A";
 const PREVIEW_COUNT = 3;
 
@@ -65,8 +59,7 @@ export async function NflPreview() {
       <div className="container-xl" style={{ position: "relative", zIndex: 1 }}>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem", flexWrap: "wrap", gap: "1.25rem" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={NFL_LOGO_URL} alt="NFL" width={52} height={52} style={{ objectFit: "contain" }} />
+            <TeamCrest src={NFL_LOGO_URL_DARK} alt="NFL" size={52} />
             <div>
               <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: NFL_RED, letterSpacing: "0.08em", textTransform: "uppercase" }}>Esportes</div>
               <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "white" }}>NFL</h2>
