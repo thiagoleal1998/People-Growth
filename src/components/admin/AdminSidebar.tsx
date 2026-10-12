@@ -139,7 +139,7 @@ export function AdminSidebar({
         // eslint-disable-next-line @next/next/no-img-element
         <img src={logoUrl} alt="Festina" style={{ height: "1.75rem", width: "auto" }} />
       ) : (
-        <span style={{ fontWeight: 800, fontSize: "0.9375rem" }}>People &amp; Growth</span>
+        <span style={{ fontWeight: 800, fontSize: "0.9375rem" }}>Festina</span>
       )}
     </div>
     {mobileOpen && <div className="admin-backdrop" onClick={() => setMobileOpen(false)} />}

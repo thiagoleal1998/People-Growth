@@ -40,9 +40,9 @@ export async function GET() {
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0">
   <channel>
-    <title>People &amp; Growth — Mea Sententia</title>
+    <title>Festina — Mea Sententia</title>
     <link>${baseUrl}/pt/conteudo</link>
-    <description>Artigos e opiniões da People &amp; Growth.</description>
+    <description>Artigos e opiniões da Festina.</description>
     <language>pt-BR</language>${items}
   </channel>
 </rss>`;

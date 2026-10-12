@@ -56,7 +56,7 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
                 letterSpacing: "-0.02em",
               }}
             >
-              People &amp; Growth
+              Festina
             </span>
           )}
         </Link>

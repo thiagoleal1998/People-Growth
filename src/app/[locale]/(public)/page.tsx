@@ -952,7 +952,7 @@ export default async function HomePage() {
               }}
             >
               <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#C89A4A", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
-                Quem está por trás da People &amp; Growth
+                Quem está por trás da Festina
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "2rem" }}>
                 {founders.map((author) => (
@@ -1070,7 +1070,7 @@ export default async function HomePage() {
                   NA MÍDIA
                 </div>
                 <h2 style={{ fontSize: "clamp(1.5rem, 3.5vw, 2rem)", fontWeight: 800, color: "var(--site-text)" }}>
-                  Onde já falamos sobre People &amp; Growth
+                  Onde já falamos sobre a Festina
                 </h2>
               </div>
               <Link

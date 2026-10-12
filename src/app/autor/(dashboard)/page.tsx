@@ -86,7 +86,7 @@ export default async function AutorHomePage() {
         <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "white", marginBottom: "0.375rem" }}>
           {ownName ? `Olá, ${ownName.split(" ")[0]}!` : "Painel do autor"}
         </h1>
-        <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.9375rem" }}>O resumo do seu trabalho e as novidades da People &amp; Growth.</p>
+        <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.9375rem" }}>O resumo do seu trabalho e as novidades da Festina.</p>
       </div>
 
       {profile?.author_id && (

@@ -465,7 +465,7 @@ export default async function ArticlePage({
               <p style={{ color: "var(--site-muted)", fontSize: "0.8125rem", lineHeight: 1.6, marginBottom: "2rem" }}>
                 {locale === "en" ? (
                   <>
-                    The author of the message, not People &amp; Growth, is responsible for the comment. Read the{" "}
+                    The author of the message, not Festina, is responsible for the comment. Read the{" "}
                     <Link href="/comentarios" style={{ color: "#315E9C", fontWeight: 600, textDecoration: "underline" }}>
                       Comment Guidelines
                     </Link>
@@ -473,7 +473,7 @@ export default async function ArticlePage({
                   </>
                 ) : (
                   <>
-                    O autor da mensagem, e não a People &amp; Growth, é o responsável pelo comentário. Leia as{" "}
+                    O autor da mensagem, e não a Festina, é o responsável pelo comentário. Leia as{" "}
                     <Link href="/comentarios" style={{ color: "#315E9C", fontWeight: 600, textDecoration: "underline" }}>
                       Regras de Uso dos Comentários
                     </Link>

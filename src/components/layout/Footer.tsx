@@ -109,7 +109,7 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
                   marginBottom: "0.75rem",
                 }}
               >
-                People &amp; Growth
+                Festina
               </div>
             )}
             <p style={{ fontSize: "0.875rem", lineHeight: 1.6 }}>{t("tagline")}</p>
@@ -220,7 +220,7 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
           }}
         >
           <p style={{ fontSize: "0.8125rem" }}>
-            © {year} People &amp; Growth. {t("rights")}
+            © {year} Festina. {t("rights")}
           </p>
           <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
             <Link href="/normas-de-seguranca-e-privacidade" style={{ fontSize: "0.8125rem" }}>

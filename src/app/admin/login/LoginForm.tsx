@@ -40,7 +40,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
             <img src={logoUrl} alt="Festina" style={{ height: "3.75rem", width: "auto", display: "block", margin: "0 auto 2rem" }} />
           ) : (
             <div style={{ fontWeight: 800, fontSize: "1.5rem", marginBottom: "2rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              People &amp; Growth
+              Festina
             </div>
           )}
 
@@ -55,13 +55,13 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
             Vamos construir <span style={{ background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>juntos</span>.
           </h1>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1rem", lineHeight: 1.6, marginBottom: authors.length > 0 ? "2.5rem" : 0 }}>
-            Publique artigos, acompanhe métricas e mantenha o People &amp; Growth sempre atualizado — tudo em um só lugar.
+            Publique artigos, acompanhe métricas e mantenha a Festina sempre atualizada — tudo em um só lugar.
           </p>
 
           {authors.length > 0 && (
             <div style={{ paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
               <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#C89A4A", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
-                Quem está por trás do People &amp; Growth
+                Quem está por trás da Festina
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
               {authors.slice(0, 4).map((author) => (
@@ -96,7 +96,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
               <img src={logoUrl} alt="Festina" style={{ height: "2rem", width: "auto" }} />
             ) : (
               <div style={{ fontWeight: 800, fontSize: "1.25rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-                People &amp; Growth
+                Festina
               </div>
             )}
           </div>

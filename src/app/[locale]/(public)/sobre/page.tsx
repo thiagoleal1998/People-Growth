@@ -106,7 +106,7 @@ export default async function SobrePage() {
               marginBottom: "2rem",
             }}
           >
-            A People &amp; Growth é formada por Thiago Leal, Gustavo Monken e Raul Salustiano — especialistas em Marketing, Growth, dados e Inteligência Artificial que, juntos, também dedicam parte do seu tempo a discutir os temas sociais, econômicos e ambientais que moldam pessoas e empresas.
+            A Festina é formada por Thiago Leal, Gustavo Monken e Raul Salustiano — especialistas em Marketing, Growth, dados e Inteligência Artificial que, juntos, também dedicam parte do seu tempo a discutir os temas sociais, econômicos e ambientais que moldam pessoas e empresas.
           </p>
           <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap" }}>
             <Link
@@ -190,7 +190,7 @@ export default async function SobrePage() {
         <div className="container-xl">
           <div style={{ textAlign: "center", maxWidth: "720px", margin: "0 auto 3rem" }}>
             <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>
-              Quem faz a People &amp; Growth
+              Quem faz a Festina
             </h2>
             <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", lineHeight: 1.7 }}>
               Três olhares, uma mesma convicção: negócios fortes nascem de pessoas fortes — e de um olhar atento ao que acontece ao redor delas.
