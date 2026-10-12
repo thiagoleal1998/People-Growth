@@ -218,6 +218,20 @@ export default async function EsportesPage({
               {COMPETITIONS[option].name_pt}
             </a>
           ))}
+          <Link
+            href="/nfl"
+            style={{
+              padding: "0.5rem 1.125rem",
+              borderRadius: "0.5rem",
+              border: "1px solid var(--site-border-strong)",
+              color: "var(--site-text-secondary)",
+              fontWeight: 700,
+              fontSize: "0.875rem",
+              textDecoration: "none",
+            }}
+          >
+            NFL
+          </Link>
         </nav>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>

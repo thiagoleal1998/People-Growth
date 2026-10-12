@@ -336,17 +336,15 @@ export default async function HomePage() {
                   style={{ display: "flex", textDecoration: "none", gap: "1rem", alignItems: "flex-start" }}
                   className="home-featured-link"
                 >
-                  {featured.cover_image && (
-                    <div
-                      style={{
-                        width: "200px",
-                        height: "160px",
-                        flexShrink: 0,
-                        borderRadius: "0.375rem",
-                        background: `url(${featured.cover_image}) center/cover`,
-                      }}
-                    />
-                  )}
+                  <div
+                    style={{
+                      width: "200px",
+                      height: "160px",
+                      flexShrink: 0,
+                      borderRadius: "0.375rem",
+                      background: featured.cover_image ? `url(${featured.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                    }}
+                  />
                   <div>
                     <div style={{ marginBottom: "0.5rem" }}>
                       <FormatTag format={featured.format} locale={locale} />
