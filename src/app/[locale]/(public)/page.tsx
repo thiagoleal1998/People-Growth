@@ -342,7 +342,7 @@ export default async function HomePage() {
                       height: "160px",
                       flexShrink: 0,
                       borderRadius: "0.375rem",
-                      background: featured.cover_image ? `url(${featured.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                      background: featured.cover_image ? `url("${featured.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                     }}
                   />
                   <div>
@@ -395,7 +395,7 @@ export default async function HomePage() {
                             height: "110px",
                             borderRadius: "0.5rem",
                             marginBottom: "0.5rem",
-                            background: article.cover_image ? `url(${article.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                            background: article.cover_image ? `url("${article.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                           }}
                         />
                         <div style={{ marginBottom: "0.375rem" }}>
@@ -461,7 +461,7 @@ export default async function HomePage() {
                               height: "80px",
                               flexShrink: 0,
                               borderRadius: "0.375rem",
-                              background: `url(${article.cover_image}) center/cover`,
+                              background: `url("${article.cover_image}") center/cover`,
                             }}
                           />
                         )}
@@ -676,7 +676,7 @@ export default async function HomePage() {
                       height: "3.5rem",
                       borderRadius: "0.375rem",
                       flexShrink: 0,
-                      background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
                     }}
                   />
                   <div className="columnist-text">
@@ -941,7 +941,7 @@ export default async function HomePage() {
                         height: "3.25rem",
                         borderRadius: "50%",
                         flexShrink: 0,
-                        background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                        background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
                       }}
                     />
                     <div>
@@ -1264,7 +1264,7 @@ export default async function HomePage() {
                       border: "2px solid var(--site-surface-alt)",
                       marginLeft: i === 0 ? 0 : "-0.625rem",
                       flexShrink: 0,
-                      background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
                     }}
                   />
                 ))}

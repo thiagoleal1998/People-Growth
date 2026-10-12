@@ -39,7 +39,7 @@ export function VideoFacade({ embedUrl, thumbnailUrl, title }: { embedUrl: strin
         padding: 0,
         cursor: "pointer",
         backgroundColor: "#000",
-        backgroundImage: thumbnailUrl ? `url(${thumbnailUrl})` : undefined,
+        backgroundImage: thumbnailUrl ? `url("${thumbnailUrl}")` : undefined,
         backgroundSize: "cover",
         backgroundPosition: "center",
         display: "flex",

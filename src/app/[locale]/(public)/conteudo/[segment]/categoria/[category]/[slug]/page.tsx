@@ -317,7 +317,7 @@ export default async function ArticlePage({
                         height: "2.75rem",
                         borderRadius: "50%",
                         flexShrink: 0,
-                        background: a.photo_url ? `url(${a.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                        background: a.photo_url ? `url("${a.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
                       }}
                     />
                     <div>
@@ -394,7 +394,7 @@ export default async function ArticlePage({
                     height: "4rem",
                     borderRadius: "50%",
                     flexShrink: 0,
-                    background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                    background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
                   }}
                 />
                 <div>
@@ -437,7 +437,7 @@ export default async function ArticlePage({
                           height: "110px",
                           borderRadius: "0.5rem",
                           marginBottom: "0.625rem",
-                          background: r.cover_image ? `url(${r.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                          background: r.cover_image ? `url("${r.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                         }}
                       />
                       <div style={{ marginBottom: "0.375rem" }}>

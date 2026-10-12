@@ -94,7 +94,7 @@ export default async function AuthorPage({
                 height: "6rem",
                 borderRadius: "50%",
                 flexShrink: 0,
-                background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
               }}
             />
             <div style={{ flex: 1, minWidth: "240px" }}>
@@ -181,7 +181,7 @@ export default async function AuthorPage({
                           flexShrink: 0,
                           borderRadius: "0.75rem",
                           background: article.cover_image
-                            ? `url(${article.cover_image}) center/cover`
+                            ? `url("${article.cover_image}") center/cover`
                             : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                           display: "flex",
                           alignItems: "center",

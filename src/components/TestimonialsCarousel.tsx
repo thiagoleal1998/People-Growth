@@ -62,7 +62,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
                   height: "2.75rem",
                   borderRadius: "50%",
                   flexShrink: 0,
-                  background: item.avatar_url ? `url(${item.avatar_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                  background: item.avatar_url ? `url("${item.avatar_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
                 }}
               />
               <div>

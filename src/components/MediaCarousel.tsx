@@ -49,7 +49,7 @@ export function MediaCarousel({ items }: { items: MediaItem[] }) {
                   height: "2.75rem",
                   borderRadius: "0.75rem",
                   flexShrink: 0,
-                  background: item.thumbnail ? `url(${item.thumbnail}) center/cover` : `${meta.color}15`,
+                  background: item.thumbnail ? `url("${item.thumbnail}") center/cover` : `${meta.color}15`,
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",

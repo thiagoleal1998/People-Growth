@@ -56,7 +56,7 @@ export default async function CursosPage() {
                         height: "3.5rem",
                         borderRadius: "0.875rem",
                         marginBottom: "1rem",
-                        background: course.cover_image ? `url(${course.cover_image}) center/cover` : `${color}15`,
+                        background: course.cover_image ? `url("${course.cover_image}") center/cover` : `${color}15`,
                       }}
                     />
                     {course.category && (

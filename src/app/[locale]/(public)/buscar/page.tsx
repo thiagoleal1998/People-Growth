@@ -93,7 +93,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                   height: "90px",
                   flexShrink: 0,
                   borderRadius: "0.5rem",
-                  background: article.cover_image ? `url(${article.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                  background: article.cover_image ? `url("${article.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                 }}
               />
               <div>

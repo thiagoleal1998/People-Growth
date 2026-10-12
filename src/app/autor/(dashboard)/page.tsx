@@ -222,7 +222,7 @@ export default async function AutorHomePage() {
                 className="autor-post-card"
                 style={{ display: "block", textDecoration: "none", borderRadius: "0.875rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}
               >
-                <div style={{ height: "120px", background: item.cover_image ? `url(${item.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)" }} />
+                <div style={{ height: "120px", background: item.cover_image ? `url("${item.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)" }} />
                 <div style={{ padding: "0.875rem 1rem" }}>
                   <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--admin-text)", lineHeight: 1.35, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", marginBottom: "0.375rem" }}>
                     {item.title_pt}

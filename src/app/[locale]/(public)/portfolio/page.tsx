@@ -64,7 +64,7 @@ export default async function PortfolioPage() {
                       <div
                         style={{
                           height: "220px",
-                          background: c.cover_image ? `url(${c.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                          background: c.cover_image ? `url("${c.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",

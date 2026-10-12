@@ -89,7 +89,7 @@ export default async function FounderPage({
                 height: "6rem",
                 borderRadius: "50%",
                 flexShrink: 0,
-                background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
               }}
             />
             <div style={{ flex: 1, minWidth: "240px" }}>

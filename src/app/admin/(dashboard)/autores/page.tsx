@@ -44,7 +44,7 @@ export default async function AutoresPage({ searchParams }: { searchParams: Prom
                         height: "2rem",
                         borderRadius: "50%",
                         flexShrink: 0,
-                        background: s.photo_url ? `url(${s.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                        background: s.photo_url ? `url("${s.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
                       }}
                     />
                     {s.name}

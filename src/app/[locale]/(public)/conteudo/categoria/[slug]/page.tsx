@@ -118,7 +118,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                         height: "5rem",
                         flexShrink: 0,
                         borderRadius: "0.75rem",
-                        background: article.cover_image ? `url(${article.cover_image}) center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                        background: article.cover_image ? `url("${article.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                       }}
                     />
                     <div style={{ flex: 1 }}>

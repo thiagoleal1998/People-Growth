@@ -47,7 +47,7 @@ function ArticleRow({ article, category, author }: { article: Article; category:
             flexShrink: 0,
             borderRadius: "0.75rem",
             background: article.cover_image
-              ? `url(${article.cover_image}) center/cover`
+              ? `url("${article.cover_image}") center/cover`
               : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
             display: "flex",
             alignItems: "center",
@@ -184,7 +184,7 @@ export function ArticlesExplorer({
                       style={{
                         height: "280px",
                         background: featured.cover_image
-                          ? `url(${featured.cover_image}) center/cover`
+                          ? `url("${featured.cover_image}") center/cover`
                           : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                         position: "relative",
                       }}

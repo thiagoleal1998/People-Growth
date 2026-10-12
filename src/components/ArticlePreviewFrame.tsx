@@ -101,7 +101,7 @@ export function ArticlePreviewFrame({ article, author, coauthors, category }: { 
                     height: "2.75rem",
                     borderRadius: "50%",
                     flexShrink: 0,
-                    background: a.photo_url ? `url(${a.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                    background: a.photo_url ? `url("${a.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
                   }}
                 />
                 <div>

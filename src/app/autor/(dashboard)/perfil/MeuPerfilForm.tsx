@@ -190,7 +190,7 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
                 height: "3.5rem",
                 borderRadius: "0.375rem",
                 flexShrink: 0,
-                background: photoPreview ? `url(${photoPreview}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                background: photoPreview ? `url("${photoPreview}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
               }}
             />
             <div>
@@ -215,7 +215,7 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
                 height: "3rem",
                 borderRadius: "50%",
                 flexShrink: 0,
-                background: photoPreview ? `url(${photoPreview}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                background: photoPreview ? `url("${photoPreview}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
               }}
             />
             <div style={{ color: "white", fontWeight: 800, fontSize: "0.9375rem", marginTop: "0.375rem" }}>

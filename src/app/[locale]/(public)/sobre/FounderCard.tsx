@@ -28,7 +28,7 @@ export async function FounderCard({ author }: { author: Author }) {
             borderRadius: "50%",
             flexShrink: 0,
             background: author.photo_url
-              ? `url(${author.photo_url}) center/cover`
+              ? `url("${author.photo_url}") center/cover`
               : "linear-gradient(135deg, #4361EE, #06D6A0)",
           }}
         />

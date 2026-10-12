@@ -72,7 +72,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
                       height: "2.25rem",
                       borderRadius: "50%",
                       flexShrink: 0,
-                      background: author.photo_url ? `url(${author.photo_url}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
                     }}
                   />
                   <span style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8125rem", fontWeight: 600 }}>{author.name}</span>

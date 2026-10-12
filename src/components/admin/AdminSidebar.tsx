@@ -230,7 +230,7 @@ export function AdminSidebar({
               height: "2rem",
               borderRadius: "50%",
               flexShrink: 0,
-              background: userPhoto ? `url(${userPhoto}) center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+              background: userPhoto ? `url("${userPhoto}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
             }}
           />
           <div style={{ fontSize: "0.8125rem", fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>

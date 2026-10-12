@@ -73,7 +73,7 @@ export const YoutubeEmbed = Node.create<YoutubeEmbedOptions>({
       const thumbWrap = document.createElement("div");
       thumbWrap.style.cssText =
         "position:relative;padding-top:56.25%;border-radius:0.5rem;overflow:hidden;background-color:#000" +
-        (thumbnail ? `;background-image:url(${thumbnail});background-size:cover;background-position:center` : "");
+        (thumbnail ? `;background-image:url("${thumbnail}");background-size:cover;background-position:center` : "");
       figure.appendChild(thumbWrap);
 
       const playBtn = document.createElement("div");
