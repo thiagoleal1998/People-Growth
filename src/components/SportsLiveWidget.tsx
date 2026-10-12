@@ -92,19 +92,24 @@ function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
 // API route every minute — same skeleton as ElectionResults.tsx,
 // LiveStatsWidget.tsx and NotificationBell.tsx. The route itself only ever
 // hits the real API while a match window is open, so polling here costs
-// nothing extra outside live windows. Falls back through three states when
-// nothing is live: the round's results (while still fresh, see
-// isRoundResultsFresh), then the round's next fixtures (once within 24h of
-// kickoff, see fixturesStartingSoon), then "no matches" — never showing
-// stale results or a far-off fixture just to fill the space. Shows 3 cards
-// at a time, auto-rotating through the rest when there are more than 3.
+// nothing extra outside live windows. Falls back through a strict priority
+// order when nothing is live: today's matches (todayFixtures — always wins
+// over an older result, a game happening today is never less relevant than
+// one that already happened), then the round's last results (while still
+// fresh, see isRoundResultsFresh), then the round's next fixture (once
+// within 24h of kickoff, see fixturesStartingSoon), then "no matches" —
+// never showing a stale result or a far-off fixture over a same-day game.
+// Shows 3 cards at a time, auto-rotating through the rest when there are
+// more than 3.
 export function SportsLiveWidget({
   initial,
+  todayFixtures = [],
   roundResults = [],
   upcomingFixtures = [],
   locale,
 }: {
   initial: Fixture[];
+  todayFixtures?: Fixture[];
   roundResults?: Fixture[];
   upcomingFixtures?: Fixture[];
   locale: string;
@@ -133,9 +138,10 @@ export function SportsLiveWidget({
   }, []);
 
   const showingLive = live.length > 0;
-  const showingResults = !showingLive && roundResults.length > 0;
-  const showingUpcoming = !showingLive && !showingResults && upcomingFixtures.length > 0;
-  const shown = showingLive ? live : showingResults ? roundResults : showingUpcoming ? upcomingFixtures : [];
+  const showingToday = !showingLive && todayFixtures.length > 0;
+  const showingResults = !showingLive && !showingToday && roundResults.length > 0;
+  const showingUpcoming = !showingLive && !showingToday && !showingResults && upcomingFixtures.length > 0;
+  const shown = showingLive ? live : showingToday ? todayFixtures : showingResults ? roundResults : showingUpcoming ? upcomingFixtures : [];
 
   // Offset isn't reset when `shown` changes identity (e.g. switching from
   // results to live) — every read of it below is modulo'd against the
@@ -153,13 +159,17 @@ export function SportsLiveWidget({
     ? locale === "en"
       ? "Live now"
       : "Ao vivo agora"
-    : showingUpcoming
+    : showingToday
       ? locale === "en"
-        ? "Upcoming matches"
-        : "Próximos jogos"
-      : locale === "en"
-        ? "Round results"
-        : "Resultados da rodada";
+        ? "Today's matches"
+        : "Jogos de hoje"
+      : showingUpcoming
+        ? locale === "en"
+          ? "Upcoming matches"
+          : "Próximos jogos"
+        : locale === "en"
+          ? "Round results"
+          : "Resultados da rodada";
 
   return (
     <div>

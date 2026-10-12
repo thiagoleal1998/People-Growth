@@ -32,6 +32,7 @@ import {
   getBestStandings,
   getCurrentRoundFixtures,
   getLiveFixtures,
+  getTodayFixtures,
   getUpcomingRoundFixtures,
   isAnyCompetitionLiveNow,
   isRoundResultsFresh,
@@ -185,35 +186,55 @@ export default async function HomePage() {
   // pages, falling back to TheSportsDB's top-5 if that ever breaks (see
   // getBestStandings in src/lib/sports.ts). Live scores: API-Football, which
   // can't do standings itself on the free plan (current season is blocked).
-  // roundResults (Série A's current round, finished matches only) is what
-  // the widget shows instead of "sem jogos ao vivo" on a day with no live
-  // match — shares the same scraped page/cache as the standings fetch above.
-  // Only shown for 24h after the round's last match ends (isRoundResultsFresh)
-  // so the home page doesn't keep the same results up for days once they're
-  // no longer news — /esportes itself has no such cutoff, this is a home-
-  // page-only decluttering rule. Once results go stale, the widget falls
-  // back further to "Próximos jogos" — the round's still-scheduled fixtures,
-  // but only once they're within 24h of kickoff (fixturesStartingSoon),
-  // never earlier, so an upcoming match isn't shown a week ahead of time
-  // either. Only fetched when actually needed (nothing live, no fresh
-  // results) since it's an extra request beyond what the rest of this
-  // block already makes.
-  let sportsInitial: { standings: StandingRow[] | null; live: Fixture[] | null; roundResults: Fixture[]; upcoming: Fixture[] } | null = null;
+  //
+  // The widget's non-live fallback has a strict priority order — getting
+  // this wrong previously hid a same-day match behind a still-"fresh"
+  // result from a day earlier, which is backwards: a game today is always
+  // more relevant than an old result, regardless of how fresh that result
+  // still technically is.
+  //   1. live (any of the 4 competitions)
+  //   2. today (Série A's matches today — scheduled, live, or already
+  //      finished — via the same date-scoped fetch /esportes's own "Jogos
+  //      de hoje" uses, so this always reflects what's actually on today
+  //      regardless of the scraped round's own state)
+  //   3. roundResults (Série A's last round, finished matches only) — for a
+  //      day with no game of its own, shown only within 24h of the round's
+  //      last match ending (isRoundResultsFresh) so the home page doesn't
+  //      keep the same results up for days once they're no longer news —
+  //      /esportes itself has no such cutoff, this is a home-page-only
+  //      decluttering rule
+  //   4. upcoming (the round's next fixture) — only once within 24h of
+  //      kickoff (fixturesStartingSoon), never earlier
+  // Each later step only runs if every step before it came up empty, both
+  // to keep the priority order correct and to avoid fetching data nothing
+  // will use.
+  let sportsInitial: {
+    standings: StandingRow[] | null;
+    live: Fixture[] | null;
+    today: Fixture[];
+    roundResults: Fixture[];
+    upcoming: Fixture[];
+  } | null = null;
   if (sportsEnabled) {
-    const rawRoundFixtures = (await getCurrentRoundFixtures("serie_a")) ?? [];
     const live = (await isAnyCompetitionLiveNow()) ? await getLiveFixtures() : [];
-    const resultsFresh = isRoundResultsFresh(rawRoundFixtures);
+    const hasLive = Boolean(live && live.length > 0);
+
+    const today = hasLive ? [] : ((await getTodayFixtures()) ?? []).filter((f) => f.competition === "serie_a");
+    const hasToday = today.length > 0;
+
+    let roundResults: Fixture[] = [];
     let upcoming: Fixture[] = [];
-    if (!resultsFresh && (!live || live.length === 0)) {
-      const soon = fixturesStartingSoon((await getUpcomingRoundFixtures("serie_a")) ?? []);
-      upcoming = soon.length > 0 ? await attachDetailIds(soon) : [];
+    if (!hasLive && !hasToday) {
+      const rawRoundFixtures = (await getCurrentRoundFixtures("serie_a")) ?? [];
+      if (isRoundResultsFresh(rawRoundFixtures)) {
+        roundResults = await attachDetailIds(rawRoundFixtures.filter((f) => f.status === "finished"));
+      } else {
+        const soon = fixturesStartingSoon((await getUpcomingRoundFixtures("serie_a")) ?? []);
+        upcoming = soon.length > 0 ? await attachDetailIds(soon) : [];
+      }
     }
-    sportsInitial = {
-      standings: await getBestStandings("serie_a"),
-      live,
-      roundResults: resultsFresh ? await attachDetailIds(rawRoundFixtures.filter((f) => f.status === "finished")) : [],
-      upcoming,
-    };
+
+    sportsInitial = { standings: await getBestStandings("serie_a"), live, today, roundResults, upcoming };
   }
   const faqEntries = getFaqEntriesFromConfig(config, locale);
   // Articles are ordered by publication date, except where an admin pinned one
@@ -293,6 +314,7 @@ export default async function HomePage() {
             </h2>
             <SportsLiveWidget
               initial={sportsInitial.live ?? []}
+              todayFixtures={sportsInitial.today}
               roundResults={sportsInitial.roundResults}
               upcomingFixtures={sportsInitial.upcoming}
               locale={locale}
