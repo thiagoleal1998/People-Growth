@@ -28,16 +28,15 @@ import { ElectionResults } from "@/components/ElectionResults";
 import { ElectionBanner } from "@/components/ElectionBanner";
 import {
   attachDetailIds,
-  fixturesStartingSoon,
+  defaultWidgetTab,
   getBestStandings,
   getCurrentRoundFixtures,
   getLiveFixtures,
-  getTodayFixtures,
   getUpcomingRoundFixtures,
   isAnyCompetitionLiveNow,
-  isRoundResultsFresh,
   withReliableCrests,
   type Fixture,
+  type SportsWidgetTab,
   type StandingRow,
 } from "@/lib/sports";
 import { SportsLiveWidget } from "@/components/SportsLiveWidget";
@@ -188,65 +187,46 @@ export default async function HomePage() {
   // getBestStandings in src/lib/sports.ts). Live scores: API-Football, which
   // can't do standings itself on the free plan (current season is blocked).
   //
-  // The widget's non-live fallback has a strict priority order — getting
-  // this wrong previously hid a same-day match behind a still-"fresh"
-  // result from a day earlier, which is backwards: a game today is always
-  // more relevant than an old result, regardless of how fresh that result
-  // still technically is.
-  //   1. live (any of the 4 competitions)
-  //   2. today (Série A's matches today — scheduled, live, or already
-  //      finished — via the same date-scoped fetch /esportes's own "Jogos
-  //      de hoje" uses, so this always reflects what's actually on today
-  //      regardless of the scraped round's own state)
-  //   3. roundResults (Série A's last round, finished matches only) — for a
-  //      day with no game of its own, shown only within 24h of the round's
-  //      last match ending (isRoundResultsFresh) so the home page doesn't
-  //      keep the same results up for days once they're no longer news —
-  //      /esportes itself has no such cutoff, this is a home-page-only
-  //      decluttering rule
-  //   4. upcoming (the round's next fixture) — only once within 24h of
-  //      kickoff (fixturesStartingSoon), never earlier
-  // Each later step only runs if every step before it came up empty, both
-  // to keep the priority order correct and to avoid fetching data nothing
-  // will use.
+  // The widget shows up to three tabs — Ao vivo (only when something's
+  // actually live), Resultados da rodada, Próximos jogos — letting the
+  // viewer switch freely instead of the page guessing a single state.
+  // roundResults/roundUpcoming are each the CURRENT round's full list (not
+  // time-windowed — a viewer who clicks a tab wants to see it, not a
+  // decluttered slice of it); defaultWidgetTab picks a sensible starting
+  // tab from that same data (today's own game beats an older result or a
+  // later fixture; otherwise a still-fresh result or a fixture starting
+  // soon; see sports.ts). getCurrentRoundFixtures/getUpcomingRoundFixtures
+  // both read api-futebol.com.br's own "current round" page — the former
+  // falls back to the previous round if the current one has no results yet
+  // (so results doesn't show an empty round), the latter never does (so
+  // upcoming always reflects the real next fixture, never a dead round).
   let sportsInitial: {
     standings: StandingRow[] | null;
     live: Fixture[];
-    today: Fixture[];
     roundResults: Fixture[];
-    upcoming: Fixture[];
+    roundUpcoming: Fixture[];
+    defaultTab: SportsWidgetTab;
   } | null = null;
   if (sportsEnabled) {
-    // live/today carry API-Football's own crest urls (media.api-sports.io) —
+    // live carries API-Football's own crest urls (media.api-sports.io) —
     // withReliableCrests swaps those for the scraped standings' equivalent
     // (a different, confirmed-working domain) wherever a match exists,
-    // before any of this ever reaches the page. roundResults/upcoming are
-    // already scraped-sourced and don't need it.
+    // before any of this ever reaches the page. roundResults/roundUpcoming
+    // are already scraped-sourced and don't need it.
     const standings = await getBestStandings("serie_a");
     const live = withReliableCrests((await isAnyCompetitionLiveNow()) ? ((await getLiveFixtures()) ?? []) : [], standings);
-    const hasLive = live.length > 0;
 
-    const today = hasLive
-      ? []
-      : withReliableCrests(
-          ((await getTodayFixtures()) ?? []).filter((f) => f.competition === "serie_a"),
-          standings
-        );
-    const hasToday = today.length > 0;
+    const rawRoundFixtures = (await getCurrentRoundFixtures("serie_a")) ?? [];
+    const roundResults = await attachDetailIds(rawRoundFixtures.filter((f) => f.status === "finished"));
+    const roundUpcoming = await attachDetailIds((await getUpcomingRoundFixtures("serie_a")) ?? []);
 
-    let roundResults: Fixture[] = [];
-    let upcoming: Fixture[] = [];
-    if (!hasLive && !hasToday) {
-      const rawRoundFixtures = (await getCurrentRoundFixtures("serie_a")) ?? [];
-      if (isRoundResultsFresh(rawRoundFixtures)) {
-        roundResults = await attachDetailIds(rawRoundFixtures.filter((f) => f.status === "finished"));
-      } else {
-        const soon = fixturesStartingSoon((await getUpcomingRoundFixtures("serie_a")) ?? []);
-        upcoming = soon.length > 0 ? await attachDetailIds(soon) : [];
-      }
-    }
-
-    sportsInitial = { standings, live, today, roundResults, upcoming };
+    sportsInitial = {
+      standings,
+      live,
+      roundResults,
+      roundUpcoming,
+      defaultTab: defaultWidgetTab(live.length > 0, roundResults, roundUpcoming),
+    };
   }
   const faqEntries = getFaqEntriesFromConfig(config, locale);
   // Articles are ordered by publication date, except where an admin pinned one
@@ -326,9 +306,9 @@ export default async function HomePage() {
             </h2>
             <SportsLiveWidget
               initial={sportsInitial.live}
-              todayFixtures={sportsInitial.today}
               roundResults={sportsInitial.roundResults}
-              upcomingFixtures={sportsInitial.upcoming}
+              roundUpcoming={sportsInitial.roundUpcoming}
+              defaultTab={sportsInitial.defaultTab}
               locale={locale}
             />
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
@@ -475,7 +455,7 @@ export default async function HomePage() {
                           borderTop: "1px solid var(--site-border)",
                         }}
                       >
-                        {i % 2 === 0 && article.cover_image && (
+                        {article.cover_image && (
                           <div
                             className="more-news-img"
                             style={{
@@ -609,8 +589,9 @@ export default async function HomePage() {
 
                 {sportsInitial && (
                   <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
-                    <div style={{ backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>
-                      {locale === "en" ? "Standings" : "Classificação"}
+                    <div style={{ backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1rem" }}>
+                      <div style={{ fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>{locale === "en" ? "Standings" : "Classificação"}</div>
+                      <div style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.75)", marginTop: "0.0625rem" }}>Brasileirão Série A</div>
                     </div>
                     <div style={{ padding: "0.875rem 1rem", backgroundColor: "var(--site-card)" }}>
                       <SportsStandingsSnippet standings={sportsInitial.standings} locale={locale} />

@@ -69,22 +69,32 @@ const API_BASE = `https://${API_FOOTBALL_HOST}`;
 const THESPORTSDB_KEY = process.env.THESPORTSDB_KEY || "3";
 const THESPORTSDB_BASE = `https://www.thesportsdb.com/api/v1/json/${THESPORTSDB_KEY}`;
 
-export type Competition = "serie_a" | "serie_b" | "copa_do_brasil" | "libertadores";
+export type Competition = "serie_a" | "serie_b" | "copa_do_brasil" | "libertadores" | "sulamericana";
 
 export const COMPETITIONS: Record<Competition, { apiLeagueId: number; name_pt: string; name_en: string; format: "table" | "list" }> = {
   serie_a: { apiLeagueId: 71, name_pt: "Brasileirão Série A", name_en: "Brasileirão Série A", format: "table" },
   serie_b: { apiLeagueId: 72, name_pt: "Brasileirão Série B", name_en: "Brasileirão Série B", format: "table" },
   copa_do_brasil: { apiLeagueId: 73, name_pt: "Copa do Brasil", name_en: "Copa do Brasil", format: "list" },
   libertadores: { apiLeagueId: 13, name_pt: "Libertadores", name_en: "Copa Libertadores", format: "list" },
+  // apiLeagueId=11 confirmed live via /leagues?search=sudamericana ("CONMEBOL
+  // Sudamericana"). Knockout-only like Copa do Brasil/Libertadores — no
+  // round-robin group table to show at this point in most seasons either.
+  sulamericana: { apiLeagueId: 11, name_pt: "Sul-Americana", name_en: "Copa Sudamericana", format: "list" },
 };
 
-export const COMPETITION_ORDER: Competition[] = ["serie_a", "serie_b", "copa_do_brasil", "libertadores"];
+export const COMPETITION_ORDER: Competition[] = ["serie_a", "serie_b", "copa_do_brasil", "libertadores", "sulamericana"];
 
+// Only ever actually read for format:"table" competitions (via
+// getBestStandings -> getStandingsTop5) — copa_do_brasil/libertadores/
+// sulamericana's entries are unused filler to satisfy the Record type, not
+// verified ids; getLastResult (the other consumer) is dead code, called
+// from nowhere.
 const THESPORTSDB_LEAGUE_IDS: Record<Competition, number> = {
   serie_a: 4351,
   serie_b: 4404,
   copa_do_brasil: 4725,
   libertadores: 4501,
+  sulamericana: 0,
 };
 
 const SCRAPE_SLUGS: Record<Competition, string> = {
@@ -92,6 +102,11 @@ const SCRAPE_SLUGS: Record<Competition, string> = {
   serie_b: "campeonato-brasileiro-serie-b",
   copa_do_brasil: "copa-do-brasil",
   libertadores: "copa-libertadores-da-america",
+  // Confirmed live via api-futebol.com.br's own sitemap
+  // (sitemap-tournament-copa-sulamericana.xml) and a direct fetch of
+  // /campeonato/copa-sulamericana/2026 (real match cards, currently
+  // semifinal-phase hrefs matching MATCH_HREF_RE).
+  sulamericana: "copa-sulamericana",
 };
 
 export type StandingRow = {
@@ -337,7 +352,7 @@ export async function getTeamFixtures(teamId: number): Promise<Fixture[] | null>
 // The free-plan substitute for "today's fixtures per competition": /fixtures
 // with only a `date` (no league, no season) is NOT season-gated — confirmed
 // against the live API — but it returns every match worldwide for that date,
-// so results are filtered down to our 4 competitions here. This is the
+// so results are filtered down to our tracked competitions here. This is the
 // source for both "jogos de hoje" and the live-match gate below, at the cost
 // of one global call rather than one per competition.
 const TODAY_CACHE_SECONDS = 10800; // 3h
@@ -737,6 +752,27 @@ export function fixturesStartingSoon(fixtures: Fixture[]): Fixture[] {
     const diff = new Date(f.date).getTime() - now;
     return diff >= 0 && diff <= UPCOMING_WINDOW_HOURS * 60 * 60 * 1000;
   });
+}
+
+export type SportsWidgetTab = "live" | "results" | "upcoming" | "none";
+
+// The home widget shows all three tabs (when there's live content) or two
+// (when there isn't), letting the viewer switch freely — but it still needs
+// a sensible starting tab. Priority: live outright; otherwise whichever of
+// results/upcoming has something happening TODAY (today's own game always
+// beats an older result or a later fixture); otherwise a still-fresh result
+// (isRoundResultsFresh) or a fixture starting soon (fixturesStartingSoon);
+// otherwise "none" — the viewer lands on whichever tab actually has
+// something to show, without the page guessing wrong the way the single
+// auto-picked state used to.
+export function defaultWidgetTab(hasLive: boolean, roundResults: Fixture[], roundUpcoming: Fixture[]): SportsWidgetTab {
+  if (hasLive) return "live";
+  const today = dateKeySaoPaulo(new Date().toISOString());
+  if (roundResults.some((f) => dateKeySaoPaulo(f.date) === today)) return "results";
+  if (roundUpcoming.some((f) => dateKeySaoPaulo(f.date) === today)) return "upcoming";
+  if (isRoundResultsFresh(roundResults)) return "results";
+  if (fixturesStartingSoon(roundUpcoming).length > 0) return "upcoming";
+  return "none";
 }
 
 // Swaps a fixture's own teamLogo (API-Football's media.api-sports.io, for

@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { COMPETITIONS, type Fixture } from "@/lib/sports";
+import { useEffect, useRef, useState } from "react";
+import { COMPETITIONS, type Fixture, type SportsWidgetTab } from "@/lib/sports";
 import { TeamCrest } from "@/components/TeamCrest";
 
 const BRAND = "#4361EE";
@@ -76,34 +76,42 @@ function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
   );
 }
 
+const TAB_LABEL: Record<Exclude<SportsWidgetTab, "none">, { pt: string; en: string }> = {
+  live: { pt: "Ao vivo", en: "Live" },
+  results: { pt: "Resultados da rodada", en: "Round results" },
+  upcoming: { pt: "Próximos jogos", en: "Upcoming" },
+};
+
 // Seeded from the home page's own server-fetched data, then polls its own
 // API route every minute — same skeleton as ElectionResults.tsx,
 // LiveStatsWidget.tsx and NotificationBell.tsx. The route itself only ever
 // hits the real API while a match window is open, so polling here costs
-// nothing extra outside live windows. Falls back through a strict priority
-// order when nothing is live: today's matches (todayFixtures — always wins
-// over an older result, a game happening today is never less relevant than
-// one that already happened), then the round's last results (while still
-// fresh, see isRoundResultsFresh), then the round's next fixture (once
-// within 24h of kickoff, see fixturesStartingSoon), then "no matches" —
-// never showing a stale result or a far-off fixture over a same-day game.
-// Shows 3 cards at a time, auto-rotating through the rest when there are
-// more than 3.
+// nothing extra outside live windows.
+//
+// Three tabs (Ao vivo only appears once something's actually live) let the
+// viewer switch freely instead of the page guessing a single state.
+// `defaultTab` (computed server-side, see defaultWidgetTab in sports.ts)
+// picks the starting tab; once the viewer clicks one themselves, their
+// choice sticks even if a match goes live afterward — "ao vivo" only
+// auto-takes over the FIRST time it appears, not every poll. Shows 3 cards
+// at a time, auto-rotating through the rest when a tab has more than 3.
 export function SportsLiveWidget({
   initial,
-  todayFixtures = [],
   roundResults = [],
-  upcomingFixtures = [],
+  roundUpcoming = [],
+  defaultTab,
   locale,
 }: {
   initial: Fixture[];
-  todayFixtures?: Fixture[];
   roundResults?: Fixture[];
-  upcomingFixtures?: Fixture[];
+  roundUpcoming?: Fixture[];
+  defaultTab: SportsWidgetTab;
   locale: string;
 }) {
   const [live, setLive] = useState<Fixture[]>(initial);
   const [offset, setOffset] = useState(0);
+  const [tab, setTab] = useState<SportsWidgetTab>(defaultTab);
+  const manualRef = useRef(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -112,7 +120,9 @@ export function SportsLiveWidget({
         const res = await fetch("/api/sports/placar", { cache: "no-store" });
         if (!res.ok) return;
         const data = (await res.json()) as { live: Fixture[] };
-        if (!cancelled) setLive(data.live);
+        if (cancelled) return;
+        setLive(data.live);
+        if (!manualRef.current && data.live.length > 0) setTab("live");
       } catch {
         // Keep showing the last known matches if a refresh fails.
       }
@@ -125,14 +135,16 @@ export function SportsLiveWidget({
     };
   }, []);
 
-  const showingLive = live.length > 0;
-  const showingToday = !showingLive && todayFixtures.length > 0;
-  const showingResults = !showingLive && !showingToday && roundResults.length > 0;
-  const showingUpcoming = !showingLive && !showingToday && !showingResults && upcomingFixtures.length > 0;
-  const shown = showingLive ? live : showingToday ? todayFixtures : showingResults ? roundResults : showingUpcoming ? upcomingFixtures : [];
+  const tabs: { key: Exclude<SportsWidgetTab, "none">; data: Fixture[] }[] = [
+    ...(live.length > 0 ? [{ key: "live" as const, data: live }] : []),
+    { key: "results" as const, data: roundResults },
+    { key: "upcoming" as const, data: roundUpcoming },
+  ];
+  const activeKey = tabs.some((t) => t.key === tab) ? tab : (tabs[0]?.key ?? "results");
+  const shown = tabs.find((t) => t.key === activeKey)?.data ?? [];
 
-  // Offset isn't reset when `shown` changes identity (e.g. switching from
-  // results to live) — every read of it below is modulo'd against the
+  // Offset isn't reset when `shown` changes identity (switching tabs, or
+  // live starting/ending) — every read of it below is modulo'd against the
   // current array length, so it's always a safe index regardless, just
   // possibly not starting back at the first card, which is a fine tradeoff.
   useEffect(() => {
@@ -143,25 +155,32 @@ export function SportsLiveWidget({
 
   const visible = Array.from({ length: Math.min(VISIBLE_COUNT, shown.length) }, (_, i) => shown[(offset + i) % shown.length]);
 
-  const heading = showingLive
-    ? locale === "en"
-      ? "Live now"
-      : "Ao vivo agora"
-    : showingToday
-      ? locale === "en"
-        ? "Today's matches"
-        : "Jogos de hoje"
-      : showingUpcoming
-        ? locale === "en"
-          ? "Upcoming matches"
-          : "Próximos jogos"
-        : locale === "en"
-          ? "Round results"
-          : "Resultados da rodada";
-
   return (
     <div>
-      <div style={{ fontSize: "1.125rem", fontWeight: 700, color: "var(--site-text)", marginBottom: "0.75rem", textAlign: "center" }}>{heading}</div>
+      <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginBottom: "0.875rem", flexWrap: "wrap" }}>
+        {tabs.map(({ key }) => (
+          <button
+            key={key}
+            type="button"
+            onClick={() => {
+              manualRef.current = true;
+              setTab(key);
+            }}
+            style={{
+              padding: "0.375rem 0.875rem",
+              borderRadius: "9999px",
+              border: `1px solid ${key === activeKey ? BRAND : "var(--site-border-strong)"}`,
+              backgroundColor: key === activeKey ? BRAND : "transparent",
+              color: key === activeKey ? "white" : "var(--site-text-secondary)",
+              fontWeight: 700,
+              fontSize: "0.8125rem",
+              cursor: "pointer",
+            }}
+          >
+            {locale === "en" ? TAB_LABEL[key].en : TAB_LABEL[key].pt}
+          </button>
+        ))}
+      </div>
       {visible.length === 0 ? (
         <div style={{ fontSize: "0.875rem", color: "var(--site-faint)", padding: "1rem 0", textAlign: "center" }}>
           {locale === "en" ? "No matches right now." : "Nenhum jogo no momento."}

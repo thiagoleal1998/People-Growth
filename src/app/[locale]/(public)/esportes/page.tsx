@@ -19,7 +19,7 @@ export const revalidate = 180;
 
 export const metadata: Metadata = {
   title: "Esportes — tabela e jogos do Brasileirão",
-  description: "Classificação completa, jogos da rodada e placar ao vivo do Brasileirão Série A e B, Copa do Brasil e Libertadores.",
+  description: "Classificação completa, jogos da rodada e placar ao vivo do Brasileirão Série A e B, Copa do Brasil, Libertadores e Sul-Americana.",
 };
 
 // Portuguese-only, same as /eleicoes — Brazilian competition data for a
