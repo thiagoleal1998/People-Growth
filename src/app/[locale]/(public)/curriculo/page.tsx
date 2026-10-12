@@ -79,7 +79,7 @@ const events = [
   { title: "Keynote: Dados como Diferencial Competitivo", event: "Data Summit Brasil", year: "2023" },
 ];
 
-function Section({ icon: Icon, title, children, color = "#4361EE" }: {
+function Section({ icon: Icon, title, children, color = "#315E9C" }: {
   icon: React.ComponentType<{ size: number; color: string }>;
   title: string;
   children: React.ReactNode;
@@ -135,7 +135,7 @@ export default async function CurriculoPage() {
               style={{
                 display: "inline-block",
                 backgroundColor: "rgba(6,214,160,0.15)",
-                color: "#06D6A0",
+                color: "#C89A4A",
                 padding: "0.25rem 0.875rem",
                 borderRadius: "9999px",
                 fontSize: "0.8125rem",
@@ -163,7 +163,7 @@ export default async function CurriculoPage() {
               display: "inline-flex",
               alignItems: "center",
               gap: "0.5rem",
-              backgroundColor: "#06D6A0",
+              backgroundColor: "#C89A4A",
               color: "var(--site-text)",
               padding: "0.875rem 1.75rem",
               borderRadius: "0.75rem",
@@ -182,7 +182,7 @@ export default async function CurriculoPage() {
       <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
         <div className="container-xl" style={{ maxWidth: "900px" }}>
           {/* Education */}
-          <Section icon={GraduationCap} title={t("education")} color="#4361EE">
+          <Section icon={GraduationCap} title={t("education")} color="#315E9C">
             <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
               {education.map((item) => (
                 <div
@@ -205,7 +205,7 @@ export default async function CurriculoPage() {
                   <span
                     style={{
                       backgroundColor: "rgba(67,97,238,0.1)",
-                      color: "#4361EE",
+                      color: "#315E9C",
                       padding: "0.25rem 0.75rem",
                       borderRadius: "9999px",
                       fontSize: "0.8125rem",
@@ -221,7 +221,7 @@ export default async function CurriculoPage() {
           </Section>
 
           {/* Experience */}
-          <Section icon={Briefcase} title={t("experience")} color="#06D6A0">
+          <Section icon={Briefcase} title={t("experience")} color="#C89A4A">
             <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               {experience.map((item) => (
                 <div
@@ -230,13 +230,13 @@ export default async function CurriculoPage() {
                     padding: "1.5rem",
                     border: "1px solid var(--site-border-strong)",
                     borderRadius: "0.75rem",
-                    borderLeft: "4px solid #06D6A0",
+                    borderLeft: "4px solid #C89A4A",
                   }}
                 >
                   <div style={{ display: "flex", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.75rem" }}>
                     <div>
                       <div style={{ fontWeight: 700, color: "var(--site-text)", fontSize: "1rem" }}>{item.role}</div>
-                      <div style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.875rem" }}>{item.company}</div>
+                      <div style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.875rem" }}>{item.company}</div>
                     </div>
                     <span style={{ color: "var(--site-faint)", fontSize: "0.8125rem", fontWeight: 500 }}>{item.period}</span>
                   </div>
@@ -249,7 +249,7 @@ export default async function CurriculoPage() {
                         key={h}
                         style={{
                           backgroundColor: "rgba(6,214,160,0.1)",
-                          color: "#04a87d",
+                          color: "#A07B3B",
                           padding: "0.2rem 0.625rem",
                           borderRadius: "9999px",
                           fontSize: "0.8rem",
@@ -288,7 +288,7 @@ export default async function CurriculoPage() {
           </Section>
 
           {/* Awards */}
-          <Section icon={Award} title={t("awards")} color="#4361EE">
+          <Section icon={Award} title={t("awards")} color="#315E9C">
             <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
               {awards.map((award) => (
                 <div
@@ -308,14 +308,14 @@ export default async function CurriculoPage() {
                     <div style={{ fontWeight: 700, color: "var(--site-text)", fontSize: "0.9375rem" }}>🥇 {award.title}</div>
                     <div style={{ color: "var(--site-muted)", fontSize: "0.8125rem" }}>{award.org}</div>
                   </div>
-                  <span style={{ color: "#4361EE", fontWeight: 700, fontSize: "0.875rem" }}>{award.year}</span>
+                  <span style={{ color: "#315E9C", fontWeight: 700, fontSize: "0.875rem" }}>{award.year}</span>
                 </div>
               ))}
             </div>
           </Section>
 
           {/* Courses taught */}
-          <Section icon={BookOpen} title={t("courses")} color="#06D6A0">
+          <Section icon={BookOpen} title={t("courses")} color="#C89A4A">
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(min(260px, 100%), 1fr))", gap: "0.75rem" }}>
               {courses.map((c) => (
                 <div
@@ -330,7 +330,7 @@ export default async function CurriculoPage() {
                     border: "1px solid rgba(6,214,160,0.15)",
                   }}
                 >
-                  <span style={{ color: "#06D6A0", flexShrink: 0 }}>📚</span>
+                  <span style={{ color: "#C89A4A", flexShrink: 0 }}>📚</span>
                   <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--site-text)" }}>{c}</span>
                 </div>
               ))}

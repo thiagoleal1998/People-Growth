@@ -44,7 +44,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
               flexDirection: "column",
             }}
           >
-            <Quote size={22} color="#4361EE" style={{ marginBottom: "0.75rem", opacity: 0.5 }} />
+            <Quote size={22} color="#315E9C" style={{ marginBottom: "0.75rem", opacity: 0.5 }} />
             {item.rating && (
               <div style={{ display: "flex", gap: "0.125rem", marginBottom: "0.75rem" }}>
                 {Array.from({ length: 5 }).map((_, i) => (
@@ -62,7 +62,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
                   height: "2.75rem",
                   borderRadius: "50%",
                   flexShrink: 0,
-                  background: item.avatar_url ? `url("${item.avatar_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                  background: item.avatar_url ? `url("${item.avatar_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                 }}
               />
               <div>
@@ -84,7 +84,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
             type="button"
             onClick={goPrev}
             aria-label="Depoimento anterior"
-            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "2.25rem", height: "2.25rem", borderRadius: "50%", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", color: "#4361EE", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "2.25rem", height: "2.25rem", borderRadius: "50%", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", color: "#315E9C", cursor: "pointer" }}
           >
             <ChevronLeft size={18} />
           </button>
@@ -102,7 +102,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
                   borderRadius: "50%",
                   border: "none",
                   padding: 0,
-                  backgroundColor: i === start ? "#4361EE" : "var(--site-border-strong)",
+                  backgroundColor: i === start ? "#315E9C" : "var(--site-border-strong)",
                   cursor: "pointer",
                   transition: "background-color 0.3s",
                 }}
@@ -114,7 +114,7 @@ export function TestimonialsCarousel({ testimonials }: { testimonials: Testimoni
             type="button"
             onClick={goNext}
             aria-label="Próximo depoimento"
-            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "2.25rem", height: "2.25rem", borderRadius: "50%", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", color: "#4361EE", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "2.25rem", height: "2.25rem", borderRadius: "50%", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", color: "#315E9C", cursor: "pointer" }}
           >
             <ChevronRight size={18} />
           </button>

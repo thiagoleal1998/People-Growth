@@ -69,13 +69,13 @@ export default async function ColunistasPage() {
                         height: "4rem",
                         borderRadius: "50%",
                         flexShrink: 0,
-                        background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                        background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                       }}
                     />
                     <div>
                       <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)" }}>{author.name}</h2>
                       {author.role_pt && (
-                        <p style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.8125rem" }}>{pickLocale(locale, author.role_pt, author.role_en)}</p>
+                        <p style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.8125rem" }}>{pickLocale(locale, author.role_pt, author.role_en)}</p>
                       )}
                     </div>
                   </div>
@@ -87,7 +87,7 @@ export default async function ColunistasPage() {
                   <div style={{ display: "flex", gap: "1.25rem", marginTop: (author.tagline_pt || author.bio_pt) ? 0 : "auto", paddingTop: (author.tagline_pt || author.bio_pt) ? 0 : "1rem" }}>
                     <Link
                       href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
-                      style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#4361EE", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
+                      style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#315E9C", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
                     >
                       {locale === "en" ? "About" : "Sobre"} <ArrowRight size={15} />
                     </Link>

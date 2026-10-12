@@ -47,7 +47,7 @@ export default async function ServicePage({
 
   const t = await getTranslations("services");
   const tNav = await getTranslations("nav");
-  const color = "#4361EE";
+  const color = "#315E9C";
   const benefits = service.benefits ?? [];
   const methodology = linesToList(pickLocale(locale, service.methodology_pt, service.methodology_en));
   const results = linesToList(pickLocale(locale, service.results_pt, service.results_en));

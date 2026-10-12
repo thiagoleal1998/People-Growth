@@ -11,11 +11,11 @@ import type { Resource } from "@/types/database.types";
 export const revalidate = 300;
 
 const typeMeta: Record<Resource["type"], { labelKey: string; icon: LucideIcon; color: string }> = {
-  template: { labelKey: "typeTemplate", icon: Layout, color: "#4361EE" },
-  checklist: { labelKey: "typeChecklist", icon: CheckSquare, color: "#06D6A0" },
+  template: { labelKey: "typeTemplate", icon: Layout, color: "#315E9C" },
+  checklist: { labelKey: "typeChecklist", icon: CheckSquare, color: "#C89A4A" },
   prompt: { labelKey: "typePrompt", icon: Zap, color: "#FFB703" },
-  guide: { labelKey: "typeGuide", icon: BookOpen, color: "#4361EE" },
-  ebook: { labelKey: "typeEbook", icon: FileText, color: "#06D6A0" },
+  guide: { labelKey: "typeGuide", icon: BookOpen, color: "#315E9C" },
+  ebook: { labelKey: "typeEbook", icon: FileText, color: "#C89A4A" },
   tool: { labelKey: "typeTool", icon: Grid3x3, color: "#FFB703" },
 };
 

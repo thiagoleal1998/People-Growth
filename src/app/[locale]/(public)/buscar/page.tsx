@@ -46,7 +46,7 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
     <div className="section-padding">
       <div className="container-xl" style={{ maxWidth: "800px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.5rem" }}>
-          <Search size={22} color="#4361EE" />
+          <Search size={22} color="#315E9C" />
           <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--site-text)" }}>
             {query ? (locale === "en" ? `Results for "${query}"` : `Resultados para "${query}"`) : (locale === "en" ? "Search" : "Buscar")}
           </h1>

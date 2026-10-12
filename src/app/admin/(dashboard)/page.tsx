@@ -5,9 +5,9 @@ import { LiveStatsWidget } from "@/components/admin/LiveStatsWidget";
 import type { Lead } from "@/types/database.types";
 
 const statusLabels: Record<Lead["status"], { label: string; color: string; bg: string }> = {
-  new: { label: "Novo", color: "#4361EE", bg: "rgba(67,97,238,0.12)" },
+  new: { label: "Novo", color: "#315E9C", bg: "rgba(67,97,238,0.12)" },
   contacted: { label: "Em contato", color: "#FFB703", bg: "rgba(255,183,3,0.12)" },
-  proposal: { label: "Proposta", color: "#06D6A0", bg: "rgba(6,214,160,0.12)" },
+  proposal: { label: "Proposta", color: "#C89A4A", bg: "rgba(6,214,160,0.12)" },
   closed: { label: "Fechado", color: "var(--admin-faint)", bg: "rgba(148,163,184,0.12)" },
 };
 
@@ -32,10 +32,10 @@ export default async function AdminDashboard() {
   const recentLeads = (recentLeadsRes.data ?? []) as Lead[];
 
   const stats = [
-    { label: "Artigos publicados", value: publishedArticles.count ?? 0, icon: FileText, color: "#4361EE" },
-    { label: "Leads novos", value: newLeads.count ?? 0, icon: Users, color: "#06D6A0" },
+    { label: "Artigos publicados", value: publishedArticles.count ?? 0, icon: FileText, color: "#315E9C" },
+    { label: "Leads novos", value: newLeads.count ?? 0, icon: Users, color: "#C89A4A" },
     { label: "Assinantes newsletter", value: activeSubs.count ?? 0, icon: Mail, color: "#FFB703" },
-    { label: "Downloads de recursos", value: totalDownloads, icon: Download, color: "#4361EE" },
+    { label: "Downloads de recursos", value: totalDownloads, icon: Download, color: "#315E9C" },
   ];
 
   return (
@@ -62,7 +62,7 @@ export default async function AdminDashboard() {
       <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
         <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--admin-border-strong)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)" }}>Leads recentes</h2>
-          <Link href="/admin/leads" style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Ver todos →</Link>
+          <Link href="/admin/leads" style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Ver todos →</Link>
         </div>
         {recentLeads.length === 0 ? (
           <div style={{ padding: "3rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.9rem" }}>Nenhum lead recebido ainda.</div>

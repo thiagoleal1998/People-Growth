@@ -95,7 +95,7 @@ export function LeadershipNineBox({
       })}
 
       {/* Plotted point */}
-      <circle cx={dotX} cy={dotY} r={8} fill="#4361EE" stroke="white" strokeWidth={2.5} />
+      <circle cx={dotX} cy={dotY} r={8} fill="#315E9C" stroke="white" strokeWidth={2.5} />
       <text x={dotX} y={dotY - 15} textAnchor="middle" fontSize="12.5" fontWeight={700} fill="currentColor">
         {legendMark} {personLabel}
       </text>

@@ -27,7 +27,7 @@ export function StateMenu({ cargo, uf }: { cargo: string; uf: string }) {
       >
         <span style={{ color: "var(--site-muted)", fontWeight: 600 }}>Estado</span>
         {current}
-        <span className="state-menu-chevron" aria-hidden style={{ display: "inline-block", transition: "transform 150ms", color: "#4361EE" }}>
+        <span className="state-menu-chevron" aria-hidden style={{ display: "inline-block", transition: "transform 150ms", color: "#315E9C" }}>
           ▾
         </span>
       </summary>
@@ -59,7 +59,7 @@ export function StateMenu({ cargo, uf }: { cargo: string; uf: string }) {
               textDecoration: "none",
               fontSize: "0.875rem",
               fontWeight: option.code === uf ? 800 : 500,
-              color: option.code === uf ? "#4361EE" : "var(--site-text-secondary)",
+              color: option.code === uf ? "#315E9C" : "var(--site-text-secondary)",
               backgroundColor: option.code === uf ? "rgba(67,97,238,0.08)" : "transparent",
             }}
           >

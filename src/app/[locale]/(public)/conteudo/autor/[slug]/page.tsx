@@ -94,7 +94,7 @@ export default async function AuthorPage({
                 height: "6rem",
                 borderRadius: "50%",
                 flexShrink: 0,
-                background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
               }}
             />
             <div style={{ flex: 1, minWidth: "240px" }}>
@@ -102,7 +102,7 @@ export default async function AuthorPage({
                 {author.name}
               </h1>
               {author.role_pt && (
-                <p style={{ color: "#06D6A0", fontWeight: 600, fontSize: "1rem", marginBottom: "0.875rem" }}>
+                <p style={{ color: "#C89A4A", fontWeight: 600, fontSize: "1rem", marginBottom: "0.875rem" }}>
                   {pickLocale(locale, author.role_pt, author.role_en)}
                 </p>
               )}
@@ -114,7 +114,7 @@ export default async function AuthorPage({
               <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap" }}>
                 <Link
                   href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
-                  style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "#06D6A0", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
+                  style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "#C89A4A", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
                 >
                   {aboutAuthorLabel(author.gender, locale)} <ChevronRight size={14} />
                 </Link>
@@ -191,8 +191,8 @@ export default async function AuthorPage({
                         {cat && !article.cover_image && (
                           <span
                             style={{
-                              backgroundColor: `${cat.color ?? "#4361EE"}25`,
-                              color: cat.color ?? "#4361EE",
+                              backgroundColor: `${cat.color ?? "#315E9C"}25`,
+                              color: cat.color ?? "#315E9C",
                               padding: "0.2rem 0.5rem",
                               borderRadius: "0.25rem",
                               fontSize: "0.625rem",

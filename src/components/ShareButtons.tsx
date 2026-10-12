@@ -109,7 +109,7 @@ export function ShareButtons({ title }: { title: string }) {
           cursor: "pointer",
         }}
       >
-        {copied ? <Check size={16} color="#04a87d" /> : <Link2 size={16} />}
+        {copied ? <Check size={16} color="#A07B3B" /> : <Link2 size={16} />}
       </button>
     </div>
   );

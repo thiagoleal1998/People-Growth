@@ -84,7 +84,7 @@ export function CalendarGrid({
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           backgroundColor: pending ? "rgba(255,183,3,0.15)" : "rgba(6,214,160,0.12)",
-                          color: pending ? "#cc9200" : "#04a87d",
+                          color: pending ? "#cc9200" : "#A07B3B",
                         }}
                       >
                         {pending ? "⏳ " : "✓ "}
@@ -109,7 +109,7 @@ export function CalendarGrid({
                           overflow: "hidden",
                           textOverflow: "ellipsis",
                           backgroundColor: isSocial ? "rgba(67,97,238,0.12)" : "rgba(148,163,184,0.18)",
-                          color: isSocial ? "#4361EE" : "var(--admin-text-secondary)",
+                          color: isSocial ? "#315E9C" : "var(--admin-text-secondary)",
                         }}
                       >
                         {isSocial ? `📱 ${item.platform ? PLATFORM_LABEL[item.platform] + ": " : ""}` : "📝 "}

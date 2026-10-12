@@ -32,7 +32,7 @@ function CopyPromoTextButton({ text }: { text: string }) {
         alignItems: "center",
         gap: "0.5rem",
         backgroundColor: copied ? "rgba(6,214,160,0.12)" : "var(--admin-surface-alt)",
-        color: copied ? "#04a87d" : "var(--admin-text)",
+        color: copied ? "#A07B3B" : "var(--admin-text)",
         border: "1px solid var(--admin-border-strong)",
         padding: "0.625rem 1.125rem",
         borderRadius: "0.625rem",
@@ -129,7 +129,7 @@ export function PromoForm({ item, imageError }: { item?: Promo; imageError?: str
               <input className="admin-file-input" type="file" name="image_file" accept="image/png,image/jpeg,image/webp" onChange={handleImageChange} />
               {item?.image_url && (
                 <div style={{ marginTop: "0.5rem" }}>
-                  <a href={item.image_url} download target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.8125rem", color: "#4361EE", fontWeight: 600 }}>
+                  <a href={item.image_url} download target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.8125rem", color: "#315E9C", fontWeight: 600 }}>
                     Baixar imagem atual
                   </a>
                 </div>

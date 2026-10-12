@@ -51,7 +51,7 @@ export function ListKanbanToolbar({
               fontWeight: 700,
               border: "none",
               cursor: "pointer",
-              backgroundColor: view === v ? "#4361EE" : "var(--admin-surface)",
+              backgroundColor: view === v ? "#315E9C" : "var(--admin-surface)",
               color: view === v ? "white" : "var(--admin-muted)",
             }}
           >

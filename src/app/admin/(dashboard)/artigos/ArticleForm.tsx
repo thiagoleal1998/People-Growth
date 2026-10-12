@@ -184,10 +184,10 @@ export function ArticleForm({
                 padding: "0.75rem 1.25rem",
                 fontSize: "0.875rem",
                 fontWeight: 700,
-                color: active === tab.id ? "#4361EE" : "var(--admin-muted)",
+                color: active === tab.id ? "#315E9C" : "var(--admin-muted)",
                 background: "none",
                 border: "none",
-                borderBottom: active === tab.id ? "2px solid #4361EE" : "2px solid transparent",
+                borderBottom: active === tab.id ? "2px solid #315E9C" : "2px solid transparent",
                 cursor: "pointer",
                 marginBottom: "-1px",
               }}
@@ -316,7 +316,7 @@ export function ArticleForm({
             <button
               type="button"
               onClick={() => setSources((prev) => [...prev, { label: "", url: null }])}
-              style={{ padding: "0.5rem 0.875rem", borderRadius: "0.5rem", border: "1px dashed #4361EE", background: "transparent", color: "#4361EE", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+              style={{ padding: "0.5rem 0.875rem", borderRadius: "0.5rem", border: "1px dashed #315E9C", background: "transparent", color: "#315E9C", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
             >
               + Adicionar fonte
             </button>

@@ -77,10 +77,10 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
               padding: "0.75rem 1.25rem",
               fontSize: "0.875rem",
               fontWeight: 700,
-              color: active === tab.id ? "#4361EE" : "var(--admin-muted)",
+              color: active === tab.id ? "#315E9C" : "var(--admin-muted)",
               background: "none",
               border: "none",
-              borderBottom: active === tab.id ? "2px solid #4361EE" : "2px solid transparent",
+              borderBottom: active === tab.id ? "2px solid #315E9C" : "2px solid transparent",
               cursor: "pointer",
               marginBottom: "-1px",
               whiteSpace: "nowrap",
@@ -160,7 +160,7 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
                           <button
                             type="submit"
                             title="Publicar agora"
-                            style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.5rem", color: "#04a87d", backgroundColor: "rgba(6,214,160,0.1)", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 700 }}
+                            style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.5rem", color: "#A07B3B", backgroundColor: "rgba(6,214,160,0.1)", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 700 }}
                           >
                             <Check size={13} /> {a.status === "scheduled" ? "Publicar agora" : "Aprovar"}
                           </button>
@@ -177,7 +177,7 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
                       ) : (
                         <Link href={`/admin/artigos/${a.id}/preview`} target="_blank" style={{ padding: "0.375rem", color: "var(--admin-muted)", borderRadius: "0.375rem" }} title="Ler o artigo"><Eye size={15} /></Link>
                       )}
-                      <Link href={`/admin/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
+                      <Link href={`/admin/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
                       <ConfirmDeleteButton confirmText={`Excluir o artigo "${a.title_pt}"?`} onDelete={deleteArticle.bind(null, a.id)} />
                     </div>
                   </td>

@@ -43,7 +43,7 @@ export function UsersClient({ users, authors }: { users: UserProfile[]; authors:
                       }}
                       style={{
                         backgroundColor: u.role === "admin" ? "rgba(67,97,238,0.1)" : "rgba(6,214,160,0.1)",
-                        color: u.role === "admin" ? "#4361EE" : "#04a87d",
+                        color: u.role === "admin" ? "#315E9C" : "#A07B3B",
                         padding: "0.2rem 0.5rem",
                         borderRadius: "0.375rem",
                         fontSize: "0.75rem",

@@ -1,7 +1,7 @@
 import { UF_OPTIONS, formatName, partyColor, shortName, type RaceStatus, type TseRace } from "@/lib/tse";
 import { ElectionTag } from "@/components/ElectionTag";
 
-const BRAND = "#4361EE";
+const BRAND = "#315E9C";
 
 const cardStyle = {
   borderRadius: "0.75rem",

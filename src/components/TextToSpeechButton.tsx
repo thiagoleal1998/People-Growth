@@ -48,7 +48,7 @@ export function TextToSpeechButton({ text, title, fill }: { text: string; title:
         padding: "0.75rem 1.125rem",
         borderRadius: "0.625rem",
         border: "1px solid var(--site-border-strong)",
-        backgroundColor: speaking ? "#4361EE" : "var(--site-surface-alt)",
+        backgroundColor: speaking ? "#315E9C" : "var(--site-surface-alt)",
         color: speaking ? "white" : "var(--site-text)",
         fontSize: "0.9375rem",
         fontWeight: 700,

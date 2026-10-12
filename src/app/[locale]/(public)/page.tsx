@@ -77,14 +77,14 @@ const services = [
     title: "Consultoria Estratégica",
     description: "Diagnóstico, planejamento e reestruturação para negócios que querem crescer com inteligência.",
     href: "/servicos" as const,
-    color: "#4361EE",
+    color: "#315E9C",
   },
   {
     icon: TrendingUp,
     title: "Growth & Marketing Digital",
     description: "Estratégias de aquisição, ativação e retenção baseadas em dados e experimentação contínua.",
     href: "/servicos" as const,
-    color: "#06D6A0",
+    color: "#C89A4A",
   },
   {
     icon: BarChart3,
@@ -98,14 +98,14 @@ const services = [
     title: "Inteligência Artificial",
     description: "Agentes GPT, automações com n8n/Make e soluções de IA aplicadas ao seu negócio.",
     href: "/laboratorio-ia" as const,
-    color: "#4361EE",
+    color: "#315E9C",
   },
   {
     icon: Users,
     title: "Treinamentos Corporativos",
     description: "Capacitação em Marketing, IA, OKR e 5W2H para times e líderes.",
     href: "/servicos" as const,
-    color: "#06D6A0",
+    color: "#C89A4A",
   },
   {
     icon: Sparkles,
@@ -280,7 +280,7 @@ export default async function HomePage() {
           <span style={{ color: "white", fontSize: "0.875rem", fontWeight: 600 }}>
             🚀 Pronto para acelerar o crescimento do seu negócio com estratégia, dados e IA?
           </span>
-          <span style={{ color: "#06D6A0", fontSize: "0.875rem", fontWeight: 700 }}>
+          <span style={{ color: "#C89A4A", fontSize: "0.875rem", fontWeight: 700 }}>
             Agende uma conversa gratuita →
           </span>
         </div>
@@ -303,7 +303,7 @@ export default async function HomePage() {
 
       {sportsInitial && (
         <div className="container-xl" style={{ maxWidth: "1180px", margin: "0 auto", paddingTop: "1.5rem" }}>
-          <section style={{ borderTop: "3px solid #4361EE", paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
+          <section style={{ borderTop: "3px solid #315E9C", paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
             <h2
               style={{
                 display: "flex",
@@ -329,7 +329,7 @@ export default async function HomePage() {
               locale={locale}
             />
             <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "1rem" }}>
-              <Link href="/esportes" style={{ color: "#4361EE", fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600 }}>
+              <Link href="/esportes" style={{ color: "#315E9C", fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600 }}>
                 {locale === "en" ? "See all competitions ›" : "Ver todas as competições ›"}
               </Link>
             </div>
@@ -341,7 +341,7 @@ export default async function HomePage() {
       {featured && (
         <section style={{ backgroundColor: "var(--site-bg)", paddingTop: "1.5rem", paddingBottom: "1.5rem" }}>
           <div className="container-xl">
-            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4361EE", letterSpacing: "0.08em", marginBottom: "0.75rem" }}>
+            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#315E9C", letterSpacing: "0.08em", marginBottom: "0.75rem" }}>
               {tNewsletter("heroBadge")}
             </div>
 
@@ -390,7 +390,7 @@ export default async function HomePage() {
                           href={articleHref(article, article.categories?.slug)}
                           style={{ display: "flex", alignItems: "baseline", gap: "0.625rem", textDecoration: "none", color: "var(--site-text-secondary)", fontSize: "0.9375rem", fontWeight: 500 }}
                         >
-                          <span style={{ width: "0.4375rem", height: "0.4375rem", backgroundColor: "#4361EE", flexShrink: 0 }} />
+                          <span style={{ width: "0.4375rem", height: "0.4375rem", backgroundColor: "#315E9C", flexShrink: 0 }} />
                           {pickLocale(locale, article.title_pt, article.title_en)}
                         </Link>
                       </li>
@@ -538,8 +538,8 @@ export default async function HomePage() {
               {/* Sidebar */}
               <aside>
                 {showLiveBox && (
-                  <div style={{ borderRadius: "0.5rem", overflow: "hidden", border: `2px solid ${isLive ? "#dc2626" : "#4361EE"}`, marginBottom: "0.875rem" }}>
-                    <div style={{ backgroundColor: isLive ? "#dc2626" : "#4361EE", color: "white", padding: "0.5rem 0.75rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ borderRadius: "0.5rem", overflow: "hidden", border: `2px solid ${isLive ? "#dc2626" : "#315E9C"}`, marginBottom: "0.875rem" }}>
+                    <div style={{ backgroundColor: isLive ? "#dc2626" : "#315E9C", color: "white", padding: "0.5rem 0.75rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                       <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontWeight: 800, fontSize: "0.75rem", letterSpacing: "0.03em" }}>
                         <Radio size={14} /> {isLive ? t("liveBroadcast") : "Replay"}
                       </span>
@@ -583,7 +583,7 @@ export default async function HomePage() {
                 )}
 
                 <div style={{ borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
-                  <div style={{ backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>
+                  <div style={{ backgroundColor: "#315E9C", color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>
                     {t("featuredVideo")}
                   </div>
                   {featuredVideoUrl ? (
@@ -604,7 +604,7 @@ export default async function HomePage() {
 
                 {sportsInitial && (
                   <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
-                    <div style={{ backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
+                    <div style={{ backgroundColor: "#315E9C", color: "white", padding: "0.625rem 1rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
                       <TeamCrest src={COMPETITIONS.serie_a.logo} alt="" size={28} />
                       <div>
                         <div style={{ fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>{locale === "en" ? "Standings" : "Classificação"}</div>
@@ -677,7 +677,7 @@ export default async function HomePage() {
 
       {/* Columnists strip */}
       {visibleColumnists.length > 0 && (
-        <section className="columnist-section" style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #4361EE", borderBottom: "1px solid var(--site-border)" }}>
+        <section className="columnist-section" style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #315E9C", borderBottom: "1px solid var(--site-border)" }}>
           <div className="container-xl" style={{ padding: "1.25rem 0", maxWidth: "1180px", margin: "0 auto" }}>
           <div className="columnist-grid">
             {visibleColumnists.map((author) => {
@@ -696,11 +696,11 @@ export default async function HomePage() {
                       height: "3.5rem",
                       borderRadius: "0.375rem",
                       flexShrink: 0,
-                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                     }}
                   />
                   <div className="columnist-text">
-                    <div style={{ fontWeight: 800, fontSize: "0.8125rem", color: "#4361EE", marginBottom: "0.25rem" }}>{author.name}</div>
+                    <div style={{ fontWeight: 800, fontSize: "0.8125rem", color: "#315E9C", marginBottom: "0.25rem" }}>{author.name}</div>
                     <div
                       style={{
                         color: "var(--site-text-secondary)",
@@ -722,7 +722,7 @@ export default async function HomePage() {
           </div>
           {completeColumnists.length > 4 && (
             <div style={{ textAlign: "center", marginTop: "1rem" }}>
-              <Link href="/conteudo/colunistas" style={{ color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}>
+              <Link href="/conteudo/colunistas" style={{ color: "#315E9C", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}>
                 {tc("seeAll")} →
               </Link>
             </div>
@@ -806,8 +806,8 @@ export default async function HomePage() {
               marginBottom: "2rem",
             }}
           >
-            <Sparkles size={14} color="#06D6A0" />
-            <span style={{ fontSize: "0.8125rem", color: "#06D6A0", fontWeight: 600 }}>
+            <Sparkles size={14} color="#C89A4A" />
+            <span style={{ fontSize: "0.8125rem", color: "#C89A4A", fontWeight: 600 }}>
               Negócios · Pessoas · Sociedade · IA
             </span>
           </div>
@@ -828,7 +828,7 @@ export default async function HomePage() {
             <br />
             <span
               style={{
-                background: "linear-gradient(135deg, #4361EE, #06D6A0)",
+                background: "linear-gradient(135deg, #315E9C, #C89A4A)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -858,7 +858,7 @@ export default async function HomePage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "0.5rem",
-                backgroundColor: "#4361EE",
+                backgroundColor: "#315E9C",
                 color: "white",
                 padding: "0.875rem 1.75rem",
                 borderRadius: "0.75rem",
@@ -924,7 +924,7 @@ export default async function HomePage() {
                   style={{
                     fontSize: "2rem",
                     fontWeight: 800,
-                    background: "linear-gradient(135deg, #4361EE, #06D6A0)",
+                    background: "linear-gradient(135deg, #315E9C, #C89A4A)",
                     WebkitBackgroundClip: "text",
                     WebkitTextFillColor: "transparent",
                     lineHeight: 1,
@@ -951,7 +951,7 @@ export default async function HomePage() {
                 padding: "2rem",
               }}
             >
-              <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#06D6A0", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
+              <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#C89A4A", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
                 Quem está por trás da People &amp; Growth
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "2rem" }}>
@@ -963,7 +963,7 @@ export default async function HomePage() {
                         height: "3.25rem",
                         borderRadius: "50%",
                         flexShrink: 0,
-                        background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                        background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                       }}
                     />
                     <div>
@@ -1066,7 +1066,7 @@ export default async function HomePage() {
             <Reveal>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-end", gap: "1.5rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>
               <div>
-                <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#4361EE", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>
+                <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#315E9C", letterSpacing: "0.08em", marginBottom: "0.5rem" }}>
                   NA MÍDIA
                 </div>
                 <h2 style={{ fontSize: "clamp(1.5rem, 3.5vw, 2rem)", fontWeight: 800, color: "var(--site-text)" }}>
@@ -1075,7 +1075,7 @@ export default async function HomePage() {
               </div>
               <Link
                 href="/na-midia"
-                style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "#4361EE", fontWeight: 700, fontSize: "0.9375rem", textDecoration: "none", whiteSpace: "nowrap" }}
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "#315E9C", fontWeight: 700, fontSize: "0.9375rem", textDecoration: "none", whiteSpace: "nowrap" }}
               >
                 Ver todas as menções <ArrowRight size={16} />
               </Link>
@@ -1134,7 +1134,7 @@ export default async function HomePage() {
               style={{
                 display: "inline-block",
                 backgroundColor: "rgba(6,214,160,0.15)",
-                color: "#06D6A0",
+                color: "#C89A4A",
                 padding: "0.25rem 0.875rem",
                 borderRadius: "9999px",
                 fontSize: "0.8125rem",
@@ -1154,7 +1154,7 @@ export default async function HomePage() {
             >
               Estratégia, dados e um olhar
               <br />
-              <span style={{ color: "#06D6A0" }}>atento ao que move o mundo.</span>
+              <span style={{ color: "#C89A4A" }}>atento ao que move o mundo.</span>
             </h2>
             <p style={{ color: "rgba(255,255,255,0.7)", lineHeight: 1.7, marginBottom: "2rem", fontSize: "1.0625rem" }}>
               Fundada por Thiago Leal, Gustavo Monken e Raul Salustiano, a People & Growth une estratégia de negócios, dados e inteligência artificial a uma cobertura independente dos temas sociais, políticos, econômicos e ambientais que impactam pessoas e empresas.
@@ -1166,7 +1166,7 @@ export default async function HomePage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "0.5rem",
-                backgroundColor: "#06D6A0",
+                backgroundColor: "#C89A4A",
                 color: "var(--site-text)",
                 padding: "0.875rem 1.75rem",
                 borderRadius: "0.75rem",
@@ -1219,7 +1219,7 @@ export default async function HomePage() {
               width: "4rem",
               height: "4rem",
               borderRadius: "1rem",
-              background: "linear-gradient(135deg, #4361EE, #06D6A0)",
+              background: "linear-gradient(135deg, #315E9C, #C89A4A)",
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
@@ -1242,7 +1242,7 @@ export default async function HomePage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "0.5rem",
-                backgroundColor: "#4361EE",
+                backgroundColor: "#315E9C",
                 color: "white",
                 padding: "0.875rem 1.75rem",
                 borderRadius: "0.75rem",
@@ -1286,7 +1286,7 @@ export default async function HomePage() {
                       border: "2px solid var(--site-surface-alt)",
                       marginLeft: i === 0 ? 0 : "-0.625rem",
                       flexShrink: 0,
-                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                     }}
                   />
                 ))}
@@ -1314,7 +1314,7 @@ export default async function HomePage() {
               </div>
               <FaqAccordion entries={faqEntries} />
               <div style={{ textAlign: "center", marginTop: "2rem" }}>
-                <Link href="/faq" style={{ color: "#4361EE", fontWeight: 700, fontSize: "0.9375rem", textDecoration: "none" }}>
+                <Link href="/faq" style={{ color: "#315E9C", fontWeight: 700, fontSize: "0.9375rem", textDecoration: "none" }}>
                   Ver todas as perguntas →
                 </Link>
               </div>

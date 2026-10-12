@@ -112,7 +112,7 @@ export default async function MeaSententiePage() {
 
       {/* Columnists strip */}
       {authors.length > 0 && (
-        <section style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #4361EE", borderBottom: "1px solid var(--site-border)" }}>
+        <section style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #315E9C", borderBottom: "1px solid var(--site-border)" }}>
           <div
             className="container-xl"
             style={{ display: "flex", justifyContent: "center", gap: "2rem", padding: "1.5rem 0", flexWrap: "wrap", overflowX: "auto" }}
@@ -131,11 +131,11 @@ export default async function MeaSententiePage() {
                       height: "3.5rem",
                       borderRadius: "0.375rem",
                       flexShrink: 0,
-                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                     }}
                   />
                   <div>
-                    <div style={{ fontWeight: 800, fontSize: "0.875rem", color: "#4361EE", marginBottom: "0.25rem" }}>{author.name}</div>
+                    <div style={{ fontWeight: 800, fontSize: "0.875rem", color: "#315E9C", marginBottom: "0.25rem" }}>{author.name}</div>
                     <div
                       style={{
                         color: "var(--site-text-secondary)",

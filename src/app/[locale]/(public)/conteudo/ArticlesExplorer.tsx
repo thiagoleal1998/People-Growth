@@ -57,8 +57,8 @@ function ArticleRow({ article, category, author }: { article: Article; category:
           {category && !article.cover_image && (
             <span
               style={{
-                backgroundColor: `${category.color ?? "#4361EE"}25`,
-                color: category.color ?? "#4361EE",
+                backgroundColor: `${category.color ?? "#315E9C"}25`,
+                color: category.color ?? "#315E9C",
                 padding: "0.2rem 0.5rem",
                 borderRadius: "0.25rem",
                 fontSize: "0.625rem",
@@ -197,7 +197,7 @@ export function ArticlesExplorer({
                               position: "absolute",
                               top: "1rem",
                               left: "1rem",
-                              backgroundColor: cat.color ?? "#4361EE",
+                              backgroundColor: cat.color ?? "#315E9C",
                               color: "white",
                               padding: "0.4rem 1rem",
                               borderRadius: "9999px",
@@ -230,7 +230,7 @@ export function ArticlesExplorer({
                           {featured.published_at && new Date(featured.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" })}
                           {featured.read_time ? ` · ${featured.read_time} ${tc("minutes")}` : ""}
                         </span>
-                        <span style={{ color: "#4361EE", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                        <span style={{ color: "#315E9C", fontWeight: 700, display: "flex", alignItems: "center", gap: "0.25rem" }}>
                           {t("readMore")} <ChevronRight size={16} />
                         </span>
                       </div>
@@ -318,7 +318,7 @@ export function ArticlesExplorer({
                   href={{ pathname: "/conteudo/categoria/[slug]", params: { slug: category.slug } }}
                   style={{
                     backgroundColor: "rgba(67,97,238,0.1)",
-                    color: "#4361EE",
+                    color: "#315E9C",
                     padding: "0.3rem 0.75rem",
                     borderRadius: "9999px",
                     fontSize: "0.8125rem",

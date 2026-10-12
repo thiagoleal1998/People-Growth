@@ -68,7 +68,7 @@ export default async function SobrePage() {
             style={{
               display: "inline-block",
               backgroundColor: "rgba(6,214,160,0.15)",
-              color: "#06D6A0",
+              color: "#C89A4A",
               padding: "0.25rem 0.875rem",
               borderRadius: "9999px",
               fontSize: "0.8125rem",
@@ -90,7 +90,7 @@ export default async function SobrePage() {
             <br />
             <span
               style={{
-                background: "linear-gradient(135deg, #4361EE, #06D6A0)",
+                background: "linear-gradient(135deg, #315E9C, #C89A4A)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
               }}
@@ -115,7 +115,7 @@ export default async function SobrePage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "0.5rem",
-                backgroundColor: "#4361EE",
+                backgroundColor: "#315E9C",
                 color: "white",
                 padding: "0.875rem 1.75rem",
                 borderRadius: "0.75rem",
@@ -158,7 +158,7 @@ export default async function SobrePage() {
             style={{
               fontSize: "1.25rem",
               fontWeight: 800,
-              background: "linear-gradient(135deg, #4361EE, #06D6A0)",
+              background: "linear-gradient(135deg, #315E9C, #C89A4A)",
               WebkitBackgroundClip: "text",
               WebkitTextFillColor: "transparent",
               marginBottom: "1.5rem",
@@ -175,7 +175,7 @@ export default async function SobrePage() {
               display: "inline-flex",
               alignItems: "center",
               gap: "0.5rem",
-              color: "#4361EE",
+              color: "#315E9C",
               fontWeight: 700,
               textDecoration: "none",
             }}
@@ -262,7 +262,7 @@ export default async function SobrePage() {
                 name: "People & Growth",
                 description: "Consultoria, treinamentos e conteúdo sobre negócios, pessoas e os temas sociais, políticos e ambientais que os impactam.",
                 icon: "🚀",
-                color: "#4361EE",
+                color: "#315E9C",
               },
               {
                 name: "Mea Sententia",
@@ -307,7 +307,7 @@ export default async function SobrePage() {
       {/* CTA */}
       <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)", textAlign: "center" }}>
         <div className="container-xl" style={{ maxWidth: "560px", margin: "0 auto" }}>
-          <Lightbulb size={40} color="#4361EE" style={{ marginBottom: "1rem" }} />
+          <Lightbulb size={40} color="#315E9C" style={{ marginBottom: "1rem" }} />
           <h2 style={{ fontSize: "2rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>
             Vamos criar algo juntos?
           </h2>
@@ -320,7 +320,7 @@ export default async function SobrePage() {
               display: "inline-flex",
               alignItems: "center",
               gap: "0.5rem",
-              backgroundColor: "#4361EE",
+              backgroundColor: "#315E9C",
               color: "white",
               padding: "0.875rem 2rem",
               borderRadius: "0.75rem",

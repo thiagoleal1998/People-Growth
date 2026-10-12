@@ -57,7 +57,7 @@ export default async function DepoimentosPage() {
                         height: "2.75rem",
                         borderRadius: "50%",
                         flexShrink: 0,
-                        background: item.avatar_url ? `url("${item.avatar_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                        background: item.avatar_url ? `url("${item.avatar_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",

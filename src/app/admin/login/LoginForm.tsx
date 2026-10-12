@@ -32,27 +32,27 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
             pointerEvents: "none",
           }}
         />
-        <div style={{ position: "absolute", width: "22rem", height: "22rem", borderRadius: "50%", background: "#4361EE", opacity: 0.18, filter: "blur(90px)", top: "-6rem", right: "-6rem", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", width: "18rem", height: "18rem", borderRadius: "50%", background: "#06D6A0", opacity: 0.14, filter: "blur(90px)", bottom: "-4rem", left: "-4rem", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", width: "22rem", height: "22rem", borderRadius: "50%", background: "#315E9C", opacity: 0.18, filter: "blur(90px)", top: "-6rem", right: "-6rem", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", width: "18rem", height: "18rem", borderRadius: "50%", background: "#C89A4A", opacity: 0.14, filter: "blur(90px)", bottom: "-4rem", left: "-4rem", pointerEvents: "none" }} />
         <div style={{ position: "relative", maxWidth: "440px" }}>
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
             <img src={logoUrl} alt="People & Growth" style={{ height: "3.75rem", width: "auto", display: "block", margin: "0 auto 2rem" }} />
           ) : (
-            <div style={{ fontWeight: 800, fontSize: "1.5rem", marginBottom: "2rem", background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            <div style={{ fontWeight: 800, fontSize: "1.5rem", marginBottom: "2rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               People &amp; Growth
             </div>
           )}
 
           <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "rgba(67,97,238,0.15)", border: "1px solid rgba(67,97,238,0.3)", borderRadius: "9999px", padding: "0.375rem 1rem", marginBottom: "1.5rem" }}>
-            <Sparkles size={13} color="#06D6A0" />
-            <span style={{ fontSize: "0.75rem", color: "#06D6A0", fontWeight: 600 }}>Painel do portal</span>
+            <Sparkles size={13} color="#C89A4A" />
+            <span style={{ fontSize: "0.75rem", color: "#C89A4A", fontWeight: 600 }}>Painel do portal</span>
           </div>
 
           <h1 style={{ fontSize: "2.25rem", fontWeight: 800, color: "white", lineHeight: 1.15, marginBottom: "1rem" }}>
             Bem-vindo de volta.
             <br />
-            Vamos construir <span style={{ background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>juntos</span>.
+            Vamos construir <span style={{ background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>juntos</span>.
           </h1>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1rem", lineHeight: 1.6, marginBottom: authors.length > 0 ? "2.5rem" : 0 }}>
             Publique artigos, acompanhe métricas e mantenha o People &amp; Growth sempre atualizado — tudo em um só lugar.
@@ -60,7 +60,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
 
           {authors.length > 0 && (
             <div style={{ paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
-              <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#06D6A0", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
+              <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#C89A4A", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
                 Quem está por trás do People &amp; Growth
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
@@ -72,7 +72,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
                       height: "2.25rem",
                       borderRadius: "50%",
                       flexShrink: 0,
-                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                     }}
                   />
                   <span style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8125rem", fontWeight: 600 }}>{author.name}</span>
@@ -87,15 +87,15 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
       </div>
 
       <div className="login-form-panel" style={{ flex: "1 1 50%", position: "relative", overflow: "hidden", display: "flex", alignItems: "center", justifyContent: "center", backgroundColor: "#f8fafc", padding: "1.5rem" }}>
-        <div style={{ position: "absolute", width: "26rem", height: "26rem", borderRadius: "50%", background: "#4361EE", opacity: 0.06, filter: "blur(100px)", top: "-8rem", left: "-8rem", pointerEvents: "none" }} />
-        <div style={{ position: "absolute", width: "20rem", height: "20rem", borderRadius: "50%", background: "#06D6A0", opacity: 0.06, filter: "blur(100px)", bottom: "-6rem", right: "-6rem", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", width: "26rem", height: "26rem", borderRadius: "50%", background: "#315E9C", opacity: 0.06, filter: "blur(100px)", top: "-8rem", left: "-8rem", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", width: "20rem", height: "20rem", borderRadius: "50%", background: "#C89A4A", opacity: 0.06, filter: "blur(100px)", bottom: "-6rem", right: "-6rem", pointerEvents: "none" }} />
         <div style={{ position: "relative", width: "100%", maxWidth: "360px" }}>
           <div className="login-mobile-logo" style={{ display: "none", marginBottom: "1.5rem" }}>
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logoUrl} alt="People & Growth" style={{ height: "2rem", width: "auto" }} />
             ) : (
-              <div style={{ fontWeight: 800, fontSize: "1.25rem", background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+              <div style={{ fontWeight: 800, fontSize: "1.25rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 People &amp; Growth
               </div>
             )}
@@ -190,7 +190,7 @@ function LoginFields({ onForgotPassword }: { onForgotPassword: () => void }) {
 
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.375rem" }}>
         <label style={{ fontSize: "0.8rem", fontWeight: 600, color: "#334155" }}>Senha</label>
-        <button type="button" onClick={onForgotPassword} style={{ background: "none", border: "none", color: "#4361EE", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", padding: 0 }}>
+        <button type="button" onClick={onForgotPassword} style={{ background: "none", border: "none", color: "#315E9C", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", padding: 0 }}>
           Esqueci minha senha
         </button>
       </div>
@@ -233,7 +233,7 @@ function LoginFields({ onForgotPassword }: { onForgotPassword: () => void }) {
           padding: "0.75rem",
           borderRadius: "0.5rem",
           border: "none",
-          backgroundColor: "#4361EE",
+          backgroundColor: "#315E9C",
           color: "white",
           fontWeight: 600,
           fontSize: "0.9rem",
@@ -314,7 +314,7 @@ function ForgotPasswordFields({ onBack }: { onBack: () => void }) {
           <button
             type="submit"
             disabled={loading}
-            style={{ width: "100%", padding: "0.75rem", borderRadius: "0.5rem", border: "none", backgroundColor: "#4361EE", color: "white", fontWeight: 600, fontSize: "0.9rem", cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1 }}
+            style={{ width: "100%", padding: "0.75rem", borderRadius: "0.5rem", border: "none", backgroundColor: "#315E9C", color: "white", fontWeight: 600, fontSize: "0.9rem", cursor: loading ? "default" : "pointer", opacity: loading ? 0.7 : 1 }}
           >
             {loading ? "Enviando..." : "Enviar pedido"}
           </button>

@@ -127,7 +127,7 @@ export function CommentForm({
             justifyContent: "center",
             gap: "0.5rem",
             alignSelf: "flex-start",
-            backgroundColor: "#4361EE",
+            backgroundColor: "#315E9C",
             color: "white",
             padding: compact ? "0.625rem 1.25rem" : "0.75rem 1.5rem",
             borderRadius: "0.625rem",

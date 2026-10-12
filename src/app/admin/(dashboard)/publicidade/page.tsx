@@ -113,7 +113,7 @@ export default async function PublicidadePage({ searchParams }: { searchParams: 
                             </a>
                           ) : null;
                         })()}
-                        <Link href={`/admin/publicidade/${ad.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar">
+                        <Link href={`/admin/publicidade/${ad.id}`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Editar">
                           <Edit size={15} />
                         </Link>
                         <ConfirmDeleteButton confirmText={`Excluir o anúncio "${ad.title}"?`} onDelete={deleteAd.bind(null, ad.id)} />

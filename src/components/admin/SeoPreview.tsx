@@ -19,7 +19,7 @@ export function SeoPreview({ url, title, description }: { url: string; title: st
         <div
           style={{
             fontSize: "1.1875rem",
-            color: "#4361EE",
+            color: "#315E9C",
             marginTop: "0.125rem",
             whiteSpace: "nowrap",
             overflow: "hidden",

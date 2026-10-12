@@ -181,7 +181,7 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
               <button
                 type="button"
                 onClick={handleMarkAllRead}
-                style={{ fontSize: "0.75rem", color: "#4361EE", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}
+                style={{ fontSize: "0.75rem", color: "#315E9C", background: "none", border: "none", cursor: "pointer", fontWeight: 600 }}
               >
                 Marcar todas como lidas
               </button>
@@ -213,7 +213,7 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
                   }}
                 >
                   <div style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
-                    {!n.read && <span style={{ width: "0.4rem", height: "0.4rem", borderRadius: "9999px", backgroundColor: "#4361EE", flexShrink: 0, marginTop: "0.375rem" }} />}
+                    {!n.read && <span style={{ width: "0.4rem", height: "0.4rem", borderRadius: "9999px", backgroundColor: "#315E9C", flexShrink: 0, marginTop: "0.375rem" }} />}
                     <div style={{ flex: 1, minWidth: 0 }}>
                       <div style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text)" }}>{n.title}</div>
                       {n.body && <div style={{ fontSize: "0.75rem", color: "var(--admin-muted)", marginTop: "0.125rem" }}>{n.body}</div>}

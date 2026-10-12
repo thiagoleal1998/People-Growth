@@ -137,7 +137,7 @@ const toolButtonStyle = {
 
 function activeStyle(active: boolean) {
   return active
-    ? { ...toolButtonStyle, backgroundColor: "rgba(67,97,238,0.12)", color: "#4361EE" }
+    ? { ...toolButtonStyle, backgroundColor: "rgba(67,97,238,0.12)", color: "#315E9C" }
     : toolButtonStyle;
 }
 

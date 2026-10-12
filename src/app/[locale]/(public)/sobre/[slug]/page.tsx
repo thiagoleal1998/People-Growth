@@ -89,7 +89,7 @@ export default async function FounderPage({
                 height: "6rem",
                 borderRadius: "50%",
                 flexShrink: 0,
-                background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
               }}
             />
             <div style={{ flex: 1, minWidth: "240px" }}>
@@ -97,7 +97,7 @@ export default async function FounderPage({
                 {author.name}
               </h1>
               {author.role_pt && (
-                <p style={{ color: "#06D6A0", fontWeight: 600, fontSize: "1rem", marginBottom: "0.875rem" }}>
+                <p style={{ color: "#C89A4A", fontWeight: 600, fontSize: "1rem", marginBottom: "0.875rem" }}>
                   {pickLocale(locale, author.role_pt, author.role_en)}
                 </p>
               )}
@@ -204,7 +204,7 @@ export default async function FounderPage({
                           width: "2.25rem",
                           height: "2.25rem",
                           borderRadius: "50%",
-                          backgroundColor: "#4361EE",
+                          backgroundColor: "#315E9C",
                           display: "flex",
                           alignItems: "center",
                           justifyContent: "center",
@@ -220,7 +220,7 @@ export default async function FounderPage({
                           style={{
                             display: "inline-block",
                             backgroundColor: "rgba(67,97,238,0.1)",
-                            color: "#4361EE",
+                            color: "#315E9C",
                             padding: "0.125rem 0.625rem",
                             borderRadius: "9999px",
                             fontSize: "0.75rem",

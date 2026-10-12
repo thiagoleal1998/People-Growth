@@ -41,7 +41,7 @@ export default async function ComunicadosAutorPage() {
             <div key={item.id} style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.25rem 1.5rem" }}>
               <div style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem" }}>
                 <div style={{ width: "2.25rem", height: "2.25rem", borderRadius: "0.625rem", backgroundColor: "rgba(67,97,238,0.1)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                  <Megaphone size={16} color="#4361EE" />
+                  <Megaphone size={16} color="#315E9C" />
                 </div>
                 <div style={{ minWidth: 0 }}>
                   <div style={{ fontWeight: 800, fontSize: "0.9375rem", color: "var(--admin-text)" }}>{item.title}</div>

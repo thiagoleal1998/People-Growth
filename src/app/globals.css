@@ -4,12 +4,12 @@
   /* Brand colors */
   --color-navy: #0d1b2a;
   --color-navy-light: #162236;
-  --color-brand: #4361ee;
-  --color-brand-light: #6b80f4;
-  --color-brand-dark: #2d44c9;
-  --color-growth: #06d6a0;
-  --color-growth-light: #3de8b8;
-  --color-growth-dark: #04a87d;
+  --color-brand: #315e9c;
+  --color-brand-light: #5a7eb0;
+  --color-brand-dark: #274b7d;
+  --color-growth: #c89a4a;
+  --color-growth-light: #d3ae6e;
+  --color-growth-dark: #a07b3b;
   --color-amber: #ffb703;
   --color-amber-light: #ffc82e;
   --color-amber-dark: #cc9200;
@@ -28,8 +28,8 @@
   --radius-2xl: 1.5rem;
 
   /* Shadows */
-  --shadow-brand: 0 4px 24px -4px rgb(67 97 238 / 0.25);
-  --shadow-growth: 0 4px 24px -4px rgb(6 214 160 / 0.25);
+  --shadow-brand: 0 4px 24px -4px rgb(49 94 156 / 0.25);
+  --shadow-growth: 0 4px 24px -4px rgb(200 154 74 / 0.25);
 }
 
 :root {
@@ -92,8 +92,8 @@
 
 .admin-select:focus {
   outline: none;
-  border-color: #4361ee;
-  box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.15);
+  border-color: #315E9C;
+  box-shadow: 0 0 0 3px rgba(49, 94, 156, 0.15);
 }
 
 .comment-details summary {
@@ -154,13 +154,13 @@
 .tiptap-content blockquote {
   margin: 0 0 0.875rem;
   padding: 0.5rem 0 0.5rem 1rem;
-  border-left: 3px solid #4361ee;
+  border-left: 3px solid #315E9C;
   color: var(--admin-text-secondary);
   font-style: italic;
 }
 
 .tiptap-content a {
-  color: #4361ee;
+  color: #315E9C;
   text-decoration: underline;
 }
 
@@ -188,7 +188,7 @@
 
 .admin-scroll {
   scrollbar-width: thin;
-  scrollbar-color: rgba(67, 97, 238, 0.35) transparent;
+  scrollbar-color: rgba(49, 94, 156, 0.35) transparent;
 }
 
 .admin-scroll::-webkit-scrollbar {
@@ -201,14 +201,14 @@
 }
 
 .admin-scroll::-webkit-scrollbar-thumb {
-  background-color: rgba(67, 97, 238, 0.35);
+  background-color: rgba(49, 94, 156, 0.35);
   border-radius: 999px;
   border: 2px solid transparent;
   background-clip: padding-box;
 }
 
 .admin-scroll::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(67, 97, 238, 0.6);
+  background-color: rgba(49, 94, 156, 0.6);
   background-clip: padding-box;
 }
 
@@ -318,7 +318,7 @@
     box-shadow: 0 16px 32px -12px rgba(13, 27, 42, 0.18);
   }
   [data-theme="dark"] .hover-card:hover {
-    box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(67, 97, 238, 0.25);
+    box-shadow: 0 16px 32px -12px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(49, 94, 156, 0.25);
   }
 
   .hover-link-move {
@@ -415,7 +415,7 @@
    "is-revealed" to each highlight as it scrolls into view, so the tint draws
    in from the left. Outside that container the highlight is simply shown in full. */
 .brand-highlight {
-  background: linear-gradient(rgba(67, 97, 238, 0.16), rgba(67, 97, 238, 0.16)) no-repeat left center / 100% 100%;
+  background: linear-gradient(rgba(49, 94, 156, 0.16), rgba(49, 94, 156, 0.16)) no-repeat left center / 100% 100%;
   color: inherit;
   border-radius: 0.25em;
   padding: 0.05em 0.2em;

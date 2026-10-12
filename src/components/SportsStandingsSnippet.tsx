@@ -1,7 +1,7 @@
 import { Link } from "@/i18n/navigation";
 import type { StandingRow } from "@/lib/sports";
 
-const BRAND = "#4361EE";
+const BRAND = "#315E9C";
 const SNIPPET_ROWS = 6;
 
 // Server-rendered from data the home page already fetched — no fetch of its

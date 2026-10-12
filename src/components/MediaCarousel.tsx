@@ -5,10 +5,10 @@ import { Mic, Video, BookOpen, Headphones, Calendar, ChevronLeft, ChevronRight, 
 import type { MediaItem } from "@/types/database.types";
 
 const mediaTypeMeta: Record<MediaItem["type"], { icon: LucideIcon; color: string }> = {
-  interview: { icon: Mic, color: "#4361EE" },
-  event: { icon: Video, color: "#06D6A0" },
+  interview: { icon: Mic, color: "#315E9C" },
+  event: { icon: Video, color: "#C89A4A" },
   article: { icon: BookOpen, color: "#FFB703" },
-  podcast: { icon: Headphones, color: "#4361EE" },
+  podcast: { icon: Headphones, color: "#315E9C" },
 };
 
 const VISIBLE = 3;
@@ -85,7 +85,7 @@ export function MediaCarousel({ items }: { items: MediaItem[] }) {
             type="button"
             onClick={goPrev}
             aria-label="Menção anterior"
-            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "2.25rem", height: "2.25rem", borderRadius: "50%", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", color: "#4361EE", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "2.25rem", height: "2.25rem", borderRadius: "50%", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", color: "#315E9C", cursor: "pointer" }}
           >
             <ChevronLeft size={18} />
           </button>
@@ -103,7 +103,7 @@ export function MediaCarousel({ items }: { items: MediaItem[] }) {
                   borderRadius: "50%",
                   border: "none",
                   padding: 0,
-                  backgroundColor: i === start ? "#4361EE" : "var(--site-border-strong)",
+                  backgroundColor: i === start ? "#315E9C" : "var(--site-border-strong)",
                   cursor: "pointer",
                   transition: "background-color 0.3s",
                 }}
@@ -115,7 +115,7 @@ export function MediaCarousel({ items }: { items: MediaItem[] }) {
             type="button"
             onClick={goNext}
             aria-label="Próxima menção"
-            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "2.25rem", height: "2.25rem", borderRadius: "50%", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", color: "#4361EE", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "2.25rem", height: "2.25rem", borderRadius: "50%", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", color: "#315E9C", cursor: "pointer" }}
           >
             <ChevronRight size={18} />
           </button>

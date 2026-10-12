@@ -87,7 +87,7 @@ export const ImageWithCredit = Image.extend<ImageWithCreditOptions>({
 
       const handle = document.createElement("div");
       handle.style.cssText =
-        "display:none;position:absolute;right:-7px;bottom:-7px;width:14px;height:14px;border-radius:3px;background-color:#4361EE;border:2px solid white;cursor:nwse-resize;z-index:2;touch-action:none";
+        "display:none;position:absolute;right:-7px;bottom:-7px;width:14px;height:14px;border-radius:3px;background-color:#315E9C;border:2px solid white;cursor:nwse-resize;z-index:2;touch-action:none";
       wrap.appendChild(handle);
 
       figure.appendChild(wrap);
@@ -153,7 +153,7 @@ export const ImageWithCredit = Image.extend<ImageWithCreditOptions>({
         selectNode() {
           controls.style.display = "flex";
           handle.style.display = "block";
-          img.style.outline = "2px solid #4361EE";
+          img.style.outline = "2px solid #315E9C";
         },
         deselectNode() {
           controls.style.display = "none";

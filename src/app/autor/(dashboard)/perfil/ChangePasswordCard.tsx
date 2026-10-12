@@ -47,7 +47,7 @@ export function ChangePasswordCard() {
           });
         }}
         style={{
-          backgroundColor: "#4361EE",
+          backgroundColor: "#315E9C",
           color: "white",
           padding: "0.625rem 1.25rem",
           borderRadius: "0.625rem",

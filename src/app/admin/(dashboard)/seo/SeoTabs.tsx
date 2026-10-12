@@ -61,7 +61,7 @@ function SitemapField({ siteUrl }: { siteUrl: string }) {
         <button
           type="button"
           onClick={copy}
-          style={{ display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.625rem 0.875rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", backgroundColor: "var(--admin-surface)", color: copied ? "#04a87d" : "var(--admin-text-secondary)", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
+          style={{ display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.625rem 0.875rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", backgroundColor: "var(--admin-surface)", color: copied ? "#A07B3B" : "var(--admin-text-secondary)", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer", whiteSpace: "nowrap" }}
         >
           {copied ? <Check size={14} /> : <Copy size={14} />}
           {copied ? "Copiado" : "Copiar"}
@@ -94,10 +94,10 @@ export function SeoTabs({
               padding: "0.75rem 1.25rem",
               fontSize: "0.875rem",
               fontWeight: 700,
-              color: active === tab.id ? "#4361EE" : "var(--admin-muted)",
+              color: active === tab.id ? "#315E9C" : "var(--admin-muted)",
               background: "none",
               border: "none",
-              borderBottom: active === tab.id ? "2px solid #4361EE" : "2px solid transparent",
+              borderBottom: active === tab.id ? "2px solid #315E9C" : "2px solid transparent",
               cursor: "pointer",
               marginBottom: "-1px",
             }}

@@ -24,7 +24,7 @@ export default async function EditarPaginaInstitucionalPage({ params }: { params
   return (
     <FormShell title={`Editar: ${page.label}`} backHref="/admin/paginas">
       <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "1.5rem" }}>
-        Publicada em <a href={page.path} target="_blank" rel="noopener noreferrer" style={{ color: "#4361EE" }}>{page.path}</a>.
+        Publicada em <a href={page.path} target="_blank" rel="noopener noreferrer" style={{ color: "#315E9C" }}>{page.path}</a>.
         {" "}Use a barra de ferramentas para negrito, subtítulos, listas, citações e links, como no editor de artigos.
       </p>
       <form action={action}>

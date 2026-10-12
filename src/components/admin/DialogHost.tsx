@@ -117,7 +117,7 @@ export function DialogHost() {
               padding: "0.5rem 1.125rem",
               borderRadius: "0.5rem",
               border: "none",
-              backgroundColor: danger ? "#dc2626" : "#4361EE",
+              backgroundColor: danger ? "#dc2626" : "#315E9C",
               color: "white",
               fontWeight: 700,
               fontSize: "0.875rem",

@@ -10,10 +10,10 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 }
 
 const projects = [
-  { icon: Bot, title: "Agente de Qualificação de Leads", description: "GPT personalizado que qualifica leads automaticamente com base em perguntas estratégicas e integra com CRM.", tags: ["GPT-4", "n8n", "HubSpot"], color: "#4361EE" },
-  { icon: Zap, title: "Automação de Conteúdo", description: "Fluxo automatizado que gera, revisa e agenda conteúdo para redes sociais com base no calendário editorial.", tags: ["Make", "ChatGPT", "Buffer"], color: "#06D6A0" },
+  { icon: Bot, title: "Agente de Qualificação de Leads", description: "GPT personalizado que qualifica leads automaticamente com base em perguntas estratégicas e integra com CRM.", tags: ["GPT-4", "n8n", "HubSpot"], color: "#315E9C" },
+  { icon: Zap, title: "Automação de Conteúdo", description: "Fluxo automatizado que gera, revisa e agenda conteúdo para redes sociais com base no calendário editorial.", tags: ["Make", "ChatGPT", "Buffer"], color: "#C89A4A" },
   { icon: Brain, title: "Análise de Dados com IA", description: "Agente que analisa planilhas de vendas e gera relatórios com insights e recomendações estratégicas.", tags: ["Python", "OpenAI", "Pandas"], color: "#FFB703" },
-  { icon: Cpu, title: "IA para Negócios", description: "Soluções completas de IA para empresas: agentes, automações, integração com sistemas legados e treinamento de times.", tags: ["GPT-4", "LangChain", "n8n"], color: "#4361EE" },
+  { icon: Cpu, title: "IA para Negócios", description: "Soluções completas de IA para empresas: agentes, automações, integração com sistemas legados e treinamento de times.", tags: ["GPT-4", "LangChain", "n8n"], color: "#315E9C" },
 ];
 
 export default async function LaboratorioIAPage() {
@@ -24,13 +24,13 @@ export default async function LaboratorioIAPage() {
       <section style={{ background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)", paddingTop: "6rem", paddingBottom: "5rem", color: "white", textAlign: "center", position: "relative", overflow: "hidden" }}>
         <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 30% 50%, rgba(67,97,238,0.15) 0%, transparent 60%)", pointerEvents: "none" }} />
         <div className="container-xl" style={{ maxWidth: "700px", margin: "0 auto", position: "relative" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "rgba(67,97,238,0.2)", color: "#6b80f4", padding: "0.375rem 1rem", borderRadius: "9999px", fontSize: "0.8125rem", fontWeight: 700, marginBottom: "1.5rem" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "rgba(67,97,238,0.2)", color: "#5A7EB0", padding: "0.375rem 1rem", borderRadius: "9999px", fontSize: "0.8125rem", fontWeight: 700, marginBottom: "1.5rem" }}>
             🤖 {t("title")}
           </div>
           <h1 style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 800, lineHeight: 1.1, marginBottom: "1rem" }}>
             Explorando o futuro com
             <br />
-            <span style={{ background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            <span style={{ background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               Inteligência Artificial.
             </span>
           </h1>
@@ -71,7 +71,7 @@ export default async function LaboratorioIAPage() {
             A People &amp; Growth desenvolve agentes, automações e integrações de IA que aumentam a produtividade e criam vantagens competitivas reais para o seu negócio.
           </p>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/contato" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#4361EE", color: "white", padding: "0.875rem 1.75rem", borderRadius: "0.75rem", fontWeight: 700, boxShadow: "0 4px 24px -4px rgba(67,97,238,0.5)" }}>
+            <Link href="/contato" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", padding: "0.875rem 1.75rem", borderRadius: "0.75rem", fontWeight: 700, boxShadow: "0 4px 24px -4px rgba(67,97,238,0.5)" }}>
               Falar sobre IA para meu negócio <ArrowRight size={18} />
             </Link>
           </div>

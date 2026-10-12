@@ -9,9 +9,9 @@ import { updateLeadStatus, updateLeadNotes, deleteLead } from "./actions";
 type Lead = Database["public"]["Tables"]["leads"]["Row"];
 
 const statusConfig: Record<Lead["status"], { label: string; color: string; bg: string }> = {
-  new: { label: "Novo", color: "#4361EE", bg: "rgba(67,97,238,0.1)" },
+  new: { label: "Novo", color: "#315E9C", bg: "rgba(67,97,238,0.1)" },
   contacted: { label: "Em contato", color: "#cc9200", bg: "rgba(255,183,3,0.1)" },
-  proposal: { label: "Proposta", color: "#04a87d", bg: "rgba(6,214,160,0.1)" },
+  proposal: { label: "Proposta", color: "#A07B3B", bg: "rgba(6,214,160,0.1)" },
   closed: { label: "Fechado", color: "var(--admin-text-secondary)", bg: "rgba(148,163,184,0.1)" },
 };
 
@@ -86,7 +86,7 @@ export function LeadsClient({ leads }: { leads: Lead[] }) {
                         <td style={{ padding: "0.875rem 1.25rem" }}>
                           <button
                             onClick={() => setExpanded(isOpen ? null : lead.id)}
-                            style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.8125rem", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.25rem" }}
+                            style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.8125rem", background: "none", border: "none", cursor: "pointer", display: "flex", alignItems: "center", gap: "0.25rem" }}
                           >
                             {lead.message ? "Ver" : "Notas"} {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                           </button>
@@ -144,7 +144,7 @@ function NotesEditor({ leadId, initialNotes }: { leadId: string; initialNotes: s
       />
       <button
         onClick={() => startTransition(async () => { await updateLeadNotes(leadId, notes); setSaved(true); })}
-        style={{ marginTop: "0.5rem", color: "#4361EE", background: "none", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.8125rem" }}
+        style={{ marginTop: "0.5rem", color: "#315E9C", background: "none", border: "none", cursor: "pointer", fontWeight: 600, fontSize: "0.8125rem" }}
       >
         {saved ? "Salvo" : "Salvar notas"}
       </button>

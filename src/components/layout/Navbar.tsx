@@ -50,7 +50,7 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
               style={{
                 fontWeight: 800,
                 fontSize: "1.25rem",
-                background: "linear-gradient(135deg, #4361EE, #06D6A0)",
+                background: "linear-gradient(135deg, #315E9C, #C89A4A)",
                 WebkitBackgroundClip: "text",
                 WebkitTextFillColor: "transparent",
                 letterSpacing: "-0.02em",
@@ -74,7 +74,7 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
                   borderRadius: "0.5rem",
                   fontSize: "0.875rem",
                   fontWeight: 500,
-                  color: isActive ? "#4361EE" : "rgba(255,255,255,0.75)",
+                  color: isActive ? "#315E9C" : "rgba(255,255,255,0.75)",
                   backgroundColor: isActive ? "rgba(67,97,238,0.12)" : "transparent",
                   transition: "all 0.2s",
                 }}

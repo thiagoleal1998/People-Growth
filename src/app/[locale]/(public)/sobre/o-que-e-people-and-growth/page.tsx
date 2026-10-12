@@ -85,7 +85,7 @@ export default async function OQueEPeopleAndGrowthPage() {
           .oque-toc-title { font-size: 0.6875rem; font-weight: 800; letter-spacing: 0.08em; text-transform: uppercase; color: var(--site-muted); margin-bottom: 0.75rem; }
           .oque-toc ul { list-style: none; margin: 0; padding: 0; border-left: 2px solid var(--site-border); }
           .oque-toc li a { display: block; padding: 0.375rem 0 0.375rem 0.875rem; margin-left: -2px; border-left: 2px solid transparent; color: var(--site-text-secondary); font-size: 0.875rem; line-height: 1.4; text-decoration: none; transition: color 0.15s, border-color 0.15s; }
-          .oque-toc li a:hover { color: #4361EE; border-left-color: #4361EE; }
+          .oque-toc li a:hover { color: #315E9C; border-left-color: #315E9C; }
           @media (max-width: 860px) {
             .oque-layout { grid-template-columns: 1fr; gap: 1.5rem; }
             .oque-toc { position: static; background: var(--site-surface-alt); border: 1px solid var(--site-border); border-radius: 0.75rem; padding: 1rem 1.125rem; }

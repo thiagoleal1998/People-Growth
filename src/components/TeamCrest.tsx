@@ -20,7 +20,7 @@ export function TeamCrest({ src, alt, size = 44 }: { src: string | null; alt: st
   if (!showImage) {
     return (
       <div
-        style={{ width: size, height: size, flexShrink: 0, borderRadius: "50%", background: "linear-gradient(135deg, #4361EE, #06D6A0)" }}
+        style={{ width: size, height: size, flexShrink: 0, borderRadius: "50%", background: "linear-gradient(135deg, #315E9C, #C89A4A)" }}
         title={alt}
       />
     );

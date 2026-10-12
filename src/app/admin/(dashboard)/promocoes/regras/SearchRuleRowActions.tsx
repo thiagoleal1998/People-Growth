@@ -21,7 +21,7 @@ export function SearchRuleRowActions({ rule }: { rule: PromoSearchRule }) {
           border: "none",
           cursor: pending ? "default" : "pointer",
           backgroundColor: rule.active ? "rgba(6,214,160,0.1)" : "rgba(148,163,184,0.15)",
-          color: rule.active ? "#04a87d" : "var(--admin-muted)",
+          color: rule.active ? "#A07B3B" : "var(--admin-muted)",
           opacity: pending ? 0.6 : 1,
         }}
       >

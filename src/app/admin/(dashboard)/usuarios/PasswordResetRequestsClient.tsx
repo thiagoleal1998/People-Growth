@@ -68,7 +68,7 @@ function ResetRequestRow({ request, user, onResolved }: { request: PasswordReset
                 }
               });
             }}
-            style={{ backgroundColor: "#4361EE", color: "white", padding: "0.5rem 1rem", borderRadius: "0.5rem", fontWeight: 700, fontSize: "0.8125rem", border: "none", cursor: pending || newPassword.length < 6 ? "default" : "pointer", opacity: pending || newPassword.length < 6 ? 0.6 : 1 }}
+            style={{ backgroundColor: "#315E9C", color: "white", padding: "0.5rem 1rem", borderRadius: "0.5rem", fontWeight: 700, fontSize: "0.8125rem", border: "none", cursor: pending || newPassword.length < 6 ? "default" : "pointer", opacity: pending || newPassword.length < 6 ? 0.6 : 1 }}
           >
             {pending ? "Salvando..." : "Definir senha"}
           </button>

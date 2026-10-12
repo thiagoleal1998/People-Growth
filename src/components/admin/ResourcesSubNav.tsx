@@ -25,7 +25,7 @@ export function ResourcesSubNav({ active }: { active: "all" | "tool" }) {
               fontWeight: 700,
               textDecoration: "none",
               border: isActive ? "none" : "1px solid var(--admin-border-strong)",
-              backgroundColor: isActive ? "#4361EE" : "transparent",
+              backgroundColor: isActive ? "#315E9C" : "transparent",
               color: isActive ? "white" : "var(--admin-muted)",
             }}
           >

@@ -59,7 +59,7 @@ function AnnouncementRow({ item, onSaved, onDeleted }: { item: Announcement; onS
               }
             });
           }}
-          style={{ backgroundColor: "#4361EE", color: "white", padding: "0.4rem 0.875rem", borderRadius: "0.375rem", fontWeight: 700, fontSize: "0.8125rem", border: "none", cursor: pending ? "default" : "pointer", opacity: pending ? 0.6 : 1 }}
+          style={{ backgroundColor: "#315E9C", color: "white", padding: "0.4rem 0.875rem", borderRadius: "0.375rem", fontWeight: 700, fontSize: "0.8125rem", border: "none", cursor: pending ? "default" : "pointer", opacity: pending ? 0.6 : 1 }}
         >
           {pending ? "Salvando..." : "Salvar"}
         </button>
@@ -105,7 +105,7 @@ export function AnnouncementsClient({ announcements }: { announcements: Announce
           type="button"
           disabled={pending || !title.trim() || !body.trim()}
           onClick={send}
-          style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1.25rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.875rem", border: "none", cursor: pending || !title.trim() || !body.trim() ? "default" : "pointer", opacity: pending || !title.trim() || !body.trim() ? 0.6 : 1 }}
+          style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", padding: "0.625rem 1.25rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.875rem", border: "none", cursor: pending || !title.trim() || !body.trim() ? "default" : "pointer", opacity: pending || !title.trim() || !body.trim() ? 0.6 : 1 }}
         >
           <Send size={15} /> {pending ? "Enviando..." : "Enviar a todos os autores"}
         </button>

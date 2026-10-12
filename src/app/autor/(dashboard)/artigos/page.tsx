@@ -104,8 +104,8 @@ export default async function MeusArtigosPage({ searchParams }: { searchParams: 
                   <td style={{ padding: "0.875rem 1.25rem", color: "#94a3b8", fontSize: "0.8125rem" }}>{formatDate(a.created_at)}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <Link href={`/autor/artigos/${a.id}/estatisticas`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Estatísticas"><BarChart3 size={15} /></Link>
-                      <Link href={`/autor/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
+                      <Link href={`/autor/artigos/${a.id}/estatisticas`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Estatísticas"><BarChart3 size={15} /></Link>
+                      <Link href={`/autor/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
                       {a.status !== "published" && a.status !== "scheduled" && (
                         <ConfirmDeleteButton confirmText={`Excluir o artigo "${a.title_pt}"?`} onDelete={deleteOwnArticle.bind(null, a.id)} />
                       )}

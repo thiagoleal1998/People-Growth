@@ -79,8 +79,8 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
           <span
             style={{
               display: "inline-block",
-              backgroundColor: `${category.color ?? "#4361EE"}25`,
-              color: category.color ?? "#4361EE",
+              backgroundColor: `${category.color ?? "#315E9C"}25`,
+              color: category.color ?? "#315E9C",
               padding: "0.25rem 0.875rem",
               borderRadius: "9999px",
               fontSize: "0.8125rem",

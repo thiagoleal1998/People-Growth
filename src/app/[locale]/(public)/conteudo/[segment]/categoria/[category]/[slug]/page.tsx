@@ -242,8 +242,8 @@ export default async function ArticlePage({
               <span
                 style={{
                   display: "inline-block",
-                  backgroundColor: `${categoryRow.color ?? "#4361EE"}25`,
-                  color: categoryRow.color ?? "#4361EE",
+                  backgroundColor: `${categoryRow.color ?? "#315E9C"}25`,
+                  color: categoryRow.color ?? "#315E9C",
                   padding: "0.25rem 0.875rem",
                   borderRadius: "9999px",
                   fontSize: "0.8125rem",
@@ -317,7 +317,7 @@ export default async function ArticlePage({
                         height: "2.75rem",
                         borderRadius: "50%",
                         flexShrink: 0,
-                        background: a.photo_url ? `url("${a.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                        background: a.photo_url ? `url("${a.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                       }}
                     />
                     <div>
@@ -326,7 +326,7 @@ export default async function ArticlePage({
                         {isAuthorPubliclyVisible(a) && (
                           <Link
                             href={{ pathname: "/sobre/[slug]", params: { slug: a.slug } }}
-                            style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
+                            style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#315E9C", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
                           >
                             {aboutAuthorLabel(a.gender, locale)} <ChevronRight size={14} />
                           </Link>
@@ -394,7 +394,7 @@ export default async function ArticlePage({
                     height: "4rem",
                     borderRadius: "50%",
                     flexShrink: 0,
-                    background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                    background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                   }}
                 />
                 <div>
@@ -402,7 +402,7 @@ export default async function ArticlePage({
                     {author.name}
                   </div>
                   {author.role_pt && (
-                    <div style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.875rem", marginBottom: "0.5rem" }}>
+                    <div style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.875rem", marginBottom: "0.5rem" }}>
                       {pickLocale(locale, author.role_pt, author.role_en)}
                     </div>
                   )}
@@ -411,7 +411,7 @@ export default async function ArticlePage({
                       {pickLocale(locale, author.bio_pt, author.bio_en)}
                     </p>
                   )}
-                  <span style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem" }}>
+                  <span style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#315E9C", fontWeight: 700, fontSize: "0.8125rem" }}>
                     {aboutAuthorLabel(author.gender, locale)} <ChevronRight size={14} />
                   </span>
                 </div>
@@ -458,7 +458,7 @@ export default async function ArticlePage({
             )}
 
             {/* Comments */}
-            <div style={{ marginTop: "3rem", paddingTop: "1.5rem", borderTop: "2px solid #4361EE" }}>
+            <div style={{ marginTop: "3rem", paddingTop: "1.5rem", borderTop: "2px solid #315E9C" }}>
               <h2 style={{ fontWeight: 800, fontSize: "1.375rem", color: "var(--site-text)", marginBottom: "0.75rem" }}>
                 {comments.length} {locale === "en" ? `comment${comments.length === 1 ? "" : "s"}` : `comentário${comments.length === 1 ? "" : "s"}`}
               </h2>
@@ -466,7 +466,7 @@ export default async function ArticlePage({
                 {locale === "en" ? (
                   <>
                     The author of the message, not People &amp; Growth, is responsible for the comment. Read the{" "}
-                    <Link href="/comentarios" style={{ color: "#4361EE", fontWeight: 600, textDecoration: "underline" }}>
+                    <Link href="/comentarios" style={{ color: "#315E9C", fontWeight: 600, textDecoration: "underline" }}>
                       Comment Guidelines
                     </Link>
                     .
@@ -474,7 +474,7 @@ export default async function ArticlePage({
                 ) : (
                   <>
                     O autor da mensagem, e não a People &amp; Growth, é o responsável pelo comentário. Leia as{" "}
-                    <Link href="/comentarios" style={{ color: "#4361EE", fontWeight: 600, textDecoration: "underline" }}>
+                    <Link href="/comentarios" style={{ color: "#315E9C", fontWeight: 600, textDecoration: "underline" }}>
                       Regras de Uso dos Comentários
                     </Link>
                     .
@@ -527,7 +527,7 @@ export default async function ArticlePage({
                 style={{
                   display: "block",
                   textAlign: "center",
-                  backgroundColor: "#4361EE",
+                  backgroundColor: "#315E9C",
                   color: "white",
                   padding: "0.75rem 1rem",
                   borderRadius: "0.625rem",

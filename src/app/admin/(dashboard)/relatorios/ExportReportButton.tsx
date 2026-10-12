@@ -164,7 +164,7 @@ export function ExportReportButton({
                 type="button"
                 onClick={handleDownload}
                 disabled={downloading}
-                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#4361EE", color: "white", border: "none", borderRadius: "0.5rem", padding: "0.5rem 1.125rem", fontSize: "0.8125rem", fontWeight: 700, cursor: downloading ? "default" : "pointer", opacity: downloading ? 0.7 : 1 }}
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", border: "none", borderRadius: "0.5rem", padding: "0.5rem 1.125rem", fontSize: "0.8125rem", fontWeight: 700, cursor: downloading ? "default" : "pointer", opacity: downloading ? 0.7 : 1 }}
               >
                 {downloading ? <Loader2 size={15} className="admin-spin" /> : <Download size={15} />}
                 {downloading ? "Gerando..." : "Baixar"}

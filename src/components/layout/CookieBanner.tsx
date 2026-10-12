@@ -59,14 +59,14 @@ export function CookieBanner() {
       >
         <p style={{ flex: "1 1 200px", color: "rgba(255,255,255,0.75)", fontSize: "0.75rem", lineHeight: 1.5, margin: 0, maxWidth: "640px" }}>
           {t("cookieNotice")}{" "}
-          <Link href="/cookies" style={{ color: "#06D6A0", fontWeight: 600 }}>
+          <Link href="/cookies" style={{ color: "#C89A4A", fontWeight: 600 }}>
             {t("learnMore")}
           </Link>
         </p>
         <button
           onClick={accept}
           style={{
-            backgroundColor: "#4361EE",
+            backgroundColor: "#315E9C",
             color: "white",
             border: "none",
             padding: "0.5rem 1.25rem",

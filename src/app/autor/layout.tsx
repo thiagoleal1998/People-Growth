@@ -21,7 +21,7 @@ export default function AuthorRootLayout({ children }: { children: React.ReactNo
   return (
     <html lang="pt" data-scroll-behavior="smooth">
       <body style={{ margin: 0, fontFamily: "system-ui, sans-serif", backgroundColor: "#f0f4f8" }}>
-        <NextTopLoader color="#4361EE" height={3} showSpinner={false} />
+        <NextTopLoader color="#315E9C" height={3} showSpinner={false} />
         {children}
         <DialogHost />
         <style>{`

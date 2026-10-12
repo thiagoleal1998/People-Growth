@@ -44,7 +44,7 @@ export default async function AutoresPage({ searchParams }: { searchParams: Prom
                         height: "2rem",
                         borderRadius: "50%",
                         flexShrink: 0,
-                        background: s.photo_url ? `url("${s.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                        background: s.photo_url ? `url("${s.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                       }}
                     />
                     {s.name}
@@ -55,7 +55,7 @@ export default async function AutoresPage({ searchParams }: { searchParams: Prom
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <Link href={`/admin/autores/${s.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
+                      <Link href={`/admin/autores/${s.id}`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
                       <ConfirmDeleteButton confirmText={`Excluir o autor "${s.name}"?`} onDelete={deleteAuthor.bind(null, s.id)} />
                     </div>
                   </td>

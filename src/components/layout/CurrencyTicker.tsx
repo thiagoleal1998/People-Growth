@@ -54,7 +54,7 @@ export function CurrencyTicker() {
 
 function CurrencyItem({ label, quote, locale }: { label: string; quote: Quote; locale: string }) {
   const up = quote.pctChange >= 0;
-  const color = up ? "#06D6A0" : "#ef4444";
+  const color = up ? "#C89A4A" : "#ef4444";
   const formatted = locale === "en" ? quote.bid.toFixed(3) : quote.bid.toFixed(3).replace(".", ",");
   return (
     <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.75rem", whiteSpace: "nowrap" }}>

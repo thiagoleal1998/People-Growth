@@ -25,7 +25,7 @@ export const metadata: Metadata = {
 
 // Portuguese-only, same as /eleicoes — Brazilian competition data for a
 // Brazilian audience, no locale branching needed here.
-const BRAND = "#4361EE";
+const BRAND = "#315E9C";
 
 const cardStyle = {
   borderRadius: "0.75rem",

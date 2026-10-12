@@ -193,7 +193,7 @@ export function ArticleReview({ article, author, coauthors, category }: { articl
               padding: "0.75rem 1.125rem",
               borderRadius: "0.625rem",
               border: "none",
-              backgroundColor: "#04a87d",
+              backgroundColor: "#A07B3B",
               color: "white",
               fontWeight: 700,
               fontSize: "0.875rem",
@@ -295,7 +295,7 @@ export function ArticleReview({ article, author, coauthors, category }: { articl
               type="button"
               onClick={addAnnotation}
               disabled={!noteText.trim()}
-              style={{ padding: "0.375rem 0.75rem", borderRadius: "0.5rem", border: "none", backgroundColor: "#4361EE", color: "white", fontSize: "0.75rem", fontWeight: 700, cursor: noteText.trim() ? "pointer" : "default", opacity: noteText.trim() ? 1 : 0.6 }}
+              style={{ padding: "0.375rem 0.75rem", borderRadius: "0.5rem", border: "none", backgroundColor: "#315E9C", color: "white", fontSize: "0.75rem", fontWeight: 700, cursor: noteText.trim() ? "pointer" : "default", opacity: noteText.trim() ? 1 : 0.6 }}
             >
               Adicionar
             </button>

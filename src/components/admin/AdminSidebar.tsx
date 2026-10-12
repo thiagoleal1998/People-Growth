@@ -166,7 +166,7 @@ export function AdminSidebar({
             // eslint-disable-next-line @next/next/no-img-element
             <img src={logoUrl} alt="People & Growth" style={{ height: "2.25rem", width: "auto", display: "block" }} />
           ) : (
-            <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               People & Growth
             </div>
           )}
@@ -230,7 +230,7 @@ export function AdminSidebar({
               height: "2rem",
               borderRadius: "50%",
               flexShrink: 0,
-              background: userPhoto ? `url("${userPhoto}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+              background: userPhoto ? `url("${userPhoto}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
             }}
           />
           <div style={{ fontSize: "0.8125rem", fontWeight: 600, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1, minWidth: 0 }}>

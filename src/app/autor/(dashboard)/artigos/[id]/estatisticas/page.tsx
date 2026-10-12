@@ -61,9 +61,9 @@ export default async function EstatisticasArtigoPage({ params }: { params: Promi
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1.25rem", marginBottom: "1.5rem" }}>
-        <StatCard icon={Eye} label="Visualizações" value={typedArticle.views.toLocaleString("pt-BR")} color="#4361EE" />
-        <StatCard icon={MoveDown} label="Quanto do artigo é lido, em média" value={avgScrollDepth != null ? `${avgScrollDepth}%` : "—"} color="#06D6A0" />
-        <StatCard icon={MessageCircle} label="Comentários" value={comments.length} color="#06D6A0" />
+        <StatCard icon={Eye} label="Visualizações" value={typedArticle.views.toLocaleString("pt-BR")} color="#315E9C" />
+        <StatCard icon={MoveDown} label="Quanto do artigo é lido, em média" value={avgScrollDepth != null ? `${avgScrollDepth}%` : "—"} color="#C89A4A" />
+        <StatCard icon={MessageCircle} label="Comentários" value={comments.length} color="#C89A4A" />
         <StatCard icon={ThumbsUp} label="Curtidas em comentários" value={totalLikes} color="#FFB703" />
         <StatCard icon={Flag} label="Denúncias" value={totalReports} color="#dc2626" />
       </div>

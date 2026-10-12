@@ -29,13 +29,13 @@ export async function FounderCard({ author }: { author: Author }) {
             flexShrink: 0,
             background: author.photo_url
               ? `url("${author.photo_url}") center/cover`
-              : "linear-gradient(135deg, #4361EE, #06D6A0)",
+              : "linear-gradient(135deg, #315E9C, #C89A4A)",
           }}
         />
         <div>
           <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--site-text)" }}>{author.name}</h3>
           {author.role_pt && (
-            <div style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.8125rem", marginTop: "0.125rem" }}>
+            <div style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.8125rem", marginTop: "0.125rem" }}>
               {pickLocale(locale, author.role_pt, author.role_en)}
             </div>
           )}
@@ -67,7 +67,7 @@ export async function FounderCard({ author }: { author: Author }) {
           marginTop: "0.875rem",
           fontSize: "0.8125rem",
           fontWeight: 700,
-          color: "#4361EE",
+          color: "#315E9C",
         }}
       >
         {locale === "en" ? "View journey" : "Ver trajetória"}

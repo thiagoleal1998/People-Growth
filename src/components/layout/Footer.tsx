@@ -103,7 +103,7 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
                 style={{
                   fontWeight: 800,
                   fontSize: "1.25rem",
-                  background: "linear-gradient(135deg, #4361EE, #06D6A0)",
+                  background: "linear-gradient(135deg, #315E9C, #C89A4A)",
                   WebkitBackgroundClip: "text",
                   WebkitTextFillColor: "transparent",
                   marginBottom: "0.75rem",

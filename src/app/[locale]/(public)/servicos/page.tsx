@@ -16,7 +16,7 @@ const iconMap: Record<string, LucideIcon> = {
   Target, TrendingUp, Rocket, BarChart3, Brain, Users, Sparkles,
 };
 
-const palette = ["#4361EE", "#06D6A0", "#FFB703"];
+const palette = ["#315E9C", "#C89A4A", "#FFB703"];
 
 export async function generateMetadata({
   params,
@@ -56,7 +56,7 @@ export default async function ServicosPage() {
             style={{
               display: "inline-block",
               backgroundColor: "rgba(67,97,238,0.2)",
-              color: "#6b80f4",
+              color: "#5A7EB0",
               padding: "0.25rem 0.875rem",
               borderRadius: "9999px",
               fontSize: "0.8125rem",
@@ -69,7 +69,7 @@ export default async function ServicosPage() {
           <h1 style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 800, lineHeight: 1.1, marginBottom: "1rem" }}>
             {t("heroTitle1")}
             <br />
-            <span style={{ background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+            <span style={{ background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               {t("heroTitle2")}
             </span>
           </h1>
@@ -217,7 +217,7 @@ export default async function ServicosPage() {
                 display: "inline-flex",
                 alignItems: "center",
                 gap: "0.5rem",
-                backgroundColor: "#4361EE",
+                backgroundColor: "#315E9C",
                 color: "white",
                 padding: "0.875rem 2rem",
                 borderRadius: "0.75rem",

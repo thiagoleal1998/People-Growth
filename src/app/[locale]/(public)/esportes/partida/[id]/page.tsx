@@ -8,7 +8,7 @@ import { COMPETITIONS, getMatchDetail, type MatchEvent, type MatchHeader, type T
 export const revalidate = 900;
 
 // Portuguese-only, same as the rest of /esportes.
-const BRAND = "#4361EE";
+const BRAND = "#315E9C";
 
 const TABS = ["lances", "escalacoes", "estatisticas"] as const;
 type Tab = (typeof TABS)[number];
@@ -39,7 +39,7 @@ function TeamHeading({ name, logo }: { name: string; logo: string | null }) {
         // eslint-disable-next-line @next/next/no-img-element
         <img src={logo} alt={name} width={56} height={56} style={{ objectFit: "contain" }} />
       ) : (
-        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #4361EE, #06D6A0)" }} />
+        <div style={{ width: 56, height: 56, borderRadius: "50%", background: "linear-gradient(135deg, #315E9C, #C89A4A)" }} />
       )}
       <span style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--site-text)", textAlign: "center" }}>{name}</span>
     </div>
@@ -181,7 +181,7 @@ function StatRow({ label, home, away }: { label: string; home: number; away: num
       </div>
       <div style={{ display: "flex", height: "0.375rem", borderRadius: "9999px", overflow: "hidden", backgroundColor: "var(--site-border)" }}>
         <div style={{ width: `${homePct}%`, backgroundColor: BRAND }} />
-        <div style={{ width: `${100 - homePct}%`, backgroundColor: "#06D6A0" }} />
+        <div style={{ width: `${100 - homePct}%`, backgroundColor: "#C89A4A" }} />
       </div>
     </div>
   );

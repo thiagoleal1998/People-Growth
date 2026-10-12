@@ -9,7 +9,7 @@ type Payload = { uf: string; president: TseRace | null; governor: TseRace | null
 type SideTab = "governor" | "senate";
 
 // People & Growth's own colour. Candidates use their party's colour instead.
-const BRAND = "#4361EE";
+const BRAND = "#315E9C";
 
 function CandidatePhoto({ src, color }: { src: string | null; color: string }) {
   return (

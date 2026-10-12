@@ -33,7 +33,7 @@ export default function AdminRootLayout({ children }: { children: React.ReactNod
         <script dangerouslySetInnerHTML={{ __html: THEME_SCRIPT }} />
       </head>
       <body style={{ margin: 0, fontFamily: "system-ui, sans-serif", backgroundColor: "var(--admin-bg)", color: "var(--admin-text)" }}>
-        <NextTopLoader color="#4361EE" height={3} showSpinner={false} />
+        <NextTopLoader color="#315E9C" height={3} showSpinner={false} />
         {children}
         <DialogHost />
         <style>{`

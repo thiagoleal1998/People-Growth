@@ -39,14 +39,14 @@ export function LiveStatsWidget() {
   return (
     <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.5rem", marginBottom: "1.5rem" }}>
       <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "1.25rem" }}>
-        <span className="live-pulse-dot" style={{ width: "0.5rem", height: "0.5rem", borderRadius: "50%", backgroundColor: "#06D6A0", flexShrink: 0 }} />
+        <span className="live-pulse-dot" style={{ width: "0.5rem", height: "0.5rem", borderRadius: "50%", backgroundColor: "#C89A4A", flexShrink: 0 }} />
         <h2 style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)" }}>Ao vivo agora</h2>
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1.5rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
           <div style={{ width: "2.75rem", height: "2.75rem", borderRadius: "0.75rem", backgroundColor: "rgba(67,97,238,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <Eye size={18} color="#4361EE" />
+            <Eye size={18} color="#315E9C" />
           </div>
           <div>
             <div style={{ fontWeight: 900, fontSize: "1.75rem", color: "var(--admin-text)", lineHeight: 1 }}>{stats?.visitorsOnline ?? "—"}</div>
@@ -56,7 +56,7 @@ export function LiveStatsWidget() {
 
         <div style={{ display: "flex", alignItems: "center", gap: "0.875rem" }}>
           <div style={{ width: "2.75rem", height: "2.75rem", borderRadius: "0.75rem", backgroundColor: "rgba(6,214,160,0.12)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <Users size={18} color="#04a87d" />
+            <Users size={18} color="#A07B3B" />
           </div>
           <div>
             <div style={{ fontWeight: 900, fontSize: "1.75rem", color: "var(--admin-text)", lineHeight: 1 }}>{stats?.onlineStaff.length ?? "—"}</div>
@@ -84,7 +84,7 @@ export function LiveStatsWidget() {
                 color: "var(--admin-text-secondary)",
               }}
             >
-              <span style={{ width: "0.4rem", height: "0.4rem", borderRadius: "50%", backgroundColor: "#06D6A0" }} />
+              <span style={{ width: "0.4rem", height: "0.4rem", borderRadius: "50%", backgroundColor: "#C89A4A" }} />
               {s.name}
             </span>
           ))}

@@ -62,9 +62,9 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
               style={{
                 padding: "0.4375rem 0.875rem",
                 borderRadius: "0.5rem",
-                border: `1px solid ${active === tab.id ? "#4361EE" : "#e2e8f0"}`,
+                border: `1px solid ${active === tab.id ? "#315E9C" : "#e2e8f0"}`,
                 backgroundColor: active === tab.id ? "rgba(67,97,238,0.08)" : "white",
-                color: active === tab.id ? "#4361EE" : "#64748b",
+                color: active === tab.id ? "#315E9C" : "#64748b",
                 fontWeight: 700,
                 fontSize: "0.8125rem",
                 cursor: "pointer",
@@ -190,11 +190,11 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
                 height: "3.5rem",
                 borderRadius: "0.375rem",
                 flexShrink: 0,
-                background: photoPreview ? `url("${photoPreview}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                background: photoPreview ? `url("${photoPreview}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
               }}
             />
             <div>
-              <div style={{ fontWeight: 800, fontSize: "0.8125rem", color: "#4361EE", marginBottom: "0.25rem" }}>
+              <div style={{ fontWeight: 800, fontSize: "0.8125rem", color: "#315E9C", marginBottom: "0.25rem" }}>
                 {author?.name ?? "Seu nome"}
               </div>
               <div style={{ color: "#475569", fontSize: "0.75rem", lineHeight: 1.35 }}>
@@ -215,7 +215,7 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
                 height: "3rem",
                 borderRadius: "50%",
                 flexShrink: 0,
-                background: photoPreview ? `url("${photoPreview}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                background: photoPreview ? `url("${photoPreview}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
               }}
             />
             <div style={{ color: "white", fontWeight: 800, fontSize: "0.9375rem", marginTop: "0.375rem" }}>
@@ -223,7 +223,7 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
             </div>
           </div>
           {taglinePt.trim() && (
-            <p style={{ color: "#06D6A0", fontSize: "0.8125rem", fontStyle: "italic", marginBottom: "0.75rem" }}>
+            <p style={{ color: "#C89A4A", fontSize: "0.8125rem", fontStyle: "italic", marginBottom: "0.75rem" }}>
               &ldquo;{taglinePt.trim()}&rdquo;
             </p>
           )}
@@ -248,7 +248,7 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
                         width: "1.5rem",
                         height: "1.5rem",
                         borderRadius: "50%",
-                        backgroundColor: "#4361EE",
+                        backgroundColor: "#315E9C",
                         display: "flex",
                         alignItems: "center",
                         justifyContent: "center",

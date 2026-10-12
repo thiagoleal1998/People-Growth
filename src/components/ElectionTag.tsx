@@ -10,7 +10,7 @@ export function ElectionTag({ kind }: { kind: "elected" | "runoff" | "projected"
         ? { backgroundColor: "#FACC15", color: "#1F2937", border: "none" }
         : kind === "irregular"
           ? { backgroundColor: "#E5E7EB", color: "#374151", border: "none" }
-          : { backgroundColor: "transparent", color: "#4361EE", border: "1px solid #4361EE" };
+          : { backgroundColor: "transparent", color: "#315E9C", border: "1px solid #315E9C" };
   return (
     <span
       style={{

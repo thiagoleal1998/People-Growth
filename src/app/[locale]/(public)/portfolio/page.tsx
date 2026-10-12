@@ -10,11 +10,11 @@ import type { PortfolioCase } from "@/types/database.types";
 export const revalidate = 300;
 
 const categoryColor: Record<PortfolioCase["category"], string> = {
-  marketing: "#4361EE",
-  growth: "#06D6A0",
+  marketing: "#315E9C",
+  growth: "#C89A4A",
   data: "#FFB703",
-  ai: "#4361EE",
-  consulting: "#06D6A0",
+  ai: "#315E9C",
+  consulting: "#C89A4A",
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
@@ -98,7 +98,7 @@ export default async function PortfolioPage() {
                           </div>
                         )}
 
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#4361EE", fontWeight: 700, fontSize: "0.9rem" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#315E9C", fontWeight: 700, fontSize: "0.9rem" }}>
                           {t("viewFullCase")} <ArrowRight size={16} />
                         </div>
                       </div>

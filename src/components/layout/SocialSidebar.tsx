@@ -69,7 +69,7 @@ export function SocialSidebar({ instagram, linkedin, whatsapp, youtube, x }: Pro
           .social-sidebar { display: none !important; }
         }
         .social-sidebar-icon:hover {
-          background-color: #4361EE !important;
+          background-color: #315E9C !important;
           color: white !important;
         }
       `}</style>

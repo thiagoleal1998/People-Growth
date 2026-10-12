@@ -9,7 +9,7 @@ import type { Category } from "@/types/database.types";
 type Draft = { name_pt: string; name_en: string; slug: string; color: string };
 
 function toDraft(c: Category): Draft {
-  return { name_pt: c.name_pt, name_en: c.name_en ?? "", slug: c.slug, color: c.color ?? "#4361EE" };
+  return { name_pt: c.name_pt, name_en: c.name_en ?? "", slug: c.slug, color: c.color ?? "#315E9C" };
 }
 
 const cellStyle = { padding: "0.625rem 0.875rem" } as const;
@@ -81,7 +81,7 @@ function CategoryRow({ category, articleCount, onSaved, onDeleted }: { category:
 
 export function CategoriesManager({ categories, articleCounts }: { categories: Category[]; articleCounts: Record<string, number> }) {
   const [items, setItems] = useState(categories);
-  const [newDraft, setNewDraft] = useState<Draft>({ name_pt: "", name_en: "", slug: "", color: "#4361EE" });
+  const [newDraft, setNewDraft] = useState<Draft>({ name_pt: "", name_en: "", slug: "", color: "#315E9C" });
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -91,7 +91,7 @@ export function CategoriesManager({ categories, articleCounts }: { categories: C
       try {
         const created = await createCategory(newDraft);
         setItems((prev) => [...prev, created].sort((a, b) => a.name_pt.localeCompare(b.name_pt, "pt-BR")));
-        setNewDraft({ name_pt: "", name_en: "", slug: "", color: "#4361EE" });
+        setNewDraft({ name_pt: "", name_en: "", slug: "", color: "#315E9C" });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erro ao criar.");
       }
@@ -144,7 +144,7 @@ export function CategoriesManager({ categories, articleCounts }: { categories: C
             type="button"
             disabled={pending || !newDraft.name_pt.trim()}
             onClick={add}
-            style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", backgroundColor: "#4361EE", color: "white", padding: "0.5rem 1rem", borderRadius: "0.5rem", fontWeight: 700, fontSize: "0.8125rem", border: "none", cursor: pending || !newDraft.name_pt.trim() ? "default" : "pointer", opacity: pending || !newDraft.name_pt.trim() ? 0.6 : 1 }}
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", backgroundColor: "#315E9C", color: "white", padding: "0.5rem 1rem", borderRadius: "0.5rem", fontWeight: 700, fontSize: "0.8125rem", border: "none", cursor: pending || !newDraft.name_pt.trim() ? "default" : "pointer", opacity: pending || !newDraft.name_pt.trim() ? 0.6 : 1 }}
           >
             <Plus size={15} /> {pending ? "Adicionando..." : "Adicionar"}
           </button>

@@ -8,7 +8,7 @@ import type { Course } from "@/types/database.types";
 
 export const revalidate = 300;
 
-const palette = ["#4361EE", "#06D6A0", "#FFB703"];
+const palette = ["#315E9C", "#C89A4A", "#FFB703"];
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {
   const { locale } = await params;

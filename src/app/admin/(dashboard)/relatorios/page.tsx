@@ -34,10 +34,10 @@ function tally(items: string[], labels: Record<string, string>): { key: string; 
 }
 
 const ACTIVITY_ACTION_LABELS: Record<string, { label: string; color: string }> = {
-  create: { label: "Criou", color: "#06D6A0" },
-  update: { label: "Atualizou", color: "#4361EE" },
+  create: { label: "Criou", color: "#C89A4A" },
+  update: { label: "Atualizou", color: "#315E9C" },
   delete: { label: "Excluiu", color: "#dc2626" },
-  publish: { label: "Publicou", color: "#04a87d" },
+  publish: { label: "Publicou", color: "#A07B3B" },
   login: { label: "Entrou", color: "#FFB703" },
   logout: { label: "Saiu", color: "var(--admin-faint)" },
 };
@@ -46,7 +46,7 @@ function renderWordDiff(before: string, after: string) {
   return diffWords(before, after).map((part, i) => {
     if (part.added) {
       return (
-        <ins key={i} style={{ backgroundColor: "rgba(6,214,160,0.18)", color: "#04a87d", textDecoration: "none", fontWeight: 700, borderRadius: "0.1875rem", padding: "0 0.125rem" }}>
+        <ins key={i} style={{ backgroundColor: "rgba(6,214,160,0.18)", color: "#A07B3B", textDecoration: "none", fontWeight: 700, borderRadius: "0.1875rem", padding: "0 0.125rem" }}>
           {part.value}
         </ins>
       );
@@ -87,7 +87,7 @@ function Bar({ label, value, max, sub }: { label: string; value: number; max: nu
         </span>
       </div>
       <div style={{ height: "0.5rem", borderRadius: "9999px", backgroundColor: "var(--admin-surface-alt)", overflow: "hidden" }}>
-        <div style={{ height: "100%", width: `${pct}%`, borderRadius: "9999px", backgroundColor: "#4361EE" }} />
+        <div style={{ height: "100%", width: `${pct}%`, borderRadius: "9999px", backgroundColor: "#315E9C" }} />
       </div>
     </div>
   );
@@ -106,13 +106,13 @@ function DailyChart({ days }: { days: { date: string; impressions: number; click
             title={`${new Date(d.date).toLocaleDateString("pt-BR")}: ${d.impressions} impressões, ${d.clicks} cliques`}
             style={{ display: "flex", alignItems: "flex-end", gap: "2px", height: "140px", flexShrink: 0 }}
           >
-            <div style={{ width: "6px", height: `${(d.impressions / max) * 140}px`, backgroundColor: "#4361EE", borderRadius: "2px 2px 0 0" }} />
+            <div style={{ width: "6px", height: `${(d.impressions / max) * 140}px`, backgroundColor: "#315E9C", borderRadius: "2px 2px 0 0" }} />
             <div style={{ width: "6px", height: `${(d.clicks / max) * 140}px`, backgroundColor: "#FFB703", borderRadius: "2px 2px 0 0" }} />
           </div>
         ))}
       </div>
       <div style={{ display: "flex", gap: "1.25rem", fontSize: "0.75rem", color: "var(--admin-muted)" }}>
-        <span><span style={{ display: "inline-block", width: 8, height: 8, backgroundColor: "#4361EE", borderRadius: 2, marginRight: 4 }} />Impressões</span>
+        <span><span style={{ display: "inline-block", width: 8, height: 8, backgroundColor: "#315E9C", borderRadius: 2, marginRight: 4 }} />Impressões</span>
         <span><span style={{ display: "inline-block", width: 8, height: 8, backgroundColor: "#FFB703", borderRadius: 2, marginRight: 4 }} />Cliques</span>
       </div>
     </div>
@@ -442,7 +442,7 @@ export default async function RelatoriosPage({
                 fontWeight: 700,
                 textDecoration: "none",
                 color: tab === t.key ? "white" : "var(--admin-muted)",
-                backgroundColor: tab === t.key ? "#4361EE" : "transparent",
+                backgroundColor: tab === t.key ? "#315E9C" : "transparent",
               }}
             >
               {t.label}
@@ -517,7 +517,7 @@ export default async function RelatoriosPage({
                     fontWeight: 600,
                     textDecoration: "none",
                     color: !usingCustomRange && period === p.key ? "white" : "var(--admin-muted)",
-                    backgroundColor: !usingCustomRange && period === p.key ? "#4361EE" : "transparent",
+                    backgroundColor: !usingCustomRange && period === p.key ? "#315E9C" : "transparent",
                   }}
                 >
                   {p.label}
@@ -545,7 +545,7 @@ export default async function RelatoriosPage({
               />
               <button
                 type="submit"
-                style={{ backgroundColor: "#4361EE", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.375rem 0.875rem", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+                style={{ backgroundColor: "#315E9C", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.375rem 0.875rem", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
               >
                 Aplicar
               </button>
@@ -555,7 +555,7 @@ export default async function RelatoriosPage({
           {chamadosStats && (
             <>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))", gap: "1.25rem", marginBottom: "1.5rem" }}>
-                <StatCard icon={Ticket} label="Chamados internos" value={chamadosStats.totalTickets.toLocaleString("pt-BR")} color="#4361EE" />
+                <StatCard icon={Ticket} label="Chamados internos" value={chamadosStats.totalTickets.toLocaleString("pt-BR")} color="#315E9C" />
                 <StatCard icon={Ticket} label="Chamados em aberto" value={chamadosStats.openTickets.toLocaleString("pt-BR")} color="#cc9200" />
                 <StatCard icon={Bug} label="Erros reportados" value={chamadosStats.totalErrors.toLocaleString("pt-BR")} color="#dc2626" />
                 <StatCard icon={Bug} label="Erros pendentes" value={chamadosStats.pendingErrors.toLocaleString("pt-BR")} color="#cc9200" />
@@ -659,7 +659,7 @@ export default async function RelatoriosPage({
                     fontWeight: 600,
                     textDecoration: "none",
                     color: !usingCustomRange && period === p.key ? "white" : "var(--admin-muted)",
-                    backgroundColor: !usingCustomRange && period === p.key ? "#4361EE" : "transparent",
+                    backgroundColor: !usingCustomRange && period === p.key ? "#315E9C" : "transparent",
                   }}
                 >
                   {p.label}
@@ -688,7 +688,7 @@ export default async function RelatoriosPage({
               />
               <button
                 type="submit"
-                style={{ backgroundColor: "#4361EE", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.375rem 0.875rem", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+                style={{ backgroundColor: "#315E9C", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.375rem 0.875rem", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
               >
                 Aplicar
               </button>
@@ -711,7 +711,7 @@ export default async function RelatoriosPage({
               </select>
               <button
                 type="submit"
-                style={{ backgroundColor: "#4361EE", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.5rem 0.875rem", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+                style={{ backgroundColor: "#315E9C", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.5rem 0.875rem", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
               >
                 Filtrar
               </button>
@@ -749,7 +749,7 @@ export default async function RelatoriosPage({
                               <summary
                                 style={{
                                   cursor: "pointer",
-                                  color: "#4361EE",
+                                  color: "#315E9C",
                                   fontWeight: 600,
                                   overflow: "hidden",
                                   textOverflow: "ellipsis",
@@ -798,7 +798,7 @@ export default async function RelatoriosPage({
                 fontWeight: 600,
                 textDecoration: "none",
                 color: !usingCustomRange && period === p.key ? "white" : "var(--admin-muted)",
-                backgroundColor: !usingCustomRange && period === p.key ? "#4361EE" : "transparent",
+                backgroundColor: !usingCustomRange && period === p.key ? "#315E9C" : "transparent",
               }}
             >
               {p.label}
@@ -826,7 +826,7 @@ export default async function RelatoriosPage({
           />
           <button
             type="submit"
-            style={{ backgroundColor: "#4361EE", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.375rem 0.875rem", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+            style={{ backgroundColor: "#315E9C", color: "white", border: "none", borderRadius: "0.375rem", padding: "0.375rem 0.875rem", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
           >
             Aplicar
           </button>
@@ -834,11 +834,11 @@ export default async function RelatoriosPage({
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))", gap: "1.25rem", marginBottom: "1.5rem" }}>
-        <StatCard icon={Eye} label="Visualizações de página" value={totalViews.toLocaleString("pt-BR")} color="#4361EE" />
-        <StatCard icon={Users} label="Visitantes únicos" value={uniqueVisitors.toLocaleString("pt-BR")} color="#06D6A0" />
+        <StatCard icon={Eye} label="Visualizações de página" value={totalViews.toLocaleString("pt-BR")} color="#315E9C" />
+        <StatCard icon={Users} label="Visitantes únicos" value={uniqueVisitors.toLocaleString("pt-BR")} color="#C89A4A" />
         <StatCard icon={MousePointerClick} label="Cliques em anúncios" value={totalClicks.toLocaleString("pt-BR")} color="#FFB703" />
-        <StatCard icon={Percent} label="CTR de anúncios" value={`${ctr}%`} color="#4361EE" />
-        <StatCard icon={MoveDown} label="Quanto da página é vista, em média" value={avgScrollDepth != null ? `${avgScrollDepth}%` : "—"} color="#06D6A0" />
+        <StatCard icon={Percent} label="CTR de anúncios" value={`${ctr}%`} color="#315E9C" />
+        <StatCard icon={MoveDown} label="Quanto da página é vista, em média" value={avgScrollDepth != null ? `${avgScrollDepth}%` : "—"} color="#C89A4A" />
       </div>
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(420px, 100%), 1fr))", gap: "1.25rem", marginBottom: "1.25rem" }}>
@@ -905,7 +905,7 @@ export default async function RelatoriosPage({
                         <td style={{ padding: "0.625rem 0" }}>
                           <Link
                             href={`/admin/relatorios?${new URLSearchParams({ ...rangeQuery, ad: id }).toString()}`}
-                            style={{ color: adParam === id ? "#4361EE" : "var(--admin-text)", fontWeight: 700, textDecoration: adParam === id ? "underline" : "none" }}
+                            style={{ color: adParam === id ? "#315E9C" : "var(--admin-text)", fontWeight: 700, textDecoration: adParam === id ? "underline" : "none" }}
                           >
                             {info?.title ?? id}
                           </Link>

@@ -18,7 +18,7 @@ export function ReadingProgress() {
 
   return (
     <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: "3px", zIndex: 60 }} aria-hidden="true">
-      <div style={{ height: "100%", width: `${progress}%`, background: "linear-gradient(90deg, #4361EE, #06D6A0)", transition: "width 0.1s linear" }} />
+      <div style={{ height: "100%", width: `${progress}%`, background: "linear-gradient(90deg, #315E9C, #C89A4A)", transition: "width 0.1s linear" }} />
     </div>
   );
 }

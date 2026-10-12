@@ -50,7 +50,7 @@ export default async function RecursosPage({ searchParams }: { searchParams: Pro
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <Link href={`/admin/recursos/${s.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
+                      <Link href={`/admin/recursos/${s.id}`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
                       <ConfirmDeleteButton confirmText={`Excluir o recurso "${s.title_pt}"?`} onDelete={deleteResource.bind(null, s.id)} />
                     </div>
                   </td>

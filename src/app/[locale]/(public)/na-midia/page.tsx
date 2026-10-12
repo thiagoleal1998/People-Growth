@@ -8,10 +8,10 @@ import type { MediaItem } from "@/types/database.types";
 export const revalidate = 300;
 
 const typeMeta: Record<MediaItem["type"], { icon: LucideIcon; color: string }> = {
-  interview: { icon: Mic, color: "#4361EE" },
-  event: { icon: Video, color: "#06D6A0" },
+  interview: { icon: Mic, color: "#315E9C" },
+  event: { icon: Video, color: "#C89A4A" },
   article: { icon: BookOpen, color: "#FFB703" },
-  podcast: { icon: Headphones, color: "#4361EE" },
+  podcast: { icon: Headphones, color: "#315E9C" },
 };
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> }): Promise<Metadata> {

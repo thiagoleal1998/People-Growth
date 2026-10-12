@@ -12,7 +12,7 @@ function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit" });
 }
 
-const cardStyle = { backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", borderTop: "3px solid #4361EE", overflow: "hidden" } as const;
+const cardStyle = { backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", borderTop: "3px solid #315E9C", overflow: "hidden" } as const;
 const cardHeaderStyle = { padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--admin-border-strong)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" } as const;
 
 export default async function AutorHomePage() {
@@ -53,10 +53,10 @@ export default async function AutorHomePage() {
   const drafting = ownArticles.filter((a) => a.status === "draft" || a.status === "pending").length;
 
   const stats = [
-    { label: "Artigos publicados", value: published.length, icon: FileText, color: "#4361EE" },
-    { label: "Visualizações totais", value: totalViews, icon: Eye, color: "#06D6A0" },
+    { label: "Artigos publicados", value: published.length, icon: FileText, color: "#315E9C" },
+    { label: "Visualizações totais", value: totalViews, icon: Eye, color: "#C89A4A" },
     { label: "Rascunhos e pendentes", value: drafting, icon: Clock, color: "#FFB703" },
-    { label: "Comentários a revisar", value: pendingComments, icon: MessageCircle, color: "#4361EE" },
+    { label: "Comentários a revisar", value: pendingComments, icon: MessageCircle, color: "#315E9C" },
   ];
 
   // Only the channels actually configured in Configurações — no fabricated
@@ -76,7 +76,7 @@ export default async function AutorHomePage() {
     <div>
       <div
         style={{
-          background: "linear-gradient(135deg, #4361EE 0%, #2f49c7 100%)",
+          background: "linear-gradient(135deg, #315E9C 0%, #2f49c7 100%)",
           borderRadius: "1.25rem",
           padding: "2rem 2.25rem",
           marginBottom: "1.5rem",
@@ -108,9 +108,9 @@ export default async function AutorHomePage() {
         <div style={cardStyle}>
           <div style={cardHeaderStyle}>
             <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <Megaphone size={17} color="#4361EE" /> Comunicados
+              <Megaphone size={17} color="#315E9C" /> Comunicados
             </h2>
-            <Link href="/autor/comunicados" style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Ver todos →</Link>
+            <Link href="/autor/comunicados" style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Ver todos →</Link>
           </div>
           {announcements.length === 0 ? (
             <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum comunicado por enquanto.</div>
@@ -131,7 +131,7 @@ export default async function AutorHomePage() {
         <div style={cardStyle}>
           <div style={cardHeaderStyle}>
             <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <Share2 size={17} color="#06D6A0" /> Nossas redes
+              <Share2 size={17} color="#C89A4A" /> Nossas redes
             </h2>
           </div>
           {socials.length === 0 ? (
@@ -170,7 +170,7 @@ export default async function AutorHomePage() {
       <div style={{ ...cardStyle, marginBottom: "1.5rem" }}>
         <div style={cardHeaderStyle}>
           <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <Video size={17} color="#4361EE" /> Últimos vídeos
+            <Video size={17} color="#315E9C" /> Últimos vídeos
           </h2>
         </div>
         <div style={{ padding: "1.5rem", display: "grid", gridTemplateColumns: "minmax(0, 480px) 220px", gap: "1.25rem" }} className="autor-videos-grid">
@@ -205,9 +205,9 @@ export default async function AutorHomePage() {
       <div style={cardStyle}>
         <div style={cardHeaderStyle}>
           <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <Newspaper size={17} color="#06D6A0" /> Últimos posts
+            <Newspaper size={17} color="#C89A4A" /> Últimos posts
           </h2>
-          <Link href="/conteudo" target="_blank" style={{ color: "#4361EE", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Ver no site →</Link>
+          <Link href="/conteudo" target="_blank" style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Ver no site →</Link>
         </div>
         {news.length === 0 ? (
           <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum artigo publicado ainda.</div>
@@ -243,7 +243,7 @@ export default async function AutorHomePage() {
           .autor-home-grid { grid-template-columns: 1fr !important; }
           .autor-videos-grid { grid-template-columns: 1fr !important; }
         }
-        .autor-social-link:hover { border-color: #4361EE !important; color: #4361EE !important; }
+        .autor-social-link:hover { border-color: #315E9C !important; color: #315E9C !important; }
         .autor-post-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-2px); transition: all 0.15s; }
       `}</style>
     </div>

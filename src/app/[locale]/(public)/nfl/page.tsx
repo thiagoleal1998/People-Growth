@@ -12,7 +12,7 @@ export const metadata: Metadata = {
 
 // Portuguese-only, same as /esportes — team names stay in English, matching
 // how Brazilian sports media refers to NFL clubs.
-const BRAND = "#4361EE";
+const BRAND = "#315E9C";
 
 const cardStyle = {
   borderRadius: "0.75rem",

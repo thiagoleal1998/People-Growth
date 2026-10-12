@@ -47,10 +47,10 @@ export function ChamadosTabs({ reports, tickets, members }: { reports: ErrorRepo
               padding: "0.75rem 1.25rem",
               fontSize: "0.875rem",
               fontWeight: 700,
-              color: active === tab.id ? "#4361EE" : "var(--admin-muted)",
+              color: active === tab.id ? "#315E9C" : "var(--admin-muted)",
               background: "none",
               border: "none",
-              borderBottom: active === tab.id ? "2px solid #4361EE" : "2px solid transparent",
+              borderBottom: active === tab.id ? "2px solid #315E9C" : "2px solid transparent",
               cursor: "pointer",
               display: "flex",
               alignItems: "center",
@@ -61,7 +61,7 @@ export function ChamadosTabs({ reports, tickets, members }: { reports: ErrorRepo
             {counts[tab.id] > 0 && (
               <span
                 style={{
-                  backgroundColor: active === tab.id ? "#4361EE" : "var(--admin-border-strong)",
+                  backgroundColor: active === tab.id ? "#315E9C" : "var(--admin-border-strong)",
                   color: active === tab.id ? "white" : "var(--admin-muted)",
                   fontSize: "0.6875rem",
                   fontWeight: 800,

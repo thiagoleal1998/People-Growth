@@ -98,7 +98,7 @@ export async function CategoryNav() {
             fontWeight: 700,
             letterSpacing: "0.03em",
             textTransform: "uppercase",
-            color: "#4361EE",
+            color: "#315E9C",
             textDecoration: "none",
             whiteSpace: "nowrap",
           }}
@@ -194,12 +194,12 @@ export async function CategoryNav() {
             width: 6px;
             height: 6px;
             border-radius: 9999px;
-            background: linear-gradient(135deg, #4361EE, #06D6A0);
+            background: linear-gradient(135deg, #315E9C, #C89A4A);
             flex-shrink: 0;
           }
-          .category-nav .category-nav-row a:hover { background: #4361EE !important; color: white !important; transform: translateX(4px); }
+          .category-nav .category-nav-row a:hover { background: #315E9C !important; color: white !important; transform: translateX(4px); }
           .category-nav .category-nav-row a.category-nav-columnists {
-            background: #4361EE !important;
+            background: #315E9C !important;
             border-color: transparent;
             color: white !important;
             font-weight: 800 !important;

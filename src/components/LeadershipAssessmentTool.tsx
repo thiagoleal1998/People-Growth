@@ -194,7 +194,7 @@ export function LeadershipAssessmentTool() {
           <button
             type="button"
             onClick={() => printReport(evaluatedName)}
-            style={{ display: "flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#4361EE", color: "white", fontWeight: 700, fontSize: "0.875rem", padding: "0.75rem 1.25rem", borderRadius: "0.625rem", border: "none", cursor: "pointer" }}
+            style={{ display: "flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", fontWeight: 700, fontSize: "0.875rem", padding: "0.75rem 1.25rem", borderRadius: "0.625rem", border: "none", cursor: "pointer" }}
           >
             <Printer size={16} /> {t("printButton")}
           </button>
@@ -250,7 +250,7 @@ export function LeadershipAssessmentTool() {
                       style={{
                         padding: "0.5rem 0.375rem",
                         borderRadius: "0.5rem",
-                        border: ratings[c.key] === r ? "2px solid #4361EE" : "1px solid var(--site-border-strong)",
+                        border: ratings[c.key] === r ? "2px solid #315E9C" : "1px solid var(--site-border-strong)",
                         backgroundColor: ratings[c.key] === r ? "rgba(67,97,238,0.08)" : "var(--site-card)",
                         color: "var(--site-text)",
                         fontSize: "0.75rem",
@@ -337,7 +337,7 @@ export function LeadershipAssessmentTool() {
             <button
               type="submit"
               disabled={status === "loading"}
-              style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", backgroundColor: "#4361EE", color: "white", fontWeight: 700, fontSize: "0.875rem", padding: "0.75rem", borderRadius: "0.625rem", border: "none", cursor: status === "loading" ? "default" : "pointer", opacity: status === "loading" ? 0.7 : 1 }}
+              style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", fontWeight: 700, fontSize: "0.875rem", padding: "0.75rem", borderRadius: "0.625rem", border: "none", cursor: status === "loading" ? "default" : "pointer", opacity: status === "loading" ? 0.7 : 1 }}
             >
               {status === "loading" && <Loader2 size={16} style={{ animation: "spin 1s linear infinite" }} />}
               {status === "loading" ? t("submitting") : t("submit")}
@@ -393,7 +393,7 @@ function StepNav({
         type="button"
         onClick={onNext}
         disabled={nextDisabled}
-        style={{ flex: 1, backgroundColor: "#4361EE", color: "white", fontWeight: 700, fontSize: "0.875rem", padding: "0.75rem", borderRadius: "0.625rem", border: "none", cursor: nextDisabled ? "default" : "pointer", opacity: nextDisabled ? 0.5 : 1 }}
+        style={{ flex: 1, backgroundColor: "#315E9C", color: "white", fontWeight: 700, fontSize: "0.875rem", padding: "0.75rem", borderRadius: "0.625rem", border: "none", cursor: nextDisabled ? "default" : "pointer", opacity: nextDisabled ? 0.5 : 1 }}
       >
         {nextLabel}
       </button>

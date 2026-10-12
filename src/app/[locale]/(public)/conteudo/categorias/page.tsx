@@ -84,8 +84,8 @@ export default async function CategoriasPage() {
                   <span
                     style={{
                       display: "inline-block",
-                      backgroundColor: `${category.color ?? "#4361EE"}25`,
-                      color: category.color ?? "#4361EE",
+                      backgroundColor: `${category.color ?? "#315E9C"}25`,
+                      color: category.color ?? "#315E9C",
                       padding: "0.25rem 0.75rem",
                       borderRadius: "9999px",
                       fontSize: "0.75rem",

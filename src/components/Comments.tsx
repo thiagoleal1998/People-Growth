@@ -53,9 +53,9 @@ function LikeButton({ commentId, initialLikes }: { commentId: string; initialLik
       type="button"
       onClick={handleLike}
       disabled={liked}
-      style={{ display: "flex", alignItems: "center", gap: "0.375rem", background: "none", border: "none", color: liked ? "#4361EE" : "var(--site-muted)", fontSize: "0.8125rem", fontWeight: 600, cursor: liked ? "default" : "pointer", padding: 0 }}
+      style={{ display: "flex", alignItems: "center", gap: "0.375rem", background: "none", border: "none", color: liked ? "#315E9C" : "var(--site-muted)", fontSize: "0.8125rem", fontWeight: 600, cursor: liked ? "default" : "pointer", padding: 0 }}
     >
-      <ThumbsUp size={14} fill={liked ? "#4361EE" : "none"} /> {likes > 0 ? likes : ""}
+      <ThumbsUp size={14} fill={liked ? "#315E9C" : "none"} /> {likes > 0 ? likes : ""}
     </button>
   );
 }
@@ -148,7 +148,7 @@ function CommentCard({
           <button
             type="button"
             onClick={() => setRepliesOpen((o) => !o)}
-            style={{ display: "flex", alignItems: "center", gap: "0.375rem", background: "none", border: "none", color: "#4361EE", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer", padding: 0 }}
+            style={{ display: "flex", alignItems: "center", gap: "0.375rem", background: "none", border: "none", color: "#315E9C", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer", padding: 0 }}
           >
             {replies.length} resposta{replies.length === 1 ? "" : "s"}
             {repliesOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}

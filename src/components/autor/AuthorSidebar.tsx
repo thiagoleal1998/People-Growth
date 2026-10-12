@@ -57,7 +57,7 @@ export function AuthorSidebar({ logoUrl, pendingComments = 0, unreadAnnouncement
           // eslint-disable-next-line @next/next/no-img-element
           <img src={logoUrl} alt="People & Growth" style={{ height: "2.25rem", width: "auto", display: "block" }} />
         ) : (
-          <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #4361EE, #06D6A0)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
+          <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
             People & Growth
           </div>
         )}

@@ -10,9 +10,9 @@ import { dateKeySaoPaulo } from "@/lib/date-key";
 import { updateErrorReportStatus, deleteErrorReport } from "./actions";
 
 const statusConfig: Record<ErrorReport["status"], { label: string; color: string; bg: string }> = {
-  new: { label: "Novo", color: "#4361EE", bg: "rgba(67,97,238,0.1)" },
+  new: { label: "Novo", color: "#315E9C", bg: "rgba(67,97,238,0.1)" },
   reviewing: { label: "Em análise", color: "#cc9200", bg: "rgba(255,183,3,0.1)" },
-  resolved: { label: "Resolvido", color: "#04a87d", bg: "rgba(6,214,160,0.1)" },
+  resolved: { label: "Resolvido", color: "#A07B3B", bg: "rgba(6,214,160,0.1)" },
 };
 
 const columns: KanbanColumn<ErrorReport["status"]>[] = [
@@ -122,7 +122,7 @@ export function ErrorReportsClient({ reports }: { reports: ErrorReport[] }) {
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
-                style={{ display: "block", color: "#4361EE", fontSize: "0.75rem", marginTop: "0.5rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                style={{ display: "block", color: "#315E9C", fontSize: "0.75rem", marginTop: "0.5rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
               >
                 {report.page_url.replace(/^https?:\/\/[^/]+/, "") || "/"}
               </a>
@@ -153,7 +153,7 @@ export function ErrorReportsClient({ reports }: { reports: ErrorReport[] }) {
                     <tr key={report.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
                       <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem", maxWidth: "360px" }}>{report.description}</td>
                       <td style={{ padding: "0.875rem 1.25rem", fontSize: "0.8125rem" }}>
-                        <a href={report.page_url} target="_blank" rel="noopener noreferrer" style={{ color: "#4361EE" }}>
+                        <a href={report.page_url} target="_blank" rel="noopener noreferrer" style={{ color: "#315E9C" }}>
                           {report.page_url.replace(/^https?:\/\/[^/]+/, "") || "/"}
                         </a>
                       </td>

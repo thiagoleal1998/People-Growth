@@ -207,7 +207,7 @@ export default async function LocaleLayout({
             </noscript>
           </>
         )}
-        <NextTopLoader color="#4361EE" height={3} showSpinner={false} />
+        <NextTopLoader color="#315E9C" height={3} showSpinner={false} />
         <Analytics />
         <NextIntlClientProvider messages={messages}>
           {children}

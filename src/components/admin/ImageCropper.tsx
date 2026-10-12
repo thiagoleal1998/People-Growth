@@ -166,9 +166,9 @@ export function ImageCropper({
                   fontSize: "0.8125rem",
                   fontWeight: 700,
                   cursor: "pointer",
-                  border: aspect === opt.value ? "1px solid #4361EE" : "1px solid var(--admin-border-strong)",
+                  border: aspect === opt.value ? "1px solid #315E9C" : "1px solid var(--admin-border-strong)",
                   backgroundColor: aspect === opt.value ? "rgba(67,97,238,0.12)" : "var(--admin-surface)",
-                  color: aspect === opt.value ? "#4361EE" : "var(--admin-muted)",
+                  color: aspect === opt.value ? "#315E9C" : "var(--admin-muted)",
                 }}
               >
                 {opt.label}
@@ -258,7 +258,7 @@ export function ImageCropper({
               padding: "0.5rem 1.125rem",
               borderRadius: "0.5rem",
               border: "none",
-              backgroundColor: "#4361EE",
+              backgroundColor: "#315E9C",
               color: "white",
               fontWeight: 700,
               fontSize: "0.875rem",

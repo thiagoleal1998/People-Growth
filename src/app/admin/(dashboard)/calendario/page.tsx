@@ -70,8 +70,8 @@ export default async function CalendarioPage({
       />
       <div style={{ display: "flex", flexWrap: "wrap", gap: "1.25rem", marginBottom: "1rem", fontSize: "0.8125rem", color: "var(--admin-muted)" }}>
         <span><span style={{ color: "#cc9200" }}>⏳</span> Matéria aguardando aprovação</span>
-        <span><span style={{ color: "#04a87d" }}>✓</span> Matéria agendada (aprovada)</span>
-        <span><span style={{ color: "#4361EE" }}>📱</span> Post de rede social</span>
+        <span><span style={{ color: "#A07B3B" }}>✓</span> Matéria agendada (aprovada)</span>
+        <span><span style={{ color: "#315E9C" }}>📱</span> Post de rede social</span>
         <span>📝 Pauta de matéria a produzir</span>
       </div>
       <CalendarGrid grid={grid} itemsByDate={itemsByDate} articlesByDate={articlesByDate} monthKey={monthKey} />

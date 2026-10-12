@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { COMPETITIONS, type Fixture, type SportsWidgetTab } from "@/lib/sports";
 import { TeamCrest } from "@/components/TeamCrest";
 
-const BRAND = "#4361EE";
+const BRAND = "#315E9C";
 const VISIBLE_COUNT = 3;
 const ROTATE_MS = 4000;
 

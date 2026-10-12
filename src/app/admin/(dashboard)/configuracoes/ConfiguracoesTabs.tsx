@@ -82,9 +82,9 @@ export function ConfiguracoesTabs({
             style={{
               padding: "0.5rem 1rem",
               borderRadius: "0.5rem",
-              border: `1px solid ${active === tab.id ? "#4361EE" : "var(--admin-border-strong)"}`,
+              border: `1px solid ${active === tab.id ? "#315E9C" : "var(--admin-border-strong)"}`,
               backgroundColor: active === tab.id ? "rgba(67,97,238,0.1)" : "var(--admin-surface)",
-              color: active === tab.id ? "#4361EE" : "var(--admin-text-secondary)",
+              color: active === tab.id ? "#315E9C" : "var(--admin-text-secondary)",
               fontWeight: 700,
               fontSize: "0.8125rem",
               cursor: "pointer",

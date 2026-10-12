@@ -87,7 +87,7 @@ export function renderMarkdownLite(text: string, options: { anchorHeadings?: boo
     .replace(/!video\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)\)/g, (_match, caption: string, url: string) => {
       const videoId = extractYouTubeId(url);
       if (!videoId) {
-        return protect("LNK", `<a href="${url}" style="color:#4361EE;font-weight:600;text-decoration:underline">${caption || url}</a>`);
+        return protect("LNK", `<a href="${url}" style="color:#315E9C;font-weight:600;text-decoration:underline">${caption || url}</a>`);
       }
       const thumbnail = getYouTubeThumbnail(url);
       const autoplaySrc = withClickAutoplay(toYouTubeEmbedUrl(url));
@@ -132,7 +132,7 @@ export function renderMarkdownLite(text: string, options: { anchorHeadings?: boo
     })
     // Same balanced-parens allowance as the image url above.
     .replace(/\[([^\]]+)\]\(((?:[^\s()]|\([^()]*\))+)\)/g, (_match, linkText: string, url: string) =>
-      protect("LNK", `<a href="${url}" style="color:#4361EE;font-weight:600;text-decoration:underline">${linkText.replace(/^\+\+|\+\+$/g, "")}</a>`)
+      protect("LNK", `<a href="${url}" style="color:#315E9C;font-weight:600;text-decoration:underline">${linkText.replace(/^\+\+|\+\+$/g, "")}</a>`)
     )
     .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:700;color:var(--site-text)">$1</strong>')
     // "==texto==" — a brand-tinted highlighter mark, for passages the
@@ -153,8 +153,8 @@ export function renderMarkdownLite(text: string, options: { anchorHeadings?: boo
       attribution = lines.pop()!.replace(/^—\s+/, "");
     }
     const quoteText = lines.join(" ");
-    return `<blockquote style="position:relative;margin:2rem 0;padding:0.5rem 1rem 0.5rem 2.75rem;border-left:3px solid #4361EE">
-      <span style="position:absolute;left:0.5rem;top:-0.5rem;font-size:3rem;line-height:1;color:#4361EE;font-family:Georgia,serif;font-weight:800">&ldquo;</span>
+    return `<blockquote style="position:relative;margin:2rem 0;padding:0.5rem 1rem 0.5rem 2.75rem;border-left:3px solid #315E9C">
+      <span style="position:absolute;left:0.5rem;top:-0.5rem;font-size:3rem;line-height:1;color:#315E9C;font-family:Georgia,serif;font-weight:800">&ldquo;</span>
       <p style="font-size:1.1875rem;font-weight:700;font-style:italic;color:var(--site-text);line-height:1.5;margin:0">${quoteText}</p>
       ${attribution ? `<p style="margin:0.625rem 0 0;font-size:0.875rem;font-weight:700;color:var(--site-muted)">— ${attribution}</p>` : ""}
     </blockquote>\n\n`;
@@ -260,7 +260,7 @@ function groupSourceSections(renderedBlocks: string[], protectedBlocks: string[]
     // (rather than splicing them out) so the outer loop's indices stay
     // valid — the blanked slots just contribute nothing once joined.
     renderedBlocks[groupStart] =
-      `<div style="background-color:rgba(67,97,238,0.05);border:1px solid rgba(67,97,238,0.15);border-top:2px solid #4361EE;border-radius:0.75rem;padding:0.25rem 1.5rem 1.25rem;margin:2rem 0;font-size:0.9rem;color:var(--site-text-secondary)">${styledHeading}${rest}</div>`;
+      `<div style="background-color:rgba(67,97,238,0.05);border:1px solid rgba(67,97,238,0.15);border-top:2px solid #315E9C;border-radius:0.75rem;padding:0.25rem 1.5rem 1.25rem;margin:2rem 0;font-size:0.9rem;color:var(--site-text-secondary)">${styledHeading}${rest}</div>`;
     for (let j = groupStart + 1; j < groupEnd; j++) renderedBlocks[j] = "";
     i = groupEnd - 1;
   }

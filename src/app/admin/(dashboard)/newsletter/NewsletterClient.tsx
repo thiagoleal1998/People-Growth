@@ -60,7 +60,7 @@ export function NewsletterClient({ subs }: { subs: Sub[] }) {
                         onChange={(e) => startTransition(() => updateSubStatus(sub.id, e.target.value as Sub["status"]))}
                         style={{
                           backgroundColor: sub.status === "active" ? "rgba(6,214,160,0.1)" : "rgba(148,163,184,0.15)",
-                          color: sub.status === "active" ? "#04a87d" : "var(--admin-muted)",
+                          color: sub.status === "active" ? "#A07B3B" : "var(--admin-muted)",
                           padding: "0.2rem 0.5rem", borderRadius: "0.375rem", fontSize: "0.75rem", fontWeight: 700, border: "none", cursor: "pointer",
                         }}
                       >

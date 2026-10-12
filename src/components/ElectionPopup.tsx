@@ -59,7 +59,7 @@ export function ElectionPopup({ storageKey, title, subtitle, people }: { storage
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.75rem", marginBottom: "0.75rem" }}>
         <div>
           <div style={{ fontWeight: 800, fontSize: "1rem", color: "var(--site-text)" }}>{title}</div>
-          <div style={{ fontWeight: 700, fontSize: "0.8125rem", color: "#4361EE", marginTop: "0.125rem" }}>{subtitle}</div>
+          <div style={{ fontWeight: 700, fontSize: "0.8125rem", color: "#315E9C", marginTop: "0.125rem" }}>{subtitle}</div>
         </div>
         <button type="button" onClick={close} aria-label="Fechar" style={{ border: "none", background: "transparent", color: "var(--site-muted)", fontSize: "1.375rem", lineHeight: 1, cursor: "pointer", padding: "0 0.25rem" }}>
           ×

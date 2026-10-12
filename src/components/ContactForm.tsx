@@ -172,7 +172,7 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
           alignItems: "center",
           justifyContent: "center",
           gap: "0.5rem",
-          backgroundColor: "#4361EE",
+          backgroundColor: "#315E9C",
           color: "white",
           padding: "0.875rem 1.5rem",
           borderRadius: "0.75rem",

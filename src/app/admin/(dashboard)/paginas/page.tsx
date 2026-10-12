@@ -36,7 +36,7 @@ export default async function PaginasInstitucionaisPage({ searchParams }: { sear
                     {record?.title_pt ?? label}
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <a href={path} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "#4361EE", fontSize: "0.8125rem" }}>
+                    <a href={path} target="_blank" rel="noopener noreferrer" style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", color: "#315E9C", fontSize: "0.8125rem" }}>
                       {path} <ExternalLink size={12} />
                     </a>
                   </td>
@@ -44,7 +44,7 @@ export default async function PaginasInstitucionaisPage({ searchParams }: { sear
                     {record ? new Date(record.updated_at).toLocaleDateString("pt-BR") : "— (usando texto padrão)"}
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <Link href={`/admin/paginas/${slug}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Editar">
+                    <Link href={`/admin/paginas/${slug}`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Editar">
                       <Edit size={15} />
                     </Link>
                   </td>

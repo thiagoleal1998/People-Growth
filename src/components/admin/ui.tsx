@@ -50,7 +50,7 @@ export function PrimaryLinkButton({ href, children }: { href: string; children: 
   return (
     <Link
       href={href}
-      style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#4361EE", color: "white", padding: "0.625rem 1.25rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
+      style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", padding: "0.625rem 1.25rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
     >
       {children}
     </Link>
@@ -73,7 +73,7 @@ export function EmptyState({ text }: { text: string }) {
 
 export function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: "success" | "neutral" | "warning" | "danger" }) {
   const tones: Record<string, { bg: string; color: string }> = {
-    success: { bg: "rgba(6,214,160,0.1)", color: "#04a87d" },
+    success: { bg: "rgba(6,214,160,0.1)", color: "#A07B3B" },
     warning: { bg: "rgba(255,183,3,0.15)", color: "#cc9200" },
     danger: { bg: "rgba(239,68,68,0.1)", color: "#dc2626" },
     neutral: { bg: "rgba(148,163,184,0.15)", color: "var(--admin-muted)" },
@@ -176,7 +176,7 @@ export function SubmitButton({
         display: "inline-flex",
         alignItems: "center",
         gap: "0.5rem",
-        backgroundColor: isSecondary ? "var(--admin-surface-alt)" : "#4361EE",
+        backgroundColor: isSecondary ? "var(--admin-surface-alt)" : "#315E9C",
         color: isSecondary ? "var(--admin-text)" : "white",
         padding: "0.75rem 1.5rem",
         borderRadius: "0.625rem",

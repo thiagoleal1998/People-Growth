@@ -49,8 +49,8 @@ export function ArticlePreviewFrame({ article, author, coauthors, category }: { 
             <span
               style={{
                 display: "inline-block",
-                backgroundColor: `${category.color ?? "#4361EE"}25`,
-                color: category.color ?? "#4361EE",
+                backgroundColor: `${category.color ?? "#315E9C"}25`,
+                color: category.color ?? "#315E9C",
                 padding: "0.25rem 0.875rem",
                 borderRadius: "9999px",
                 fontSize: "0.8125rem",
@@ -101,12 +101,12 @@ export function ArticlePreviewFrame({ article, author, coauthors, category }: { 
                     height: "2.75rem",
                     borderRadius: "50%",
                     flexShrink: 0,
-                    background: a.photo_url ? `url("${a.photo_url}") center/cover` : "linear-gradient(135deg, #4361EE, #06D6A0)",
+                    background: a.photo_url ? `url("${a.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                   }}
                 />
                 <div>
                   <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "0.9375rem" }}>{a.name}</div>
-                  <div style={{ color: "#4361EE", fontWeight: 700, fontSize: "0.8125rem" }}>
+                  <div style={{ color: "#315E9C", fontWeight: 700, fontSize: "0.8125rem" }}>
                     {aboutAuthorLabel(a.gender, "pt")}
                   </div>
                 </div>

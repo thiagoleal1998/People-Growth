@@ -25,7 +25,7 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
         margin: "0 auto",
         padding: "1.5rem 1.75rem",
         borderRadius: "1rem",
-        background: "linear-gradient(120deg, #0d1b2a 0%, #1d3b8a 60%, #4361EE 100%)",
+        background: "linear-gradient(120deg, #0d1b2a 0%, #1d3b8a 60%, #315E9C 100%)",
         color: "white",
         display: "flex",
         alignItems: "center",

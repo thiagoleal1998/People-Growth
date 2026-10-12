@@ -80,12 +80,12 @@ export function ArticleBody({
               fontSize: "0.9375rem",
               fontWeight: 700,
               cursor: "pointer",
-              border: "1.5px solid #4361EE",
+              border: "1.5px solid #315E9C",
               backgroundColor: "var(--site-surface)",
               color: "var(--site-text)",
             }}
           >
-            <List size={18} color="#4361EE" />
+            <List size={18} color="#315E9C" />
             Resumo
             <ChevronDown size={16} style={{ transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
           </button>
@@ -118,7 +118,7 @@ export function ArticleBody({
               style={{ width: "100%", height: "auto", borderRadius: "0.625rem", display: "block" }}
             />
             {(coverImageCaption || coverImageCredit) && (
-              <figcaption style={{ marginTop: "0.625rem", paddingLeft: "0.75rem", borderLeft: "2px solid #4361EE" }}>
+              <figcaption style={{ marginTop: "0.625rem", paddingLeft: "0.75rem", borderLeft: "2px solid #315E9C" }}>
                 {coverImageCaption && (
                   <span style={{ display: "block", fontSize: "0.8125rem", color: "var(--site-text-secondary)", lineHeight: 1.45 }}>
                     {coverImageCaption}
@@ -166,7 +166,7 @@ export function ArticleBody({
               marginTop: "1.5rem",
               backgroundColor: "rgba(67,97,238,0.05)",
               border: "1px solid rgba(67,97,238,0.15)",
-              borderTop: "2px solid #4361EE",
+              borderTop: "2px solid #315E9C",
               borderRadius: "0.75rem",
               padding: "1.25rem 1.5rem 1.5rem",
             }}
@@ -178,7 +178,7 @@ export function ArticleBody({
               {sources.map((source, index) => (
                 <li key={index}>
                   {source.url ? (
-                    <a href={source.url} target="_blank" rel="noopener noreferrer" style={{ color: "#4361EE", textDecoration: "underline", wordBreak: "break-word" }}>
+                    <a href={source.url} target="_blank" rel="noopener noreferrer" style={{ color: "#315E9C", textDecoration: "underline", wordBreak: "break-word" }}>
                       {source.label}
                     </a>
                   ) : (
@@ -218,7 +218,7 @@ export function ArticleBody({
         }
         .summary-box-content {
           background-color: rgba(67, 97, 238, 0.07);
-          border-left: 4px solid #4361EE;
+          border-left: 4px solid #315E9C;
           border-radius: 0 0.625rem 0.625rem 0;
           padding: 1.25rem 1.5rem;
           margin-bottom: 1.5rem;

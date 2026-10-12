@@ -35,7 +35,7 @@ export const metadata: Metadata = {
 };
 
 // People & Growth's own colour. Candidates use their party's colour instead.
-const BRAND = "#4361EE";
+const BRAND = "#315E9C";
 const CARGOS = ["presidente", "governador", "senado", "federal", "estadual"] as const;
 type Cargo = (typeof CARGOS)[number];
 const CARGO_LABEL: Record<Cargo, string> = {

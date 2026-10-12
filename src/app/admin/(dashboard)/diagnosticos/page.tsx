@@ -59,7 +59,7 @@ export default async function DiagnosticosPage() {
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>{formatDate(item.created_at)}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <Link href={`/admin/diagnosticos/${item.id}`} style={{ padding: "0.375rem", color: "#4361EE", borderRadius: "0.375rem" }} title="Ver detalhes">
+                    <Link href={`/admin/diagnosticos/${item.id}`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Ver detalhes">
                       <Eye size={15} />
                     </Link>
                   </td>

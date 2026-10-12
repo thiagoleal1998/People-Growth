@@ -55,7 +55,7 @@ export function SavedToast({ show }: { show: boolean }) {
         top: "1.25rem",
         right: "1.25rem",
         zIndex: 200,
-        backgroundColor: "#04a87d",
+        backgroundColor: "#A07B3B",
         color: "white",
         borderRadius: "0.625rem",
         boxShadow: "0 8px 24px rgba(0,0,0,0.18)",

@@ -156,9 +156,9 @@ export function DateTimePicker({ name, defaultValue }: { name: string; defaultVa
                     onClick={() => handleDayClick(day)}
                     style={{
                       aspectRatio: "1",
-                      border: isToday && !isSelected ? "1px solid #4361EE" : "1px solid transparent",
+                      border: isToday && !isSelected ? "1px solid #315E9C" : "1px solid transparent",
                       borderRadius: "0.5rem",
-                      background: isSelected ? "#4361EE" : "none",
+                      background: isSelected ? "#315E9C" : "none",
                       color: isSelected ? "white" : inMonth ? "var(--admin-text)" : "var(--admin-faint)",
                       fontWeight: isSelected || isToday ? 700 : 500,
                       fontSize: "0.8125rem",
@@ -205,7 +205,7 @@ export function DateTimePicker({ name, defaultValue }: { name: string; defaultVa
                 <button
                   type="button"
                   onClick={() => setOpen(false)}
-                  style={{ border: "none", background: "none", color: "#4361EE", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+                  style={{ border: "none", background: "none", color: "#315E9C", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
                 >
                   OK
                 </button>
