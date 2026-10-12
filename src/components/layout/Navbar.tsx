@@ -44,7 +44,7 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
         <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="People & Growth" style={{ height: "3rem", width: "auto" }} />
+            <img src={logoUrl} alt="Festina" style={{ height: "3rem", width: "auto" }} />
           ) : (
             <span
               style={{

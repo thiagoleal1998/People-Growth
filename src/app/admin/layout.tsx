@@ -20,7 +20,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const faviconUrl = data?.value as string | undefined;
 
   return {
-    title: { default: "Admin | People & Growth", template: "%s | Admin" },
+    title: { default: "Admin | Festina", template: "%s | Admin" },
     robots: { index: false, follow: false },
     icons: faviconUrl ? { icon: faviconUrl } : undefined,
   };

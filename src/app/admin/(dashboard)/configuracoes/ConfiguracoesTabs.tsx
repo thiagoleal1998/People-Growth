@@ -99,7 +99,7 @@ export function ConfiguracoesTabs({
         <div style={{ display: active === "identidade" ? "block" : "none" }}>
           <div style={panelStyle}>
             <FieldGrid>
-              <Field label="Logo do cabeçalho" hint="Aparece ao lado do nome People & Growth no topo do site. PNG, JPG, WEBP, SVG ou GIF, até 5MB.">
+              <Field label="Logo do cabeçalho" hint="Aparece ao lado do nome Festina no topo do site. PNG, JPG, WEBP, SVG ou GIF, até 5MB.">
                 {values.logo_url && (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img src={values.logo_url} alt="Logo atual" style={{ height: "2.5rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.25rem" }} />

@@ -37,7 +37,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
         <div style={{ position: "relative", maxWidth: "440px" }}>
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="People & Growth" style={{ height: "3.75rem", width: "auto", display: "block", margin: "0 auto 2rem" }} />
+            <img src={logoUrl} alt="Festina" style={{ height: "3.75rem", width: "auto", display: "block", margin: "0 auto 2rem" }} />
           ) : (
             <div style={{ fontWeight: 800, fontSize: "1.5rem", marginBottom: "2rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               People &amp; Growth
@@ -93,7 +93,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
           <div className="login-mobile-logo" style={{ display: "none", marginBottom: "1.5rem" }}>
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoUrl} alt="People & Growth" style={{ height: "2rem", width: "auto" }} />
+              <img src={logoUrl} alt="Festina" style={{ height: "2rem", width: "auto" }} />
             ) : (
               <div style={{ fontWeight: 800, fontSize: "1.25rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 People &amp; Growth

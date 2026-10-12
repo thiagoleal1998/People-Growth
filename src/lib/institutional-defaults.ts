@@ -40,7 +40,7 @@ This policy may be updated if the site starts using new cookies or third-party t
     titlePt: "Aviso de Direitos Autorais",
     titleEn: "Copyright Notice",
     bodyPt: `## Titularidade do conteúdo
-Os textos, imagens, vídeos e demais materiais publicados pela People & Growth — incluindo artigos, a coluna Mea Sententia e páginas institucionais — são de titularidade da People & Growth ou de seus autores, e protegidos pela legislação brasileira de direitos autorais (Lei nº 9.610/1998), salvo quando indicada outra fonte.
+Os textos, imagens, vídeos e demais materiais publicados pela Festina — incluindo artigos, a coluna Mea Sententia e páginas institucionais — são de titularidade da Festina ou de seus autores, e protegidos pela legislação brasileira de direitos autorais (Lei nº 9.610/1998), salvo quando indicada outra fonte.
 
 ## Uso permitido
 É permitido compartilhar links para o nosso conteúdo e citar trechos curtos, desde que citada a fonte com link para o artigo original. Reprodução integral de artigos, sem autorização prévia, não é permitida.
@@ -51,7 +51,7 @@ Imagens e vídeos incorporados de terceiros (como YouTube) pertencem a seus resp
 ## Solicitações e denúncias
 Caso identifique conteúdo nosso publicado indevidamente em outro site, ou acredite que publicamos algo que viola direitos autorais de terceiros, entre em contato pela [página de Contato](/contato).`,
     bodyEn: `## Content ownership
-The text, images, videos and other materials published by People & Growth — including articles, the Mea Sententia column and institutional pages — are owned by People & Growth or its authors, and protected by Brazilian copyright law (Law No. 9,610/1998), unless another source is indicated.
+The text, images, videos and other materials published by Festina — including articles, the Mea Sententia column and institutional pages — are owned by Festina or its authors, and protected by Brazilian copyright law (Law No. 9,610/1998), unless another source is indicated.
 
 ## Permitted use
 You may share links to our content and quote short excerpts, provided the source is cited with a link to the original article. Full reproduction of articles without prior authorization is not permitted.
@@ -65,27 +65,27 @@ If you find our content published without authorization on another site, or beli
   "comentarios": {
     titlePt: "Regras de Uso dos Comentários",
     titleEn: "Comment Guidelines",
-    bodyPt: `A People & Growth mantém um espaço de comentários para que leitores possam reagir e discutir os artigos publicados. Para que esse espaço funcione bem para todo mundo, pedimos que sejam seguidas as regras abaixo.
+    bodyPt: `A Festina mantém um espaço de comentários para que leitores possam reagir e discutir os artigos publicados. Para que esse espaço funcione bem para todo mundo, pedimos que sejam seguidas as regras abaixo.
 
-1. O autor do comentário, e não a People & Growth, é o responsável pelo que escreve. Publicamos comentários assinados por quem os envia, não pela redação.
+1. O autor do comentário, e não a Festina, é o responsável pelo que escreve. Publicamos comentários assinados por quem os envia, não pela redação.
 2. Todo comentário passa por moderação antes de ser publicado. Isso pode levar algumas horas, e nem todo comentário enviado é aprovado.
 3. Não publicamos comentários com discurso de ódio, ameaças, assédio ou ataques pessoais a outros leitores, colunistas ou terceiros.
 4. Não publicamos comentários com conteúdo ilegal, discriminatório, ou que incentivem violência.
 5. Não publicamos spam, propaganda, links suspeitos ou divulgação de dados pessoais de terceiros.
 6. Comentários fora do tema do artigo ou repetidos em vários artigos podem ser removidos.
-7. A People & Growth pode remover, editar a exibição ou recusar qualquer comentário, a seu critério, sem necessidade de justificar a decisão a quem o enviou.
+7. A Festina pode remover, editar a exibição ou recusar qualquer comentário, a seu critério, sem necessidade de justificar a decisão a quem o enviou.
 8. O e-mail informado no formulário de comentário não é publicado — serve apenas para eventual contato sobre a própria mensagem, conforme nossas [Normas de Segurança e Privacidade](/normas-de-seguranca-e-privacidade).
 
 Encontrou um comentário que viola essas regras? Avise a gente pela [página de Contato](/contato).`,
-    bodyEn: `People & Growth maintains a comment space so readers can react to and discuss published articles. For this space to work well for everyone, we ask that the rules below be followed.
+    bodyEn: `Festina maintains a comment space so readers can react to and discuss published articles. For this space to work well for everyone, we ask that the rules below be followed.
 
-1. The author of the comment, not People & Growth, is responsible for what they write. We publish comments signed by whoever sends them, not by the editorial team.
+1. The author of the comment, not Festina, is responsible for what they write. We publish comments signed by whoever sends them, not by the editorial team.
 2. Every comment goes through moderation before being published. This can take a few hours, and not every submitted comment is approved.
 3. We do not publish comments containing hate speech, threats, harassment, or personal attacks against other readers, columnists or third parties.
 4. We do not publish comments with illegal or discriminatory content, or content that incites violence.
 5. We do not publish spam, advertising, suspicious links, or disclosure of third parties' personal data.
 6. Comments off-topic from the article, or repeated across multiple articles, may be removed.
-7. People & Growth may remove, edit the display of, or decline any comment at its discretion, with no obligation to justify the decision to whoever submitted it.
+7. Festina may remove, edit the display of, or decline any comment at its discretion, with no obligation to justify the decision to whoever submitted it.
 8. The email provided in the comment form is not published — it's used only for possible contact about the message itself, per our [Security and Privacy Standards](/normas-de-seguranca-e-privacidade).
 
 Found a comment that violates these rules? Let us know via the [Contact page](/contato).`,
@@ -100,7 +100,7 @@ Ao comentar em um artigo ou preencher um formulário no site (contato, newslette
 O e-mail informado em um comentário serve só para eventual contato sobre a própria mensagem e não é publicado nem compartilhado. Dados de formulários são usados exclusivamente para responder ao contato ou enviar a newsletter, quando o cadastro é feito voluntariamente.
 
 ## Com quem compartilhamos
-Não vendemos, alugamos ou compartilhamos dados pessoais com terceiros para fins de marketing. Os dados ficam armazenados em infraestrutura de nuvem (Supabase) com acesso restrito à equipe da People & Growth.
+Não vendemos, alugamos ou compartilhamos dados pessoais com terceiros para fins de marketing. Os dados ficam armazenados em infraestrutura de nuvem (Supabase) com acesso restrito à equipe da Festina.
 
 ## Moderação de comentários
 Todo comentário passa por revisão antes de ser publicado. Isso significa que, entre o envio e a publicação, seu comentário e e-mail ficam visíveis apenas para a equipe responsável pela moderação.
@@ -120,7 +120,7 @@ When you comment on an article or fill in a form on the site (contact, newslette
 The email given in a comment is only used for possible follow-up about that message itself and is never published or shared. Form data is used exclusively to respond to your contact request or send the newsletter, when you sign up voluntarily.
 
 ## Who we share it with
-We do not sell, rent or share personal data with third parties for marketing purposes. Data is stored on cloud infrastructure (Supabase) with access restricted to the People & Growth team.
+We do not sell, rent or share personal data with third parties for marketing purposes. Data is stored on cloud infrastructure (Supabase) with access restricted to the Festina team.
 
 ## Comment moderation
 Every comment is reviewed before publication. This means that, between submission and publication, your comment and email are visible only to the team responsible for moderation.
@@ -138,13 +138,13 @@ The use of cookies on the site is covered separately in our [Cookie Policy](/coo
     titlePt: "Termos de Uso",
     titleEn: "Terms of Use",
     bodyPt: `## Aceitação dos termos
-Ao acessar e usar o site da People & Growth, você concorda com estes Termos de Uso. Se não concordar com algum ponto, pedimos que não utilize o site.
+Ao acessar e usar o site da Festina, você concorda com estes Termos de Uso. Se não concordar com algum ponto, pedimos que não utilize o site.
 
 ## Sobre o conteúdo
 Os artigos, análises e materiais publicados aqui — incluindo os da seção Mea Sententia — representam a opinião de seus autores e têm caráter informativo. Não constituem aconselhamento profissional individualizado (jurídico, financeiro, contábil ou de outra natureza) para o caso concreto de cada leitor.
 
 ## Propriedade intelectual
-Textos, imagens, marca e demais materiais do site são de propriedade da People & Growth ou de terceiros licenciados, protegidos por direitos autorais. A reprodução total ou parcial sem autorização prévia não é permitida — veja também nosso [Aviso de Direitos Autorais](/direitos-autorais).
+Textos, imagens, marca e demais materiais do site são de propriedade da Festina ou de terceiros licenciados, protegidos por direitos autorais. A reprodução total ou parcial sem autorização prévia não é permitida — veja também nosso [Aviso de Direitos Autorais](/direitos-autorais).
 
 ## Comentários e conduta do usuário
 Ao comentar em um artigo, você concorda em não publicar conteúdo ofensivo, ilegal, difamatório ou que viole direitos de terceiros. Reservamo-nos o direito de moderar, editar ou remover comentários que descumpram essas regras — veja as [Regras de Uso dos Comentários](/comentarios) para mais detalhes.
@@ -161,13 +161,13 @@ Podemos atualizar estes Termos de Uso periodicamente. A versão vigente é sempr
 ## Legislação aplicável
 Estes termos são regidos pelas leis da República Federativa do Brasil. Dúvidas podem ser enviadas pela [página de Contato](/contato).`,
     bodyEn: `## Acceptance of terms
-By accessing and using the People & Growth website, you agree to these Terms of Use. If you disagree with any part, please do not use the site.
+By accessing and using the Festina website, you agree to these Terms of Use. If you disagree with any part, please do not use the site.
 
 ## About the content
 The articles, analyses and materials published here — including those in the Mea Sententia section — represent the opinion of their authors and are informational in nature. They do not constitute individualized professional advice (legal, financial, accounting or otherwise) for any reader's specific situation.
 
 ## Intellectual property
-Text, images, brand and other site materials are the property of People & Growth or licensed third parties, protected by copyright. Full or partial reproduction without prior authorization is not permitted — see also our [Copyright Notice](/direitos-autorais).
+Text, images, brand and other site materials are the property of Festina or licensed third parties, protected by copyright. Full or partial reproduction without prior authorization is not permitted — see also our [Copyright Notice](/direitos-autorais).
 
 ## Comments and user conduct
 By commenting on an article, you agree not to post offensive, illegal, defamatory content or content that violates third-party rights. We reserve the right to moderate, edit or remove comments that break these rules — see the [Comment Guidelines](/comentarios) for more details.

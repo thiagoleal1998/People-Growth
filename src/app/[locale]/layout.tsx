@@ -33,18 +33,18 @@ export async function generateMetadata({
 
   return {
     title: {
-      default: config[titleKey] || "People & Growth",
-      template: "%s | People & Growth",
+      default: config[titleKey] || "Festina",
+      template: "%s | Festina",
     },
     description: config[descriptionKey] || t("heroSubtitle"),
     metadataBase: new URL(
-      process.env.NEXT_PUBLIC_SITE_URL ?? "https://peopleandgrowth.com.br"
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br"
     ),
     icons: config.favicon_url ? { icon: config.favicon_url } : undefined,
     openGraph: {
       type: "website",
       locale: locale === "pt" ? "pt_BR" : "en_US",
-      siteName: "People & Growth",
+      siteName: "Festina",
       images: config.seo_og_image ? [{ url: config.seo_og_image }] : undefined,
     },
     twitter: {
@@ -81,13 +81,13 @@ export default async function LocaleLayout({
   const messages = await getMessages();
   const t = await getTranslations({ locale, namespace: "home" });
   const config = await getSiteConfig();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://peopleandgrowth.com.br";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br";
   const summaryKey = locale === "en" ? "geo_ai_summary_en" : "geo_ai_summary_pt";
 
   const organizationSchema = {
     "@context": "https://schema.org",
     "@type": "Organization",
-    name: "People & Growth",
+    name: "Festina",
     url: siteUrl,
     logo: config.logo_url || undefined,
     description: config[summaryKey] || t("heroSubtitle"),
@@ -119,7 +119,7 @@ export default async function LocaleLayout({
   return (
     <html lang={locale} data-scroll-behavior="smooth">
       <head>
-        <link rel="alternate" type="application/rss+xml" title="People & Growth — Mea Sententia" href="/rss.xml" />
+        <link rel="alternate" type="application/rss+xml" title="Festina — Mea Sententia" href="/rss.xml" />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
       </head>
       <body>

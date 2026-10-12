@@ -901,7 +901,7 @@ export default async function HomePage() {
                 border: "1px solid rgba(255,255,255,0.1)",
               }}
             >
-              <VideoFacade embedUrl={heroVideoUrl} thumbnailUrl={heroVideoThumbnail} title="Vídeo institucional People & Growth" />
+              <VideoFacade embedUrl={heroVideoUrl} thumbnailUrl={heroVideoThumbnail} title="Vídeo institucional Festina" />
             </div>
           )}
           </div>
@@ -1157,7 +1157,7 @@ export default async function HomePage() {
               <span style={{ color: "#C89A4A" }}>atento ao que move o mundo.</span>
             </h2>
             <p style={{ color: "rgba(255,255,255,0.7)", lineHeight: 1.7, marginBottom: "2rem", fontSize: "1.0625rem" }}>
-              Fundada por Thiago Leal, Gustavo Monken e Raul Salustiano, a People & Growth une estratégia de negócios, dados e inteligência artificial a uma cobertura independente dos temas sociais, políticos, econômicos e ambientais que impactam pessoas e empresas.
+              Fundada por Thiago Leal, Gustavo Monken e Raul Salustiano, a Festina une estratégia de negócios, dados e inteligência artificial a uma cobertura independente dos temas sociais, políticos, econômicos e ambientais que impactam pessoas e empresas.
             </p>
             <Link
               href="/sobre"

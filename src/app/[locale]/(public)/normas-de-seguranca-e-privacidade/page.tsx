@@ -18,7 +18,7 @@ const DEFAULT_BODY_EN = INSTITUTIONAL_DEFAULTS["normas-de-seguranca-e-privacidad
 
 export const metadata: Metadata = {
   title: DEFAULT_TITLE_PT,
-  description: "Como a People & Growth trata os dados enviados no site, incluindo comentários e formulários.",
+  description: "Como a Festina trata os dados enviados no site, incluindo comentários e formulários.",
 };
 
 export default async function NormasSegurancaPrivacidadePage() {

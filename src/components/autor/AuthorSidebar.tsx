@@ -55,10 +55,10 @@ export function AuthorSidebar({ logoUrl, pendingComments = 0, unreadAnnouncement
       <div style={{ padding: "1.5rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={logoUrl} alt="People & Growth" style={{ height: "2.25rem", width: "auto", display: "block" }} />
+          <img src={logoUrl} alt="Festina" style={{ height: "2.25rem", width: "auto", display: "block" }} />
         ) : (
           <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-            People & Growth
+            Festina
           </div>
         )}
         <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.375rem" }}>Painel do Autor</div>

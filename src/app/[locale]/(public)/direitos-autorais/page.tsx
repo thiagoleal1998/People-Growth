@@ -18,7 +18,7 @@ const DEFAULT_BODY_EN = INSTITUTIONAL_DEFAULTS["direitos-autorais"].bodyEn;
 
 export const metadata: Metadata = {
   title: DEFAULT_TITLE_PT,
-  description: "Termos de uso do conteúdo publicado pela People & Growth.",
+  description: "Termos de uso do conteúdo publicado pela Festina.",
 };
 
 export default async function DireitosAutoraisPage() {

@@ -18,7 +18,7 @@ const DEFAULT_BODY_EN = INSTITUTIONAL_DEFAULTS["termos-de-uso"].bodyEn;
 
 export const metadata: Metadata = {
   title: DEFAULT_TITLE_PT,
-  description: "Regras de uso do site People & Growth, incluindo conteúdo, comentários e propriedade intelectual.",
+  description: "Regras de uso do site Festina, incluindo conteúdo, comentários e propriedade intelectual.",
 };
 
 export default async function TermosDeUsoPage() {

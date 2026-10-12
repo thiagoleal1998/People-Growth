@@ -5,8 +5,8 @@ import { Check, Copy } from "lucide-react";
 import { Field, Input, Textarea, SubmitButton, FieldGrid } from "@/components/admin/ui";
 
 const seoFields: { key: string; label: string; placeholder?: string; hint?: string }[] = [
-  { key: "seo_meta_title_pt", label: "Título SEO (PT)", placeholder: "People & Growth", hint: "Substitui o título padrão nas buscas. Ideal até 60 caracteres." },
-  { key: "seo_meta_title_en", label: "Título SEO (EN)", placeholder: "People & Growth" },
+  { key: "seo_meta_title_pt", label: "Título SEO (PT)", placeholder: "Festina", hint: "Substitui o título padrão nas buscas. Ideal até 60 caracteres." },
+  { key: "seo_meta_title_en", label: "Título SEO (EN)", placeholder: "Festina" },
   { key: "seo_meta_description_pt", label: "Descrição SEO (PT)", hint: "Aparece nos resultados de busca. Ideal até 155 caracteres." },
   { key: "seo_meta_description_en", label: "Descrição SEO (EN)" },
   { key: "seo_og_image", label: "Imagem de compartilhamento (Open Graph)", placeholder: "https://...", hint: "Imagem exibida ao compartilhar o site no WhatsApp, LinkedIn, etc. Ideal 1200x630px." },
@@ -18,7 +18,7 @@ const geoFields: { key: string; label: string; placeholder?: string; hint?: stri
   {
     key: "geo_ai_summary_pt",
     label: "Resumo institucional para IA (PT)",
-    hint: "Frase objetiva sobre quem é a People & Growth, usada como base para respostas de ferramentas como ChatGPT, Perplexity e Gemini.",
+    hint: "Frase objetiva sobre quem é a Festina, usada como base para respostas de ferramentas como ChatGPT, Perplexity e Gemini.",
   },
   { key: "geo_ai_summary_en", label: "Resumo institucional para IA (EN)" },
 ];
@@ -148,7 +148,7 @@ export function SeoTabs({
           <FieldGrid>
             <Field
               label="Perguntas frequentes (PT)"
-              hint='Uma pergunta e resposta por linha, separadas por " | ". Ex: O que é a People & Growth? | Uma consultoria e um espaço de conteúdo sobre negócios, pessoas e os temas que os impactam.'
+              hint='Uma pergunta e resposta por linha, separadas por " | ". Ex: O que é a Festina? | Uma consultoria e um espaço de conteúdo sobre negócios, pessoas e os temas que os impactam.'
             >
               <Textarea name="aeo_faq_pt" rows={8} defaultValue={values.aeo_faq_pt ?? ""} />
             </Field>

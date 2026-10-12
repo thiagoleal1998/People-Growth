@@ -9,7 +9,7 @@ import type { Category } from "@/types/database.types";
 export const revalidate = 300;
 
 export const metadata: Metadata = {
-  title: "Categorias — People & Growth",
+  title: "Categorias — Festina",
 };
 
 // The bar on every page only ever shows a handful of categories (see CategoryNav);

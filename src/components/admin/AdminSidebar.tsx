@@ -137,7 +137,7 @@ export function AdminSidebar({
       </button>
       {logoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={logoUrl} alt="People & Growth" style={{ height: "1.75rem", width: "auto" }} />
+        <img src={logoUrl} alt="Festina" style={{ height: "1.75rem", width: "auto" }} />
       ) : (
         <span style={{ fontWeight: 800, fontSize: "0.9375rem" }}>People &amp; Growth</span>
       )}
@@ -164,10 +164,10 @@ export function AdminSidebar({
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.5rem" }}>
           {logoUrl ? (
             // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="People & Growth" style={{ height: "2.25rem", width: "auto", display: "block" }} />
+            <img src={logoUrl} alt="Festina" style={{ height: "2.25rem", width: "auto", display: "block" }} />
           ) : (
             <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
-              People & Growth
+              Festina
             </div>
           )}
           <ThemeToggle compact />

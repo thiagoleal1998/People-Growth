@@ -18,7 +18,7 @@ const DEFAULT_BODY_EN = INSTITUTIONAL_DEFAULTS["cookies"].bodyEn;
 
 export const metadata: Metadata = {
   title: DEFAULT_TITLE_PT,
-  description: "Como o site People & Growth usa cookies.",
+  description: "Como o site Festina usa cookies.",
 };
 
 export default async function CookiesPage() {

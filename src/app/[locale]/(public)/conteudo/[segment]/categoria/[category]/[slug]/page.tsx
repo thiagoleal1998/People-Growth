@@ -169,7 +169,7 @@ export default async function ArticlePage({
     permanentRedirect(articlePath(article, article.categories?.slug, locale === "en" ? "en" : "pt"));
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://peopleandgrowth.com.br";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br";
   const canonicalPath = articlePath(article, article.categories?.slug, "pt");
   const aiText = aiDisclosureText(article.ai_usage, locale);
   const aiDisclosure = aiText
@@ -187,7 +187,7 @@ export default async function ArticlePage({
     author: allAuthors.length > 0 ? allAuthors.map((a) => ({ "@type": "Person", name: a.name, url: `${siteUrl}/conteudo/autor/${a.slug}` })) : undefined,
     publisher: {
       "@type": "Organization",
-      name: "People & Growth",
+      name: "Festina",
       logo: { "@type": "ImageObject", url: `${siteUrl}/favicon.ico` },
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": `${siteUrl}${canonicalPath}` },

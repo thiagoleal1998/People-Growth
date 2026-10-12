@@ -18,7 +18,7 @@ const DEFAULT_BODY_EN = INSTITUTIONAL_DEFAULTS["comentarios"].bodyEn;
 
 export const metadata: Metadata = {
   title: DEFAULT_TITLE_PT,
-  description: "Regras para comentar nos artigos da People & Growth.",
+  description: "Regras para comentar nos artigos da Festina.",
 };
 
 export default async function RegrasComentariosPage() {

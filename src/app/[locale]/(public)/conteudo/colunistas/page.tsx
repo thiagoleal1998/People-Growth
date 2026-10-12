@@ -11,7 +11,7 @@ export const revalidate = 300;
 
 export const metadata: Metadata = {
   title: "Colunistas — Mea Sententia",
-  description: "Conheça quem escreve na Mea Sententia: os colunistas da People & Growth.",
+  description: "Conheça quem escreve na Mea Sententia: os colunistas da Festina.",
 };
 
 export default async function ColunistasPage() {

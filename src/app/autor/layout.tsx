@@ -11,7 +11,7 @@ export async function generateMetadata(): Promise<Metadata> {
   const faviconUrl = data?.value as string | undefined;
 
   return {
-    title: { default: "Painel do Autor | People & Growth", template: "%s | Painel do Autor" },
+    title: { default: "Painel do Autor | Festina", template: "%s | Painel do Autor" },
     robots: { index: false, follow: false },
     icons: faviconUrl ? { icon: faviconUrl } : undefined,
   };

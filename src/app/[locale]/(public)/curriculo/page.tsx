@@ -113,7 +113,7 @@ export default async function CurriculoPage() {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: configRow } = await (supabase as any).from("site_config").select("value").eq("key", "contact_email").maybeSingle();
-  const contactEmail = configRow?.value || "contato@peoplegrowth.com.br";
+  const contactEmail = configRow?.value || "contato@grupofestina.com.br";
 
   return (
     <>

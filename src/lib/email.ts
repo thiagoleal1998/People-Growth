@@ -15,7 +15,7 @@ export async function sendAdminNotification(to: string, subject: string, html: s
   try {
     const resend = new Resend(apiKey);
     await resend.emails.send({
-      from: process.env.RESEND_FROM_EMAIL || "People & Growth <onboarding@resend.dev>",
+      from: process.env.RESEND_FROM_EMAIL || "Festina <onboarding@resend.dev>",
       to,
       subject,
       html,

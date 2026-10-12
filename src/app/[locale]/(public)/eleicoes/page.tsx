@@ -34,7 +34,7 @@ export const metadata: Metadata = {
   description: "Apuração das eleições de 2026 com os dados oficiais do Tribunal Superior Eleitoral.",
 };
 
-// People & Growth's own colour. Candidates use their party's colour instead.
+// Festina's own colour. Candidates use their party's colour instead.
 const BRAND = "#315E9C";
 const CARGOS = ["presidente", "governador", "senado", "federal", "estadual"] as const;
 type Cargo = (typeof CARGOS)[number];
