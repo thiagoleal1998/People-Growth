@@ -2,30 +2,36 @@ import { Link } from "@/i18n/navigation";
 import { getCurrentWeekGames, type NflGame } from "@/lib/nfl";
 import { TeamCrest } from "@/components/TeamCrest";
 
-const BRAND = "#4361EE";
+// Verified live against ESPN's scoreboard response (leagues[0].logos) — the
+// "dark" variant (rel: ["full","dark"]) is the one meant to sit on a dark
+// background, which is what this section uses on purpose: a distinct,
+// NFL-themed dark block rather than reusing the Brasileirão section's
+// light blue card style.
+const NFL_LOGO_URL = "https://a.espncdn.com/i/teamlogos/leagues/500-dark/nfl.png";
+const NFL_RED = "#D50A0A";
 const PREVIEW_COUNT = 3;
 
 function GameRow({ game }: { game: NflGame }) {
   const isLive = game.status === "live";
   const hasScore = game.status !== "scheduled";
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0", borderTop: "1px solid var(--site-border)" }}>
-      <div style={{ width: "5rem", flexShrink: 0, fontSize: "0.75rem", color: isLive ? "#DC2626" : "var(--site-muted)", fontWeight: isLive ? 800 : 600 }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", padding: "1.125rem 0", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+      <div style={{ width: "6rem", flexShrink: 0, fontSize: "0.75rem", color: isLive ? "#FF5252" : "rgba(255,255,255,0.55)", fontWeight: isLive ? 800 : 600 }}>
         {isLive ? "Ao vivo" : game.statusDetail}
       </div>
-      <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
-        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "0.375rem" }}>
-          <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+      <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "1rem" }}>
+        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "0.75rem" }}>
+          <span style={{ fontSize: "0.9375rem", fontWeight: 700, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {game.away.abbreviation}
           </span>
-          <TeamCrest src={game.away.logo} alt={game.away.name} size={20} />
+          <TeamCrest src={game.away.logo} alt={game.away.name} size={36} />
         </div>
-        <span style={{ fontWeight: 800, color: BRAND, fontSize: "0.875rem", flexShrink: 0, minWidth: "2.75rem", textAlign: "center" }}>
+        <span style={{ fontWeight: 800, color: NFL_RED, fontSize: "1.125rem", flexShrink: 0, minWidth: "3rem", textAlign: "center" }}>
           {hasScore ? `${game.away.score}–${game.home.score}` : "×"}
         </span>
-        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: "0.375rem" }}>
-          <TeamCrest src={game.home.logo} alt={game.home.name} size={20} />
-          <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: "0.75rem" }}>
+          <TeamCrest src={game.home.logo} alt={game.home.name} size={36} />
+          <span style={{ fontSize: "0.9375rem", fontWeight: 700, color: "white", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {game.home.abbreviation}
           </span>
         </div>
@@ -37,26 +43,55 @@ function GameRow({ game }: { game: NflGame }) {
 // A small, static preview — unlike SportsLiveWidget this doesn't poll (NFL
 // games are a once-a-week cadence, not worth the client-side complexity),
 // so it's a plain Server Component fetching ESPN's scoreboard directly (see
-// src/lib/nfl.ts). Shows nothing at all if ESPN's data is unavailable,
+// src/lib/nfl.ts). Renders nothing at all if ESPN's data is unavailable,
 // same null-safe pattern as the rest of the sports section, rather than an
-// empty-looking card.
+// empty-looking dark block.
 export async function NflPreview() {
   const games = await getCurrentWeekGames();
   if (!games || games.length === 0) return null;
   const highlighted = games.slice(0, PREVIEW_COUNT);
 
   return (
-    <section className="container-xl" style={{ paddingTop: "1.5rem", paddingBottom: "0.5rem" }}>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.875rem" }}>
-        <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)" }}>NFL</h2>
-        <Link href="/nfl" style={{ color: BRAND, fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}>
-          Ver mais →
-        </Link>
-      </div>
-      <div style={{ borderRadius: "0.75rem", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", padding: "0.25rem 1.125rem" }}>
-        {highlighted.map((game) => (
-          <GameRow key={game.id} game={game} />
-        ))}
+    <section style={{ background: "linear-gradient(135deg, #0d1b2a 0%, #162236 50%, #1a1f3e 100%)", position: "relative", overflow: "hidden", padding: "3.5rem 0" }}>
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          backgroundImage:
+            "radial-gradient(circle at 15% 25%, rgba(213,10,10,0.16) 0%, transparent 55%), radial-gradient(circle at 85% 75%, rgba(67,97,238,0.1) 0%, transparent 50%)",
+          pointerEvents: "none",
+        }}
+      />
+      <div className="container-xl" style={{ position: "relative", zIndex: 1 }}>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "2rem", flexWrap: "wrap", gap: "1.25rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={NFL_LOGO_URL} alt="NFL" width={52} height={52} style={{ objectFit: "contain" }} />
+            <div>
+              <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: NFL_RED, letterSpacing: "0.08em", textTransform: "uppercase" }}>Esportes</div>
+              <h2 style={{ fontSize: "1.5rem", fontWeight: 800, color: "white" }}>NFL</h2>
+            </div>
+          </div>
+          <Link
+            href="/nfl"
+            style={{
+              color: "white",
+              fontWeight: 700,
+              fontSize: "0.875rem",
+              textDecoration: "none",
+              border: "1px solid rgba(255,255,255,0.3)",
+              borderRadius: "9999px",
+              padding: "0.5rem 1.375rem",
+            }}
+          >
+            Ver mais →
+          </Link>
+        </div>
+        <div style={{ borderRadius: "1rem", border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(255,255,255,0.04)", padding: "0.5rem 1.75rem" }}>
+          {highlighted.map((game) => (
+            <GameRow key={game.id} game={game} />
+          ))}
+        </div>
       </div>
     </section>
   );
