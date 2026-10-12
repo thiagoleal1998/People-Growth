@@ -25,12 +25,29 @@ function statusLabel(fixture: Fixture, locale: string): string {
   return fixture.statusShort;
 }
 
+// Falls back to the gradient circle not just when there's no logo url at
+// all, but also when a real url fails to actually load (onError) — a team
+// crest can 404/time out/fail DNS on the viewer's own network even when the
+// url itself is correct (confirmed live: media.api-sports.io resolved fine
+// via Google's DNS but not via one viewer's own resolver), and a broken-
+// image icon looks like a site bug when it's really just that one request
+// failing.
 function Crest({ src, alt }: { src: string | null; alt: string }) {
+  const [failed, setFailed] = useState(false);
+  const showImage = src && !failed;
   return (
     <div style={{ width: "2.75rem", height: "2.75rem", flexShrink: 0, display: "flex", alignItems: "center", justifyContent: "center" }}>
-      {src ? (
+      {showImage ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={src} alt={alt} title={alt} width={44} height={44} style={{ objectFit: "contain", maxWidth: "100%", maxHeight: "100%" }} />
+        <img
+          src={src}
+          alt={alt}
+          title={alt}
+          width={44}
+          height={44}
+          style={{ objectFit: "contain", maxWidth: "100%", maxHeight: "100%" }}
+          onError={() => setFailed(true)}
+        />
       ) : (
         <div style={{ width: "100%", height: "100%", borderRadius: "50%", background: "linear-gradient(135deg, #4361EE, #06D6A0)" }} title={alt} />
       )}
