@@ -203,6 +203,12 @@ Hoje, o Grupo Festina é formado por três marcas:
 
 O restante desta página é dedicado à primeira delas, a People & Growth — de onde tudo começou.
 
+## Quando virou o Grupo Festina
+
+A People & Growth não ia comportar o tamanho que o grupo estava ganhando. Entre a consultoria, os cursos e o conteúdo sobre liderança e desenvolvimento, a cobertura de política, economia e sociedade, e a coluna de opinião Mea Sententia, cada frente já tinha identidade e público próprios — e manter tudo debaixo de um nome pensado pra outra escala não fazia mais sentido.
+
+Foi então que a People & Growth passou a ser uma marca — uma entre outras — dentro de um grupo maior: o **Grupo Festina**.
+
 ## 4 níveis de desenvolvimento: Pessoa, Liderança, Equipe e Negócio
 
 O People & Growth parte da compreensão de que desenvolvimento não acontece de forma isolada. Pessoas, relações, equipes e negócios estão conectados, e compreender essa relação é fundamental para construir possibilidades reais de desenvolvimento.
@@ -397,6 +403,12 @@ Today, Grupo Festina is made up of three brands:
 - [Mea Sententia](/mea-sententia) — our opinion column.
 
 The rest of this page is dedicated to the first of them, People & Growth — where it all started.
+
+## When it became Grupo Festina
+
+People & Growth wasn't going to hold the size the group was reaching. Between consulting, courses and content on leadership and development, coverage of politics, economy and society, and the opinion column Mea Sententia, each front already had its own identity and audience — and keeping everything under a name built for a different scale stopped making sense.
+
+That's when People & Growth became one brand — among others — inside a larger group: **Grupo Festina**.
 
 ## 4 levels of development: Person, Leadership, Team and Business
 
