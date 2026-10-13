@@ -22,6 +22,7 @@ const navGroups = [
     items: [
       { key: "peopleGrowth", href: "/people-growth" as const },
       { key: "pontoDeReplica", href: "/ponto-de-replica" as const },
+      { key: "meaSententia", href: "/conteudo/colunistas" as const },
     ],
   },
   {
