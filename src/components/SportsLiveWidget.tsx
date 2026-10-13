@@ -144,6 +144,18 @@ export function SportsLiveWidget({
   const activeKey = tabs.some((t) => t.key === tab) ? tab : (tabs[0]?.key ?? "results");
   const shown = tabs.find((t) => t.key === activeKey)?.data ?? [];
 
+  // The header names whichever competition the active tab is actually
+  // showing — "Brasileirão" was wrong as soon as a Sul-Americana/Libertadores
+  // card could appear here too. Only when every fixture in the tab shares
+  // one competition does it get that competition's own name/logo; a mixed
+  // tab (the common case now that every tracked competition feeds in) falls
+  // back to a generic "Esportes" label instead of naming just one of them.
+  const shownCompetitions = [...new Set(shown.map((f) => f.competition))];
+  const widgetTitle =
+    shownCompetitions.length === 1
+      ? { logo: COMPETITIONS[shownCompetitions[0]].logo, name: locale === "en" ? COMPETITIONS[shownCompetitions[0]].name_en : COMPETITIONS[shownCompetitions[0]].name_pt }
+      : { logo: null, name: locale === "en" ? "Sports" : "Esportes" };
+
   // Offset isn't reset when `shown` changes identity (switching tabs, or
   // live starting/ending) — every read of it below is modulo'd against the
   // current array length, so it's always a safe index regardless, just
@@ -158,6 +170,23 @@ export function SportsLiveWidget({
 
   return (
     <div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          gap: "0.625rem",
+          fontSize: "clamp(1.375rem, 3vw, 1.75rem)",
+          fontWeight: 800,
+          color: "var(--site-text)",
+          marginBottom: "1.25rem",
+          paddingBottom: "1rem",
+          borderBottom: "1px solid var(--site-border)",
+        }}
+      >
+        {widgetTitle.logo ? <TeamCrest src={widgetTitle.logo} alt="" size={32} /> : <span style={{ fontSize: "1.5rem" }}>🏆</span>}
+        {widgetTitle.name}
+      </div>
       <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginBottom: "0.875rem", flexWrap: "wrap" }}>
         {tabs.map(({ key }) => (
           <button

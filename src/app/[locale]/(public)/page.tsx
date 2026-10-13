@@ -317,23 +317,6 @@ export default async function HomePage() {
       {sportsInitial && (
         <div className="container-xl" style={{ maxWidth: "1180px", margin: "0 auto", paddingTop: "1.5rem" }}>
           <section style={{ borderTop: "3px solid #315E9C", paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
-            <h2
-              style={{
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                gap: "0.625rem",
-                fontSize: "clamp(1.375rem, 3vw, 1.75rem)",
-                fontWeight: 800,
-                color: "var(--site-text)",
-                marginBottom: "1.25rem",
-                paddingBottom: "1rem",
-                borderBottom: "1px solid var(--site-border)",
-              }}
-            >
-              <TeamCrest src={COMPETITIONS.serie_a.logo} alt="" size={32} />
-              Brasileirão
-            </h2>
             <SportsLiveWidget
               initial={sportsInitial.live}
               roundResults={sportsInitial.roundResults}
