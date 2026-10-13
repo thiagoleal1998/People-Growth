@@ -18,17 +18,20 @@ const nextConfig: NextConfig = {
     },
   },
   async redirects() {
-    // The "Mea Sententia" content section (news + opinion mixed together)
+    // The old "Mea Sententia" content section (news + opinion mixed together)
     // moved from /mea-sententia to /conteudo — categories and author archives
     // there mixed both formats, so nesting them under the opinion-column
-    // brand name was misleading. These keep old shared/indexed links working.
+    // brand name was misleading. These keep old shared/indexed deep links
+    // working. /mea-sententia itself is reclaimed by a real page now (the
+    // Festina brand's opinion-only listing, format: "opiniao"), so unlike
+    // before, the bare path and its EN equivalent are deliberately NOT
+    // redirected here — only sub-paths that belonged to the old mixed page.
     return [
-      { source: "/pt/mea-sententia/:path*", destination: "/pt/conteudo/:path*", permanent: true },
+      { source: "/pt/mea-sententia/:path+", destination: "/pt/conteudo/:path+", permanent: true },
       { source: "/en/mea-sententia/autor/:slug", destination: "/en/content/author/:slug", permanent: true },
       { source: "/en/mea-sententia/colunistas", destination: "/en/content/columnists", permanent: true },
       { source: "/en/mea-sententia/categoria/:slug", destination: "/en/content/category/:slug", permanent: true },
       { source: "/en/mea-sententia/:slug", destination: "/en/content/:slug", permanent: true },
-      { source: "/en/mea-sententia", destination: "/en/content", permanent: true },
     ];
   },
   async headers() {

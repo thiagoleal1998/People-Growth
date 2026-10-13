@@ -187,7 +187,17 @@ These terms are governed by the laws of the Federative Republic of Brazil. Quest
   "o-que-e-people-and-growth": {
     titlePt: "O que é a People & Growth",
     titleEn: "What is People & Growth",
-    bodyPt: `## 4 níveis de desenvolvimento: Pessoa, Liderança, Equipe e Negócio
+    bodyPt: `### E então, veio a Festina
+
+Com o tempo, a People & Growth cresceu além do que aquele nome conseguia representar. Ao lado da consultoria e dos conteúdos sobre liderança e desenvolvimento, passamos a cobrir também política, economia e sociedade, e a manter uma coluna de opinião própria, a Mea Sententia. Cada uma dessas frentes tinha identidade e público próprios — e colocar tudo debaixo do nome People & Growth deixou de fazer sentido.
+
+Foi então que decidimos: a People & Growth continuaria existindo, mas como uma marca — uma entre outras — dentro de um grupo maior, o **Grupo Festina**.
+
+O nome vem do lema latino *festina lente*, "apressa-te devagar". A logo traz dois beija-flores, duas das espécies mais comuns do Brasil, que resumem bem esse espírito: a agilidade que não abre mão da tranquilidade.
+
+Hoje, a People & Growth segue sendo a nossa frente de consultoria, cursos e conteúdo sobre liderança e desenvolvimento pessoal — e é sobre essa marca, especificamente, que o restante desta página fala.
+
+## 4 níveis de desenvolvimento: Pessoa, Liderança, Equipe e Negócio
 
 O People & Growth parte da compreensão de que desenvolvimento não acontece de forma isolada. Pessoas, relações, equipes e negócios estão conectados, e compreender essa relação é fundamental para construir possibilidades reais de desenvolvimento.
 
@@ -366,7 +376,17 @@ Consciência, Responsabilidade, Desenvolvimento contínuo, Relações, Pensament
 > — People & Growth
 
 [Conheça o time por trás da People & Growth](/sobre)`,
-    bodyEn: `## 4 levels of development: Person, Leadership, Team and Business
+    bodyEn: `### Then came Festina
+
+Over time, People & Growth grew beyond what that name could represent. Alongside consulting and content on leadership and development, we started covering politics, economy and society too, and keeping our own opinion column, Mea Sententia. Each of these fronts had its own identity and audience — and putting everything under the People & Growth name stopped making sense.
+
+That's when we decided: People & Growth would keep existing, but as one brand among others inside a larger group, **Grupo Festina**.
+
+The name comes from the Latin motto *festina lente*, "make haste slowly." The logo features two hummingbirds, two of Brazil's most common species, which capture that spirit well: speed that never gives up calm.
+
+Today, People & Growth remains our consulting, courses and content arm on leadership and personal development — and it's specifically about this brand that the rest of this page is about.
+
+## 4 levels of development: Person, Leadership, Team and Business
 
 People & Growth starts from the understanding that development doesn't happen in isolation. People, relationships, teams and businesses are connected, and understanding that relationship is essential to building real possibilities for development.
 

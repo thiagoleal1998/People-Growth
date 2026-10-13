@@ -49,6 +49,7 @@ export const routing = defineRouting({
     "/nfl": { pt: "/nfl", en: "/nfl" },
     "/people-growth": { pt: "/people-growth", en: "/people-growth" },
     "/ponto-de-replica": { pt: "/ponto-de-replica", en: "/ponto-de-replica" },
+    "/mea-sententia": { pt: "/mea-sententia", en: "/mea-sententia" },
     "/faq": { pt: "/faq", en: "/faq" },
     "/contato": { pt: "/contato", en: "/contact" },
     "/cookies": { pt: "/cookies", en: "/cookies" },

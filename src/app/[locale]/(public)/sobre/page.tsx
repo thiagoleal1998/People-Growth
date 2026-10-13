@@ -177,7 +177,7 @@ export default async function SobrePage() {
                 description: locale === "en" ? "Opinion column on business, society and the issues shaping the current moment." : "Coluna de opinião sobre negócios, sociedade e os temas que moldam o momento atual.",
                 icon: "✍️",
                 color: "#C89A4A",
-                href: "/conteudo/colunistas" as const,
+                href: "/mea-sententia" as const,
               },
             ].map(({ name, description, icon, color, href }) => (
               <Link

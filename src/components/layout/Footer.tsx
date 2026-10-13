@@ -161,7 +161,7 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
                 { key: "services", href: "/servicos" as const },
                 { key: "peopleGrowth", href: "/people-growth" as const },
                 { key: "pontoDeReplica", href: "/ponto-de-replica" as const },
-                { key: "meaSententia", href: "/conteudo/colunistas" as const },
+                { key: "meaSententia", href: "/mea-sententia" as const },
                 { key: "portfolio", href: "/portfolio" as const },
                 { key: "newsletter", href: "/conteudo" as const },
                 { key: "media", href: "/na-midia" as const },
