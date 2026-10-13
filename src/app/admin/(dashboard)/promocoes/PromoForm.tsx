@@ -31,7 +31,7 @@ function CopyPromoTextButton({ text }: { text: string }) {
         display: "inline-flex",
         alignItems: "center",
         gap: "0.5rem",
-        backgroundColor: copied ? "rgba(6,214,160,0.12)" : "var(--admin-surface-alt)",
+        backgroundColor: copied ? "rgba(200, 154, 74,0.12)" : "var(--admin-surface-alt)",
         color: copied ? "#A07B3B" : "var(--admin-text)",
         border: "1px solid var(--admin-border-strong)",
         padding: "0.625rem 1.125rem",

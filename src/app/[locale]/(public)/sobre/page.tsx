@@ -67,7 +67,7 @@ export default async function SobrePage() {
           <div
             style={{
               display: "inline-block",
-              backgroundColor: "rgba(6,214,160,0.15)",
+              backgroundColor: "rgba(200, 154, 74,0.15)",
               color: "#C89A4A",
               padding: "0.25rem 0.875rem",
               borderRadius: "9999px",
@@ -120,7 +120,7 @@ export default async function SobrePage() {
                 padding: "0.875rem 1.75rem",
                 borderRadius: "0.75rem",
                 fontWeight: 600,
-                boxShadow: "0 4px 24px -4px rgba(67,97,238,0.5)",
+                boxShadow: "0 4px 24px -4px rgba(49, 94, 156,0.5)",
               }}
             >
               Agendar conversa <ArrowRight size={18} />
@@ -325,7 +325,7 @@ export default async function SobrePage() {
               padding: "0.875rem 2rem",
               borderRadius: "0.75rem",
               fontWeight: 700,
-              boxShadow: "0 4px 24px -4px rgba(67,97,238,0.4)",
+              boxShadow: "0 4px 24px -4px rgba(49, 94, 156,0.4)",
             }}
           >
             Agendar conversa <ArrowRight size={18} />

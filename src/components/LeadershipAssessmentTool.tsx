@@ -251,7 +251,7 @@ export function LeadershipAssessmentTool() {
                         padding: "0.5rem 0.375rem",
                         borderRadius: "0.5rem",
                         border: ratings[c.key] === r ? "2px solid #315E9C" : "1px solid var(--site-border-strong)",
-                        backgroundColor: ratings[c.key] === r ? "rgba(67,97,238,0.08)" : "var(--site-card)",
+                        backgroundColor: ratings[c.key] === r ? "rgba(49, 94, 156,0.08)" : "var(--site-card)",
                         color: "var(--site-text)",
                         fontSize: "0.75rem",
                         fontWeight: 600,

@@ -167,7 +167,7 @@ export function ImageCropper({
                   fontWeight: 700,
                   cursor: "pointer",
                   border: aspect === opt.value ? "1px solid #315E9C" : "1px solid var(--admin-border-strong)",
-                  backgroundColor: aspect === opt.value ? "rgba(67,97,238,0.12)" : "var(--admin-surface)",
+                  backgroundColor: aspect === opt.value ? "rgba(49, 94, 156,0.12)" : "var(--admin-surface)",
                   color: aspect === opt.value ? "#315E9C" : "var(--admin-muted)",
                 }}
               >

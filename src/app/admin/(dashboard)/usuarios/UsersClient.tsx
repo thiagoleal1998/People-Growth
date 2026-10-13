@@ -42,7 +42,7 @@ export function UsersClient({ users, authors }: { users: UserProfile[]; authors:
                         startTransition(() => updateUserRole(u.id, role));
                       }}
                       style={{
-                        backgroundColor: u.role === "admin" ? "rgba(67,97,238,0.1)" : "rgba(6,214,160,0.1)",
+                        backgroundColor: u.role === "admin" ? "rgba(49, 94, 156,0.1)" : "rgba(200, 154, 74,0.1)",
                         color: u.role === "admin" ? "#315E9C" : "#A07B3B",
                         padding: "0.2rem 0.5rem",
                         borderRadius: "0.375rem",

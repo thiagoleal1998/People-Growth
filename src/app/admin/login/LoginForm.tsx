@@ -17,7 +17,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
             position: "absolute",
             inset: 0,
             backgroundImage:
-              "radial-gradient(circle at 20% 30%, rgba(67,97,238,0.15) 0%, transparent 55%), radial-gradient(circle at 80% 75%, rgba(6,214,160,0.1) 0%, transparent 50%)",
+              "radial-gradient(circle at 20% 30%, rgba(49, 94, 156,0.15) 0%, transparent 55%), radial-gradient(circle at 80% 75%, rgba(200, 154, 74,0.1) 0%, transparent 50%)",
             pointerEvents: "none",
           }}
         />
@@ -44,7 +44,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
             </div>
           )}
 
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "rgba(67,97,238,0.15)", border: "1px solid rgba(67,97,238,0.3)", borderRadius: "9999px", padding: "0.375rem 1rem", marginBottom: "1.5rem" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "rgba(49, 94, 156,0.15)", border: "1px solid rgba(49, 94, 156,0.3)", borderRadius: "9999px", padding: "0.375rem 1rem", marginBottom: "1.5rem" }}>
             <Sparkles size={13} color="#C89A4A" />
             <span style={{ fontSize: "0.75rem", color: "#C89A4A", fontWeight: 600 }}>Painel do portal</span>
           </div>

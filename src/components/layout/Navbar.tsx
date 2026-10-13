@@ -75,7 +75,7 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
                   fontSize: "0.875rem",
                   fontWeight: 500,
                   color: isActive ? "#315E9C" : "rgba(255,255,255,0.75)",
-                  backgroundColor: isActive ? "rgba(67,97,238,0.12)" : "transparent",
+                  backgroundColor: isActive ? "rgba(49, 94, 156,0.12)" : "transparent",
                   transition: "all 0.2s",
                 }}
               >

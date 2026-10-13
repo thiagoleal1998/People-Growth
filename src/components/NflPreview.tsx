@@ -52,7 +52,7 @@ export async function NflPreview() {
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "radial-gradient(circle at 15% 25%, rgba(213,10,10,0.16) 0%, transparent 55%), radial-gradient(circle at 85% 75%, rgba(67,97,238,0.1) 0%, transparent 50%)",
+            "radial-gradient(circle at 15% 25%, rgba(213,10,10,0.16) 0%, transparent 55%), radial-gradient(circle at 85% 75%, rgba(49, 94, 156,0.1) 0%, transparent 50%)",
           pointerEvents: "none",
         }}
       />

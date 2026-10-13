@@ -22,9 +22,9 @@ export default async function LaboratorioIAPage() {
   return (
     <>
       <section style={{ background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)", paddingTop: "6rem", paddingBottom: "5rem", color: "white", textAlign: "center", position: "relative", overflow: "hidden" }}>
-        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 30% 50%, rgba(67,97,238,0.15) 0%, transparent 60%)", pointerEvents: "none" }} />
+        <div style={{ position: "absolute", inset: 0, backgroundImage: "radial-gradient(circle at 30% 50%, rgba(49, 94, 156,0.15) 0%, transparent 60%)", pointerEvents: "none" }} />
         <div className="container-xl" style={{ maxWidth: "700px", margin: "0 auto", position: "relative" }}>
-          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "rgba(67,97,238,0.2)", color: "#5A7EB0", padding: "0.375rem 1rem", borderRadius: "9999px", fontSize: "0.8125rem", fontWeight: 700, marginBottom: "1.5rem" }}>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "rgba(49, 94, 156,0.2)", color: "#5A7EB0", padding: "0.375rem 1rem", borderRadius: "9999px", fontSize: "0.8125rem", fontWeight: 700, marginBottom: "1.5rem" }}>
             🤖 {t("title")}
           </div>
           <h1 style={{ fontSize: "clamp(2rem, 5vw, 3.5rem)", fontWeight: 800, lineHeight: 1.1, marginBottom: "1rem" }}>
@@ -71,7 +71,7 @@ export default async function LaboratorioIAPage() {
             A Festina desenvolve agentes, automações e integrações de IA que aumentam a produtividade e criam vantagens competitivas reais para o seu negócio.
           </p>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
-            <Link href="/contato" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", padding: "0.875rem 1.75rem", borderRadius: "0.75rem", fontWeight: 700, boxShadow: "0 4px 24px -4px rgba(67,97,238,0.5)" }}>
+            <Link href="/contato" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", padding: "0.875rem 1.75rem", borderRadius: "0.75rem", fontWeight: 700, boxShadow: "0 4px 24px -4px rgba(49, 94, 156,0.5)" }}>
               Falar sobre IA para meu negócio <ArrowRight size={18} />
             </Link>
           </div>

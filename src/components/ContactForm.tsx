@@ -56,7 +56,7 @@ export function ContactForm({ serviceDefault = "", compact = false }: ContactFor
 
   if (status === "success") {
     return (
-      <div style={{ backgroundColor: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.3)", borderRadius: "0.875rem", padding: "2rem", textAlign: "center" }}>
+      <div style={{ backgroundColor: "rgba(200, 154, 74,0.1)", border: "1px solid rgba(200, 154, 74,0.3)", borderRadius: "0.875rem", padding: "2rem", textAlign: "center" }}>
         <div style={{ fontSize: "2.5rem", marginBottom: "0.75rem" }}>✅</div>
         <h3 style={{ fontWeight: 700, color: "var(--site-text)", marginBottom: "0.5rem" }}>Mensagem enviada!</h3>
         <p style={{ color: "var(--site-text-secondary)", fontSize: "0.9rem" }}>Em breve entraremos em contato. Obrigado!</p>

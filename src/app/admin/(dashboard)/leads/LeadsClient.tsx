@@ -9,9 +9,9 @@ import { updateLeadStatus, updateLeadNotes, deleteLead } from "./actions";
 type Lead = Database["public"]["Tables"]["leads"]["Row"];
 
 const statusConfig: Record<Lead["status"], { label: string; color: string; bg: string }> = {
-  new: { label: "Novo", color: "#315E9C", bg: "rgba(67,97,238,0.1)" },
+  new: { label: "Novo", color: "#315E9C", bg: "rgba(49, 94, 156,0.1)" },
   contacted: { label: "Em contato", color: "#cc9200", bg: "rgba(255,183,3,0.1)" },
-  proposal: { label: "Proposta", color: "#A07B3B", bg: "rgba(6,214,160,0.1)" },
+  proposal: { label: "Proposta", color: "#A07B3B", bg: "rgba(200, 154, 74,0.1)" },
   closed: { label: "Fechado", color: "var(--admin-text-secondary)", bg: "rgba(148,163,184,0.1)" },
 };
 

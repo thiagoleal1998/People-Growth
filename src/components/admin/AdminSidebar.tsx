@@ -196,7 +196,7 @@ export function AdminSidebar({
                     fontSize: "0.875rem",
                     fontWeight: 500,
                     color: groupActive ? "white" : "rgba(255,255,255,0.55)",
-                    backgroundColor: groupActive && !open ? "rgba(67,97,238,0.2)" : "transparent",
+                    backgroundColor: groupActive && !open ? "rgba(49, 94, 156,0.2)" : "transparent",
                     border: "none",
                     width: "100%",
                     cursor: "pointer",
@@ -335,7 +335,7 @@ function NavLinkItem({
         fontSize: "0.875rem",
         fontWeight: 500,
         color: isActive ? "white" : "rgba(255,255,255,0.55)",
-        backgroundColor: isActive ? "rgba(67,97,238,0.2)" : "transparent",
+        backgroundColor: isActive ? "rgba(49, 94, 156,0.2)" : "transparent",
         textDecoration: "none",
         transition: "all 0.15s",
       }}

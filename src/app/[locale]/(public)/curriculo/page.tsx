@@ -134,7 +134,7 @@ export default async function CurriculoPage() {
             <div
               style={{
                 display: "inline-block",
-                backgroundColor: "rgba(6,214,160,0.15)",
+                backgroundColor: "rgba(200, 154, 74,0.15)",
                 color: "#C89A4A",
                 padding: "0.25rem 0.875rem",
                 borderRadius: "9999px",
@@ -204,7 +204,7 @@ export default async function CurriculoPage() {
                   </div>
                   <span
                     style={{
-                      backgroundColor: "rgba(67,97,238,0.1)",
+                      backgroundColor: "rgba(49, 94, 156,0.1)",
                       color: "#315E9C",
                       padding: "0.25rem 0.75rem",
                       borderRadius: "9999px",
@@ -248,7 +248,7 @@ export default async function CurriculoPage() {
                       <span
                         key={h}
                         style={{
-                          backgroundColor: "rgba(6,214,160,0.1)",
+                          backgroundColor: "rgba(200, 154, 74,0.1)",
                           color: "#A07B3B",
                           padding: "0.2rem 0.625rem",
                           borderRadius: "9999px",
@@ -299,7 +299,7 @@ export default async function CurriculoPage() {
                     alignItems: "center",
                     gap: "1rem",
                     padding: "1rem 1.25rem",
-                    backgroundColor: "rgba(67,97,238,0.05)",
+                    backgroundColor: "rgba(49, 94, 156,0.05)",
                     borderRadius: "0.625rem",
                     flexWrap: "wrap",
                   }}
@@ -325,9 +325,9 @@ export default async function CurriculoPage() {
                     alignItems: "center",
                     gap: "0.625rem",
                     padding: "0.75rem 1rem",
-                    backgroundColor: "rgba(6,214,160,0.08)",
+                    backgroundColor: "rgba(200, 154, 74,0.08)",
                     borderRadius: "0.625rem",
-                    border: "1px solid rgba(6,214,160,0.15)",
+                    border: "1px solid rgba(200, 154, 74,0.15)",
                   }}
                 >
                   <span style={{ color: "#C89A4A", flexShrink: 0 }}>📚</span>

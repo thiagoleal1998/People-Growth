@@ -55,7 +55,7 @@ export default async function ServicosPage() {
           <div
             style={{
               display: "inline-block",
-              backgroundColor: "rgba(67,97,238,0.2)",
+              backgroundColor: "rgba(49, 94, 156,0.2)",
               color: "#5A7EB0",
               padding: "0.25rem 0.875rem",
               borderRadius: "9999px",
@@ -201,7 +201,7 @@ export default async function ServicosPage() {
                   padding: "1.5rem",
                 }}
               >
-                <div style={{ fontWeight: 900, fontSize: "2rem", color: "rgba(67,97,238,0.4)", marginBottom: "0.5rem", lineHeight: 1 }}>
+                <div style={{ fontWeight: 900, fontSize: "2rem", color: "rgba(49, 94, 156,0.4)", marginBottom: "0.5rem", lineHeight: 1 }}>
                   {step}
                 </div>
                 <h3 style={{ fontWeight: 700, fontSize: "1rem", marginBottom: "0.375rem" }}>{title}</h3>
@@ -222,7 +222,7 @@ export default async function ServicosPage() {
                 padding: "0.875rem 2rem",
                 borderRadius: "0.75rem",
                 fontWeight: 700,
-                boxShadow: "0 4px 24px -4px rgba(67,97,238,0.5)",
+                boxShadow: "0 4px 24px -4px rgba(49, 94, 156,0.5)",
               }}
             >
               {t("scheduleFreeCall")} <ArrowRight size={18} />

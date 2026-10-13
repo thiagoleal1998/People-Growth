@@ -437,8 +437,8 @@ export default async function HomePage() {
                     marginTop: "1.75rem",
                     padding: "1.5rem",
                     borderRadius: "0.75rem",
-                    border: "1px solid rgba(67,97,238,0.2)",
-                    backgroundColor: "rgba(67,97,238,0.04)",
+                    border: "1px solid rgba(49, 94, 156,0.2)",
+                    backgroundColor: "rgba(49, 94, 156,0.04)",
                   }}
                 >
                   <h4 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)", marginBottom: "0.375rem" }}>
@@ -785,7 +785,7 @@ export default async function HomePage() {
             position: "absolute",
             inset: 0,
             backgroundImage:
-              "radial-gradient(circle at 20% 50%, rgba(67,97,238,0.12) 0%, transparent 60%), radial-gradient(circle at 80% 20%, rgba(6,214,160,0.08) 0%, transparent 50%)",
+              "radial-gradient(circle at 20% 50%, rgba(49, 94, 156,0.12) 0%, transparent 60%), radial-gradient(circle at 80% 20%, rgba(200, 154, 74,0.08) 0%, transparent 50%)",
             pointerEvents: "none",
           }}
         />
@@ -799,8 +799,8 @@ export default async function HomePage() {
               display: "inline-flex",
               alignItems: "center",
               gap: "0.5rem",
-              backgroundColor: "rgba(67,97,238,0.15)",
-              border: "1px solid rgba(67,97,238,0.3)",
+              backgroundColor: "rgba(49, 94, 156,0.15)",
+              border: "1px solid rgba(49, 94, 156,0.3)",
               borderRadius: "9999px",
               padding: "0.375rem 1rem",
               marginBottom: "2rem",
@@ -864,7 +864,7 @@ export default async function HomePage() {
                 borderRadius: "0.75rem",
                 fontWeight: 600,
                 fontSize: "0.9375rem",
-                boxShadow: "0 4px 24px -4px rgba(67,97,238,0.5)",
+                boxShadow: "0 4px 24px -4px rgba(49, 94, 156,0.5)",
               }}
             >
               {t("ctaPrimary")} <ArrowRight size={18} />
@@ -945,8 +945,8 @@ export default async function HomePage() {
             <div
               style={{
                 marginTop: "3rem",
-                backgroundColor: "rgba(6,214,160,0.08)",
-                border: "1px solid rgba(6,214,160,0.2)",
+                backgroundColor: "rgba(200, 154, 74,0.08)",
+                border: "1px solid rgba(200, 154, 74,0.2)",
                 borderRadius: "1.25rem",
                 padding: "2rem",
               }}
@@ -1133,7 +1133,7 @@ export default async function HomePage() {
             <div
               style={{
                 display: "inline-block",
-                backgroundColor: "rgba(6,214,160,0.15)",
+                backgroundColor: "rgba(200, 154, 74,0.15)",
                 color: "#C89A4A",
                 padding: "0.25rem 0.875rem",
                 borderRadius: "9999px",
@@ -1248,7 +1248,7 @@ export default async function HomePage() {
                 borderRadius: "0.75rem",
                 fontWeight: 600,
                 fontSize: "0.9375rem",
-                boxShadow: "0 4px 24px -4px rgba(67,97,238,0.4)",
+                boxShadow: "0 4px 24px -4px rgba(49, 94, 156,0.4)",
               }}
             >
               Agendar conversa <ArrowRight size={18} />

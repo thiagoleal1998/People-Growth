@@ -219,7 +219,7 @@ export default async function FounderPage({
                         <div
                           style={{
                             display: "inline-block",
-                            backgroundColor: "rgba(67,97,238,0.1)",
+                            backgroundColor: "rgba(49, 94, 156,0.1)",
                             color: "#315E9C",
                             padding: "0.125rem 0.625rem",
                             borderRadius: "9999px",

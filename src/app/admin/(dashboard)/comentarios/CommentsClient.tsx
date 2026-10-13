@@ -9,7 +9,7 @@ import { updateCommentStatus, deleteComment } from "./actions";
 
 const statusConfig: Record<Comment["status"], { label: string; color: string; bg: string }> = {
   pending: { label: "Pendente", color: "#cc9200", bg: "rgba(255,183,3,0.1)" },
-  approved: { label: "Aprovado", color: "#A07B3B", bg: "rgba(6,214,160,0.1)" },
+  approved: { label: "Aprovado", color: "#A07B3B", bg: "rgba(200, 154, 74,0.1)" },
   rejected: { label: "Rejeitado", color: "#dc2626", bg: "rgba(239,68,68,0.1)" },
 };
 

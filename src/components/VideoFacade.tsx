@@ -52,7 +52,7 @@ export function VideoFacade({ embedUrl, thumbnailUrl, title }: { embedUrl: strin
           width: "4.5rem",
           height: "4.5rem",
           borderRadius: "50%",
-          backgroundColor: "rgba(67,97,238,0.9)",
+          backgroundColor: "rgba(49, 94, 156,0.9)",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",

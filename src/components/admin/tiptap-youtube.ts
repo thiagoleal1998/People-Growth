@@ -78,7 +78,7 @@ export const YoutubeEmbed = Node.create<YoutubeEmbedOptions>({
 
       const playBtn = document.createElement("div");
       playBtn.style.cssText =
-        "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:3.25rem;height:3.25rem;border-radius:50%;background-color:rgba(67,97,238,0.9);display:flex;align-items:center;justify-content:center";
+        "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:3.25rem;height:3.25rem;border-radius:50%;background-color:rgba(49, 94, 156,0.9);display:flex;align-items:center;justify-content:center";
       playBtn.innerHTML = '<svg width="18" height="18" viewBox="0 0 24 24" fill="white" style="margin-left:2px"><path d="M8 5v14l11-7z"/></svg>';
       thumbWrap.appendChild(playBtn);
 

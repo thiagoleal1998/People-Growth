@@ -43,7 +43,7 @@ export async function MostRead({ excludeId, limit = 5 }: { excludeId?: string; l
               href={articleHref(a, a.categories?.slug)}
               style={{ display: "flex", gap: "0.75rem", alignItems: "flex-start", textDecoration: "none" }}
             >
-              <span style={{ fontWeight: 800, fontSize: "1.25rem", color: "rgba(67,97,238,0.35)", lineHeight: 1, flexShrink: 0 }}>{i + 1}</span>
+              <span style={{ fontWeight: 800, fontSize: "1.25rem", color: "rgba(49, 94, 156,0.35)", lineHeight: 1, flexShrink: 0 }}>{i + 1}</span>
               <span style={{ fontWeight: 600, fontSize: "0.875rem", color: "var(--site-text)", lineHeight: 1.4 }}>{pickLocale(locale, a.title_pt, a.title_en)}</span>
             </Link>
           </li>

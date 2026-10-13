@@ -9,9 +9,9 @@ import { formatTicketId } from "@/lib/display-id";
 import type { InternalTicket, TicketEvent, TicketComment } from "@/types/database.types";
 
 const statusConfig: Record<InternalTicket["status"], { label: string; color: string; bg: string }> = {
-  open: { label: "Aberto", color: "#315E9C", bg: "rgba(67,97,238,0.1)" },
+  open: { label: "Aberto", color: "#315E9C", bg: "rgba(49, 94, 156,0.1)" },
   in_progress: { label: "Em andamento", color: "#cc9200", bg: "rgba(255,183,3,0.1)" },
-  resolved: { label: "Resolvido", color: "#A07B3B", bg: "rgba(6,214,160,0.1)" },
+  resolved: { label: "Resolvido", color: "#A07B3B", bg: "rgba(200, 154, 74,0.1)" },
 };
 
 const typeConfig: Record<InternalTicket["type"], { label: string; icon: typeof Bug; color: string }> = {
@@ -278,7 +278,7 @@ export function TicketModal({
                 {timeline.map((item, i) => {
                   if (item.kind === "opened") {
                     return (
-                      <TimelineRow key={`opened-${i}`} icon={<Plus size={15} />} iconColor="#315E9C" iconBg="rgba(67,97,238,0.1)" createdAt={item.created_at}>
+                      <TimelineRow key={`opened-${i}`} icon={<Plus size={15} />} iconColor="#315E9C" iconBg="rgba(49, 94, 156,0.1)" createdAt={item.created_at}>
                         <strong>{item.actor_name}</strong> abriu o chamado
                       </TimelineRow>
                     );
@@ -286,7 +286,7 @@ export function TicketModal({
                   if (item.kind === "event") {
                     const iconMap = {
                       assigned: { icon: <UserCog size={15} />, color: "#cc9200", bg: "rgba(255,183,3,0.1)" },
-                      status_changed: { icon: <ArrowUpCircle size={15} />, color: "#A07B3B", bg: "rgba(6,214,160,0.1)" },
+                      status_changed: { icon: <ArrowUpCircle size={15} />, color: "#A07B3B", bg: "rgba(200, 154, 74,0.1)" },
                       notified: { icon: <BellRing size={15} />, color: "#7c3aed", bg: "rgba(124,58,237,0.1)" },
                     } as const;
                     const cfg = iconMap[item.event.event_type];

@@ -60,7 +60,7 @@ export function StateMenu({ cargo, uf }: { cargo: string; uf: string }) {
               fontSize: "0.875rem",
               fontWeight: option.code === uf ? 800 : 500,
               color: option.code === uf ? "#315E9C" : "var(--site-text-secondary)",
-              backgroundColor: option.code === uf ? "rgba(67,97,238,0.08)" : "transparent",
+              backgroundColor: option.code === uf ? "rgba(49, 94, 156,0.08)" : "transparent",
             }}
           >
             {option.name}

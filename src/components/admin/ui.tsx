@@ -73,7 +73,7 @@ export function EmptyState({ text }: { text: string }) {
 
 export function Badge({ children, tone = "neutral" }: { children: ReactNode; tone?: "success" | "neutral" | "warning" | "danger" }) {
   const tones: Record<string, { bg: string; color: string }> = {
-    success: { bg: "rgba(6,214,160,0.1)", color: "#A07B3B" },
+    success: { bg: "rgba(200, 154, 74,0.1)", color: "#A07B3B" },
     warning: { bg: "rgba(255,183,3,0.15)", color: "#cc9200" },
     danger: { bg: "rgba(239,68,68,0.1)", color: "#dc2626" },
     neutral: { bg: "rgba(148,163,184,0.15)", color: "var(--admin-muted)" },

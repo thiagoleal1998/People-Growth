@@ -5,9 +5,9 @@ import { LiveStatsWidget } from "@/components/admin/LiveStatsWidget";
 import type { Lead } from "@/types/database.types";
 
 const statusLabels: Record<Lead["status"], { label: string; color: string; bg: string }> = {
-  new: { label: "Novo", color: "#315E9C", bg: "rgba(67,97,238,0.12)" },
+  new: { label: "Novo", color: "#315E9C", bg: "rgba(49, 94, 156,0.12)" },
   contacted: { label: "Em contato", color: "#FFB703", bg: "rgba(255,183,3,0.12)" },
-  proposal: { label: "Proposta", color: "#C89A4A", bg: "rgba(6,214,160,0.12)" },
+  proposal: { label: "Proposta", color: "#C89A4A", bg: "rgba(200, 154, 74,0.12)" },
   closed: { label: "Fechado", color: "var(--admin-faint)", bg: "rgba(148,163,184,0.12)" },
 };
 

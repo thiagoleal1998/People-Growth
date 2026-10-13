@@ -13,9 +13,9 @@ import { TicketModal, type Member } from "./TicketModal";
 import type { InternalTicket } from "@/types/database.types";
 
 const statusConfig: Record<InternalTicket["status"], { label: string; color: string; bg: string }> = {
-  open: { label: "Aberto", color: "#315E9C", bg: "rgba(67,97,238,0.1)" },
+  open: { label: "Aberto", color: "#315E9C", bg: "rgba(49, 94, 156,0.1)" },
   in_progress: { label: "Em andamento", color: "#cc9200", bg: "rgba(255,183,3,0.1)" },
-  resolved: { label: "Resolvido", color: "#A07B3B", bg: "rgba(6,214,160,0.1)" },
+  resolved: { label: "Resolvido", color: "#A07B3B", bg: "rgba(200, 154, 74,0.1)" },
 };
 
 const columns: KanbanColumn<InternalTicket["status"]>[] = [

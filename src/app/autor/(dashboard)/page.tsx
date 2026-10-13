@@ -80,7 +80,7 @@ export default async function AutorHomePage() {
           borderRadius: "1.25rem",
           padding: "2rem 2.25rem",
           marginBottom: "1.5rem",
-          boxShadow: "0 12px 30px -12px rgba(67,97,238,0.5)",
+          boxShadow: "0 12px 30px -12px rgba(49, 94, 156,0.5)",
         }}
       >
         <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "white", marginBottom: "0.375rem" }}>

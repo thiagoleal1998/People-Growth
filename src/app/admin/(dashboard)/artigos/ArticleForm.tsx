@@ -351,7 +351,7 @@ export function ArticleForm({
                       </label>
                     ))}
                   </div>
-                  <div style={{ padding: "0.875rem 1rem", borderRadius: "0.625rem", backgroundColor: "rgba(67,97,238,0.05)", border: "1px solid rgba(67,97,238,0.15)" }}>
+                  <div style={{ padding: "0.875rem 1rem", borderRadius: "0.625rem", backgroundColor: "rgba(49, 94, 156,0.05)", border: "1px solid rgba(49, 94, 156,0.15)" }}>
                     <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--admin-faint)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.375rem" }}>
                       Declaração que aparecerá no artigo
                     </div>

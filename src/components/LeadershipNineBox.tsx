@@ -55,7 +55,7 @@ export function LeadershipNineBox({
             y={margin.top + row * cell}
             width={cell}
             height={cell}
-            fill={(row + col) % 2 === 0 ? "rgba(67,97,238,0.06)" : "rgba(67,97,238,0.02)"}
+            fill={(row + col) % 2 === 0 ? "rgba(49, 94, 156,0.06)" : "rgba(49, 94, 156,0.02)"}
             stroke="rgba(128,128,128,0.3)"
           />
         ))

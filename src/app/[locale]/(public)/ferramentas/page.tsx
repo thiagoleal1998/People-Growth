@@ -54,7 +54,7 @@ export default async function FerramentasPage() {
                 {items.map(({ name, description, icon, badge }) => (
                   <div key={name} className="hover-card" style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--site-border)", position: "relative" }}>
                     {badge && (
-                      <span style={{ position: "absolute", top: "1rem", right: "1rem", backgroundColor: badge === "Essencial" ? "rgba(67,97,238,0.12)" : "rgba(6,214,160,0.12)", color: badge === "Essencial" ? "#315E9C" : "#A07B3B", padding: "0.15rem 0.5rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 700 }}>
+                      <span style={{ position: "absolute", top: "1rem", right: "1rem", backgroundColor: badge === "Essencial" ? "rgba(49, 94, 156,0.12)" : "rgba(200, 154, 74,0.12)", color: badge === "Essencial" ? "#315E9C" : "#A07B3B", padding: "0.15rem 0.5rem", borderRadius: "9999px", fontSize: "0.7rem", fontWeight: 700 }}>
                         {badge}
                       </span>
                     )}

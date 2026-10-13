@@ -60,7 +60,7 @@ export function CommentForm({
 
   if (status === "success") {
     return (
-      <div style={{ backgroundColor: "rgba(6,214,160,0.1)", border: "1px solid rgba(6,214,160,0.3)", borderRadius: "0.75rem", padding: compact ? "1rem" : "1.25rem", textAlign: "center" }}>
+      <div style={{ backgroundColor: "rgba(200, 154, 74,0.1)", border: "1px solid rgba(200, 154, 74,0.3)", borderRadius: "0.75rem", padding: compact ? "1rem" : "1.25rem", textAlign: "center" }}>
         <p style={{ color: "var(--site-text)", fontWeight: 600, fontSize: compact ? "0.875rem" : "0.9375rem" }}>
           {parentId ? "Resposta enviada!" : "Comentário enviado!"} Ela aparece aqui assim que for aprovada.
         </p>

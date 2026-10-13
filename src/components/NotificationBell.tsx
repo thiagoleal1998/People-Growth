@@ -204,7 +204,7 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
                     textAlign: "left",
                     padding: "0.75rem 1rem",
                     borderBottom: "1px solid var(--admin-border)",
-                    background: n.read ? "none" : "rgba(67,97,238,0.06)",
+                    background: n.read ? "none" : "rgba(49, 94, 156,0.06)",
                     border: "none",
                     borderBottomWidth: "1px",
                     borderBottomStyle: "solid",

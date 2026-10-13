@@ -164,8 +164,8 @@ export function ArticleBody({
           <section
             style={{
               marginTop: "1.5rem",
-              backgroundColor: "rgba(67,97,238,0.05)",
-              border: "1px solid rgba(67,97,238,0.15)",
+              backgroundColor: "rgba(49, 94, 156,0.05)",
+              border: "1px solid rgba(49, 94, 156,0.15)",
               borderTop: "2px solid #315E9C",
               borderRadius: "0.75rem",
               padding: "1.25rem 1.5rem 1.5rem",
@@ -217,7 +217,7 @@ export function ArticleBody({
           min-height: 0;
         }
         .summary-box-content {
-          background-color: rgba(67, 97, 238, 0.07);
+          background-color: rgba(49, 94, 156, 0.07);
           border-left: 4px solid #315E9C;
           border-radius: 0 0.625rem 0.625rem 0;
           padding: 1.25rem 1.5rem;

@@ -46,7 +46,7 @@ function renderWordDiff(before: string, after: string) {
   return diffWords(before, after).map((part, i) => {
     if (part.added) {
       return (
-        <ins key={i} style={{ backgroundColor: "rgba(6,214,160,0.18)", color: "#A07B3B", textDecoration: "none", fontWeight: 700, borderRadius: "0.1875rem", padding: "0 0.125rem" }}>
+        <ins key={i} style={{ backgroundColor: "rgba(200, 154, 74,0.18)", color: "#A07B3B", textDecoration: "none", fontWeight: 700, borderRadius: "0.1875rem", padding: "0 0.125rem" }}>
           {part.value}
         </ins>
       );

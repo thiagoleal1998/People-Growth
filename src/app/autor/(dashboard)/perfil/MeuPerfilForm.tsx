@@ -63,7 +63,7 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
                 padding: "0.4375rem 0.875rem",
                 borderRadius: "0.5rem",
                 border: `1px solid ${active === tab.id ? "#315E9C" : "#e2e8f0"}`,
-                backgroundColor: active === tab.id ? "rgba(67,97,238,0.08)" : "white",
+                backgroundColor: active === tab.id ? "rgba(49, 94, 156,0.08)" : "white",
                 color: active === tab.id ? "#315E9C" : "#64748b",
                 fontWeight: 700,
                 fontSize: "0.8125rem",

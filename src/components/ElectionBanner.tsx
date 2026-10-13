@@ -32,7 +32,7 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
         justifyContent: "space-between",
         gap: "1.5rem",
         flexWrap: "wrap",
-        boxShadow: "0 18px 40px -18px rgba(67,97,238,0.6)",
+        boxShadow: "0 18px 40px -18px rgba(49, 94, 156,0.6)",
       }}
     >
       <div style={{ minWidth: 0, flex: "1 1 320px" }}>

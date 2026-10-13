@@ -37,8 +37,8 @@ export function NewsletterForm({ compact = false, light = false }: { compact?: b
     return (
       <div
         style={{
-          backgroundColor: compact ? "rgba(6,214,160,0.15)" : "rgba(6,214,160,0.1)",
-          border: "1px solid rgba(6,214,160,0.3)",
+          backgroundColor: compact ? "rgba(200, 154, 74,0.15)" : "rgba(200, 154, 74,0.1)",
+          border: "1px solid rgba(200, 154, 74,0.3)",
           borderRadius: "0.75rem",
           padding: "0.875rem 1.25rem",
           color: "#C89A4A",

@@ -83,7 +83,7 @@ export function ConfiguracoesTabs({
               padding: "0.5rem 1rem",
               borderRadius: "0.5rem",
               border: `1px solid ${active === tab.id ? "#315E9C" : "var(--admin-border-strong)"}`,
-              backgroundColor: active === tab.id ? "rgba(67,97,238,0.1)" : "var(--admin-surface)",
+              backgroundColor: active === tab.id ? "rgba(49, 94, 156,0.1)" : "var(--admin-surface)",
               color: active === tab.id ? "#315E9C" : "var(--admin-text-secondary)",
               fontWeight: 700,
               fontSize: "0.8125rem",

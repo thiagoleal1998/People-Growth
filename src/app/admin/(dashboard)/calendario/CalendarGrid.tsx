@@ -83,7 +83,7 @@ export function CalendarGrid({
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
-                          backgroundColor: pending ? "rgba(255,183,3,0.15)" : "rgba(6,214,160,0.12)",
+                          backgroundColor: pending ? "rgba(255,183,3,0.15)" : "rgba(200, 154, 74,0.12)",
                           color: pending ? "#cc9200" : "#A07B3B",
                         }}
                       >
@@ -108,7 +108,7 @@ export function CalendarGrid({
                           whiteSpace: "nowrap",
                           overflow: "hidden",
                           textOverflow: "ellipsis",
-                          backgroundColor: isSocial ? "rgba(67,97,238,0.12)" : "rgba(148,163,184,0.18)",
+                          backgroundColor: isSocial ? "rgba(49, 94, 156,0.12)" : "rgba(148,163,184,0.18)",
                           color: isSocial ? "#315E9C" : "var(--admin-text-secondary)",
                         }}
                       >

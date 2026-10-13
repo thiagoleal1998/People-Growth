@@ -160,7 +160,7 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
                           <button
                             type="submit"
                             title="Publicar agora"
-                            style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.5rem", color: "#A07B3B", backgroundColor: "rgba(6,214,160,0.1)", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 700 }}
+                            style={{ display: "flex", alignItems: "center", gap: "0.25rem", padding: "0.375rem 0.5rem", color: "#A07B3B", backgroundColor: "rgba(200, 154, 74,0.1)", border: "none", borderRadius: "0.375rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: 700 }}
                           >
                             <Check size={13} /> {a.status === "scheduled" ? "Publicar agora" : "Aprovar"}
                           </button>

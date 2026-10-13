@@ -16,7 +16,7 @@ export function FormatTag({ format, locale }: { format: Article["format"]; local
         letterSpacing: "0.03em",
         textTransform: "uppercase",
         color: isOpinion ? "#b8860b" : "#315E9C",
-        backgroundColor: isOpinion ? "rgba(255,183,3,0.15)" : "rgba(67,97,238,0.1)",
+        backgroundColor: isOpinion ? "rgba(255,183,3,0.15)" : "rgba(49, 94, 156,0.1)",
         padding: "0.1875rem 0.5rem",
         borderRadius: "0.25rem",
       }}

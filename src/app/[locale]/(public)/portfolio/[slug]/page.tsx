@@ -109,7 +109,7 @@ export default async function CasePage({ params }: { params: Promise<{ slug: str
           </div>
 
           <div style={{ marginTop: "3rem", textAlign: "center" }}>
-            <Link href="/contato" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", padding: "0.875rem 2rem", borderRadius: "0.75rem", fontWeight: 700, fontSize: "0.9375rem", boxShadow: "0 4px 24px -4px rgba(67,97,238,0.4)" }}>
+            <Link href="/contato" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", padding: "0.875rem 2rem", borderRadius: "0.75rem", fontWeight: 700, fontSize: "0.9375rem", boxShadow: "0 4px 24px -4px rgba(49, 94, 156,0.4)" }}>
               {t("wantResults")}
             </Link>
           </div>
