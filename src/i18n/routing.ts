@@ -7,7 +7,7 @@ export const routing = defineRouting({
     "/": "/",
     "/sobre": { pt: "/sobre", en: "/about" },
     "/sobre/[slug]": { pt: "/sobre/[slug]", en: "/about/[slug]" },
-    "/sobre/o-que-e-people-and-growth": { pt: "/sobre/o-que-e-people-and-growth", en: "/about/what-is-people-and-growth" },
+    "/sobre/o-que-e-o-grupo-festina": { pt: "/sobre/o-que-e-o-grupo-festina", en: "/about/what-is-grupo-festina" },
     "/curriculo": { pt: "/curriculo", en: "/resume" },
     "/portfolio": { pt: "/portfolio", en: "/portfolio" },
     "/portfolio/[slug]": { pt: "/portfolio/[slug]", en: "/portfolio/[slug]" },

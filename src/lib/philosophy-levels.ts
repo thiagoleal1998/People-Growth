@@ -1,6 +1,6 @@
 export type PhilosophyLevel = { title: string; description: string };
 
-// Reads the four levels out of the "O que é a People & Growth" text: each one
+// Reads the four levels out of the "O que é o Grupo Festina" text: each one
 // is a "### N. Title" heading inside the levels section, and its description is
 // the first paragraph under it. Returns nothing if the section can't be found,
 // so the caller can fall back to the built-in wording.

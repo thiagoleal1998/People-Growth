@@ -11,10 +11,10 @@ import { HideSideRails } from "@/components/HideSideRails";
 
 export const revalidate = 300;
 
-const DEFAULT_TITLE_PT = INSTITUTIONAL_DEFAULTS["o-que-e-people-and-growth"].titlePt;
-const DEFAULT_TITLE_EN = INSTITUTIONAL_DEFAULTS["o-que-e-people-and-growth"].titleEn;
-const DEFAULT_BODY_PT = INSTITUTIONAL_DEFAULTS["o-que-e-people-and-growth"].bodyPt;
-const DEFAULT_BODY_EN = INSTITUTIONAL_DEFAULTS["o-que-e-people-and-growth"].bodyEn;
+const DEFAULT_TITLE_PT = INSTITUTIONAL_DEFAULTS["o-que-e-o-grupo-festina"].titlePt;
+const DEFAULT_TITLE_EN = INSTITUTIONAL_DEFAULTS["o-que-e-o-grupo-festina"].titleEn;
+const DEFAULT_BODY_PT = INSTITUTIONAL_DEFAULTS["o-que-e-o-grupo-festina"].bodyPt;
+const DEFAULT_BODY_EN = INSTITUTIONAL_DEFAULTS["o-que-e-o-grupo-festina"].bodyEn;
 
 
 
@@ -22,16 +22,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const { locale } = await params;
   return {
     title: locale === "en" ? DEFAULT_TITLE_EN : DEFAULT_TITLE_PT,
-    description: locale === "en" ? "The four levels of development behind People & Growth: Person, Leadership, Team and Business." : "Os quatro níveis de desenvolvimento por trás da People & Growth: Pessoa, Liderança, Equipe e Negócio.",
+    description: locale === "en" ? "What Grupo Festina is, the brands inside it, and the story of the first one, People & Growth." : "O que é o Grupo Festina, as marcas dentro dele, e a história da primeira delas, a People & Growth.",
   };
 }
 
-export default async function OQueEPeopleAndGrowthPage() {
+export default async function OQueEOGrupoFestinaPage() {
   const locale = await getLocale();
   const tNav = await getTranslations("nav");
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any).from("institutional_pages").select("*").eq("slug", "o-que-e-people-and-growth").single();
+  const { data } = await (supabase as any).from("institutional_pages").select("*").eq("slug", "o-que-e-o-grupo-festina").single();
 
   const title = pickLocale(locale, data?.title_pt, data?.title_en) || (locale === "en" ? DEFAULT_TITLE_EN : DEFAULT_TITLE_PT);
   const body = pickLocale(locale, data?.body_pt, data?.body_en) || (locale === "en" ? DEFAULT_BODY_EN : DEFAULT_BODY_PT);

@@ -184,18 +184,24 @@ We may update these Terms of Use periodically. The version in effect is always t
 ## Applicable law
 These terms are governed by the laws of the Federative Republic of Brazil. Questions can be sent via the [Contact page](/contato).`,
   },
-  "o-que-e-people-and-growth": {
-    titlePt: "O que é a People & Growth",
-    titleEn: "What is People & Growth",
-    bodyPt: `### E então, veio a Festina
+  "o-que-e-o-grupo-festina": {
+    titlePt: "O que é o Grupo Festina",
+    titleEn: "What is Grupo Festina",
+    bodyPt: `## O que é o Grupo Festina
 
-Com o tempo, a People & Growth cresceu além do que aquele nome conseguia representar. Ao lado da consultoria e dos conteúdos sobre liderança e desenvolvimento, passamos a cobrir também política, economia e sociedade, e a manter uma coluna de opinião própria, a Mea Sententia. Cada uma dessas frentes tinha identidade e público próprios — e colocar tudo debaixo do nome People & Growth deixou de fazer sentido.
+O Grupo Festina reúne diferentes marcas sob um mesmo propósito: conectar negócios, pessoas e os temas que moldam o momento atual.
 
-Foi então que decidimos: a People & Growth continuaria existindo, mas como uma marca — uma entre outras — dentro de um grupo maior, o **Grupo Festina**.
+O nome vem do lema latino _festina lente_ — "apressa-te devagar". A logo traz dois beija-flores, duas das espécies mais comuns do Brasil, que resumem bem esse espírito: a agilidade que não abre mão da tranquilidade.
 
-O nome vem do lema latino *festina lente*, "apressa-te devagar". A logo traz dois beija-flores, duas das espécies mais comuns do Brasil, que resumem bem esse espírito: a agilidade que não abre mão da tranquilidade.
+## As marcas do grupo
 
-Hoje, a People & Growth segue sendo a nossa frente de consultoria, cursos e conteúdo sobre liderança e desenvolvimento pessoal — e é sobre essa marca, especificamente, que o restante desta página fala.
+Hoje, o Grupo Festina é formado por três marcas:
+
+- [People & Growth](/people-growth) — consultoria, cursos e conteúdo sobre liderança e desenvolvimento pessoal.
+- [Ponto de Réplica](/ponto-de-replica) — cobertura independente de política, economia e sociedade.
+- [Mea Sententia](/mea-sententia) — nossa coluna de opinião.
+
+O restante desta página é dedicado à primeira delas, a People & Growth — de onde tudo começou.
 
 ## 4 níveis de desenvolvimento: Pessoa, Liderança, Equipe e Negócio
 
@@ -376,15 +382,21 @@ Consciência, Responsabilidade, Desenvolvimento contínuo, Relações, Pensament
 > — People & Growth
 
 [Conheça o time por trás da People & Growth](/sobre)`,
-    bodyEn: `### Then came Festina
+    bodyEn: `## What is Grupo Festina
 
-Over time, People & Growth grew beyond what that name could represent. Alongside consulting and content on leadership and development, we started covering politics, economy and society too, and keeping our own opinion column, Mea Sententia. Each of these fronts had its own identity and audience — and putting everything under the People & Growth name stopped making sense.
+Grupo Festina brings together different brands under one purpose: connecting business, people and the issues shaping the current moment.
 
-That's when we decided: People & Growth would keep existing, but as one brand among others inside a larger group, **Grupo Festina**.
+The name comes from the Latin motto _festina lente_ — "make haste slowly." The logo features two hummingbirds, two of Brazil's most common species, which capture that spirit well: speed that never gives up calm.
 
-The name comes from the Latin motto *festina lente*, "make haste slowly." The logo features two hummingbirds, two of Brazil's most common species, which capture that spirit well: speed that never gives up calm.
+## The group's brands
 
-Today, People & Growth remains our consulting, courses and content arm on leadership and personal development — and it's specifically about this brand that the rest of this page is about.
+Today, Grupo Festina is made up of three brands:
+
+- [People & Growth](/people-growth) — consulting, courses and content on leadership and personal development.
+- [Ponto de Réplica](/ponto-de-replica) — independent coverage of politics, economy and society.
+- [Mea Sententia](/mea-sententia) — our opinion column.
+
+The rest of this page is dedicated to the first of them, People & Growth — where it all started.
 
 ## 4 levels of development: Person, Leadership, Team and Business
 

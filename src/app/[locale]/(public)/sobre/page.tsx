@@ -32,8 +32,8 @@ export default async function SobrePage() {
 
   // The four levels come from the "O que é" text, so this section always matches
   // that page; the built-in wording is only a fallback if the text can't be read.
-  const { data: essay } = await client.from("institutional_pages").select("body_pt, body_en").eq("slug", "o-que-e-people-and-growth").maybeSingle();
-  const essayBody = pickLocale(locale, essay?.body_pt, essay?.body_en) || (locale === "en" ? INSTITUTIONAL_DEFAULTS["o-que-e-people-and-growth"].bodyEn : INSTITUTIONAL_DEFAULTS["o-que-e-people-and-growth"].bodyPt) || "";
+  const { data: essay } = await client.from("institutional_pages").select("body_pt, body_en").eq("slug", "o-que-e-o-grupo-festina").maybeSingle();
+  const essayBody = pickLocale(locale, essay?.body_pt, essay?.body_en) || (locale === "en" ? INSTITUTIONAL_DEFAULTS["o-que-e-o-grupo-festina"].bodyEn : INSTITUTIONAL_DEFAULTS["o-que-e-o-grupo-festina"].bodyPt) || "";
   const ICONS = ["🧠", "🤝", "👥", "📈"];
   const extracted = extractPhilosophyLevels(essayBody);
   const philosophy = extracted.length === 4
@@ -238,7 +238,7 @@ export default async function SobrePage() {
             {t("summaryBody2")}
           </p>
           <Link
-            href="/sobre/o-que-e-people-and-growth"
+            href="/sobre/o-que-e-o-grupo-festina"
             style={{
               display: "inline-flex",
               alignItems: "center",
