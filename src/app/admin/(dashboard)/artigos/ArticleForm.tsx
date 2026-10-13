@@ -148,7 +148,7 @@ export function ArticleForm({
 
   const formatSegment = format === "opiniao" ? "mea-sententia" : "noticia";
   const categorySlug = categories.find((c) => c.id === categoryId)?.slug || "geral";
-  const previewUrl = `grupofestina.com.br › conteudo › ${formatSegment} › categoria › ${categorySlug} › ${slug || slugifyPreview(titlePt) || "..."}`;
+  const previewUrl = `grupofestina.vercel.app › conteudo › ${formatSegment} › categoria › ${categorySlug} › ${slug || slugifyPreview(titlePt) || "..."}`;
 
   return (
     <div style={{ maxWidth: "1100px" }}>

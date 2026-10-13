@@ -169,7 +169,7 @@ export default async function ArticlePage({
     permanentRedirect(articlePath(article, article.categories?.slug, locale === "en" ? "en" : "pt"));
   }
 
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.vercel.app";
   const canonicalPath = articlePath(article, article.categories?.slug, "pt");
   const aiText = aiDisclosureText(article.ai_usage, locale);
   const aiDisclosure = aiText

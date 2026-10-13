@@ -3,7 +3,7 @@ import { createClient } from "@/lib/supabase/server";
 import { articlePath } from "@/lib/article-url";
 import type { Article } from "@/types/database.types";
 
-const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br";
+const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.vercel.app";
 
 const routes = [
   { path: "/", priority: 1.0 },
