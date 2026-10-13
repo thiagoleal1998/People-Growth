@@ -219,23 +219,8 @@ export default async function SobrePage() {
           <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem" }}>
             {t("summaryTitle")}
           </h2>
-          <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", lineHeight: 1.75, marginBottom: "1.5rem" }}>
-            {t("summaryBody1")}
-          </p>
-          <p
-            style={{
-              fontSize: "1.25rem",
-              fontWeight: 800,
-              background: "linear-gradient(135deg, #315E9C, #C89A4A)",
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-              marginBottom: "1.5rem",
-            }}
-          >
-            {t("summaryChain")}
-          </p>
           <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", lineHeight: 1.75, marginBottom: "2rem" }}>
-            {t("summaryBody2")}
+            {t("summaryBody1")}
           </p>
           <Link
             href="/sobre/o-que-e-o-grupo-festina"
@@ -250,6 +235,72 @@ export default async function SobrePage() {
           >
             {t("summaryCta")} <ArrowRight size={18} />
           </Link>
+        </div>
+      </section>
+
+      {/* One section per brand */}
+      <section className="section-padding" style={{ backgroundColor: "var(--site-bg)" }}>
+        <div className="container-xl" style={{ maxWidth: "760px", margin: "0 auto", display: "flex", flexDirection: "column", gap: "3rem" }}>
+          {[
+            {
+              name: "People & Growth",
+              color: "#315E9C",
+              icon: "🚀",
+              body:
+                locale === "en"
+                  ? "Our consulting, courses and content arm on leadership and personal development. It's where the group started — organized around four levels of development: Person, Leadership, Team and Business."
+                  : "Nossa frente de consultoria, cursos e conteúdo sobre liderança e desenvolvimento pessoal. Foi por onde o grupo começou — organizada em quatro níveis de desenvolvimento: Pessoa, Liderança, Equipe e Negócio.",
+              cta: locale === "en" ? "Visit People & Growth" : "Conhecer a People & Growth",
+              href: "/people-growth" as const,
+            },
+            {
+              name: "Ponto de Réplica",
+              color: "#6A4C93",
+              icon: "🗞️",
+              body:
+                locale === "en"
+                  ? "Our independent coverage of politics, economy and society — the issues shaping the current moment, covered in depth."
+                  : "Nossa cobertura independente de política, economia e sociedade — os temas que moldam o momento atual, analisados com profundidade.",
+              cta: locale === "en" ? "Visit Ponto de Réplica" : "Conhecer o Ponto de Réplica",
+              href: "/ponto-de-replica" as const,
+            },
+            {
+              name: "Mea Sententia",
+              color: "#C89A4A",
+              icon: "✍️",
+              body:
+                locale === "en"
+                  ? "Our opinion column — a space for perspectives on business, society and the issues that impact people and companies, signed by whoever writes them."
+                  : "Nossa coluna de opinião — um espaço para perspectivas sobre negócios, sociedade e os temas que impactam pessoas e empresas, assinadas por quem escreve.",
+              cta: locale === "en" ? "Visit Mea Sententia" : "Conhecer a Mea Sententia",
+              href: "/mea-sententia" as const,
+            },
+          ].map(({ name, color, icon, body, cta, href }) => (
+            <div key={name} style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start" }}>
+              <div
+                style={{
+                  width: "3.5rem",
+                  height: "3.5rem",
+                  flexShrink: 0,
+                  borderRadius: "0.875rem",
+                  backgroundColor: `${color}1f`,
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  fontSize: "1.5rem",
+                }}
+              >
+                {icon}
+              </div>
+              <div>
+                <h3 style={{ fontWeight: 800, fontSize: "1.375rem", color: "var(--site-text)", marginBottom: "0.5rem" }}>{name}</h3>
+                <p style={{ color: "var(--site-muted)", fontSize: "1rem", lineHeight: 1.7, marginBottom: "0.875rem" }}>{body}</p>
+                <Link href={href} style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color, fontWeight: 700, textDecoration: "none", fontSize: "0.9375rem" }}>
+                  {cta} <ArrowRight size={16} />
+                </Link>
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 
