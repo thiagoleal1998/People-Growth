@@ -3,29 +3,48 @@
 import { useState } from "react";
 import { useTranslations, useLocale } from "next-intl";
 import { Link, usePathname } from "@/i18n/navigation";
-import { Menu, X } from "lucide-react";
+import { Menu, X, ChevronDown } from "lucide-react";
 import { ThemeToggle } from "./ThemeToggle";
 
+// Flat top-level items, kept short on purpose — everything else lives inside
+// one of the two dropdown groups below so the bar doesn't run out of room.
 const navLinks = [
   { key: "home", href: "/" as const },
   { key: "about", href: "/sobre" as const },
-  { key: "services", href: "/servicos" as const },
-  { key: "peopleGrowth", href: "/people-growth" as const },
-  { key: "pontoDeReplica", href: "/ponto-de-replica" as const },
   { key: "newsletter", href: "/conteudo" as const },
-  { key: "portfolio", href: "/portfolio" as const },
-  { key: "courses", href: "/cursos" as const },
-  { key: "resources", href: "/recursos" as const },
-  { key: "media", href: "/na-midia" as const },
   { key: "sports", href: "/esportes" as const },
   { key: "contact", href: "/contato" as const },
+];
+
+const navGroups = [
+  {
+    key: "brands",
+    items: [
+      { key: "peopleGrowth", href: "/people-growth" as const },
+      { key: "pontoDeReplica", href: "/ponto-de-replica" as const },
+    ],
+  },
+  {
+    key: "consulting",
+    items: [
+      { key: "services", href: "/servicos" as const },
+      { key: "portfolio", href: "/portfolio" as const },
+      { key: "courses", href: "/cursos" as const },
+      { key: "resources", href: "/recursos" as const },
+      { key: "media", href: "/na-midia" as const },
+    ],
+  },
 ];
 
 export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: { logoUrl?: string | null; mediaEnabled?: boolean; sportsEnabled?: boolean }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const visibleNavLinks = navLinks.filter((l) => (mediaEnabled || l.key !== "media") && (sportsEnabled || l.key !== "sports"));
+  const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const visibleNavLinks = navLinks.filter((l) => sportsEnabled || l.key !== "sports");
+  const visibleNavGroups = navGroups
+    .map((g) => ({ ...g, items: g.items.filter((l) => mediaEnabled || l.key !== "media") }))
+    .filter((g) => g.items.length > 0);
 
   return (
     <header
@@ -90,6 +109,79 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
               </Link>
             );
           })}
+          {visibleNavGroups.map((group) => {
+            const groupActive = group.items.some((l) => pathname === l.href || pathname.startsWith(l.href + "/"));
+            return (
+              <div
+                key={group.key}
+                className="nav-dropdown"
+                onMouseEnter={() => setOpenGroup(group.key)}
+                onMouseLeave={() => setOpenGroup((g) => (g === group.key ? null : g))}
+                style={{ position: "relative" }}
+              >
+                <button
+                  type="button"
+                  onClick={() => setOpenGroup((g) => (g === group.key ? null : group.key))}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.25rem",
+                    padding: "0.375rem 0.875rem",
+                    borderRadius: "0.5rem",
+                    fontSize: "0.875rem",
+                    fontWeight: 500,
+                    color: groupActive ? "#315E9C" : "rgba(255,255,255,0.75)",
+                    backgroundColor: groupActive ? "rgba(49, 94, 156,0.12)" : "transparent",
+                    border: "none",
+                    cursor: "pointer",
+                    transition: "all 0.2s",
+                  }}
+                >
+                  {t(group.key as keyof typeof t)}
+                  <ChevronDown size={14} style={{ transform: openGroup === group.key ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+                </button>
+                <div
+                  className="nav-dropdown-panel"
+                  style={{
+                    position: "absolute",
+                    top: "100%",
+                    left: 0,
+                    marginTop: "0.375rem",
+                    minWidth: "200px",
+                    backgroundColor: "#15223a",
+                    border: "1px solid rgba(255,255,255,0.1)",
+                    borderRadius: "0.625rem",
+                    padding: "0.375rem",
+                    boxShadow: "0 12px 32px rgba(0,0,0,0.35)",
+                    display: openGroup === group.key ? "block" : "none",
+                  }}
+                >
+                  {group.items.map(({ key, href }) => {
+                    const isActive = pathname === href || pathname.startsWith(href + "/");
+                    return (
+                      <Link
+                        key={key}
+                        href={href}
+                        onClick={() => setOpenGroup(null)}
+                        style={{
+                          display: "block",
+                          padding: "0.5rem 0.75rem",
+                          borderRadius: "0.375rem",
+                          fontSize: "0.875rem",
+                          fontWeight: 500,
+                          color: isActive ? "#315E9C" : "rgba(255,255,255,0.8)",
+                          backgroundColor: isActive ? "rgba(49, 94, 156,0.12)" : "transparent",
+                          whiteSpace: "nowrap",
+                        }}
+                      >
+                        {t(key as keyof typeof t)}
+                      </Link>
+                    );
+                  })}
+                </div>
+              </div>
+            );
+          })}
           <ThemeToggle />
           <LocaleSwitcher />
         </div>
@@ -132,6 +224,30 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
             >
               {t(key as keyof typeof t)}
             </Link>
+          ))}
+          {visibleNavGroups.map((group) => (
+            <div key={group.key}>
+              <div style={{ paddingTop: "1rem", fontSize: "0.6875rem", fontWeight: 700, letterSpacing: "0.08em", textTransform: "uppercase", color: "rgba(255,255,255,0.4)" }}>
+                {t(group.key as keyof typeof t)}
+              </div>
+              {group.items.map(({ key, href }) => (
+                <Link
+                  key={key}
+                  href={href}
+                  onClick={() => setMenuOpen(false)}
+                  style={{
+                    display: "block",
+                    padding: "0.75rem 0",
+                    color: "rgba(255,255,255,0.85)",
+                    fontSize: "1rem",
+                    fontWeight: 500,
+                    borderBottom: "1px solid rgba(255,255,255,0.06)",
+                  }}
+                >
+                  {t(key as keyof typeof t)}
+                </Link>
+              ))}
+            </div>
           ))}
           <div style={{ marginTop: "1rem" }}>
             <LocaleSwitcher />
