@@ -12,7 +12,7 @@ import type { Category } from "@/types/database.types";
 // (not through a <form action>) precisely so a mistake here never discards whatever
 // the admin has mid-typed in one of the other tabs' fields.
 
-export async function createCategory(input: { name_pt: string; name_en: string; slug: string; color: string }): Promise<Category> {
+export async function createCategory(input: { name_pt: string; name_en: string; slug: string; color: string; is_people_growth: boolean }): Promise<Category> {
   const name_pt = input.name_pt.trim();
   if (!name_pt) throw new Error("Dê um nome à categoria.");
   const slug = input.slug.trim() || slugify(name_pt, { lower: true, strict: true });
@@ -22,7 +22,7 @@ export async function createCategory(input: { name_pt: string; name_en: string; 
   const client = supabase as any;
   const { data, error } = await client
     .from("categories")
-    .insert({ name_pt, name_en: input.name_en.trim() || null, slug, color: input.color.trim() || null })
+    .insert({ name_pt, name_en: input.name_en.trim() || null, slug, color: input.color.trim() || null, is_people_growth: input.is_people_growth })
     .select("*")
     .single();
   if (error) throw new Error(error.code === "23505" ? `Já existe uma categoria com a URL "${slug}".` : error.message);
@@ -35,7 +35,7 @@ export async function createCategory(input: { name_pt: string; name_en: string; 
   return data as Category;
 }
 
-export async function updateCategory(id: string, input: { name_pt: string; name_en: string; slug: string; color: string }): Promise<void> {
+export async function updateCategory(id: string, input: { name_pt: string; name_en: string; slug: string; color: string; is_people_growth: boolean }): Promise<void> {
   const name_pt = input.name_pt.trim();
   if (!name_pt) throw new Error("Dê um nome à categoria.");
   const slug = input.slug.trim() || slugify(name_pt, { lower: true, strict: true });
@@ -45,7 +45,7 @@ export async function updateCategory(id: string, input: { name_pt: string; name_
   const client = supabase as any;
   const { error } = await client
     .from("categories")
-    .update({ name_pt, name_en: input.name_en.trim() || null, slug, color: input.color.trim() || null })
+    .update({ name_pt, name_en: input.name_en.trim() || null, slug, color: input.color.trim() || null, is_people_growth: input.is_people_growth })
     .eq("id", id);
   if (error) throw new Error(error.code === "23505" ? `Já existe uma categoria com a URL "${slug}".` : error.message);
 

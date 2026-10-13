@@ -154,6 +154,7 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
                 { key: "home", href: "/" as const },
                 { key: "about", href: "/sobre" as const },
                 { key: "services", href: "/servicos" as const },
+                { key: "peopleGrowth", href: "/people-growth" as const },
                 { key: "portfolio", href: "/portfolio" as const },
                 { key: "newsletter", href: "/conteudo" as const },
                 { key: "media", href: "/na-midia" as const },

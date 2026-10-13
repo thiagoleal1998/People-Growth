@@ -50,6 +50,7 @@ type CategoryRow = {
   slug: string;
   color: string | null;
   icon: string | null;
+  is_people_growth: boolean;
   created_at: string;
 };
 
