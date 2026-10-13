@@ -31,6 +31,7 @@ import { ElectionBanner } from "@/components/ElectionBanner";
 import {
   attachDetailIds,
   COMPETITIONS,
+  COMPETITION_ORDER,
   defaultWidgetTab,
   getBestStandings,
   getCurrentRoundFixtures,
@@ -221,9 +222,19 @@ export default async function HomePage() {
     const standings = await getBestStandings("serie_a");
     const live = withReliableCrests((await isAnyCompetitionLiveNow()) ? ((await getLiveFixtures()) ?? []) : [], standings);
 
-    const rawRoundFixtures = (await getCurrentRoundFixtures("serie_a")) ?? [];
-    const roundResults = await attachDetailIds(rawRoundFixtures.filter((f) => f.status === "finished"));
-    const roundUpcoming = await attachDetailIds((await getUpcomingRoundFixtures("serie_a")) ?? []);
+    // Every tracked competition feeds "Resultados"/"Próximos jogos", not just
+    // Série A — a Sul-Americana or Libertadores match starting soon is just
+    // as much "today's game" as a Brasileirão one. fetchScrapedHtml caches
+    // each competition's page independently, so fetching all five here costs
+    // nothing extra beyond the first render in a cache window.
+    const rawRoundFixturesByCompetition = await Promise.all(COMPETITION_ORDER.map((c) => getCurrentRoundFixtures(c)));
+    const roundResults = await attachDetailIds(
+      rawRoundFixturesByCompetition.flatMap((fixtures) => fixtures ?? []).filter((f) => f.status === "finished")
+    );
+    const roundUpcomingByCompetition = await Promise.all(COMPETITION_ORDER.map((c) => getUpcomingRoundFixtures(c)));
+    const roundUpcoming = await attachDetailIds(
+      roundUpcomingByCompetition.flatMap((fixtures) => fixtures ?? []).sort((a, b) => a.date.localeCompare(b.date))
+    );
 
     sportsInitial = {
       standings,
