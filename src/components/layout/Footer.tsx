@@ -101,7 +101,7 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
                   Grupo
                 </span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={logoUrl} alt="Festina" style={{ height: "3rem", width: "auto", marginBottom: "0.75rem" }} />
+                <img src={logoUrl} alt="Festina" style={{ height: "2.7rem", width: "auto", marginBottom: "0.75rem" }} />
               </>
             ) : (
               <div

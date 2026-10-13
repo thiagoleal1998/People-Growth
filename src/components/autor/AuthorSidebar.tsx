@@ -59,7 +59,7 @@ export function AuthorSidebar({ logoUrl, pendingComments = 0, unreadAnnouncement
               Grupo
             </span>
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={logoUrl} alt="Festina" style={{ height: "2.25rem", width: "auto", display: "block" }} />
+            <img src={logoUrl} alt="Festina" style={{ height: "2.025rem", width: "auto", display: "block" }} />
           </>
         ) : (
           <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>

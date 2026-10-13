@@ -137,7 +137,7 @@ export function AdminSidebar({
       </button>
       {logoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={logoUrl} alt="Festina" style={{ height: "1.75rem", width: "auto" }} />
+        <img src={logoUrl} alt="Festina" style={{ height: "1.575rem", width: "auto" }} />
       ) : (
         <span style={{ fontWeight: 800, fontSize: "0.9375rem" }}>Festina</span>
       )}
@@ -168,7 +168,7 @@ export function AdminSidebar({
                 Grupo
               </span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={logoUrl} alt="Festina" style={{ height: "2.25rem", width: "auto", display: "block" }} />
+              <img src={logoUrl} alt="Festina" style={{ height: "2.025rem", width: "auto", display: "block" }} />
             </div>
           ) : (
             <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
