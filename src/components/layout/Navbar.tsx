@@ -40,7 +40,7 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
         borderBottom: "1px solid rgba(255,255,255,0.08)",
       }}
     >
-      <nav className="container-xl" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "4.45rem" }}>
+      <nav className="container-xl" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "4.18rem" }}>
         {/* Logo */}
         <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.1875rem" }}>
           {logoUrl ? (
@@ -49,7 +49,7 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
                 Grupo
               </span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={logoUrl} alt="Festina" style={{ height: "2.7rem", width: "auto" }} />
+              <img src={logoUrl} alt="Festina" style={{ height: "2.43rem", width: "auto" }} />
             </>
           ) : (
             <span

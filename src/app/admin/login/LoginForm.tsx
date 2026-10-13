@@ -41,7 +41,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
                 Grupo
               </span>
               {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={logoUrl} alt="Festina" style={{ height: "3.375rem", width: "auto", display: "block", margin: "0 auto 2rem" }} />
+              <img src={logoUrl} alt="Festina" style={{ height: "3.0375rem", width: "auto", display: "block", margin: "0 auto 2rem" }} />
             </>
           ) : (
             <div style={{ fontWeight: 800, fontSize: "1.5rem", marginBottom: "2rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
@@ -102,7 +102,7 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
                   Grupo
                 </span>
                 {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img src={logoUrl} alt="Festina" style={{ height: "1.8rem", width: "auto" }} />
+                <img src={logoUrl} alt="Festina" style={{ height: "1.62rem", width: "auto" }} />
               </>
             ) : (
               <div style={{ fontWeight: 800, fontSize: "1.25rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
