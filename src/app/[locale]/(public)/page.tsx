@@ -18,6 +18,7 @@ import { FaqAccordion } from "@/components/FaqAccordion";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { PeopleGrowthBadge } from "@/components/PeopleGrowthBadge";
+import { PontoDeReplicaBadge } from "@/components/PontoDeReplicaBadge";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { MediaCarousel } from "@/components/MediaCarousel";
 import { AdBanner } from "@/components/AdBanner";
@@ -62,7 +63,7 @@ function shuffled<T>(items: T[]): T[] {
   return arr;
 }
 
-type ArticleWithCategory = Article & { categories: Pick<Category, "slug" | "is_people_growth"> | null };
+type ArticleWithCategory = Article & { categories: Pick<Category, "slug" | "is_people_growth" | "is_ponto_de_replica"> | null };
 
 const stats = [
   { labelKey: "statsYears", value: "7+" },
@@ -132,7 +133,7 @@ export default async function HomePage() {
   const [{ data: articlesData }, { data: authorsData }, { data: configData }, { data: testimonialsData }, { data: mediaData }] = await Promise.all([
     // "categories!category_id" disambiguates the embed now that articles has a second
     // FK path to categories through the article_categories join table (multi-category).
-    client.from("articles").select("*, categories!category_id(slug, is_people_growth)").eq("status", "published").order("published_at", { ascending: false }),
+    client.from("articles").select("*, categories!category_id(slug, is_people_growth, is_ponto_de_replica)").eq("status", "published").order("published_at", { ascending: false }),
     client.from("authors").select("*").eq("status", "active").order("order"),
     client.from("site_config").select("*"),
     client.from("testimonials").select("*").eq("status", "active").order("order"),
@@ -367,6 +368,7 @@ export default async function HomePage() {
                     <div style={{ marginBottom: "0.5rem" }}>
                       <FormatTag format={featured.format} locale={locale} />
                       {featured.categories?.is_people_growth && <PeopleGrowthBadge />}
+                      {featured.categories?.is_ponto_de_replica && <PontoDeReplicaBadge />}
                     </div>
                     <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "var(--site-text)", lineHeight: 1.1, marginBottom: "0.5rem" }}>
                       {pickLocale(locale, featured.title_pt, featured.title_en)}
@@ -420,6 +422,7 @@ export default async function HomePage() {
                         <div style={{ marginBottom: "0.375rem" }}>
                           <FormatTag format={article.format} locale={locale} />
                           {article.categories?.is_people_growth && <PeopleGrowthBadge />}
+                          {article.categories?.is_ponto_de_replica && <PontoDeReplicaBadge />}
                         </div>
                         <h4 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", lineHeight: 1.4 }}>
                           {pickLocale(locale, article.title_pt, article.title_en)}
@@ -489,6 +492,7 @@ export default async function HomePage() {
                           <div style={{ marginBottom: "0.375rem" }}>
                             <FormatTag format={article.format} locale={locale} />
                             {article.categories?.is_people_growth && <PeopleGrowthBadge />}
+                            {article.categories?.is_ponto_de_replica && <PontoDeReplicaBadge />}
                           </div>
                           <h4
                             style={{

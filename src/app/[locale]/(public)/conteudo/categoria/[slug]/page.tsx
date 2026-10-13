@@ -5,6 +5,7 @@ import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
 import { FormatTag } from "@/components/FormatTag";
 import { PeopleGrowthBadge } from "@/components/PeopleGrowthBadge";
+import { PontoDeReplicaBadge } from "@/components/PontoDeReplicaBadge";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
@@ -126,6 +127,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                       <div style={{ marginBottom: "0.375rem" }}>
                         <FormatTag format={article.format} locale={locale} />
                         {category.is_people_growth && <PeopleGrowthBadge />}
+                        {category.is_ponto_de_replica && <PontoDeReplicaBadge />}
                       </div>
                       <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.375rem" }}>
                         {pickLocale(locale, article.title_pt, article.title_en)}

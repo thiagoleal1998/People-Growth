@@ -51,6 +51,7 @@ type CategoryRow = {
   color: string | null;
   icon: string | null;
   is_people_growth: boolean;
+  is_ponto_de_replica: boolean;
   created_at: string;
 };
 

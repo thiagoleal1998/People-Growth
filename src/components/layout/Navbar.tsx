@@ -11,6 +11,7 @@ const navLinks = [
   { key: "about", href: "/sobre" as const },
   { key: "services", href: "/servicos" as const },
   { key: "peopleGrowth", href: "/people-growth" as const },
+  { key: "pontoDeReplica", href: "/ponto-de-replica" as const },
   { key: "newsletter", href: "/conteudo" as const },
   { key: "portfolio", href: "/portfolio" as const },
   { key: "courses", href: "/cursos" as const },

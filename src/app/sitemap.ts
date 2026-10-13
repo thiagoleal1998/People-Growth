@@ -12,6 +12,7 @@ const routes = [
   { path: "/portfolio", priority: 0.8 },
   { path: "/servicos", priority: 0.9 },
   { path: "/people-growth", priority: 0.8 },
+  { path: "/ponto-de-replica", priority: 0.8 },
   { path: "/conteudo", priority: 0.9 },
   { path: "/cursos", priority: 0.7 },
   { path: "/laboratorio-ia", priority: 0.8 },

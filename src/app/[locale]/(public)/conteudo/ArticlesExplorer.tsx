@@ -7,6 +7,7 @@ import { Search, ChevronRight } from "lucide-react";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { PeopleGrowthBadge } from "@/components/PeopleGrowthBadge";
+import { PontoDeReplicaBadge } from "@/components/PontoDeReplicaBadge";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
 import type { Article, Category, Tag, Author } from "@/types/database.types";
@@ -74,6 +75,7 @@ function ArticleRow({ article, category, author }: { article: Article; category:
           <div style={{ marginBottom: "0.375rem" }}>
             <FormatTag format={article.format} locale={locale} />
             {category?.is_people_growth && <PeopleGrowthBadge />}
+            {category?.is_ponto_de_replica && <PontoDeReplicaBadge />}
           </div>
           <h3 style={{ fontWeight: 700, fontSize: "1rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.375rem" }}>
             {pickLocale(locale, article.title_pt, article.title_en)}
@@ -217,6 +219,7 @@ export function ArticlesExplorer({
                       <div style={{ marginBottom: "0.75rem" }}>
                         <FormatTag format={featured.format} locale={locale} />
                         {featured.category_id && categoryById.get(featured.category_id)?.is_people_growth && <PeopleGrowthBadge />}
+                        {featured.category_id && categoryById.get(featured.category_id)?.is_ponto_de_replica && <PontoDeReplicaBadge />}
                       </div>
                       <h3 style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)", lineHeight: 1.3, marginBottom: "0.875rem" }}>
                         {pickLocale(locale, featured.title_pt, featured.title_en)}

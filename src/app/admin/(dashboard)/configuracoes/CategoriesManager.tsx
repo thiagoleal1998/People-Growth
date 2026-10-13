@@ -6,10 +6,10 @@ import { ConfirmDeleteButton } from "@/components/admin/ui";
 import { createCategory, updateCategory, deleteCategory } from "./category-actions";
 import type { Category } from "@/types/database.types";
 
-type Draft = { name_pt: string; name_en: string; slug: string; color: string; is_people_growth: boolean };
+type Draft = { name_pt: string; name_en: string; slug: string; color: string; is_people_growth: boolean; is_ponto_de_replica: boolean };
 
 function toDraft(c: Category): Draft {
-  return { name_pt: c.name_pt, name_en: c.name_en ?? "", slug: c.slug, color: c.color ?? "#315E9C", is_people_growth: c.is_people_growth };
+  return { name_pt: c.name_pt, name_en: c.name_en ?? "", slug: c.slug, color: c.color ?? "#315E9C", is_people_growth: c.is_people_growth, is_ponto_de_replica: c.is_ponto_de_replica };
 }
 
 const cellStyle = { padding: "0.625rem 0.875rem" } as const;
@@ -25,7 +25,7 @@ function CategoryRow({ category, articleCount, onSaved, onDeleted }: { category:
     startTransition(async () => {
       try {
         await updateCategory(category.id, draft);
-        onSaved({ ...category, name_pt: draft.name_pt.trim(), name_en: draft.name_en.trim() || null, slug: draft.slug.trim() || category.slug, color: draft.color.trim() || null, is_people_growth: draft.is_people_growth });
+        onSaved({ ...category, name_pt: draft.name_pt.trim(), name_en: draft.name_en.trim() || null, slug: draft.slug.trim() || category.slug, color: draft.color.trim() || null, is_people_growth: draft.is_people_growth, is_ponto_de_replica: draft.is_ponto_de_replica });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erro ao salvar.");
       }
@@ -55,6 +55,15 @@ function CategoryRow({ category, articleCount, onSaved, onDeleted }: { category:
           style={{ width: "1.0625rem", height: "1.0625rem", cursor: "pointer" }}
         />
       </td>
+      <td style={{ ...cellStyle, textAlign: "center" }}>
+        <input
+          type="checkbox"
+          checked={draft.is_ponto_de_replica}
+          onChange={(e) => setDraft((d) => ({ ...d, is_ponto_de_replica: e.target.checked }))}
+          title="Marca essa categoria como Ponto de Réplica (política, economia e sociedade)"
+          style={{ width: "1.0625rem", height: "1.0625rem", cursor: "pointer" }}
+        />
+      </td>
       <td style={{ ...cellStyle, color: "var(--admin-muted)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>
         {articleCount} artigo{articleCount === 1 ? "" : "s"}
       </td>
@@ -80,7 +89,7 @@ function CategoryRow({ category, articleCount, onSaved, onDeleted }: { category:
         />
       </td>
       {error && (
-        <td colSpan={7} style={{ padding: "0 0.875rem 0.625rem", color: "#dc2626", fontSize: "0.75rem" }}>
+        <td colSpan={8} style={{ padding: "0 0.875rem 0.625rem", color: "#dc2626", fontSize: "0.75rem" }}>
           {error}
         </td>
       )}
@@ -90,7 +99,7 @@ function CategoryRow({ category, articleCount, onSaved, onDeleted }: { category:
 
 export function CategoriesManager({ categories, articleCounts }: { categories: Category[]; articleCounts: Record<string, number> }) {
   const [items, setItems] = useState(categories);
-  const [newDraft, setNewDraft] = useState<Draft>({ name_pt: "", name_en: "", slug: "", color: "#315E9C", is_people_growth: false });
+  const [newDraft, setNewDraft] = useState<Draft>({ name_pt: "", name_en: "", slug: "", color: "#315E9C", is_people_growth: false, is_ponto_de_replica: false });
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -100,7 +109,7 @@ export function CategoriesManager({ categories, articleCounts }: { categories: C
       try {
         const created = await createCategory(newDraft);
         setItems((prev) => [...prev, created].sort((a, b) => a.name_pt.localeCompare(b.name_pt, "pt-BR")));
-        setNewDraft({ name_pt: "", name_en: "", slug: "", color: "#315E9C", is_people_growth: false });
+        setNewDraft({ name_pt: "", name_en: "", slug: "", color: "#315E9C", is_people_growth: false, is_ponto_de_replica: false });
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erro ao criar.");
       }
@@ -113,7 +122,7 @@ export function CategoriesManager({ categories, articleCounts }: { categories: C
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-              {["Cor", "Nome (PT)", "Nome (EN)", "URL (slug)", "P&G", "", ""].map((h) => (
+              {["Cor", "Nome (PT)", "Nome (EN)", "URL (slug)", "P&G", "PdR", "", ""].map((h) => (
                 <th key={h} style={{ padding: "0.625rem 0.875rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>
                   {h}
                 </th>
@@ -123,7 +132,7 @@ export function CategoriesManager({ categories, articleCounts }: { categories: C
           <tbody>
             {items.length === 0 ? (
               <tr>
-                <td colSpan={7} style={{ padding: "2rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.875rem" }}>
+                <td colSpan={8} style={{ padding: "2rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.875rem" }}>
                   Nenhuma categoria cadastrada ainda.
                 </td>
               </tr>
@@ -157,6 +166,15 @@ export function CategoriesManager({ categories, articleCounts }: { categories: C
               style={{ width: "1.0625rem", height: "1.0625rem", cursor: "pointer" }}
             />
             People & Growth
+          </label>
+          <label style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", fontSize: "0.8125rem", color: "var(--admin-text)", cursor: "pointer" }}>
+            <input
+              type="checkbox"
+              checked={newDraft.is_ponto_de_replica}
+              onChange={(e) => setNewDraft((d) => ({ ...d, is_ponto_de_replica: e.target.checked }))}
+              style={{ width: "1.0625rem", height: "1.0625rem", cursor: "pointer" }}
+            />
+            Ponto de Réplica
           </label>
           <button
             type="button"
