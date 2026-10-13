@@ -145,9 +145,77 @@ export default async function SobrePage() {
         </div>
       </section>
 
-      {/* Summary */}
+      {/* Brands */}
       <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl" style={{ maxWidth: "760px", margin: "0 auto", textAlign: "center" }}>
+          <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem" }}>
+            {t("brandsTitle")}
+          </h2>
+          <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", lineHeight: 1.75, marginBottom: "2.5rem" }}>
+            {t("brandsIntro")}
+          </p>
+        </div>
+        <div className="container-xl" style={{ maxWidth: "960px", margin: "0 auto 4rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))", gap: "1.5rem" }}>
+            {[
+              {
+                name: "People & Growth",
+                description: locale === "en" ? "Consulting, courses and articles on leadership and personal development." : "Consultoria, cursos e artigos sobre liderança e desenvolvimento pessoal.",
+                icon: "🚀",
+                color: "#315E9C",
+                href: "/people-growth" as const,
+              },
+              {
+                name: "Ponto de Réplica",
+                description: locale === "en" ? "Independent coverage of politics, economy and society." : "Cobertura independente de política, economia e sociedade.",
+                icon: "🗞️",
+                color: "#6A4C93",
+                href: "/ponto-de-replica" as const,
+              },
+              {
+                name: "Mea Sententia",
+                description: locale === "en" ? "Opinion column on business, society and the issues shaping the current moment." : "Coluna de opinião sobre negócios, sociedade e os temas que moldam o momento atual.",
+                icon: "✍️",
+                color: "#C89A4A",
+                href: "/conteudo/colunistas" as const,
+              },
+            ].map(({ name, description, icon, color, href }) => (
+              <Link
+                key={name}
+                href={href}
+                className="hover-card"
+                style={{
+                  display: "block",
+                  textDecoration: "none",
+                  backgroundColor: "var(--site-card)",
+                  border: "1px solid var(--site-border)",
+                  borderRadius: "1rem",
+                  padding: "1.75rem",
+                }}
+              >
+                <div
+                  style={{
+                    width: "3.5rem",
+                    height: "3.5rem",
+                    borderRadius: "0.875rem",
+                    backgroundColor: `${color}1f`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    fontSize: "1.5rem",
+                    marginBottom: "1rem",
+                  }}
+                >
+                  {icon}
+                </div>
+                <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--site-text)", marginBottom: "0.5rem" }}>{name}</h3>
+                <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.65 }}>{description}</p>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        <div className="container-xl" style={{ maxWidth: "760px", margin: "0 auto", textAlign: "center", paddingTop: "2.5rem", borderTop: "1px solid var(--site-border)" }}>
           <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem" }}>
             {t("summaryTitle")}
           </h2>
@@ -244,60 +312,6 @@ export default async function SobrePage() {
                   {title}
                 </h3>
                 <p style={{ color: "var(--site-muted)", fontSize: "0.9rem", lineHeight: 1.65, display: "-webkit-box", WebkitLineClamp: 5, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{description}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Projects */}
-      <section className="section-padding" style={{ background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)", color: "white" }}>
-        <div className="container-xl">
-          <h2 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, textAlign: "center", marginBottom: "3rem" }}>
-            Projetos & Iniciativas
-          </h2>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))", gap: "1.5rem" }}>
-            {[
-              {
-                name: "People & Growth",
-                description: "Consultoria, treinamentos e conteúdo sobre negócios, pessoas e os temas sociais, políticos e ambientais que os impactam.",
-                icon: "🚀",
-                color: "#315E9C",
-              },
-              {
-                name: "Mea Sententia",
-                description: "Coluna de opinião com perspectivas sobre negócios, sociedade e os temas que moldam o momento atual.",
-                icon: "✍️",
-                color: "#FFB703",
-              },
-            ].map(({ name, description, icon, color }) => (
-              <div
-                key={name}
-                className="hover-card-dark"
-                style={{
-                  backgroundColor: "rgba(255,255,255,0.05)",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                  borderRadius: "1rem",
-                  padding: "1.75rem",
-                }}
-              >
-                <div
-                  style={{
-                    width: "3.5rem",
-                    height: "3.5rem",
-                    borderRadius: "0.875rem",
-                    backgroundColor: `${color}20`,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                    fontSize: "1.5rem",
-                    marginBottom: "1rem",
-                  }}
-                >
-                  {icon}
-                </div>
-                <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", marginBottom: "0.5rem" }}>{name}</h3>
-                <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "0.875rem", lineHeight: 1.65 }}>{description}</p>
               </div>
             ))}
           </div>
