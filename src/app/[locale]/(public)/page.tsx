@@ -751,7 +751,7 @@ export default async function HomePage() {
               }
               .columnist-grid::-webkit-scrollbar { display: none; }
               .columnist-card {
-                flex: 0 0 60%;
+                flex: 0 0 42%;
                 flex-direction: column !important;
                 gap: 0.625rem !important;
                 scroll-snap-align: start;
