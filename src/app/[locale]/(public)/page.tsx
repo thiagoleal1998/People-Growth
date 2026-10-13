@@ -745,14 +745,14 @@ export default async function HomePage() {
                 overflow-x: auto;
                 scroll-snap-type: x mandatory;
                 scroll-padding-left: 1rem;
-                gap: 0.875rem;
+                gap: 1.5rem;
                 margin: 0 -1rem;
                 padding: 0 1rem 0.5rem;
                 scrollbar-width: none;
               }
               .columnist-grid::-webkit-scrollbar { display: none; }
               .columnist-card {
-                flex: 0 0 42%;
+                flex: 0 0 38%;
                 flex-direction: column !important;
                 gap: 0.625rem !important;
                 scroll-snap-align: start;
