@@ -744,6 +744,7 @@ export default async function HomePage() {
                 display: flex;
                 overflow-x: auto;
                 scroll-snap-type: x mandatory;
+                scroll-padding-left: 1rem;
                 gap: 0.875rem;
                 margin: 0 -1rem;
                 padding: 0 1rem 0.5rem;
