@@ -137,7 +137,7 @@ export function AdminSidebar({
       </button>
       {logoUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
-        <img src={logoUrl} alt="Festina" style={{ height: "1.75rem", width: "auto" }} />
+        <img src={logoUrl} alt="Festina" style={{ height: "2.625rem", width: "auto" }} />
       ) : (
         <span style={{ fontWeight: 800, fontSize: "0.9375rem" }}>Festina</span>
       )}
@@ -163,8 +163,13 @@ export function AdminSidebar({
       <div style={{ padding: "1.5rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "0.5rem" }}>
           {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="Festina" style={{ height: "2.25rem", width: "auto", display: "block" }} />
+            <div>
+              <span style={{ display: "block", fontSize: "0.5625rem", fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.1875rem" }}>
+                Grupo
+              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logoUrl} alt="Festina" style={{ height: "3.375rem", width: "auto", display: "block" }} />
+            </div>
           ) : (
             <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               Festina

@@ -40,12 +40,17 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
         borderBottom: "1px solid rgba(255,255,255,0.08)",
       }}
     >
-      <nav className="container-xl" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "4rem" }}>
+      <nav className="container-xl" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "6.25rem" }}>
         {/* Logo */}
-        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+        <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.1875rem" }}>
           {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="Festina" style={{ height: "3rem", width: "auto" }} />
+            <>
+              <span style={{ fontSize: "0.5625rem", fontWeight: 700, color: "rgba(255,255,255,0.45)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                Grupo
+              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logoUrl} alt="Festina" style={{ height: "4.5rem", width: "auto" }} />
+            </>
           ) : (
             <span
               style={{

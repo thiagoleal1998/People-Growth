@@ -96,8 +96,13 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
           {/* Brand */}
           <div className="ft-brand">
             {logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoUrl} alt="Festina" style={{ height: "3rem", width: "auto", marginBottom: "0.75rem" }} />
+              <>
+                <span style={{ display: "block", fontSize: "0.625rem", fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.25rem" }}>
+                  Grupo
+                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={logoUrl} alt="Festina" style={{ height: "4.5rem", width: "auto", marginBottom: "0.75rem" }} />
+              </>
             ) : (
               <div
                 style={{

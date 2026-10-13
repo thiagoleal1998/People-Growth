@@ -36,8 +36,13 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
         <div style={{ position: "absolute", width: "18rem", height: "18rem", borderRadius: "50%", background: "#C89A4A", opacity: 0.14, filter: "blur(90px)", bottom: "-4rem", left: "-4rem", pointerEvents: "none" }} />
         <div style={{ position: "relative", maxWidth: "440px" }}>
           {logoUrl ? (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img src={logoUrl} alt="Festina" style={{ height: "3.75rem", width: "auto", display: "block", margin: "0 auto 2rem" }} />
+            <>
+              <span style={{ display: "block", textAlign: "center", fontSize: "0.6875rem", fontWeight: 700, color: "rgba(255,255,255,0.45)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.375rem" }}>
+                Grupo
+              </span>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={logoUrl} alt="Festina" style={{ height: "5.625rem", width: "auto", display: "block", margin: "0 auto 2rem" }} />
+            </>
           ) : (
             <div style={{ fontWeight: 800, fontSize: "1.5rem", marginBottom: "2rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
               Festina
@@ -92,8 +97,13 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
         <div style={{ position: "relative", width: "100%", maxWidth: "360px" }}>
           <div className="login-mobile-logo" style={{ display: "none", marginBottom: "1.5rem" }}>
             {logoUrl ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img src={logoUrl} alt="Festina" style={{ height: "2rem", width: "auto" }} />
+              <>
+                <span style={{ display: "block", fontSize: "0.5625rem", fontWeight: 700, color: "rgba(13,27,42,0.45)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.1875rem" }}>
+                  Grupo
+                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={logoUrl} alt="Festina" style={{ height: "3rem", width: "auto" }} />
+              </>
             ) : (
               <div style={{ fontWeight: 800, fontSize: "1.25rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
                 Festina

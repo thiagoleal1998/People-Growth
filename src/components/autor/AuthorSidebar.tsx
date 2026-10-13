@@ -54,8 +54,13 @@ export function AuthorSidebar({ logoUrl, pendingComments = 0, unreadAnnouncement
     >
       <div style={{ padding: "1.5rem 1.25rem", borderBottom: "1px solid rgba(255,255,255,0.08)" }}>
         {logoUrl ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={logoUrl} alt="Festina" style={{ height: "2.25rem", width: "auto", display: "block" }} />
+          <>
+            <span style={{ display: "block", fontSize: "0.5625rem", fontWeight: 700, color: "rgba(255,255,255,0.4)", letterSpacing: "0.14em", textTransform: "uppercase", marginBottom: "0.1875rem" }}>
+              Grupo
+            </span>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={logoUrl} alt="Festina" style={{ height: "3.375rem", width: "auto", display: "block" }} />
+          </>
         ) : (
           <div style={{ fontWeight: 800, fontSize: "1rem", background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>
             Festina
