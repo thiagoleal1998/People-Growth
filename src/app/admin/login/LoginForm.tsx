@@ -60,13 +60,13 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
             Vamos construir <span style={{ background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>juntos</span>.
           </h1>
           <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1rem", lineHeight: 1.6, marginBottom: authors.length > 0 ? "2.5rem" : 0 }}>
-            Publique artigos, acompanhe métricas e mantenha o Festina sempre atualizado — tudo em um só lugar.
+            Publique artigos, acompanhe métricas e mantenha o Grupo Festina sempre atualizado — tudo em um só lugar.
           </p>
 
           {authors.length > 0 && (
             <div style={{ paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
               <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#C89A4A", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
-                Quem está por trás do Festina
+                Quem está por trás do Grupo Festina
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
               {authors.slice(0, 4).map((author) => (

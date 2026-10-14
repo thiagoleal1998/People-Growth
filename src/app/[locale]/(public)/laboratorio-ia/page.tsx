@@ -68,7 +68,7 @@ export default async function LaboratorioIAPage() {
             IA aplicada a negócios reais
           </h2>
           <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.0625rem", lineHeight: 1.7, marginBottom: "2rem" }}>
-            O Festina desenvolve agentes, automações e integrações de IA que aumentam a produtividade e criam vantagens competitivas reais para o seu negócio.
+            O Grupo Festina desenvolve agentes, automações e integrações de IA que aumentam a produtividade e criam vantagens competitivas reais para o seu negócio.
           </p>
           <div style={{ display: "flex", gap: "1rem", justifyContent: "center", flexWrap: "wrap" }}>
             <Link href="/contato" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", padding: "0.875rem 1.75rem", borderRadius: "0.75rem", fontWeight: 700, boxShadow: "0 4px 24px -4px rgba(49, 94, 156,0.5)" }}>

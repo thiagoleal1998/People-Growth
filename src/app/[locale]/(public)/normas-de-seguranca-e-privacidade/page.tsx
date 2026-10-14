@@ -18,7 +18,7 @@ const DEFAULT_BODY_EN = INSTITUTIONAL_DEFAULTS["normas-de-seguranca-e-privacidad
 
 export const metadata: Metadata = {
   title: DEFAULT_TITLE_PT,
-  description: "Como o Festina trata os dados enviados no site, incluindo comentários e formulários.",
+  description: "Como o Grupo Festina trata os dados enviados no site, incluindo comentários e formulários.",
 };
 
 export default async function NormasSegurancaPrivacidadePage() {

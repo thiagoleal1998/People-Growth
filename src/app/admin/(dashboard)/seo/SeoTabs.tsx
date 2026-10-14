@@ -18,7 +18,7 @@ const geoFields: { key: string; label: string; placeholder?: string; hint?: stri
   {
     key: "geo_ai_summary_pt",
     label: "Resumo institucional para IA (PT)",
-    hint: "Frase objetiva sobre quem é o Festina, usada como base para respostas de ferramentas como ChatGPT, Perplexity e Gemini.",
+    hint: "Frase objetiva sobre quem é o Grupo Festina, usada como base para respostas de ferramentas como ChatGPT, Perplexity e Gemini.",
   },
   { key: "geo_ai_summary_en", label: "Resumo institucional para IA (EN)" },
 ];
@@ -148,7 +148,7 @@ export function SeoTabs({
           <FieldGrid>
             <Field
               label="Perguntas frequentes (PT)"
-              hint='Uma pergunta e resposta por linha, separadas por " | ". Ex: O que é o Festina? | Uma consultoria e um espaço de conteúdo sobre negócios, pessoas e os temas que os impactam.'
+              hint='Uma pergunta e resposta por linha, separadas por " | ". Ex: O que é o Grupo Festina? | Uma consultoria e um espaço de conteúdo sobre negócios, pessoas e os temas que os impactam.'
             >
               <Textarea name="aeo_faq_pt" rows={8} defaultValue={values.aeo_faq_pt ?? ""} />
             </Field>

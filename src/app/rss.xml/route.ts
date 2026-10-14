@@ -42,7 +42,7 @@ export async function GET() {
   <channel>
     <title>Festina — Mea Sententia</title>
     <link>${baseUrl}/pt/conteudo</link>
-    <description>Artigos e opiniões do Festina.</description>
+    <description>Artigos e opiniões do Grupo Festina.</description>
     <language>pt-BR</language>${items}
   </channel>
 </rss>`;

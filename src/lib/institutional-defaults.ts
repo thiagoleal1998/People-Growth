@@ -40,7 +40,7 @@ This policy may be updated if the site starts using new cookies or third-party t
     titlePt: "Aviso de Direitos Autorais",
     titleEn: "Copyright Notice",
     bodyPt: `## Titularidade do conteúdo
-Os textos, imagens, vídeos e demais materiais publicados pelo Festina — incluindo artigos, a coluna Mea Sententia e páginas institucionais — são de titularidade do Festina ou de seus autores, e protegidos pela legislação brasileira de direitos autorais (Lei nº 9.610/1998), salvo quando indicada outra fonte.
+Os textos, imagens, vídeos e demais materiais publicados pelo Grupo Festina — incluindo artigos, a coluna Mea Sententia e páginas institucionais — são de titularidade do Grupo Festina ou de seus autores, e protegidos pela legislação brasileira de direitos autorais (Lei nº 9.610/1998), salvo quando indicada outra fonte.
 
 ## Uso permitido
 É permitido compartilhar links para o nosso conteúdo e citar trechos curtos, desde que citada a fonte com link para o artigo original. Reprodução integral de artigos, sem autorização prévia, não é permitida.
@@ -65,15 +65,15 @@ If you find our content published without authorization on another site, or beli
   "comentarios": {
     titlePt: "Regras de Uso dos Comentários",
     titleEn: "Comment Guidelines",
-    bodyPt: `O Festina mantém um espaço de comentários para que leitores possam reagir e discutir os artigos publicados. Para que esse espaço funcione bem para todo mundo, pedimos que sejam seguidas as regras abaixo.
+    bodyPt: `O Grupo Festina mantém um espaço de comentários para que leitores possam reagir e discutir os artigos publicados. Para que esse espaço funcione bem para todo mundo, pedimos que sejam seguidas as regras abaixo.
 
-1. O autor do comentário, e não o Festina, é o responsável pelo que escreve. Publicamos comentários assinados por quem os envia, não pela redação.
+1. O autor do comentário, e não o Grupo Festina, é o responsável pelo que escreve. Publicamos comentários assinados por quem os envia, não pela redação.
 2. Todo comentário passa por moderação antes de ser publicado. Isso pode levar algumas horas, e nem todo comentário enviado é aprovado.
 3. Não publicamos comentários com discurso de ódio, ameaças, assédio ou ataques pessoais a outros leitores, colunistas ou terceiros.
 4. Não publicamos comentários com conteúdo ilegal, discriminatório, ou que incentivem violência.
 5. Não publicamos spam, propaganda, links suspeitos ou divulgação de dados pessoais de terceiros.
 6. Comentários fora do tema do artigo ou repetidos em vários artigos podem ser removidos.
-7. O Festina pode remover, editar a exibição ou recusar qualquer comentário, a seu critério, sem necessidade de justificar a decisão a quem o enviou.
+7. O Grupo Festina pode remover, editar a exibição ou recusar qualquer comentário, a seu critério, sem necessidade de justificar a decisão a quem o enviou.
 8. O e-mail informado no formulário de comentário não é publicado — serve apenas para eventual contato sobre a própria mensagem, conforme nossas [Normas de Segurança e Privacidade](/normas-de-seguranca-e-privacidade).
 
 Encontrou um comentário que viola essas regras? Avise a gente pela [página de Contato](/contato).`,
@@ -100,7 +100,7 @@ Ao comentar em um artigo ou preencher um formulário no site (contato, newslette
 O e-mail informado em um comentário serve só para eventual contato sobre a própria mensagem e não é publicado nem compartilhado. Dados de formulários são usados exclusivamente para responder ao contato ou enviar a newsletter, quando o cadastro é feito voluntariamente.
 
 ## Com quem compartilhamos
-Não vendemos, alugamos ou compartilhamos dados pessoais com terceiros para fins de marketing. Os dados ficam armazenados em infraestrutura de nuvem (Supabase) com acesso restrito à equipe do Festina.
+Não vendemos, alugamos ou compartilhamos dados pessoais com terceiros para fins de marketing. Os dados ficam armazenados em infraestrutura de nuvem (Supabase) com acesso restrito à equipe do Grupo Festina.
 
 ## Moderação de comentários
 Todo comentário passa por revisão antes de ser publicado. Isso significa que, entre o envio e a publicação, seu comentário e e-mail ficam visíveis apenas para a equipe responsável pela moderação.
@@ -138,13 +138,13 @@ The use of cookies on the site is covered separately in our [Cookie Policy](/coo
     titlePt: "Termos de Uso",
     titleEn: "Terms of Use",
     bodyPt: `## Aceitação dos termos
-Ao acessar e usar o site do Festina, você concorda com estes Termos de Uso. Se não concordar com algum ponto, pedimos que não utilize o site.
+Ao acessar e usar o site do Grupo Festina, você concorda com estes Termos de Uso. Se não concordar com algum ponto, pedimos que não utilize o site.
 
 ## Sobre o conteúdo
 Os artigos, análises e materiais publicados aqui — incluindo os da seção Mea Sententia — representam a opinião de seus autores e têm caráter informativo. Não constituem aconselhamento profissional individualizado (jurídico, financeiro, contábil ou de outra natureza) para o caso concreto de cada leitor.
 
 ## Propriedade intelectual
-Textos, imagens, marca e demais materiais do site são de propriedade do Festina ou de terceiros licenciados, protegidos por direitos autorais. A reprodução total ou parcial sem autorização prévia não é permitida — veja também nosso [Aviso de Direitos Autorais](/direitos-autorais).
+Textos, imagens, marca e demais materiais do site são de propriedade do Grupo Festina ou de terceiros licenciados, protegidos por direitos autorais. A reprodução total ou parcial sem autorização prévia não é permitida — veja também nosso [Aviso de Direitos Autorais](/direitos-autorais).
 
 ## Comentários e conduta do usuário
 Ao comentar em um artigo, você concorda em não publicar conteúdo ofensivo, ilegal, difamatório ou que viole direitos de terceiros. Reservamo-nos o direito de moderar, editar ou remover comentários que descumpram essas regras — veja as [Regras de Uso dos Comentários](/comentarios) para mais detalhes.
