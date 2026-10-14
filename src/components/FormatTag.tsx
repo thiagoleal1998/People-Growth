@@ -24,7 +24,7 @@ export function FormatTag({ format, locale }: { format: Article["format"]; local
       }}
     >
       {isOpinion ? (
-        <img src={MEA_SENTENTIA_LOGO_URL} alt="Mea Sententia" style={{ height: "0.75rem", width: "auto", display: "block", objectFit: "contain" }} />
+        <img src={MEA_SENTENTIA_LOGO_URL} alt="Mea Sententia" style={{ height: "1.125rem", width: "auto", display: "block", objectFit: "contain" }} />
       ) : locale === "en" ? (
         "News"
       ) : (

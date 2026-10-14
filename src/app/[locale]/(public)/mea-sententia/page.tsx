@@ -64,7 +64,7 @@ export default async function MeaSententiaPage({ params }: { params: Promise<{ l
               marginBottom: "1.5rem",
             }}
           >
-            <img src={MEA_SENTENTIA_LOGO_URL} alt="Mea Sententia" style={{ height: "2.5rem", width: "auto", display: "block", objectFit: "contain" }} />
+            <img src={MEA_SENTENTIA_LOGO_URL} alt="Mea Sententia" style={{ height: "4rem", width: "auto", display: "block", objectFit: "contain" }} />
           </div>
           <span
             style={{

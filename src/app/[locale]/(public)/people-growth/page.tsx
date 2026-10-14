@@ -87,7 +87,7 @@ export default async function PeopleGrowthPage({ params }: { params: Promise<{ l
               marginBottom: "1.5rem",
             }}
           >
-            <img src={PEOPLE_GROWTH_LOGO_URL} alt="People & Growth" style={{ height: "2.5rem", width: "auto", display: "block", objectFit: "contain" }} />
+            <img src={PEOPLE_GROWTH_LOGO_URL} alt="People & Growth" style={{ height: "4rem", width: "auto", display: "block", objectFit: "contain" }} />
           </div>
           <span
             style={{

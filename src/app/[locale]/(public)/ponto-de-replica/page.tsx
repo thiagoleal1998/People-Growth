@@ -87,7 +87,7 @@ export default async function PontoDeReplicaPage({ params }: { params: Promise<{
               marginBottom: "1.5rem",
             }}
           >
-            <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ height: "2.5rem", width: "auto", display: "block", objectFit: "contain" }} />
+            <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ height: "4rem", width: "auto", display: "block", objectFit: "contain" }} />
           </div>
           <span
             style={{

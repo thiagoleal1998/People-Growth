@@ -17,7 +17,7 @@ export function PontoDeReplicaBadge() {
         marginLeft: "0.375rem",
       }}
     >
-      <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ height: "0.75rem", width: "auto", display: "block", objectFit: "contain" }} />
+      <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ height: "1.125rem", width: "auto", display: "block", objectFit: "contain" }} />
     </span>
   );
 }

@@ -15,7 +15,7 @@ export function PeopleGrowthBadge() {
         marginLeft: "0.375rem",
       }}
     >
-      <img src={PEOPLE_GROWTH_LOGO_URL} alt="People & Growth" style={{ height: "0.75rem", width: "auto", display: "block", objectFit: "contain" }} />
+      <img src={PEOPLE_GROWTH_LOGO_URL} alt="People & Growth" style={{ height: "1.125rem", width: "auto", display: "block", objectFit: "contain" }} />
     </span>
   );
 }

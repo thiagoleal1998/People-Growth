@@ -193,15 +193,15 @@ export default async function SobrePage() {
               >
                 <div
                   style={{
-                    width: "3.5rem",
-                    height: "3.5rem",
-                    borderRadius: "0.875rem",
+                    width: "5rem",
+                    height: "5rem",
+                    borderRadius: "1rem",
                     backgroundColor: "white",
                     border: "1px solid var(--site-border)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    padding: "0.375rem",
+                    padding: "0.5rem",
                     marginBottom: "1rem",
                     overflow: "hidden",
                   }}
@@ -279,16 +279,16 @@ export default async function SobrePage() {
             <div key={name} style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start" }}>
               <div
                 style={{
-                  width: "3.5rem",
-                  height: "3.5rem",
+                  width: "5rem",
+                  height: "5rem",
                   flexShrink: 0,
-                  borderRadius: "0.875rem",
+                  borderRadius: "1rem",
                   backgroundColor: "white",
                   border: "1px solid var(--site-border)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  padding: "0.375rem",
+                  padding: "0.5rem",
                   overflow: "hidden",
                 }}
               >
