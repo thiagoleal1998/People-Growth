@@ -75,35 +75,40 @@ export default async function PontoDeReplicaPage({ params }: { params: Promise<{
     <>
       <section style={{ background: "linear-gradient(135deg, #1c1430 0%, #2a1f42 100%)", paddingTop: "6rem", paddingBottom: "3.5rem", color: "white" }}>
         <div className="container-xl" style={{ maxWidth: "720px" }}>
-          <div
-            style={{
-              display: "flex",
-              width: "fit-content",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "white",
-              borderRadius: "1rem",
-              padding: "0.625rem 1.125rem",
-              marginBottom: "1.5rem",
-            }}
-          >
-            <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ height: "4rem", width: "auto", display: "block", objectFit: "contain" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+            <div
+              style={{
+                width: "4.5rem",
+                height: "4.5rem",
+                flexShrink: 0,
+                backgroundColor: "white",
+                borderRadius: "1rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "0.5rem",
+              }}
+            >
+              <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+            </div>
+            <div>
+              <span
+                style={{
+                  display: "inline-block",
+                  backgroundColor: "rgba(170,140,210,0.18)",
+                  color: "#c9adea",
+                  padding: "0.25rem 0.875rem",
+                  borderRadius: "9999px",
+                  fontSize: "0.8125rem",
+                  fontWeight: 700,
+                  marginBottom: "0.5rem",
+                }}
+              >
+                {locale === "en" ? "A FESTINA BRAND" : "UMA MARCA FESTINA"}
+              </span>
+              <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 800, lineHeight: 1.1, margin: 0 }}>Ponto de Réplica</h1>
+            </div>
           </div>
-          <span
-            style={{
-              display: "inline-block",
-              backgroundColor: "rgba(170,140,210,0.18)",
-              color: "#c9adea",
-              padding: "0.25rem 0.875rem",
-              borderRadius: "9999px",
-              fontSize: "0.8125rem",
-              fontWeight: 700,
-              marginBottom: "1rem",
-            }}
-          >
-            {locale === "en" ? "A FESTINA BRAND" : "UMA MARCA FESTINA"}
-          </span>
-          <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 800, lineHeight: 1.1, marginBottom: "1rem" }}>Ponto de Réplica</h1>
           <p style={{ fontSize: "1.0625rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.7 }}>
             {locale === "en"
               ? "Independent coverage of politics, economy and society — the issues shaping the current moment."

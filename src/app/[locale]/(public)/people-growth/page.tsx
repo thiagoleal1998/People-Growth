@@ -75,35 +75,40 @@ export default async function PeopleGrowthPage({ params }: { params: Promise<{ l
     <>
       <section style={{ background: "linear-gradient(135deg, #0d1b2a 0%, #1a1f3e 100%)", paddingTop: "6rem", paddingBottom: "3.5rem", color: "white" }}>
         <div className="container-xl" style={{ maxWidth: "720px" }}>
-          <div
-            style={{
-              display: "flex",
-              width: "fit-content",
-              alignItems: "center",
-              justifyContent: "center",
-              backgroundColor: "white",
-              borderRadius: "1rem",
-              padding: "0.625rem 1.125rem",
-              marginBottom: "1.5rem",
-            }}
-          >
-            <img src={PEOPLE_GROWTH_LOGO_URL} alt="People & Growth" style={{ height: "4rem", width: "auto", display: "block", objectFit: "contain" }} />
+          <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+            <div
+              style={{
+                width: "4.5rem",
+                height: "4.5rem",
+                flexShrink: 0,
+                backgroundColor: "white",
+                borderRadius: "1rem",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                padding: "0.5rem",
+              }}
+            >
+              <img src={PEOPLE_GROWTH_LOGO_URL} alt="People & Growth" style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
+            </div>
+            <div>
+              <span
+                style={{
+                  display: "inline-block",
+                  backgroundColor: "rgba(200,154,74,0.15)",
+                  color: "#C89A4A",
+                  padding: "0.25rem 0.875rem",
+                  borderRadius: "9999px",
+                  fontSize: "0.8125rem",
+                  fontWeight: 700,
+                  marginBottom: "0.5rem",
+                }}
+              >
+                {locale === "en" ? "A FESTINA BRAND" : "UMA MARCA FESTINA"}
+              </span>
+              <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 800, lineHeight: 1.1, margin: 0 }}>People &amp; Growth</h1>
+            </div>
           </div>
-          <span
-            style={{
-              display: "inline-block",
-              backgroundColor: "rgba(200,154,74,0.15)",
-              color: "#C89A4A",
-              padding: "0.25rem 0.875rem",
-              borderRadius: "9999px",
-              fontSize: "0.8125rem",
-              fontWeight: 700,
-              marginBottom: "1rem",
-            }}
-          >
-            {locale === "en" ? "A FESTINA BRAND" : "UMA MARCA FESTINA"}
-          </span>
-          <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 800, lineHeight: 1.1, marginBottom: "1rem" }}>People &amp; Growth</h1>
           <p style={{ fontSize: "1.0625rem", color: "rgba(255,255,255,0.7)", lineHeight: 1.7 }}>
             {locale === "en"
               ? "Content on leadership and personal development, plus our strategy, growth and AI consulting practice for businesses."
