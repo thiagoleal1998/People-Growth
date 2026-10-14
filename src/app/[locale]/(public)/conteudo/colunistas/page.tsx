@@ -26,7 +26,13 @@ export default async function ColunistasPage() {
   // to be inserted — founders first, in their own row, then everyone else
   // alphabetically, rather than one undifferentiated list.
   const byName = (a: Author, b: Author) => a.name.localeCompare(b.name, "pt-BR");
-  const founders = allAuthors.filter((a) => a.is_founder).sort(byName);
+  // Thiago specifically goes in the middle of the founders row (Gustavo,
+  // Thiago, Raul) rather than alphabetically — a deliberate layout choice,
+  // not a sort order columnists should also follow.
+  const FOUNDER_ORDER = ["Gustavo Monken", "Thiago Leal", "Raul Salustiano"];
+  const founders = allAuthors
+    .filter((a) => a.is_founder)
+    .sort((a, b) => FOUNDER_ORDER.indexOf(a.name) - FOUNDER_ORDER.indexOf(b.name));
   const columnists = allAuthors.filter((a) => !a.is_founder).sort(byName);
 
   return (
