@@ -216,7 +216,7 @@ export function AuthorForm({ item, imageError }: { item?: Author; imageError?: s
             <Field label="Fundador" hint='Só os fundadores aparecem na grade principal da página "Sobre" (/sobre). Demais autores/colunistas continuam aparecendo normalmente em Colunistas, na tira da home e nos artigos.'>
               <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
                 <input type="checkbox" name="is_founder" defaultChecked={item?.is_founder ?? false} />
-                É um dos fundadores da Festina
+                É um dos fundadores do Festina
               </label>
             </Field>
           </div>

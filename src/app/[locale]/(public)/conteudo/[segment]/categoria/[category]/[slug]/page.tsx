@@ -473,7 +473,7 @@ export default async function ArticlePage({
                   </>
                 ) : (
                   <>
-                    O autor da mensagem, e não a Festina, é o responsável pelo comentário. Leia as{" "}
+                    O autor da mensagem, e não o Festina, é o responsável pelo comentário. Leia as{" "}
                     <Link href="/comentarios" style={{ color: "#315E9C", fontWeight: 600, textDecoration: "underline" }}>
                       Regras de Uso dos Comentários
                     </Link>
