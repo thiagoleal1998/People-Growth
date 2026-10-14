@@ -10,7 +10,6 @@ import {
   Sparkles,
   Zap,
   Radio,
-  Trophy,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getFaqEntriesFromConfig } from "@/lib/faq";
@@ -630,13 +629,7 @@ export default async function HomePage() {
 
                 {sportsInitial && (
                   <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
-                    <div style={{ backgroundColor: "#315E9C", color: "white", padding: "0.625rem 1rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                      <Trophy size={20} />
-                      <div style={{ fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>{locale === "en" ? "Standings" : "Classificação"}</div>
-                    </div>
-                    <div style={{ padding: "0.875rem 1rem", backgroundColor: "var(--site-card)" }}>
-                      <SportsStandingsSnippet standingsByCompetition={sportsInitial.standingsByCompetition} locale={locale} />
-                    </div>
+                    <SportsStandingsSnippet standingsByCompetition={sportsInitial.standingsByCompetition} locale={locale} />
                   </div>
                 )}
 
