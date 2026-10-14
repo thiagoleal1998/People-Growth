@@ -20,7 +20,14 @@ export default async function ColunistasPage() {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data } = await (supabase as any).from("authors").select("*").eq("status", "active").order("order");
-  const authors = ((data ?? []) as Author[]).filter(isAuthorPubliclyVisible);
+  const allAuthors = ((data ?? []) as Author[]).filter(isAuthorPubliclyVisible);
+  // The DB's own "order" column doesn't distinguish founders from everyone
+  // else, so the grid used to just come out in whatever order rows happened
+  // to be inserted — founders first, in their own row, then everyone else
+  // alphabetically, rather than one undifferentiated list.
+  const byName = (a: Author, b: Author) => a.name.localeCompare(b.name, "pt-BR");
+  const founders = allAuthors.filter((a) => a.is_founder).sort(byName);
+  const columnists = allAuthors.filter((a) => !a.is_founder).sort(byName);
 
   return (
     <>
@@ -43,67 +50,96 @@ export default async function ColunistasPage() {
 
       <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl" style={{ maxWidth: "900px" }}>
-          {authors.length === 0 ? (
+          {allAuthors.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               {locale === "en" ? "No columnists registered at the moment." : "Nenhum colunista cadastrado no momento."}
             </div>
           ) : (
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "1.5rem" }}>
-              {authors.map((author) => (
-                <article
-                  key={author.id}
-                  style={{
-                    backgroundColor: "var(--site-card)",
-                    borderRadius: "1.25rem",
-                    padding: "1.75rem",
-                    border: "1px solid var(--site-border)",
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                  }}
-                >
-                  <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1rem" }}>
-                    <div
-                      style={{
-                        width: "4rem",
-                        height: "4rem",
-                        borderRadius: "50%",
-                        flexShrink: 0,
-                        background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
-                      }}
-                    />
-                    <div>
-                      <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)" }}>{author.name}</h2>
-                      {author.role_pt && (
-                        <p style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.8125rem" }}>{pickLocale(locale, author.role_pt, author.role_en)}</p>
-                      )}
+            <>
+              {founders.length > 0 && (
+                <div style={{ marginBottom: "2.5rem" }}>
+                  <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#C89A4A", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "1rem" }}>
+                    {locale === "en" ? "Editorial Board" : "Conselho Editorial"}
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "1.5rem" }}>
+                    {founders.map((author) => (
+                      <AuthorCard key={author.id} author={author} locale={locale} accent="#C89A4A" />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {columnists.length > 0 && (
+                <div>
+                  {founders.length > 0 && (
+                    <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--site-faint)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "1rem", paddingTop: "1.5rem", borderTop: "1px solid var(--site-border)" }}>
+                      {locale === "en" ? "Columnists" : "Colunistas"}
                     </div>
-                  </div>
-                  {(author.tagline_pt || author.bio_pt) && (
-                    <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6, flex: 1, marginBottom: "1rem" }}>
-                      {pickLocale(locale, author.tagline_pt, author.tagline_en)?.trim() || pickLocale(locale, author.bio_pt, author.bio_en)}
-                    </p>
                   )}
-                  <div style={{ display: "flex", gap: "1.25rem", marginTop: (author.tagline_pt || author.bio_pt) ? 0 : "auto", paddingTop: (author.tagline_pt || author.bio_pt) ? 0 : "1rem" }}>
-                    <Link
-                      href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
-                      style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "#315E9C", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
-                    >
-                      {locale === "en" ? "About" : "Sobre"} <ArrowRight size={15} />
-                    </Link>
-                    <Link
-                      href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
-                      style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--site-muted)", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
-                    >
-                      {locale === "en" ? "View articles" : "Ver artigos"} <ArrowRight size={15} />
-                    </Link>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "1.5rem" }}>
+                    {columnists.map((author) => (
+                      <AuthorCard key={author.id} author={author} locale={locale} accent="#315E9C" />
+                    ))}
                   </div>
-                </article>
-              ))}
-            </div>
+                </div>
+              )}
+            </>
           )}
         </div>
       </section>
     </>
+  );
+}
+
+function AuthorCard({ author, locale, accent }: { author: Author; locale: string; accent: string }) {
+  return (
+    <article
+      style={{
+        backgroundColor: "var(--site-card)",
+        borderRadius: "1.25rem",
+        padding: "1.75rem",
+        border: "1px solid var(--site-border)",
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+      }}
+    >
+      <div style={{ display: "flex", gap: "1rem", alignItems: "center", marginBottom: "1rem" }}>
+        <div
+          style={{
+            width: "4rem",
+            height: "4rem",
+            borderRadius: "50%",
+            flexShrink: 0,
+            background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+          }}
+        />
+        <div>
+          <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)" }}>{author.name}</h2>
+          {author.role_pt && (
+            <p style={{ color: accent, fontWeight: 600, fontSize: "0.8125rem" }}>{pickLocale(locale, author.role_pt, author.role_en)}</p>
+          )}
+        </div>
+      </div>
+      {(author.tagline_pt || author.bio_pt) && (
+        <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6, flex: 1, marginBottom: "1rem" }}>
+          {pickLocale(locale, author.tagline_pt, author.tagline_en)?.trim() || pickLocale(locale, author.bio_pt, author.bio_en)}
+        </p>
+      )}
+      <div style={{ display: "flex", gap: "1.25rem", marginTop: (author.tagline_pt || author.bio_pt) ? 0 : "auto", paddingTop: (author.tagline_pt || author.bio_pt) ? 0 : "1rem" }}>
+        <Link
+          href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
+          style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: accent, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
+        >
+          {locale === "en" ? "About" : "Sobre"} <ArrowRight size={15} />
+        </Link>
+        <Link
+          href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
+          style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--site-muted)", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
+        >
+          {locale === "en" ? "View articles" : "Ver artigos"} <ArrowRight size={15} />
+        </Link>
+      </div>
+    </article>
   );
 }
