@@ -4,5 +4,12 @@
 const BRAND_LOGO_BASE = "https://lqgkxpoyymokrratgabe.supabase.co/storage/v1/object/public/site-assets/brand-logos";
 
 export const PEOPLE_GROWTH_LOGO_URL = `${BRAND_LOGO_BASE}/people-growth.png`;
-export const PONTO_DE_REPLICA_LOGO_URL = `${BRAND_LOGO_BASE}/ponto-de-replica.png`;
-export const MEA_SENTENTIA_LOGO_URL = `${BRAND_LOGO_BASE}/mea-sententia.png`;
+
+// -v2 files: the Ponto de Réplica and Mea Sententia logos as originally
+// supplied were flattened onto a solid black background (no alpha channel
+// at all — confirmed via sharp's metadata, not just how they looked), unlike
+// the People & Growth file, which was already a true transparent PNG. Re-cut
+// with a screen-style alpha matte (alpha = max(r,g,b), since both are light
+// metallic renders on pure black) rather than asking for a re-export.
+export const PONTO_DE_REPLICA_LOGO_URL = `${BRAND_LOGO_BASE}/ponto-de-replica-v2.png`;
+export const MEA_SENTENTIA_LOGO_URL = `${BRAND_LOGO_BASE}/mea-sententia-v2.png`;
