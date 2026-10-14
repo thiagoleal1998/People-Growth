@@ -69,7 +69,7 @@ const API_BASE = `https://${API_FOOTBALL_HOST}`;
 const THESPORTSDB_KEY = process.env.THESPORTSDB_KEY || "3";
 const THESPORTSDB_BASE = `https://www.thesportsdb.com/api/v1/json/${THESPORTSDB_KEY}`;
 
-export type Competition = "serie_a" | "serie_b" | "copa_do_brasil" | "libertadores" | "sulamericana";
+export type Competition = "serie_a" | "serie_b" | "copa_do_brasil" | "libertadores" | "sulamericana" | "premier_league" | "la_liga" | "champions_league";
 
 // `logo` used to point straight at API-Football's own league badge
 // (media.api-sports.io/football/leagues/{id}.png) — but that's the exact
@@ -94,21 +94,53 @@ export const COMPETITIONS: Record<Competition, { apiLeagueId: number; name_pt: s
   // Sudamericana"). Knockout-only like Copa do Brasil/Libertadores — no
   // round-robin group table to show at this point in most seasons either.
   sulamericana: { apiLeagueId: 11, name_pt: "Sul-Americana", name_en: "Copa Sudamericana", format: "list", logo: `${SPORTS_LOGO_BASE}/sulamericana.png` },
+  // apiLeagueId values below (39/140/2) are API-Football's own long-standing,
+  // widely-documented ids for these three competitions — NOT live-verified
+  // against /leagues?search= the way every id above this point was, because
+  // the free-plan quota was exhausted for the day when these were added.
+  // Worth a live check (same pattern as sulamericana above) once quota
+  // resets; low risk either way since these ids are only used for live-match
+  // detection and crest substitution, not for the scraped standings/fixtures
+  // data this competition actually displays (see SCRAPE_SLUGS below). Logos
+  // for all three downloaded from api-futebol.com.br's own CDN (confirmed
+  // live: cdn.api-futebol.com.br/campeonatos/logos/{slug}.png, same reliable
+  // domain already used for every team crest on the site) and re-hosted here
+  // the same way as the other competitions' logos — sidesteps the
+  // media.api-sports.io DNS issue those were originally moved off of, and
+  // doesn't touch the exhausted API-Football quota at all.
+  premier_league: { apiLeagueId: 39, name_pt: "Premier League", name_en: "Premier League", format: "table", logo: `${SPORTS_LOGO_BASE}/premier-league.png` },
+  la_liga: { apiLeagueId: 140, name_pt: "LaLiga", name_en: "LaLiga", format: "table", logo: `${SPORTS_LOGO_BASE}/la-liga.png` },
+  // UEFA's post-2024 format plays a single 36-team league phase (a real
+  // table) before the knockout rounds start — confirmed live, the site's own
+  // base URL for 2026-2027 currently redirects to "/primeira-fase" and that
+  // page has both a <table> and individual match cards, so "table" format
+  // correctly shows a standings table for as long as that phase lasts. Once
+  // the season moves into the knockout rounds (oitavas-de-final and on),
+  // that page has no table and getFullStandings naturally returns null —
+  // the UI already handles a null table gracefully elsewhere, so this just
+  // stops showing one rather than needing a mid-season format change.
+  champions_league: { apiLeagueId: 2, name_pt: "Champions League", name_en: "Champions League", format: "table", logo: `${SPORTS_LOGO_BASE}/champions-league.png` },
 };
 
-export const COMPETITION_ORDER: Competition[] = ["serie_a", "serie_b", "copa_do_brasil", "libertadores", "sulamericana"];
+export const COMPETITION_ORDER: Competition[] = ["serie_a", "serie_b", "copa_do_brasil", "libertadores", "sulamericana", "premier_league", "la_liga", "champions_league"];
 
 // Only ever actually read for format:"table" competitions (via
 // getBestStandings -> getStandingsTop5) — copa_do_brasil/libertadores/
 // sulamericana's entries are unused filler to satisfy the Record type, not
 // verified ids; getLastResult (the other consumer) is dead code, called
-// from nowhere.
+// from nowhere. premier_league/la_liga ARE "table" format so their ids here
+// are real (TheSportsDB's own long-standing public ids for both leagues),
+// but — same caveat as the apiLeagueIds above — not live-verified; this is
+// only a fallback behind the scraped standings anyway (see getBestStandings).
 const THESPORTSDB_LEAGUE_IDS: Record<Competition, number> = {
   serie_a: 4351,
   serie_b: 4404,
   copa_do_brasil: 4725,
   libertadores: 4501,
   sulamericana: 0,
+  premier_league: 4328,
+  la_liga: 4335,
+  champions_league: 4480,
 };
 
 const SCRAPE_SLUGS: Record<Competition, string> = {
@@ -121,7 +153,63 @@ const SCRAPE_SLUGS: Record<Competition, string> = {
   // /campeonato/copa-sulamericana/2026 (real match cards, currently
   // semifinal-phase hrefs matching MATCH_HREF_RE).
   sulamericana: "copa-sulamericana",
+  // Confirmed live via api-futebol.com.br's sitemap index (sitemap-tournament-
+  // premier-league.xml / -la-liga.xml / -champions-league.xml) and a direct
+  // fetch of each base URL — unlike the Brazilian competitions above, these
+  // use a two-year season in the URL (see EUROPEAN_SEASON_COMPETITIONS).
+  premier_league: "premier-league",
+  la_liga: "la-liga",
+  champions_league: "champions-league",
 };
+
+// European leagues run August-to-May, so api-futebol.com.br's URLs for them
+// use a two-year season label ("2026-2027", confirmed live via each
+// competition's sitemap) instead of the bare current year Brazilian
+// competitions use (their season runs within one calendar year, so "the
+// current year" and "the season label" are the same thing). Also drives
+// matchCalendarYear() below, which infers the right YEAR for a round page's
+// "DD/MM"-only match dates — currentSeason() alone would mislabel every
+// January-June match of a season that started the previous year.
+const EUROPEAN_SEASON_COMPETITIONS = new Set<Competition>(["premier_league", "la_liga", "champions_league"]);
+
+// The year a European season STARTED in — European transfer/competition
+// seasons kick off in July/August, so before that this year's "new season"
+// hasn't started yet and "the current season" is still the one that began
+// the previous calendar year.
+function europeanSeasonStartYear(): number {
+  const now = new Date();
+  return now.getMonth() >= 6 ? now.getFullYear() : now.getFullYear() - 1; // getMonth() is 0-indexed; 6 = July
+}
+
+// The season label api-futebol.com.br's URLs expect for a given competition —
+// just the year for Brazilian competitions, "startYear-startYear+1" for
+// European ones.
+function scrapeSeasonLabel(competition: Competition): string {
+  if (!EUROPEAN_SEASON_COMPETITIONS.has(competition)) return String(currentSeason());
+  const startYear = europeanSeasonStartYear();
+  return `${startYear}-${startYear + 1}`;
+}
+
+// The real calendar year a round page's "DD/MM"-only match date falls in.
+// Brazilian competitions run within one calendar year, so that's always
+// `currentSeason()`. A European season spans a year boundary — July-December
+// belongs to the season's start year, January-June belongs to start year + 1
+// (e.g. a Premier League match on "15/03" during the 2026-2027 season is
+// really 2027-03-15, not 2026-03-15).
+function matchCalendarYear(competition: Competition, month: number): number {
+  if (!EUROPEAN_SEASON_COMPETITIONS.has(competition)) return currentSeason();
+  const startYear = europeanSeasonStartYear();
+  return month >= 7 ? startYear : startYear + 1;
+}
+
+// API-Football's own `season` param (unlike api-futebol.com.br's URLs) is
+// always a single number even for a European season — the year it started
+// in, e.g. 2026 for "2026-2027". Only used by the season-scoped API-Football
+// functions below, all dead code on the free plan today (see file header) —
+// fixed for correctness anyway since they're kept for a future paid upgrade.
+function apiSeasonYear(competition: Competition): number {
+  return EUROPEAN_SEASON_COMPETITIONS.has(competition) ? europeanSeasonStartYear() : currentSeason();
+}
 
 export type StandingRow = {
   rank: number;
@@ -312,7 +400,7 @@ function parseFixture(f: RawFixture, competition: Competition): Fixture {
 // upgraded or pointed at a different source.
 export async function getStandings(competition: Competition): Promise<StandingRow[] | null> {
   const { apiLeagueId } = COMPETITIONS[competition];
-  const data = await fetchFootballApi<RawStandingsResponse>("/standings", { league: apiLeagueId, season: currentSeason() }, STANDINGS_CACHE_SECONDS);
+  const data = await fetchFootballApi<RawStandingsResponse>("/standings", { league: apiLeagueId, season: apiSeasonYear(competition) }, STANDINGS_CACHE_SECONDS);
   return parseStandings(data);
 }
 
@@ -321,7 +409,7 @@ export async function getStandings(competition: Competition): Promise<StandingRo
 // substitute used for "today's games" and the live gate).
 export async function getCompetitionFixtures(competition: Competition, opts: { date?: string; next?: number; last?: number } = {}): Promise<Fixture[] | null> {
   const { apiLeagueId } = COMPETITIONS[competition];
-  const params: Record<string, string | number> = { league: apiLeagueId, season: currentSeason() };
+  const params: Record<string, string | number> = { league: apiLeagueId, season: apiSeasonYear(competition) };
   if (opts.date) params.date = opts.date;
   if (opts.next) params.next = opts.next;
   if (opts.last) params.last = opts.last;
@@ -347,7 +435,7 @@ export async function getLiveFixtures(): Promise<Fixture[] | null> {
 // called from any page right now.
 export async function getCompetitionTeams(competition: Competition): Promise<Team[] | null> {
   const { apiLeagueId } = COMPETITIONS[competition];
-  const data = await fetchFootballApi<RawTeamsResponse>("/teams", { league: apiLeagueId, season: currentSeason() }, TEAMS_CACHE_SECONDS);
+  const data = await fetchFootballApi<RawTeamsResponse>("/teams", { league: apiLeagueId, season: apiSeasonYear(competition) }, TEAMS_CACHE_SECONDS);
   if (!data?.response) return null;
   return data.response.map((t) => ({ id: t.team.id, name: t.team.name, logo: t.team.logo ?? null }));
 }
@@ -453,12 +541,16 @@ async function fetchSportsDb<T>(path: string, revalidateSeconds: number): Promis
 
 // TheSportsDB's table endpoint is capped at the top 5 rows on the shared
 // free key — real current-season data, just not the full 20-team table (no
-// known free source gives that). Only meaningful for serie_a/serie_b
-// (COMPETITIONS[x].format === "table"); copa_do_brasil/libertadores don't
-// have a points table to begin with.
+// known free source gives that). Only meaningful for "table"-format
+// competitions (serie_a/serie_b/premier_league/la_liga/champions_league);
+// the knockout-only ones don't have a points table to begin with. TheSportsDB
+// also expects the two-year season label for European leagues (same
+// convention as the scrape URLs, scrapeSeasonLabel) — unverified for these
+// three specifically (not live-checked, see COMPETITIONS' own note), but
+// this is only a fallback behind the real standings source either way.
 export async function getStandingsTop5(competition: Competition): Promise<StandingRow[] | null> {
   const leagueId = THESPORTSDB_LEAGUE_IDS[competition];
-  const data = await fetchSportsDb<RawSportsDbTableResponse>(`/lookuptable.php?l=${leagueId}&s=${currentSeason()}`, SPORTSDB_STANDINGS_CACHE_SECONDS);
+  const data = await fetchSportsDb<RawSportsDbTableResponse>(`/lookuptable.php?l=${leagueId}&s=${scrapeSeasonLabel(competition)}`, SPORTSDB_STANDINGS_CACHE_SECONDS);
   if (!data?.table) return null;
   return data.table.map((r) => ({
     rank: Number(r.intRank),
@@ -572,7 +664,7 @@ function zoneLabel(color: string | null, competition: Competition): string | nul
 // serie_a/serie_b (COMPETITIONS[x].format === "table").
 export async function getFullStandings(competition: Competition): Promise<StandingRow[] | null> {
   const slug = SCRAPE_SLUGS[competition];
-  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${currentSeason()}`);
+  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${scrapeSeasonLabel(competition)}`);
   if (!page) return null;
   const $ = cheerio.load(page.html);
   const rows: StandingRow[] = [];
@@ -650,7 +742,7 @@ function parseFixturesFromRoundPage($: cheerio.CheerioAPI, competition: Competit
     // midnight into the next day, so "-03:00" silently shifted the fixture
     // onto the wrong calendar day.
     const date = dateMatch
-      ? `${currentSeason()}-${dateMatch[2]}-${dateMatch[1]}T${dateMatch[3]}:${dateMatch[4]}:00Z`
+      ? `${matchCalendarYear(competition, Number(dateMatch[2]))}-${dateMatch[2]}-${dateMatch[1]}T${dateMatch[3]}:${dateMatch[4]}:00Z`
       : new Date().toISOString();
     fixtures.push({
       id: idMatch ? Number(idMatch[1]) : hashString(href),
@@ -695,7 +787,7 @@ function previousRoundNumber($: cheerio.CheerioAPI): number | null {
 // show rather than an all-scheduled round with zero results.
 export async function getCurrentRoundFixtures(competition: Competition): Promise<Fixture[] | null> {
   const slug = SCRAPE_SLUGS[competition];
-  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${currentSeason()}`);
+  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${scrapeSeasonLabel(competition)}`);
   if (!page) return null;
   const $ = cheerio.load(page.html);
   const fixtures = parseFixturesFromRoundPage($, competition);
@@ -706,7 +798,7 @@ export async function getCurrentRoundFixtures(competition: Competition): Promise
 
   const prevRound = previousRoundNumber($);
   if (prevRound === null) return fixtures;
-  const prevPage = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${currentSeason()}/rodada/${prevRound}`);
+  const prevPage = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${scrapeSeasonLabel(competition)}/rodada/${prevRound}`);
   if (!prevPage) return fixtures;
   const prevFixtures = parseFixturesFromRoundPage(cheerio.load(prevPage.html), competition);
   return prevFixtures.length > 0 ? prevFixtures : fixtures;
@@ -722,7 +814,7 @@ export async function getCurrentRoundFixtures(competition: Competition): Promise
 // getFullStandings, no extra request.
 export async function getUpcomingRoundFixtures(competition: Competition): Promise<Fixture[] | null> {
   const slug = SCRAPE_SLUGS[competition];
-  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${currentSeason()}`);
+  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${scrapeSeasonLabel(competition)}`);
   if (!page) return null;
   const fixtures = parseFixturesFromRoundPage(cheerio.load(page.html), competition).filter((f) => f.status === "scheduled");
   return fixtures.length > 0 ? fixtures.sort((a, b) => a.date.localeCompare(b.date)) : null;
@@ -849,7 +941,7 @@ type ScrapedSeasonMatch = {
 
 export async function getSeasonFixtures(competition: Competition): Promise<Fixture[] | null> {
   const slug = SCRAPE_SLUGS[competition];
-  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${currentSeason()}`);
+  const page = await fetchScrapedHtml(`https://www.api-futebol.com.br/campeonato/${slug}/${scrapeSeasonLabel(competition)}`);
   if (!page) return null;
   const matches = page.html.match(SEASON_MATCH_RE);
   if (!matches || matches.length === 0) return null;

@@ -45,6 +45,7 @@ import {
 } from "@/lib/sports";
 import { SportsLiveWidget } from "@/components/SportsLiveWidget";
 import { NflPreview } from "@/components/NflPreview";
+import { NbaPreview } from "@/components/NbaPreview";
 import { TeamCrest } from "@/components/TeamCrest";
 import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
 import { articleHref } from "@/lib/article-url";
@@ -770,6 +771,7 @@ export default async function HomePage() {
       )}
 
       <NflPreview />
+      <NbaPreview />
 
       {/* Hero */}
       <section
