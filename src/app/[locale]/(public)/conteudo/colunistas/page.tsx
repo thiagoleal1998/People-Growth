@@ -74,9 +74,15 @@ export default async function ColunistasPage() {
                     ))}
                   </div>
                   {foundersBottomRow.length > 0 && (
-                    <div style={{ maxWidth: "min(280px, 100%)", margin: "1.5rem auto 0" }}>
+                    <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem" }}>
                       {foundersBottomRow.map((author) => (
-                        <AuthorCard key={author.id} author={author} locale={locale} accent="#C89A4A" />
+                        // Matches the top row's own column width exactly (same
+                        // minmax(min(280px, 100%), 1fr) math, just via flex-basis
+                        // since this is a 1-item row) — same size as Gustavo's
+                        // and Raul's cards, just centered on its own line below them.
+                        <div key={author.id} style={{ flex: "0 1 calc(50% - 0.75rem)", minWidth: "min(280px, 100%)" }}>
+                          <AuthorCard author={author} locale={locale} accent="#C89A4A" />
+                        </div>
                       ))}
                     </div>
                   )}
