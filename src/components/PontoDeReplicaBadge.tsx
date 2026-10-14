@@ -1,5 +1,3 @@
-import { PONTO_DE_REPLICA_LOGO_URL } from "@/lib/brand-logos";
-
 // Small pill shown next to FormatTag on article cards whose category was
 // flagged is_ponto_de_replica (CategoriesManager) — marks content that
 // belongs to the restricted Ponto de Réplica sub-brand (política, economia
@@ -9,15 +7,18 @@ export function PontoDeReplicaBadge() {
   return (
     <span
       style={{
-        display: "inline-flex",
-        alignItems: "center",
+        display: "inline-block",
+        fontSize: "0.6875rem",
+        fontWeight: 800,
+        letterSpacing: "0.03em",
+        color: "#6A4C93",
         backgroundColor: "rgba(106,76,147,0.12)",
         padding: "0.1875rem 0.5rem",
         borderRadius: "0.25rem",
         marginLeft: "0.375rem",
       }}
     >
-      <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ height: "1.125rem", width: "auto", display: "block", objectFit: "contain" }} />
+      Ponto de Réplica
     </span>
   );
 }

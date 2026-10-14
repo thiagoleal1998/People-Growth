@@ -145,9 +145,15 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
                   className="nav-dropdown-panel"
                   style={{
                     position: "absolute",
+                    // Flush against the trigger (no marginTop gap): a gap here
+                    // is dead space that belongs to neither the button nor the
+                    // panel, so moving the mouse diagonally from one to the
+                    // other crosses it and fires mouseleave on .nav-dropdown
+                    // before the pointer ever reaches the panel, closing the
+                    // menu mid-click. The panel's own padding below already
+                    // gives the same visual breathing room without the gap.
                     top: "100%",
                     left: 0,
-                    marginTop: "0.375rem",
                     minWidth: "200px",
                     backgroundColor: "#15223a",
                     border: "1px solid rgba(255,255,255,0.1)",
