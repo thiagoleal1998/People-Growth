@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PEOPLE_GROWTH_LOGO_URL, PONTO_DE_REPLICA_LOGO_URL, MEA_SENTENTIA_LOGO_URL } from "@/lib/brand-logos";
 import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight, Lightbulb } from "lucide-react";
@@ -161,25 +162,22 @@ export default async function SobrePage() {
               {
                 name: "People & Growth",
                 description: locale === "en" ? "Consulting, courses and articles on leadership and personal development." : "Consultoria, cursos e artigos sobre liderança e desenvolvimento pessoal.",
-                icon: "🚀",
-                color: "#315E9C",
+                logo: PEOPLE_GROWTH_LOGO_URL,
                 href: "/people-growth" as const,
               },
               {
                 name: "Ponto de Réplica",
                 description: locale === "en" ? "Independent coverage of politics, economy and society." : "Cobertura independente de política, economia e sociedade.",
-                icon: "🗞️",
-                color: "#6A4C93",
+                logo: PONTO_DE_REPLICA_LOGO_URL,
                 href: "/ponto-de-replica" as const,
               },
               {
                 name: "Mea Sententia",
                 description: locale === "en" ? "Opinion column on business, society and the issues shaping the current moment." : "Coluna de opinião sobre negócios, sociedade e os temas que moldam o momento atual.",
-                icon: "✍️",
-                color: "#C89A4A",
+                logo: MEA_SENTENTIA_LOGO_URL,
                 href: "/mea-sententia" as const,
               },
-            ].map(({ name, description, icon, color, href }) => (
+            ].map(({ name, description, logo, href }) => (
               <Link
                 key={name}
                 href={href}
@@ -198,15 +196,17 @@ export default async function SobrePage() {
                     width: "3.5rem",
                     height: "3.5rem",
                     borderRadius: "0.875rem",
-                    backgroundColor: `${color}1f`,
+                    backgroundColor: "white",
+                    border: "1px solid var(--site-border)",
                     display: "flex",
                     alignItems: "center",
                     justifyContent: "center",
-                    fontSize: "1.5rem",
+                    padding: "0.375rem",
                     marginBottom: "1rem",
+                    overflow: "hidden",
                   }}
                 >
-                  {icon}
+                  <img src={logo} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
                 </div>
                 <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--site-text)", marginBottom: "0.5rem" }}>{name}</h3>
                 <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.65 }}>{description}</p>
@@ -245,7 +245,7 @@ export default async function SobrePage() {
             {
               name: "People & Growth",
               color: "#315E9C",
-              icon: "🚀",
+              logo: PEOPLE_GROWTH_LOGO_URL,
               body:
                 locale === "en"
                   ? "Our consulting, courses and content arm on leadership and personal development. It's where the group started — organized around four levels of development: Person, Leadership, Team and Business."
@@ -256,7 +256,7 @@ export default async function SobrePage() {
             {
               name: "Ponto de Réplica",
               color: "#6A4C93",
-              icon: "🗞️",
+              logo: PONTO_DE_REPLICA_LOGO_URL,
               body:
                 locale === "en"
                   ? "Our independent coverage of politics, economy and society — the issues shaping the current moment, covered in depth."
@@ -267,7 +267,7 @@ export default async function SobrePage() {
             {
               name: "Mea Sententia",
               color: "#C89A4A",
-              icon: "✍️",
+              logo: MEA_SENTENTIA_LOGO_URL,
               body:
                 locale === "en"
                   ? "Our opinion column — a space for perspectives on business, society and the issues that impact people and companies, signed by whoever writes them."
@@ -275,7 +275,7 @@ export default async function SobrePage() {
               cta: locale === "en" ? "Visit Mea Sententia" : "Conhecer a Mea Sententia",
               href: "/mea-sententia" as const,
             },
-          ].map(({ name, color, icon, body, cta, href }) => (
+          ].map(({ name, color, logo, body, cta, href }) => (
             <div key={name} style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start" }}>
               <div
                 style={{
@@ -283,14 +283,16 @@ export default async function SobrePage() {
                   height: "3.5rem",
                   flexShrink: 0,
                   borderRadius: "0.875rem",
-                  backgroundColor: `${color}1f`,
+                  backgroundColor: "white",
+                  border: "1px solid var(--site-border)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  fontSize: "1.5rem",
+                  padding: "0.375rem",
+                  overflow: "hidden",
                 }}
               >
-                {icon}
+                <img src={logo} alt={name} style={{ maxWidth: "100%", maxHeight: "100%", objectFit: "contain" }} />
               </div>
               <div>
                 <h3 style={{ fontWeight: 800, fontSize: "1.375rem", color: "var(--site-text)", marginBottom: "0.5rem" }}>{name}</h3>

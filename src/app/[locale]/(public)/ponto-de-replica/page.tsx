@@ -5,6 +5,7 @@ import { FormatTag } from "@/components/FormatTag";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
+import { PONTO_DE_REPLICA_LOGO_URL } from "@/lib/brand-logos";
 import type { Article, Author, Category } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -74,6 +75,20 @@ export default async function PontoDeReplicaPage({ params }: { params: Promise<{
     <>
       <section style={{ background: "linear-gradient(135deg, #1c1430 0%, #2a1f42 100%)", paddingTop: "6rem", paddingBottom: "3.5rem", color: "white" }}>
         <div className="container-xl" style={{ maxWidth: "720px" }}>
+          <div
+            style={{
+              display: "flex",
+              width: "fit-content",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "white",
+              borderRadius: "1rem",
+              padding: "0.625rem 1.125rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ height: "2.5rem", width: "auto", display: "block", objectFit: "contain" }} />
+          </div>
           <span
             style={{
               display: "inline-block",

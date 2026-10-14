@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight } from "lucide-react";
 import { FormatTag } from "@/components/FormatTag";
+import { PEOPLE_GROWTH_LOGO_URL } from "@/lib/brand-logos";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
@@ -74,6 +75,20 @@ export default async function PeopleGrowthPage({ params }: { params: Promise<{ l
     <>
       <section style={{ background: "linear-gradient(135deg, #0d1b2a 0%, #1a1f3e 100%)", paddingTop: "6rem", paddingBottom: "3.5rem", color: "white" }}>
         <div className="container-xl" style={{ maxWidth: "720px" }}>
+          <div
+            style={{
+              display: "flex",
+              width: "fit-content",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "white",
+              borderRadius: "1rem",
+              padding: "0.625rem 1.125rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <img src={PEOPLE_GROWTH_LOGO_URL} alt="People & Growth" style={{ height: "2.5rem", width: "auto", display: "block", objectFit: "contain" }} />
+          </div>
           <span
             style={{
               display: "inline-block",

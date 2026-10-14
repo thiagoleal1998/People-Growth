@@ -4,6 +4,7 @@ import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
+import { MEA_SENTENTIA_LOGO_URL } from "@/lib/brand-logos";
 import type { Article, Author, Category } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -51,6 +52,20 @@ export default async function MeaSententiaPage({ params }: { params: Promise<{ l
     <>
       <section style={{ background: "linear-gradient(135deg, #2b2208 0%, #3d2f0c 100%)", paddingTop: "6rem", paddingBottom: "3.5rem", color: "white" }}>
         <div className="container-xl" style={{ maxWidth: "720px" }}>
+          <div
+            style={{
+              display: "flex",
+              width: "fit-content",
+              alignItems: "center",
+              justifyContent: "center",
+              backgroundColor: "white",
+              borderRadius: "1rem",
+              padding: "0.625rem 1.125rem",
+              marginBottom: "1.5rem",
+            }}
+          >
+            <img src={MEA_SENTENTIA_LOGO_URL} alt="Mea Sententia" style={{ height: "2.5rem", width: "auto", display: "block", objectFit: "contain" }} />
+          </div>
           <span
             style={{
               display: "inline-block",
