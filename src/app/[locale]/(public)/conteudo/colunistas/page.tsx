@@ -26,14 +26,15 @@ export default async function ColunistasPage() {
   // to be inserted — founders first, in their own row, then everyone else
   // alphabetically, rather than one undifferentiated list.
   const byName = (a: Author, b: Author) => a.name.localeCompare(b.name, "pt-BR");
-  // Thiago specifically goes in the middle of the founders row (Gustavo,
-  // Thiago, Raul) rather than alphabetically — a deliberate layout choice,
-  // not a sort order columnists should also follow.
-  const FOUNDER_ORDER = ["Gustavo Monken", "Thiago Leal", "Raul Salustiano"];
-  const founders = allAuthors
-    .filter((a) => a.is_founder)
-    .sort((a, b) => FOUNDER_ORDER.indexOf(a.name) - FOUNDER_ORDER.indexOf(b.name));
+  const founders = allAuthors.filter((a) => a.is_founder).sort(byName);
   const columnists = allAuthors.filter((a) => !a.is_founder).sort(byName);
+  // The founders row is a 2-up-1-down pyramid (Gustavo and Raul side by
+  // side, Thiago centered below them) rather than a plain 3-column grid —
+  // alphabetical order happens to put Thiago last, which is exactly the
+  // "goes on the bottom row" slot this layout needs. Only correct for
+  // exactly 3 founders; falls back to the plain grid otherwise.
+  const foundersTopRow = founders.length === 3 ? founders.slice(0, 2) : founders;
+  const foundersBottomRow = founders.length === 3 ? founders.slice(2) : [];
 
   return (
     <>
@@ -68,10 +69,17 @@ export default async function ColunistasPage() {
                     {locale === "en" ? "Editorial Board" : "Conselho Editorial"}
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "1.5rem" }}>
-                    {founders.map((author) => (
+                    {foundersTopRow.map((author) => (
                       <AuthorCard key={author.id} author={author} locale={locale} accent="#C89A4A" />
                     ))}
                   </div>
+                  {foundersBottomRow.length > 0 && (
+                    <div style={{ maxWidth: "min(280px, 100%)", margin: "1.5rem auto 0" }}>
+                      {foundersBottomRow.map((author) => (
+                        <AuthorCard key={author.id} author={author} locale={locale} accent="#C89A4A" />
+                      ))}
+                    </div>
+                  )}
                 </div>
               )}
 
