@@ -1,32 +1,40 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useState, type ReactNode, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 // Shared paging behavior for any "show N at a time, with prev/next + dots to
 // see the rest" section — NflPreview.tsx, NbaPreview.tsx (both dark cards)
 // and the home page's columnist strip (light background) all used to just
 // hard-slice their list to a fixed preview count with no way to see what was
-// left out. This only owns the page state and the control row; the caller's
-// renderPage decides how the current page's items actually look, so each
-// section keeps its own grid/card styling instead of this component
-// imposing one.
-export function PagedCarousel<T>({
+// left out. This only owns the page state and the control row.
+//
+// `items` takes already-rendered elements (one per underlying data item, each
+// with its own key), not a render callback — NflPreview/NbaPreview are plain
+// Server Components, and a Server Component can't pass a function prop to a
+// Client Component like this one (React Server Components can only cross
+// that boundary with serializable data; a closure isn't). Pre-rendering each
+// item server-side and handing over the resulting element array sidesteps
+// that entirely, and costs nothing since the Client Component only has to
+// slice an array, not generate markup.
+export function PagedCarousel({
   items,
   pageSize = 3,
   accentColor,
   controlColor = "white",
   controlBorderColor = "rgba(255,255,255,0.2)",
   dotInactiveColor = "rgba(255,255,255,0.25)",
-  renderPage,
+  pageStyle,
+  pageClassName,
 }: {
-  items: T[];
+  items: ReactNode[];
   pageSize?: number;
   accentColor: string;
   controlColor?: string;
   controlBorderColor?: string;
   dotInactiveColor?: string;
-  renderPage: (pageItems: T[]) => ReactNode;
+  pageStyle?: CSSProperties;
+  pageClassName?: string;
 }) {
   const pageCount = Math.ceil(items.length / pageSize);
   const [page, setPage] = useState(0);
@@ -34,7 +42,9 @@ export function PagedCarousel<T>({
 
   return (
     <div>
-      {renderPage(visible)}
+      <div className={pageClassName} style={pageStyle}>
+        {visible}
+      </div>
       {pageCount > 1 && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1.25rem", marginTop: "1.25rem" }}>
           <button

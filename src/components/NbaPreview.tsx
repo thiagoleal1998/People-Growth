@@ -79,15 +79,11 @@ export async function NbaPreview() {
           </Link>
         </div>
         <PagedCarousel
-          items={games}
+          items={games.map((game) => (
+            <GameRow key={game.id} game={game} />
+          ))}
           accentColor={NBA_ORANGE}
-          renderPage={(pageGames) => (
-            <div style={{ borderRadius: "1rem", border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(255,255,255,0.04)", padding: "0.5rem 1.75rem" }}>
-              {pageGames.map((game) => (
-                <GameRow key={game.id} game={game} />
-              ))}
-            </div>
-          )}
+          pageStyle={{ borderRadius: "1rem", border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(255,255,255,0.04)", padding: "0.5rem 1.75rem" }}
         />
       </div>
     </section>
