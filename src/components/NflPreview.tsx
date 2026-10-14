@@ -1,9 +1,9 @@
 import { Link } from "@/i18n/navigation";
 import { getCurrentWeekGames, NFL_LOGO_URL_DARK, type NflGame } from "@/lib/nfl";
 import { TeamCrest } from "@/components/TeamCrest";
+import { PagedCarousel } from "@/components/PagedCarousel";
 
 const NFL_RED = "#D50A0A";
-const PREVIEW_COUNT = 3;
 
 function GameRow({ game }: { game: NflGame }) {
   const isLive = game.status === "live";
@@ -43,7 +43,6 @@ function GameRow({ game }: { game: NflGame }) {
 export async function NflPreview() {
   const games = await getCurrentWeekGames();
   if (!games || games.length === 0) return null;
-  const highlighted = games.slice(0, PREVIEW_COUNT);
 
   return (
     <section style={{ background: "linear-gradient(135deg, #0d1b2a 0%, #162236 50%, #1a1f3e 100%)", position: "relative", overflow: "hidden", padding: "3.5rem 0" }}>
@@ -80,11 +79,17 @@ export async function NflPreview() {
             Ver mais →
           </Link>
         </div>
-        <div style={{ borderRadius: "1rem", border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(255,255,255,0.04)", padding: "0.5rem 1.75rem" }}>
-          {highlighted.map((game) => (
-            <GameRow key={game.id} game={game} />
-          ))}
-        </div>
+        <PagedCarousel
+          items={games}
+          accentColor={NFL_RED}
+          renderPage={(pageGames) => (
+            <div style={{ borderRadius: "1rem", border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(255,255,255,0.04)", padding: "0.5rem 1.75rem" }}>
+              {pageGames.map((game) => (
+                <GameRow key={game.id} game={game} />
+              ))}
+            </div>
+          )}
+        />
       </div>
     </section>
   );

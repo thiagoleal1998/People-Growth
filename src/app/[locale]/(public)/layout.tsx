@@ -35,7 +35,7 @@ export default async function PublicLayout({
   return (
     <>
       <UtilityBar cityName={weatherCity} lat={weatherLat} lon={weatherLon} />
-      <Navbar logoUrl={logoUrl} mediaEnabled={mediaEnabled} sportsEnabled={sportsEnabled} />
+      <Navbar logoUrl={logoUrl} mediaEnabled={mediaEnabled} />
       <main className="public-main" style={{ paddingTop: "6.43rem" }}>
         <CategoryNav />
         {children}

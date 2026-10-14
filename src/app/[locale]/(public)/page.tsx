@@ -10,6 +10,7 @@ import {
   Sparkles,
   Zap,
   Radio,
+  Trophy,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getFaqEntriesFromConfig } from "@/lib/faq";
@@ -39,14 +40,15 @@ import {
   getUpcomingRoundFixtures,
   isAnyCompetitionLiveNow,
   withReliableCrests,
+  type Competition,
   type Fixture,
   type SportsWidgetTab,
   type StandingRow,
 } from "@/lib/sports";
 import { SportsLiveWidget } from "@/components/SportsLiveWidget";
+import { ColumnistCarousel } from "@/components/ColumnistCarousel";
 import { NflPreview } from "@/components/NflPreview";
 import { NbaPreview } from "@/components/NbaPreview";
-import { TeamCrest } from "@/components/TeamCrest";
 import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
 import { articleHref } from "@/lib/article-url";
 import { isAuthorPubliclyVisible } from "@/lib/founder-data";
@@ -153,13 +155,31 @@ export default async function HomePage() {
   // page reshuffles (see `shuffled` above), and only profiles finished
   // enough to actually show (photo + name + tagline).
   const completeColumnists = authors.filter(isAuthorPubliclyVisible);
-  // Random which 4 show up, but alphabetical once picked — randomizing the
-  // set alone (without also fixing the display order) would make names
-  // jump around the strip on every reshuffle even when the same person is
-  // still in it.
-  const visibleColumnists = shuffled(completeColumnists)
-    .slice(0, 4)
-    .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
+  // One author's most recent published article, used as a blurb fallback
+  // below when a profile has no tagline of its own — needed here (rather
+  // than down where allArticles is otherwise consumed) because the
+  // columnist strip's card data is built right after this.
+  const latestArticleByAuthor = new Map<string, Article>();
+  for (const a of allArticles) {
+    if (a.author_id && !latestArticleByAuthor.has(a.author_id)) latestArticleByAuthor.set(a.author_id, a);
+  }
+  // Shuffled once per render (see `shuffled` above — effectively every 5min,
+  // this page's revalidate window) rather than fixed to a random 4: the
+  // strip is now a client-side carousel (ColumnistCarousel) that pages
+  // through everyone instead of hard-capping at 4 with no way to see the
+  // rest, so the full set is sent down, just in a different order each time.
+  const columnistCards = shuffled(completeColumnists).map((author) => ({
+    id: author.id,
+    slug: author.slug,
+    name: author.name,
+    photoUrl: author.photo_url,
+    blurb:
+      pickLocale(locale, author.tagline_pt, author.tagline_en)?.trim() ||
+      (() => {
+        const latest = latestArticleByAuthor.get(author.id);
+        return latest ? pickLocale(locale, latest.title_pt, latest.title_en) : pickLocale(locale, author.role_pt, author.role_en);
+      })(),
+  }));
   const founderFirstNames = founders.map((a) => a.name.split(" ")[0]);
   const founderNamesText =
     founderFirstNames.length > 1
@@ -208,20 +228,28 @@ export default async function HomePage() {
   // (so results doesn't show an empty round), the latter never does (so
   // upcoming always reflects the real next fixture, never a dead round).
   let sportsInitial: {
-    standings: StandingRow[] | null;
+    standingsByCompetition: Partial<Record<Competition, StandingRow[] | null>>;
     live: Fixture[];
     roundResults: Fixture[];
     roundUpcoming: Fixture[];
     defaultTab: SportsWidgetTab;
   } | null = null;
   if (sportsEnabled) {
+    // Every format:"table" competition, not just Série A — the home widget
+    // now has its own tabs (SportsStandingsSnippet) so a viewer can flip
+    // between leagues instead of only ever seeing Série A. Knockout-only
+    // competitions (copa_do_brasil/libertadores/sulamericana) have no table
+    // to show here. fetchScrapedHtml caches each page independently, so this
+    // costs nothing extra beyond the first render in a cache window.
+    const tableCompetitions = COMPETITION_ORDER.filter((c) => COMPETITIONS[c].format === "table");
+    const standingsEntries = await Promise.all(tableCompetitions.map(async (c) => [c, await getBestStandings(c)] as const));
+    const standingsByCompetition = Object.fromEntries(standingsEntries) as Partial<Record<Competition, StandingRow[] | null>>;
     // live carries API-Football's own crest urls (media.api-sports.io) —
     // withReliableCrests swaps those for the scraped standings' equivalent
     // (a different, confirmed-working domain) wherever a match exists,
     // before any of this ever reaches the page. roundResults/roundUpcoming
     // are already scraped-sourced and don't need it.
-    const standings = await getBestStandings("serie_a");
-    const live = withReliableCrests((await isAnyCompetitionLiveNow()) ? ((await getLiveFixtures()) ?? []) : [], standings);
+    const live = withReliableCrests((await isAnyCompetitionLiveNow()) ? ((await getLiveFixtures()) ?? []) : [], standingsByCompetition.serie_a ?? null);
 
     // Every tracked competition feeds "Resultados"/"Próximos jogos", not just
     // Série A — a Sul-Americana or Libertadores match starting soon is just
@@ -238,7 +266,7 @@ export default async function HomePage() {
     );
 
     sportsInitial = {
-      standings,
+      standingsByCompetition,
       live,
       roundResults,
       roundUpcoming,
@@ -269,11 +297,6 @@ export default async function HomePage() {
   // fundamentally different units (video aspect ratio vs. text rows) — the
   // only stable option is to let this one run its natural length.
   const moreNews = queue;
-
-  const latestByAuthor = new Map<string, Article>();
-  for (const a of allArticles) {
-    if (a.author_id && !latestByAuthor.has(a.author_id)) latestByAuthor.set(a.author_id, a);
-  }
 
   return (
     <>
@@ -608,14 +631,11 @@ export default async function HomePage() {
                 {sportsInitial && (
                   <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
                     <div style={{ backgroundColor: "#315E9C", color: "white", padding: "0.625rem 1rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                      <TeamCrest src={COMPETITIONS.serie_a.logo} alt="" size={28} />
-                      <div>
-                        <div style={{ fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>{locale === "en" ? "Standings" : "Classificação"}</div>
-                        <div style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.75)", marginTop: "0.0625rem" }}>Brasileirão Série A</div>
-                      </div>
+                      <Trophy size={20} />
+                      <div style={{ fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>{locale === "en" ? "Standings" : "Classificação"}</div>
                     </div>
                     <div style={{ padding: "0.875rem 1rem", backgroundColor: "var(--site-card)" }}>
-                      <SportsStandingsSnippet standings={sportsInitial.standings} locale={locale} />
+                      <SportsStandingsSnippet standingsByCompetition={sportsInitial.standingsByCompetition} locale={locale} />
                     </div>
                   </div>
                 )}
@@ -679,50 +699,10 @@ export default async function HomePage() {
       )}
 
       {/* Columnists strip */}
-      {visibleColumnists.length > 0 && (
+      {columnistCards.length > 0 && (
         <section className="columnist-section" style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #315E9C", borderBottom: "1px solid var(--site-border)" }}>
           <div className="container-xl" style={{ padding: "1.25rem 0", maxWidth: "1180px", margin: "0 auto" }}>
-          <div className="columnist-grid">
-            {visibleColumnists.map((author) => {
-              const latest = latestByAuthor.get(author.id);
-              return (
-                <Link
-                  key={author.id}
-                  href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
-                  className="columnist-hover columnist-card"
-                  style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none" }}
-                >
-                  <div
-                    className="columnist-photo"
-                    style={{
-                      width: "3.5rem",
-                      height: "3.5rem",
-                      borderRadius: "0.375rem",
-                      flexShrink: 0,
-                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
-                    }}
-                  />
-                  <div className="columnist-text">
-                    <div style={{ fontWeight: 800, fontSize: "0.8125rem", color: "#315E9C", marginBottom: "0.25rem" }}>{author.name}</div>
-                    <div
-                      style={{
-                        color: "var(--site-text-secondary)",
-                        fontSize: "0.75rem",
-                        lineHeight: 1.35,
-                        display: "-webkit-box",
-                        WebkitLineClamp: 3,
-                        WebkitBoxOrient: "vertical",
-                        overflow: "hidden",
-                      }}
-                    >
-                      {pickLocale(locale, author.tagline_pt, author.tagline_en)?.trim() ||
-                        (latest ? pickLocale(locale, latest.title_pt, latest.title_en) : pickLocale(locale, author.role_pt, author.role_en))}
-                    </div>
-                  </div>
-                </Link>
-              );
-            })}
-          </div>
+          <ColumnistCarousel cards={columnistCards} />
           {completeColumnists.length > 4 && (
             <div style={{ textAlign: "center", marginTop: "1rem" }}>
               <Link href="/conteudo/colunistas" style={{ color: "#315E9C", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}>

@@ -12,7 +12,6 @@ const navLinks = [
   { key: "home", href: "/" as const },
   { key: "about", href: "/sobre" as const },
   { key: "newsletter", href: "/conteudo" as const },
-  { key: "sports", href: "/esportes" as const },
   { key: "contact", href: "/contato" as const },
 ];
 
@@ -37,12 +36,11 @@ const navGroups = [
   },
 ];
 
-export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: { logoUrl?: string | null; mediaEnabled?: boolean; sportsEnabled?: boolean }) {
+export function Navbar({ logoUrl, mediaEnabled = true }: { logoUrl?: string | null; mediaEnabled?: boolean }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
-  const visibleNavLinks = navLinks.filter((l) => sportsEnabled || l.key !== "sports");
   const visibleNavGroups = navGroups
     .map((g) => ({ ...g, items: g.items.filter((l) => mediaEnabled || l.key !== "media") }))
     .filter((g) => g.items.length > 0);
@@ -90,7 +88,7 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
 
         {/* Desktop nav */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }} className="hidden-mobile">
-          {visibleNavLinks.map(({ key, href }) => {
+          {navLinks.map(({ key, href }) => {
             const isActive = pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
@@ -215,7 +213,7 @@ export function Navbar({ logoUrl, mediaEnabled = true, sportsEnabled = true }: {
             padding: "1rem 1.5rem 1.5rem",
           }}
         >
-          {visibleNavLinks.map(({ key, href }) => (
+          {navLinks.map(({ key, href }) => (
             <Link
               key={key}
               href={href}
