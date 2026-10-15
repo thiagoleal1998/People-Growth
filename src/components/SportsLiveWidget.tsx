@@ -6,7 +6,7 @@ import { TeamCrest } from "@/components/TeamCrest";
 
 const BRAND = "#315E9C";
 const VISIBLE_COUNT = 3;
-const ROTATE_MS = 4000;
+const ROTATE_MS = 6000;
 
 function statusLabel(fixture: Fixture, locale: string): string {
   if (fixture.status === "live") {
@@ -91,8 +91,9 @@ const TAB_LABEL: Record<Exclude<SportsWidgetTab, "none">, { pt: string; en: stri
 // picks the starting tab; once the viewer clicks one themselves, their
 // choice sticks even if a match goes live afterward — "ao vivo" only
 // auto-takes over the FIRST time it appears, not every poll. Within a tab,
-// fixtures are grouped into one block per competition (see `blocks` below)
-// and auto-rotate through those blocks, up to VISIBLE_COUNT cards at a time.
+// fixtures are grouped into one block per competition (see `blocks` below),
+// VISIBLE_COUNT cards at a time — paging through every game a competition
+// has before rotating on to the next one's block, not just its first page.
 export function SportsLiveWidget({
   initial,
   roundResults = [],
@@ -108,6 +109,7 @@ export function SportsLiveWidget({
 }) {
   const [live, setLive] = useState<Fixture[]>(initial);
   const [blockIndex, setBlockIndex] = useState(0);
+  const [pageIndex, setPageIndex] = useState(0);
   const [tab, setTab] = useState<SportsWidgetTab>(defaultTab);
   const manualRef = useRef(false);
 
@@ -145,35 +147,49 @@ export function SportsLiveWidget({
   // sequence) instead of one flat rotating list mixing every tracked
   // competition's games together — a Brasileirão game next to a LaLiga one
   // next to a Libertadores one, three cards at a time with no sense of which
-  // round or league you were even looking at. Each block caps at
-  // VISIBLE_COUNT fixtures (the rest of a given competition's round is a
-  // "Ver todas as competições" click away, same as before).
+  // round or league you were even looking at. A block keeps its FULL fixture
+  // list (not capped to VISIBLE_COUNT) — if a competition has more games
+  // than fit on one page, pageIndex below pages through all of them, 3 at a
+  // time, before moving on to the next competition's block.
   const blocks = COMPETITION_ORDER.map((competition) => ({
     competition,
-    fixtures: shown.filter((f) => f.competition === competition).slice(0, VISIBLE_COUNT),
+    fixtures: shown.filter((f) => f.competition === competition),
   })).filter((b) => b.fixtures.length > 0);
   const activeBlock = blocks[blockIndex % Math.max(blocks.length, 1)] ?? null;
+  const blockPageCount = activeBlock ? Math.ceil(activeBlock.fixtures.length / VISIBLE_COUNT) : 1;
+  const activePageIndex = pageIndex % Math.max(blockPageCount, 1);
+  const visibleFixtures = activeBlock ? activeBlock.fixtures.slice(activePageIndex * VISIBLE_COUNT, activePageIndex * VISIBLE_COUNT + VISIBLE_COUNT) : [];
 
   // Back to the first block whenever the tab changes — the old block index
   // would otherwise point at some arbitrary competition in the new tab's
   // own set, not necessarily even a valid one.
   useEffect(() => {
     setBlockIndex(0);
+    setPageIndex(0);
   }, [activeKey]);
 
-  // Advances to the next competition's block, re-armed on every change
-  // (manual tab switch or automatic) so the interval between transitions
-  // stays even either way. The title row and the match grid below are each
-  // remounted (via `key`) on every block change, which restarts their own
-  // CSS fade-in animation cleanly — simpler than hand-rolling a fade-out/
-  // fade-in state machine, and avoids the "new content flashes at full
-  // opacity for a frame" bug that approach had elsewhere on this page.
+  // Advances one page within the current competition's block; only once
+  // every one of that competition's games has been shown does it move on to
+  // the next block (and reset back to that block's own first page). Re-armed
+  // on every change (manual tab switch or automatic) so the interval between
+  // transitions stays even either way. The title row and the match grid
+  // below are each remounted (via `key`) on every change, which restarts
+  // their own CSS fade-in animation cleanly — simpler than hand-rolling a
+  // fade-out/fade-in state machine, and avoids the "new content flashes at
+  // full opacity for a frame" bug that approach had elsewhere on this page.
   useEffect(() => {
-    if (blocks.length <= 1) return;
-    const timer = setTimeout(() => setBlockIndex((i) => (i + 1) % blocks.length), ROTATE_MS);
+    if (blocks.length <= 1 && blockPageCount <= 1) return;
+    const timer = setTimeout(() => {
+      if (activePageIndex + 1 < blockPageCount) {
+        setPageIndex((p) => p + 1);
+      } else {
+        setPageIndex(0);
+        setBlockIndex((i) => (i + 1) % blocks.length);
+      }
+    }, ROTATE_MS);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [blockIndex, blocks.length]);
+  }, [blockIndex, activePageIndex, blockPageCount, blocks.length]);
 
   // The header names whichever competition the active block is actually
   // showing — each block is always exactly one competition now, so this no
@@ -182,7 +198,7 @@ export function SportsLiveWidget({
   const widgetTitle = activeBlock
     ? { logo: COMPETITIONS[activeBlock.competition].logo, name: locale === "en" ? COMPETITIONS[activeBlock.competition].name_en : COMPETITIONS[activeBlock.competition].name_pt }
     : { logo: null, name: locale === "en" ? "Sports" : "Esportes" };
-  const transitionKey = `${activeKey}-${activeBlock?.competition ?? "none"}-${blockIndex}`;
+  const transitionKey = `${activeKey}-${activeBlock?.competition ?? "none"}-${blockIndex}-${activePageIndex}`;
 
   return (
     <div>
@@ -229,7 +245,7 @@ export function SportsLiveWidget({
           </button>
         ))}
       </div>
-      {!activeBlock || activeBlock.fixtures.length === 0 ? (
+      {visibleFixtures.length === 0 ? (
         <div style={{ fontSize: "0.875rem", color: "var(--site-faint)", padding: "1rem 0", textAlign: "center" }}>
           {locale === "en" ? "No matches right now." : "Nenhum jogo no momento."}
         </div>
@@ -237,9 +253,9 @@ export function SportsLiveWidget({
         <div
           key={`grid-${transitionKey}`}
           className="sports-carousel-fade"
-          style={{ display: "grid", gridTemplateColumns: `repeat(${activeBlock.fixtures.length}, minmax(0, 1fr))`, gap: "0.75rem" }}
+          style={{ display: "grid", gridTemplateColumns: `repeat(${visibleFixtures.length}, minmax(0, 1fr))`, gap: "0.75rem" }}
         >
-          {activeBlock.fixtures.map((fixture) => (
+          {visibleFixtures.map((fixture) => (
             <MatchCard key={fixture.id} fixture={fixture} locale={locale} />
           ))}
         </div>
