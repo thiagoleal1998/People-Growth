@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { COMPETITIONS, type Fixture, type SportsWidgetTab } from "@/lib/sports";
+import { COMPETITIONS, COMPETITION_ORDER, type Fixture, type SportsWidgetTab } from "@/lib/sports";
 import { TeamCrest } from "@/components/TeamCrest";
 
 const BRAND = "#315E9C";
@@ -90,8 +90,9 @@ const TAB_LABEL: Record<Exclude<SportsWidgetTab, "none">, { pt: string; en: stri
 // `defaultTab` (computed server-side, see defaultWidgetTab in sports.ts)
 // picks the starting tab; once the viewer clicks one themselves, their
 // choice sticks even if a match goes live afterward — "ao vivo" only
-// auto-takes over the FIRST time it appears, not every poll. Shows 3 cards
-// at a time, auto-rotating through the rest when a tab has more than 3.
+// auto-takes over the FIRST time it appears, not every poll. Within a tab,
+// fixtures are grouped into one block per competition (see `blocks` below)
+// and auto-rotate through those blocks, up to VISIBLE_COUNT cards at a time.
 export function SportsLiveWidget({
   initial,
   roundResults = [],
@@ -106,7 +107,7 @@ export function SportsLiveWidget({
   locale: string;
 }) {
   const [live, setLive] = useState<Fixture[]>(initial);
-  const [offset, setOffset] = useState(0);
+  const [blockIndex, setBlockIndex] = useState(0);
   const [tab, setTab] = useState<SportsWidgetTab>(defaultTab);
   const manualRef = useRef(false);
 
@@ -140,33 +141,54 @@ export function SportsLiveWidget({
   const activeKey = tabs.some((t) => t.key === tab) ? tab : (tabs[0]?.key ?? "results");
   const shown = tabs.find((t) => t.key === activeKey)?.data ?? [];
 
-  // The header names whichever competition the active tab is actually
-  // showing — "Brasileirão" was wrong as soon as a Sul-Americana/Libertadores
-  // card could appear here too. Only when every fixture in the tab shares
-  // one competition does it get that competition's own name/logo; a mixed
-  // tab (the common case now that every tracked competition feeds in) falls
-  // back to a generic "Esportes" label instead of naming just one of them.
-  const shownCompetitions = [...new Set(shown.map((f) => f.competition))];
-  const widgetTitle =
-    shownCompetitions.length === 1
-      ? { logo: COMPETITIONS[shownCompetitions[0]].logo, name: locale === "en" ? COMPETITIONS[shownCompetitions[0]].name_en : COMPETITIONS[shownCompetitions[0]].name_pt }
-      : { logo: null, name: locale === "en" ? "Sports" : "Esportes" };
+  // Grouped into one block per competition (in COMPETITION_ORDER's own
+  // sequence) instead of one flat rotating list mixing every tracked
+  // competition's games together — a Brasileirão game next to a LaLiga one
+  // next to a Libertadores one, three cards at a time with no sense of which
+  // round or league you were even looking at. Each block caps at
+  // VISIBLE_COUNT fixtures (the rest of a given competition's round is a
+  // "Ver todas as competições" click away, same as before).
+  const blocks = COMPETITION_ORDER.map((competition) => ({
+    competition,
+    fixtures: shown.filter((f) => f.competition === competition).slice(0, VISIBLE_COUNT),
+  })).filter((b) => b.fixtures.length > 0);
+  const activeBlock = blocks[blockIndex % Math.max(blocks.length, 1)] ?? null;
 
-  // Offset isn't reset when `shown` changes identity (switching tabs, or
-  // live starting/ending) — every read of it below is modulo'd against the
-  // current array length, so it's always a safe index regardless, just
-  // possibly not starting back at the first card, which is a fine tradeoff.
+  // Back to the first block whenever the tab changes — the old block index
+  // would otherwise point at some arbitrary competition in the new tab's
+  // own set, not necessarily even a valid one.
   useEffect(() => {
-    if (shown.length <= VISIBLE_COUNT) return;
-    const timer = setInterval(() => setOffset((o) => (o + 1) % shown.length), ROTATE_MS);
-    return () => clearInterval(timer);
-  }, [shown.length]);
+    setBlockIndex(0);
+  }, [activeKey]);
 
-  const visible = Array.from({ length: Math.min(VISIBLE_COUNT, shown.length) }, (_, i) => shown[(offset + i) % shown.length]);
+  // Advances to the next competition's block, re-armed on every change
+  // (manual tab switch or automatic) so the interval between transitions
+  // stays even either way. The title row and the match grid below are each
+  // remounted (via `key`) on every block change, which restarts their own
+  // CSS fade-in animation cleanly — simpler than hand-rolling a fade-out/
+  // fade-in state machine, and avoids the "new content flashes at full
+  // opacity for a frame" bug that approach had elsewhere on this page.
+  useEffect(() => {
+    if (blocks.length <= 1) return;
+    const timer = setTimeout(() => setBlockIndex((i) => (i + 1) % blocks.length), ROTATE_MS);
+    return () => clearTimeout(timer);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [blockIndex, blocks.length]);
+
+  // The header names whichever competition the active block is actually
+  // showing — each block is always exactly one competition now, so this no
+  // longer needs the "only when every fixture agrees" fallback the flat-list
+  // version did.
+  const widgetTitle = activeBlock
+    ? { logo: COMPETITIONS[activeBlock.competition].logo, name: locale === "en" ? COMPETITIONS[activeBlock.competition].name_en : COMPETITIONS[activeBlock.competition].name_pt }
+    : { logo: null, name: locale === "en" ? "Sports" : "Esportes" };
+  const transitionKey = `${activeKey}-${activeBlock?.competition ?? "none"}-${blockIndex}`;
 
   return (
     <div>
       <div
+        key={`title-${transitionKey}`}
+        className="sports-carousel-fade"
         style={{
           display: "flex",
           alignItems: "center",
@@ -207,14 +229,18 @@ export function SportsLiveWidget({
           </button>
         ))}
       </div>
-      {visible.length === 0 ? (
+      {!activeBlock || activeBlock.fixtures.length === 0 ? (
         <div style={{ fontSize: "0.875rem", color: "var(--site-faint)", padding: "1rem 0", textAlign: "center" }}>
           {locale === "en" ? "No matches right now." : "Nenhum jogo no momento."}
         </div>
       ) : (
-        <div key={offset} className="sports-carousel-fade" style={{ display: "grid", gridTemplateColumns: `repeat(${visible.length}, minmax(0, 1fr))`, gap: "0.75rem" }}>
-          {visible.map((fixture, i) => (
-            <MatchCard key={`${fixture.id}-${i}`} fixture={fixture} locale={locale} />
+        <div
+          key={`grid-${transitionKey}`}
+          className="sports-carousel-fade"
+          style={{ display: "grid", gridTemplateColumns: `repeat(${activeBlock.fixtures.length}, minmax(0, 1fr))`, gap: "0.75rem" }}
+        >
+          {activeBlock.fixtures.map((fixture) => (
+            <MatchCard key={fixture.id} fixture={fixture} locale={locale} />
           ))}
         </div>
       )}

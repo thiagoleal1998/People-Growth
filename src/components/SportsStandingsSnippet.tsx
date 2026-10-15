@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { TeamCrest } from "@/components/TeamCrest";
@@ -33,18 +33,30 @@ export function SportsStandingsSnippet({
   const standings = activeCompetition ? standingsByCompetition[activeCompetition] : null;
 
   // Switching competitions used to swap the crest/name/table instantly —
-  // felt too abrupt. Same fade-in technique as PagedCarousel: force opacity
-  // 0 the instant the active competition changes, then flip it back to 1 on
-  // the next animation frame so the browser actually paints the 0 state
-  // before the CSS transition animates it. No auto-advance here (unlike the
-  // carousels) — only the effect was asked for.
-  const [faded, setFaded] = useState(true);
-  useEffect(() => {
-    setFaded(false);
-    const raf = requestAnimationFrame(() => setFaded(true));
-    return () => cancelAnimationFrame(raf);
-  }, [activeCompetition]);
-  const fadeStyle = { opacity: faded ? 1 : 0, transition: "opacity 300ms ease" };
+  // felt too abrupt, and an earlier fix (fade the new competition in after
+  // switching) still flashed the new content at full opacity for a frame
+  // before the fade even started, same bug PagedCarousel had. Real two-phase
+  // fade instead: fade the current content out first (visible1 -> false),
+  // only swap `index` once that transition has actually finished
+  // (onTransitionEnd, not a guessed timer), then fade the new content in. No
+  // auto-advance here (unlike the carousels) — only the effect was asked for.
+  const [visible1, setVisible1] = useState(true);
+  const pendingRef = useRef<number | null>(null);
+
+  function goTo(next: number) {
+    if (next === index) return;
+    pendingRef.current = next;
+    setVisible1(false);
+  }
+
+  function handleFadedOut() {
+    if (pendingRef.current === null) return;
+    setIndex(pendingRef.current);
+    pendingRef.current = null;
+    requestAnimationFrame(() => setVisible1(true));
+  }
+
+  const fadeStyle = { opacity: visible1 ? 1 : 0, transition: "opacity 220ms ease" };
 
   return (
     <>
@@ -68,7 +80,7 @@ export function SportsStandingsSnippet({
           <div style={{ display: "flex", gap: "0.25rem", flexShrink: 0 }}>
             <button
               type="button"
-              onClick={() => setIndex((i) => (i - 1 + availableCompetitions.length) % availableCompetitions.length)}
+              onClick={() => goTo((index - 1 + availableCompetitions.length) % availableCompetitions.length)}
               aria-label={locale === "en" ? "Previous competition" : "Competição anterior"}
               style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "1.75rem", height: "1.75rem", borderRadius: "50%", border: "1px solid rgba(255,255,255,0.3)", backgroundColor: "transparent", color: "white", cursor: "pointer" }}
             >
@@ -76,7 +88,7 @@ export function SportsStandingsSnippet({
             </button>
             <button
               type="button"
-              onClick={() => setIndex((i) => (i + 1) % availableCompetitions.length)}
+              onClick={() => goTo((index + 1) % availableCompetitions.length)}
               aria-label={locale === "en" ? "Next competition" : "Próxima competição"}
               style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "1.75rem", height: "1.75rem", borderRadius: "50%", border: "1px solid rgba(255,255,255,0.3)", backgroundColor: "transparent", color: "white", cursor: "pointer" }}
             >
@@ -86,7 +98,12 @@ export function SportsStandingsSnippet({
         )}
       </div>
 
-      <div style={{ padding: "0.875rem 1rem", backgroundColor: "var(--site-card)", ...fadeStyle }}>
+      <div
+        style={{ padding: "0.875rem 1rem", backgroundColor: "var(--site-card)", ...fadeStyle }}
+        onTransitionEnd={(e) => {
+          if (e.propertyName === "opacity" && !visible1) handleFadedOut();
+        }}
+      >
         {!activeCompetition || !standings || standings.length === 0 ? (
           <div style={{ fontSize: "0.875rem", color: "var(--site-faint)", padding: "1rem 0" }}>
             {locale === "en" ? "Standings unavailable right now." : "Classificação indisponível no momento."}

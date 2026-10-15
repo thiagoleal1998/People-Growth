@@ -9,7 +9,7 @@ function GameRow({ game }: { game: NflGame }) {
   const isLive = game.status === "live";
   const hasScore = game.status !== "scheduled";
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "1.25rem", padding: "1.125rem 0", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+    <div className="nfl-game-row" style={{ display: "flex", alignItems: "center", gap: "1.25rem", padding: "1.125rem 0" }}>
       <div style={{ width: "6rem", flexShrink: 0, fontSize: "0.75rem", color: isLive ? "#FF5252" : "rgba(255,255,255,0.55)", fontWeight: isLive ? 800 : 600 }}>
         {isLive ? "Ao vivo" : game.statusDetail}
       </div>
@@ -34,6 +34,24 @@ function GameRow({ game }: { game: NflGame }) {
   );
 }
 
+// Pulled out of the carousel grid and shown above it instead — a live game
+// buried a few pages into "Ver mais →" clicks was easy to miss entirely.
+function FeaturedGame({ game }: { game: NflGame }) {
+  return (
+    <div
+      style={{
+        borderRadius: "1rem",
+        border: "1px solid rgba(255,82,82,0.4)",
+        backgroundColor: "rgba(255,82,82,0.06)",
+        padding: "0.25rem 1.75rem",
+        marginBottom: "1rem",
+      }}
+    >
+      <GameRow game={game} />
+    </div>
+  );
+}
+
 // A small, static preview — unlike SportsLiveWidget this doesn't poll (NFL
 // games are a once-a-week cadence, not worth the client-side complexity),
 // so it's a plain Server Component fetching ESPN's scoreboard directly (see
@@ -43,6 +61,8 @@ function GameRow({ game }: { game: NflGame }) {
 export async function NflPreview() {
   const games = await getCurrentWeekGames();
   if (!games || games.length === 0) return null;
+  const liveGames = games.filter((g) => g.status === "live");
+  const otherGames = games.filter((g) => g.status !== "live");
 
   return (
     <section style={{ background: "linear-gradient(135deg, #0d1b2a 0%, #162236 50%, #1a1f3e 100%)", position: "relative", overflow: "hidden", padding: "3.5rem 0" }}>
@@ -79,14 +99,20 @@ export async function NflPreview() {
             Ver mais →
           </Link>
         </div>
-        <PagedCarousel
-          items={games.map((game) => (
-            <GameRow key={game.id} game={game} />
-          ))}
-          accentColor={NFL_RED}
-          pageStyle={{ borderRadius: "1rem", border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(255,255,255,0.04)", padding: "0.5rem 1.75rem" }}
-        />
+        {liveGames.map((game) => (
+          <FeaturedGame key={game.id} game={game} />
+        ))}
+        {otherGames.length > 0 && (
+          <PagedCarousel
+            items={otherGames.map((game) => (
+              <GameRow key={game.id} game={game} />
+            ))}
+            accentColor={NFL_RED}
+            pageStyle={{ borderRadius: "1rem", border: "1px solid rgba(255,255,255,0.12)", backgroundColor: "rgba(255,255,255,0.04)", padding: "0.5rem 1.75rem" }}
+          />
+        )}
       </div>
+      <style>{`.nfl-game-row + .nfl-game-row { border-top: 1px solid rgba(255,255,255,0.1); }`}</style>
     </section>
   );
 }
