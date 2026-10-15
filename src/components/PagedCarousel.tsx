@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect, useState, type ReactNode, type CSSProperties } from "react";
+import { useEffect, useRef, useState, type ReactNode, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const AUTO_ADVANCE_MS = 5000;
+const FADE_MS = 220;
 
 // Shared paging behavior for any "show N at a time, with prev/next + dots to
 // see the rest" section — NflPreview.tsx, NbaPreview.tsx (both dark cards)
@@ -21,14 +22,15 @@ const AUTO_ADVANCE_MS = 5000;
 // slice an array, not generate markup.
 //
 // Auto-advances on its own every 5s (re-armed on any page change, manual or
-// automatic, so the spacing between transitions stays even either way), and
-// fades the new page in on every change — a plain instant swap read as too
-// abrupt. There's no real cross-dissolve of the outgoing page (that needs
-// both pages mounted at once, not worth the complexity here): the content
-// swaps immediately but renders at opacity 0 first, then a rAF flips it to 1
-// so the browser actually paints the 0 state before the CSS transition
-// animates it back up — a fade-in, not a true crossfade, but enough to not
-// feel like a hard cut.
+// automatic, so the spacing between transitions stays even either way).
+// Transitions are a two-phase fade — opacity to 0, swap the page while
+// invisible, opacity back to 1 — not a single fade-in: an earlier version
+// flipped the page first and faded in after, which meant the new page's
+// content was briefly visible at full opacity for one frame before the fade
+// even started (easy to miss entirely on a fast page, which is what made it
+// look like there was no effect at all). Going through `pending` first (the
+// page to switch to once faded out) guarantees the swap only happens while
+// genuinely invisible.
 export function PagedCarousel({
   items,
   pageSize = 3,
@@ -50,31 +52,50 @@ export function PagedCarousel({
 }) {
   const pageCount = Math.ceil(items.length / pageSize);
   const [page, setPage] = useState(0);
-  const [faded, setFaded] = useState(false);
+  const [visible1, setVisible1] = useState(true);
+  const pendingRef = useRef<number | null>(null);
   const visible = items.slice(page * pageSize, page * pageSize + pageSize);
 
-  useEffect(() => {
-    setFaded(false);
-    const raf = requestAnimationFrame(() => setFaded(true));
-    return () => cancelAnimationFrame(raf);
-  }, [page]);
+  function goTo(next: number) {
+    if (next === page) return;
+    pendingRef.current = next;
+    setVisible1(false);
+  }
+
+  // Runs the second half of the fade once the CSS transition that
+  // setVisible1(false) kicked off has actually finished (not on a timer
+  // guessed to roughly match FADE_MS — onTransitionEnd fires exactly when
+  // the opacity:0 transition completes).
+  function handleFadedOut() {
+    if (pendingRef.current === null) return;
+    setPage(pendingRef.current);
+    pendingRef.current = null;
+    requestAnimationFrame(() => setVisible1(true));
+  }
 
   useEffect(() => {
     if (pageCount <= 1) return;
-    const id = setTimeout(() => setPage((p) => (p + 1) % pageCount), AUTO_ADVANCE_MS);
+    const id = setTimeout(() => goTo((page + 1) % pageCount), AUTO_ADVANCE_MS);
     return () => clearTimeout(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [page, pageCount]);
 
   return (
     <div>
-      <div className={pageClassName} style={{ ...pageStyle, opacity: faded ? 1 : 0, transition: "opacity 300ms ease" }}>
+      <div
+        className={pageClassName}
+        style={{ ...pageStyle, opacity: visible1 ? 1 : 0, transition: `opacity ${FADE_MS}ms ease` }}
+        onTransitionEnd={(e) => {
+          if (e.propertyName === "opacity" && !visible1) handleFadedOut();
+        }}
+      >
         {visible}
       </div>
       {pageCount > 1 && (
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "1.25rem", marginTop: "1.25rem" }}>
           <button
             type="button"
-            onClick={() => setPage((p) => (p - 1 + pageCount) % pageCount)}
+            onClick={() => goTo((page - 1 + pageCount) % pageCount)}
             aria-label="Anterior"
             style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "2.25rem", height: "2.25rem", borderRadius: "50%", border: `1px solid ${controlBorderColor}`, backgroundColor: "transparent", color: controlColor, cursor: "pointer" }}
           >
@@ -85,7 +106,7 @@ export function PagedCarousel({
               <button
                 key={i}
                 type="button"
-                onClick={() => setPage(i)}
+                onClick={() => goTo(i)}
                 aria-label={`Página ${i + 1}`}
                 style={{
                   width: "0.4375rem",
@@ -101,7 +122,7 @@ export function PagedCarousel({
           </div>
           <button
             type="button"
-            onClick={() => setPage((p) => (p + 1) % pageCount)}
+            onClick={() => goTo((page + 1) % pageCount)}
             aria-label="Próximo"
             style={{ display: "flex", alignItems: "center", justifyContent: "center", width: "2.25rem", height: "2.25rem", borderRadius: "50%", border: `1px solid ${controlBorderColor}`, backgroundColor: "transparent", color: controlColor, cursor: "pointer" }}
           >

@@ -13,8 +13,12 @@ export type ColumnistCard = {
 
 // The home page's columnist strip used to be a fixed random 4 with no way
 // to see anyone else short of leaving for /conteudo/colunistas — this pages
-// through everyone (4 at a time, same grid/swipe-row CSS as before, defined
-// in page.tsx's own <style> block) via the shared PagedCarousel.
+// through everyone (same grid/swipe-row CSS as before, defined in page.tsx's
+// own <style> block) via the shared PagedCarousel. pageSize is 3, not 4 —
+// with exactly 4 "complete enough to show" profiles right now (the only
+// count isAuthorPubliclyVisible currently lets through), a page of 4 would
+// mean a single page with nothing to ever transition to, which is exactly
+// what made the auto-advance/fade look like it wasn't there at all.
 export function ColumnistCarousel({ cards }: { cards: ColumnistCard[] }) {
   return (
     <PagedCarousel
@@ -53,7 +57,7 @@ export function ColumnistCarousel({ cards }: { cards: ColumnistCard[] }) {
           </div>
         </Link>
       ))}
-      pageSize={4}
+      pageSize={3}
       accentColor="#315E9C"
       controlColor="#315E9C"
       controlBorderColor="var(--site-border)"
