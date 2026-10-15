@@ -29,7 +29,6 @@ import { getGovernorRace, getPresidentRace, getSenateRace } from "@/lib/tse";
 import { ElectionResults } from "@/components/ElectionResults";
 import { ElectionBanner } from "@/components/ElectionBanner";
 import {
-  attachDetailIds,
   COMPETITIONS,
   COMPETITION_ORDER,
   defaultWidgetTab,
@@ -67,6 +66,30 @@ function shuffled<T>(items: T[]): T[] {
 }
 
 type ArticleWithCategory = Article & { categories: Pick<Category, "slug" | "is_people_growth" | "is_ponto_de_replica"> | null };
+
+function FounderEntry({ author, locale }: { author: Author; locale: string }) {
+  return (
+    <div style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
+      <div
+        style={{
+          width: "3.25rem",
+          height: "3.25rem",
+          borderRadius: "50%",
+          flexShrink: 0,
+          background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+        }}
+      />
+      <div>
+        <div style={{ color: "white", fontWeight: 800, fontSize: "0.9375rem" }}>{author.name}</div>
+        {author.role_pt && (
+          <div style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8125rem", lineHeight: 1.4, marginTop: "0.125rem" }}>
+            {pickLocale(locale, author.role_pt, author.role_en)}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
 
 const stats = [
   { labelKey: "statsYears", value: "7+" },
@@ -150,6 +173,13 @@ export default async function HomePage() {
   // "fale direto com..." CTA) are specifically about the 3 founders, not
   // every active columnist — authors.is_founder distinguishes them.
   const founders = authors.filter((a) => a.is_founder);
+  // The founders box is a 1-top-2-bottom pyramid (the CEO centered above
+  // the other two, rather than a plain grid) — identified by role text
+  // ("CEO") rather than name, so it keeps working if the CEO ever changes.
+  // Only meaningful for exactly 3 founders; falls back to the plain grid
+  // otherwise.
+  const ceoFounder = founders.length === 3 ? (founders.find((a) => a.role_pt?.includes("CEO")) ?? null) : null;
+  const otherFounders = ceoFounder ? founders.filter((a) => a.id !== ceoFounder.id) : [];
   // Shown in the white strip below — a different random 4 each time this
   // page reshuffles (see `shuffled` above), and only profiles finished
   // enough to actually show (photo + name + tagline).
@@ -256,13 +286,9 @@ export default async function HomePage() {
     // each competition's page independently, so fetching all five here costs
     // nothing extra beyond the first render in a cache window.
     const rawRoundFixturesByCompetition = await Promise.all(COMPETITION_ORDER.map((c) => getCurrentRoundFixtures(c)));
-    const roundResults = await attachDetailIds(
-      rawRoundFixturesByCompetition.flatMap((fixtures) => fixtures ?? []).filter((f) => f.status === "finished")
-    );
+    const roundResults = rawRoundFixturesByCompetition.flatMap((fixtures) => fixtures ?? []).filter((f) => f.status === "finished");
     const roundUpcomingByCompetition = await Promise.all(COMPETITION_ORDER.map((c) => getUpcomingRoundFixtures(c)));
-    const roundUpcoming = await attachDetailIds(
-      roundUpcomingByCompetition.flatMap((fixtures) => fixtures ?? []).sort((a, b) => a.date.localeCompare(b.date))
-    );
+    const roundUpcoming = roundUpcomingByCompetition.flatMap((fixtures) => fixtures ?? []).sort((a, b) => a.date.localeCompare(b.date));
 
     sportsInitial = {
       standingsByCompetition,
@@ -932,27 +958,21 @@ export default async function HomePage() {
               <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#C89A4A", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1.5rem" }}>
                 Quem está por trás do Grupo Festina
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "2rem" }}>
-                {founders.map((author) => (
-                  <div key={author.id} style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
-                    <div
-                      style={{
-                        width: "3.25rem",
-                        height: "3.25rem",
-                        borderRadius: "50%",
-                        flexShrink: 0,
-                        background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
-                      }}
-                    />
-                    <div>
-                      <div style={{ color: "white", fontWeight: 800, fontSize: "0.9375rem" }}>{author.name}</div>
-                      {author.role_pt && (
-                        <div style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8125rem", lineHeight: 1.4, marginTop: "0.125rem" }}>
-                          {pickLocale(locale, author.role_pt, author.role_en)}
-                        </div>
-                      )}
-                    </div>
+              {ceoFounder && (
+                <div style={{ display: "flex", justifyContent: "center", marginBottom: "2rem" }}>
+                  {/* Matches the bottom row's own column width (same
+                      minmax(min(240px, 100%), 1fr) math as the grid below,
+                      via flex-basis since this is a 1-item row) — same size
+                      as the other two, just centered on its own line above
+                      them. */}
+                  <div style={{ flex: "0 1 calc(50% - 1rem)", minWidth: "min(240px, 100%)" }}>
+                    <FounderEntry author={ceoFounder} locale={locale} />
                   </div>
+                </div>
+              )}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "2rem" }}>
+                {(ceoFounder ? otherFounders : founders).map((author) => (
+                  <FounderEntry key={author.id} author={author} locale={locale} />
                 ))}
               </div>
             </div>

@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, type ReactNode, type CSSProperties } from "react";
+import { useEffect, useState, type ReactNode, type CSSProperties } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+
+const AUTO_ADVANCE_MS = 5000;
 
 // Shared paging behavior for any "show N at a time, with prev/next + dots to
 // see the rest" section — NflPreview.tsx, NbaPreview.tsx (both dark cards)
@@ -17,6 +19,16 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 // item server-side and handing over the resulting element array sidesteps
 // that entirely, and costs nothing since the Client Component only has to
 // slice an array, not generate markup.
+//
+// Auto-advances on its own every 5s (re-armed on any page change, manual or
+// automatic, so the spacing between transitions stays even either way), and
+// fades the new page in on every change — a plain instant swap read as too
+// abrupt. There's no real cross-dissolve of the outgoing page (that needs
+// both pages mounted at once, not worth the complexity here): the content
+// swaps immediately but renders at opacity 0 first, then a rAF flips it to 1
+// so the browser actually paints the 0 state before the CSS transition
+// animates it back up — a fade-in, not a true crossfade, but enough to not
+// feel like a hard cut.
 export function PagedCarousel({
   items,
   pageSize = 3,
@@ -38,11 +50,24 @@ export function PagedCarousel({
 }) {
   const pageCount = Math.ceil(items.length / pageSize);
   const [page, setPage] = useState(0);
+  const [faded, setFaded] = useState(false);
   const visible = items.slice(page * pageSize, page * pageSize + pageSize);
+
+  useEffect(() => {
+    setFaded(false);
+    const raf = requestAnimationFrame(() => setFaded(true));
+    return () => cancelAnimationFrame(raf);
+  }, [page]);
+
+  useEffect(() => {
+    if (pageCount <= 1) return;
+    const id = setTimeout(() => setPage((p) => (p + 1) % pageCount), AUTO_ADVANCE_MS);
+    return () => clearTimeout(id);
+  }, [page, pageCount]);
 
   return (
     <div>
-      <div className={pageClassName} style={pageStyle}>
+      <div className={pageClassName} style={{ ...pageStyle, opacity: faded ? 1 : 0, transition: "opacity 300ms ease" }}>
         {visible}
       </div>
       {pageCount > 1 && (

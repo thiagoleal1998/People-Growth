@@ -29,14 +29,11 @@ function statusLabel(fixture: Fixture, locale: string): string {
 function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
   const isLive = fixture.status === "live";
   const hasScore = fixture.status === "live" || fixture.status === "finished";
-  // Every card links out, even a scraped fixture with no resolved detailId —
-  // its own (non-API-Football) id just won't match anything real, which the
-  // match-detail page already handles gracefully (an "indisponível no
-  // momento" message, not a 404) rather than leaving the card dead with
-  // nothing to click at all.
+  // No longer links out to a match-detail page — see FixtureRow in
+  // /esportes/page.tsx for why (removed, not fixed: no reliable data source
+  // for most fixtures, which only ever showed an "indisponível" dead end).
   return (
-    <a
-      href={`/esportes/partida/${fixture.detailId ?? fixture.id}`}
+    <div
       style={{
         display: "flex",
         flexDirection: "column",
@@ -47,7 +44,6 @@ function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
         border: "1px solid var(--site-border-strong)",
         backgroundColor: "var(--site-card)",
         minWidth: 0,
-        textDecoration: "none",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "0.3125rem", fontSize: "0.625rem", color: "var(--site-faint)", textAlign: "center", overflow: "hidden", maxWidth: "100%" }}>
@@ -73,7 +69,7 @@ function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
         </span>
         <TeamCrest src={fixture.awayTeamLogo} alt={fixture.awayTeamName} />
       </div>
-    </a>
+    </div>
   );
 }
 

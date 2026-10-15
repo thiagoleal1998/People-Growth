@@ -259,16 +259,6 @@ export type Fixture = {
   homeGoals: number | null;
   awayGoals: number | null;
   competition: Competition;
-  // "api_football" fixtures have a real API-Football fixture id (in `id`),
-  // so /esportes/partida/[id] (events/lineups/statistics, all fixture-id-
-  // scoped and NOT season-blocked — confirmed live) can look them up.
-  // "scraped" fixtures (TheSportsDB, api-futebol.com.br) number matches in
-  // an unrelated system — `id` on its own can't be used for the detail
-  // page. `detailId` is the resolved API-Football id when one was found
-  // (see attachDetailIds), null otherwise — UI should link using `detailId`,
-  // never the raw `id`, for a "scraped" fixture.
-  source: "api_football" | "scraped";
-  detailId: number | null;
 };
 
 export type Team = {
@@ -390,8 +380,6 @@ function parseFixture(f: RawFixture, competition: Competition): Fixture {
     homeGoals: f.goals.home,
     awayGoals: f.goals.away,
     competition,
-    source: "api_football",
-    detailId: f.fixture.id,
   };
 }
 
@@ -464,8 +452,19 @@ export async function getTodayFixtures(): Promise<Fixture[] | null> {
   // create a multi-hour blind window (Brazil is UTC-3, so from ~9pm to
   // midnight local time, the UTC calendar day is already "tomorrow", and
   // today's real matches would silently stop showing up).
+  //
+  // Computing `today` correctly in São Paulo time isn't enough on its own,
+  // though — API-Football's own `date` filter buckets fixtures by UTC
+  // calendar day unless told otherwise, so a match kicking off 21:00-23:59
+  // BRT (00:00-02:59 UTC the next day) still got excluded from date="today"
+  // even with the right string, because the API considered it tomorrow.
+  // Confirmed live: a 21:30 BRT Libertadores match (Fluminense x Palmeiras)
+  // never showed as live on the home page despite isAnyCompetitionLiveNow's
+  // own kickoff-window math being correct — getTodayFixtures just never
+  // returned it in the first place. `timezone` makes the API bucket by the
+  // same calendar day we're asking about instead of UTC's.
   const today = dateKeySaoPaulo(new Date().toISOString());
-  const data = await fetchFootballApi<RawFixturesResponse>("/fixtures", { date: today }, TODAY_CACHE_SECONDS);
+  const data = await fetchFootballApi<RawFixturesResponse>("/fixtures", { date: today, timezone: "America/Sao_Paulo" }, TODAY_CACHE_SECONDS);
   if (!data?.response) return null;
   const competitionByLeagueId = new Map(COMPETITION_ORDER.map((key) => [COMPETITIONS[key].apiLeagueId, key]));
   return data.response
@@ -589,8 +588,6 @@ function parseSportsDbEvent(e: RawSportsDbEvent, competition: Competition): Fixt
     homeGoals: e.intHomeScore !== null && e.intHomeScore !== undefined ? Number(e.intHomeScore) : null,
     awayGoals: e.intAwayScore !== null && e.intAwayScore !== undefined ? Number(e.intAwayScore) : null,
     competition,
-    source: "scraped",
-    detailId: null,
   };
 }
 
@@ -760,8 +757,6 @@ function parseFixturesFromRoundPage($: cheerio.CheerioAPI, competition: Competit
       homeGoals: scoreMatch ? Number(scoreMatch[1]) : null,
       awayGoals: scoreMatch ? Number(scoreMatch[2]) : null,
       competition,
-      source: "scraped",
-      detailId: null,
     });
   });
   return fixtures;
@@ -981,8 +976,6 @@ export async function getSeasonFixtures(competition: Competition): Promise<Fixtu
       homeGoals: parsed.homeTeam.score,
       awayGoals: parsed.awayTeam.score,
       competition,
-      source: "scraped",
-      detailId: null,
     });
   }
   return fixtures;
@@ -1065,185 +1058,3 @@ const TEAM_IDS: Record<string, number> = {
   "América-MG": 125,
   "Ponte Preta": 139,
 };
-
-const H2H_CACHE_SECONDS = 21600; // 6h — per team pair, not per fixture, so cheap even daily
-
-export async function attachDetailIds(fixtures: Fixture[]): Promise<Fixture[]> {
-  const unresolved = fixtures.filter((f) => f.source === "scraped" && f.detailId === null);
-  if (unresolved.length === 0) return fixtures;
-
-  const pairs = new Map<string, { home: number; away: number }>();
-  for (const f of unresolved) {
-    const home = TEAM_IDS[f.homeTeamName];
-    const away = TEAM_IDS[f.awayTeamName];
-    if (home && away) pairs.set(`${home}-${away}`, { home, away });
-  }
-
-  const h2hByPair = new Map<string, RawFixture[]>();
-  await Promise.all(
-    [...pairs.entries()].map(async ([key, { home, away }]) => {
-      const data = await fetchFootballApi<RawFixturesResponse>("/fixtures/headtohead", { h2h: `${home}-${away}` }, H2H_CACHE_SECONDS);
-      h2hByPair.set(key, data?.response ?? []);
-    })
-  );
-
-  return fixtures.map((f) => {
-    if (f.source !== "scraped" || f.detailId !== null) return f;
-    const home = TEAM_IDS[f.homeTeamName];
-    const away = TEAM_IDS[f.awayTeamName];
-    if (!home || !away) return f;
-    const candidates = h2hByPair.get(`${home}-${away}`) ?? [];
-    const targetDate = dateKeySaoPaulo(f.date);
-    const leagueId = COMPETITIONS[f.competition].apiLeagueId;
-    const match = candidates.find((raw) => raw.league.id === leagueId && dateKeySaoPaulo(raw.fixture.date) === targetDate);
-    return match ? { ...f, detailId: match.fixture.id } : f;
-  });
-}
-
-// --- Match detail: events, lineups, statistics for a single fixture ---
-// (src/app/[locale]/(public)/esportes/partida/[id]/page.tsx). Confirmed
-// live: /fixtures?id=, /fixtures/events, /fixtures/lineups and
-// /fixtures/statistics are all scoped by fixture id, not by season — none of
-// them hit the free-plan season block that /standings and the other
-// season-scoped endpoints do. Only usable for fixtures with a real
-// API-Football id (Fixture.source === "api_football"); never call these with
-// an id from the scraped sources, which use an unrelated numbering.
-
-// 15min. getMatchDetail makes 4 separate API calls (header, events,
-// lineups, statistics) every time this cache expires — at the old 3min
-// value that was 4 calls x 50 refreshes over one ~150min match = 200
-// requests, double the free plan's entire 100req/day quota from a single
-// viewed match. 15min cuts that to 4 x 10 = 40 requests/match.
-const MATCH_DETAIL_CACHE_SECONDS = 900;
-
-export type MatchHeader = Fixture & {
-  referee: string | null;
-  venueName: string | null;
-  venueCity: string | null;
-};
-
-type RawFixtureFull = RawFixture & {
-  fixture: RawFixture["fixture"] & { referee?: string | null; venue?: { name?: string | null; city?: string | null } };
-};
-type RawFixturesFullResponse = { response?: RawFixtureFull[] };
-
-export async function getMatchHeader(fixtureId: number): Promise<MatchHeader | null> {
-  const data = await fetchFootballApi<RawFixturesFullResponse>("/fixtures", { id: fixtureId }, MATCH_DETAIL_CACHE_SECONDS);
-  const f = data?.response?.[0];
-  if (!f) return null;
-  const competitionByLeagueId = new Map(COMPETITION_ORDER.map((key) => [COMPETITIONS[key].apiLeagueId, key]));
-  const competition = competitionByLeagueId.get(f.league.id);
-  if (!competition) return null;
-  return {
-    ...parseFixture(f, competition),
-    referee: f.fixture.referee ?? null,
-    venueName: f.fixture.venue?.name ?? null,
-    venueCity: f.fixture.venue?.city ?? null,
-  };
-}
-
-export type MatchEvent = {
-  minute: number;
-  extraMinute: number | null;
-  teamId: number;
-  teamName: string;
-  playerName: string | null;
-  assistName: string | null;
-  type: "goal" | "card" | "subst" | "var" | "other";
-  detail: string;
-};
-
-type RawMatchEvent = {
-  time: { elapsed: number; extra: number | null };
-  team: { id: number; name: string };
-  player: { name: string | null };
-  assist: { name: string | null };
-  type: string;
-  detail: string;
-};
-type RawEventsResponse = { response?: RawMatchEvent[] };
-
-function mapEventType(type: string): MatchEvent["type"] {
-  const lower = type.toLowerCase();
-  if (lower === "goal") return "goal";
-  if (lower === "card") return "card";
-  if (lower === "subst") return "subst";
-  if (lower === "var") return "var";
-  return "other";
-}
-
-export async function getMatchEvents(fixtureId: number): Promise<MatchEvent[] | null> {
-  const data = await fetchFootballApi<RawEventsResponse>("/fixtures/events", { fixture: fixtureId }, MATCH_DETAIL_CACHE_SECONDS);
-  if (!data?.response) return null;
-  return data.response.map((e) => ({
-    minute: e.time.elapsed,
-    extraMinute: e.time.extra,
-    teamId: e.team.id,
-    teamName: e.team.name,
-    playerName: e.player.name ?? null,
-    assistName: e.assist.name ?? null,
-    type: mapEventType(e.type),
-    detail: e.detail,
-  }));
-}
-
-export type LineupPlayer = { id: number; name: string; number: number | null; position: string | null };
-
-export type TeamLineup = {
-  teamId: number;
-  teamName: string;
-  teamLogo: string | null;
-  formation: string | null;
-  coachName: string | null;
-  startXI: LineupPlayer[];
-  substitutes: LineupPlayer[];
-};
-
-type RawLineupPlayer = { player: { id: number; name: string; number: number | null; pos: string | null } };
-type RawLineup = {
-  team: { id: number; name: string; logo?: string };
-  formation: string | null;
-  coach: { name: string | null };
-  startXI: RawLineupPlayer[];
-  substitutes: RawLineupPlayer[];
-};
-type RawLineupsResponse = { response?: RawLineup[] };
-
-export async function getMatchLineups(fixtureId: number): Promise<TeamLineup[] | null> {
-  const data = await fetchFootballApi<RawLineupsResponse>("/fixtures/lineups", { fixture: fixtureId }, MATCH_DETAIL_CACHE_SECONDS);
-  if (!data?.response) return null;
-  return data.response.map((l) => ({
-    teamId: l.team.id,
-    teamName: l.team.name,
-    teamLogo: l.team.logo ?? null,
-    formation: l.formation,
-    coachName: l.coach.name ?? null,
-    startXI: l.startXI.map((p) => ({ id: p.player.id, name: p.player.name, number: p.player.number, position: p.player.pos })),
-    substitutes: l.substitutes.map((p) => ({ id: p.player.id, name: p.player.name, number: p.player.number, position: p.player.pos })),
-  }));
-}
-
-export type TeamStatistics = { teamId: number; teamName: string; stats: { type: string; value: string | number | null }[] };
-
-type RawTeamStatistics = { team: { id: number; name: string }; statistics: { type: string; value: string | number | null }[] };
-type RawStatisticsResponse = { response?: RawTeamStatistics[] };
-
-export async function getMatchStatistics(fixtureId: number): Promise<TeamStatistics[] | null> {
-  const data = await fetchFootballApi<RawStatisticsResponse>("/fixtures/statistics", { fixture: fixtureId }, MATCH_DETAIL_CACHE_SECONDS);
-  if (!data?.response) return null;
-  return data.response.map((s) => ({ teamId: s.team.id, teamName: s.team.name, stats: s.statistics }));
-}
-
-export type MatchDetail = {
-  header: MatchHeader;
-  events: MatchEvent[] | null;
-  lineups: TeamLineup[] | null;
-  statistics: TeamStatistics[] | null;
-};
-
-export async function getMatchDetail(fixtureId: number): Promise<MatchDetail | null> {
-  const header = await getMatchHeader(fixtureId);
-  if (!header) return null;
-  const [events, lineups, statistics] = await Promise.all([getMatchEvents(fixtureId), getMatchLineups(fixtureId), getMatchStatistics(fixtureId)]);
-  return { header, events, lineups, statistics };
-}

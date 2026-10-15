@@ -3,7 +3,6 @@ import { Link } from "@/i18n/navigation";
 import {
   COMPETITIONS,
   COMPETITION_ORDER,
-  attachDetailIds,
   getBestStandings,
   getClubFixtures,
   getCurrentRoundFixtures,
@@ -40,16 +39,14 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
   const isLive = fixture.status === "live";
   const isFinished = fixture.status === "finished";
   const scoreLabel = isLive || isFinished ? `${fixture.homeGoals ?? 0} – ${fixture.awayGoals ?? 0}` : dateLabel;
-  // Every card links out, even a scraped fixture with no resolved detailId —
-  // its own (non-API-Football) id just won't match anything real, which the
-  // match-detail page already handles gracefully (an "indisponível no
-  // momento" message, not a 404 — see getMatchDetail's null case there)
-  // rather than leaving the card dead with nothing to click at all.
+  // No longer links out to a match-detail page — that page depended on
+  // API-Football calls (events/lineups/statistics) that only ever resolved
+  // for a small minority of fixtures (anything scraped rather than sourced
+  // straight from API-Football had no real detailId to begin with), so most
+  // clicks just landed on an "indisponível no momento" dead end. Removed
+  // rather than fixed: there's no reliable data source for the rest.
   return (
-    <a
-      href={`/esportes/partida/${fixture.detailId ?? fixture.id}`}
-      style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0", borderTop: "1px solid var(--site-border)", textDecoration: "none" }}
-    >
+    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0", borderTop: "1px solid var(--site-border)" }}>
       <div style={{ width: "4.5rem", flexShrink: 0, fontSize: "0.75rem", color: isLive ? "#DC2626" : "var(--site-muted)", fontWeight: isLive ? 800 : 600 }}>
         {isLive ? (fixture.elapsed ? `${fixture.elapsed}'` : "Ao vivo") : dateLabel.split(",")[0] ?? dateLabel}
       </div>
@@ -70,7 +67,7 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
           </span>
         </div>
       </div>
-    </a>
+    </div>
   );
 }
 
@@ -169,7 +166,7 @@ export default async function EsportesPage({
   const competition: Competition = COMPETITION_ORDER.includes(rawCompeticao as Competition) ? (rawCompeticao as Competition) : "serie_a";
   const info = COMPETITIONS[competition];
 
-  const [allToday, standings, rawRoundFixtures] = await Promise.all([
+  const [allToday, standings, roundFixtures] = await Promise.all([
     getTodayFixtures(),
     info.format === "table" ? getBestStandings(competition) : Promise.resolve(null),
     getCurrentRoundFixtures(competition),
@@ -179,15 +176,13 @@ export default async function EsportesPage({
   // (a different, confirmed-working domain) wherever a match exists.
   // roundFixtures/clubFixtures are already scraped-sourced and don't need it.
   const todayFixtures = withReliableCrests((allToday ?? []).filter((f) => f.competition === competition), standings);
-  const roundFixtures = rawRoundFixtures ? await attachDetailIds(rawRoundFixtures) : null;
 
   // Only a club that's actually in this competition's own standings is a
   // valid choice — besides being the source of the selector list itself,
   // this keeps a stray/typo'd ?clube= from quietly showing an empty "no
   // games" state that looks like a bug instead of a bad link.
   const clube = standings?.some((row) => row.teamName === rawClube) ? (rawClube as string) : null;
-  const rawClubFixtures = clube ? await getClubFixtures(competition, clube) : null;
-  const clubFixtures = rawClubFixtures ? await attachDetailIds(rawClubFixtures) : null;
+  const clubFixtures = clube ? await getClubFixtures(competition, clube) : null;
 
   return (
     <section className="section-padding esportes-page" style={{ backgroundColor: "var(--site-bg)", minHeight: "70vh" }}>

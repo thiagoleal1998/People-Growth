@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { TeamCrest } from "@/components/TeamCrest";
@@ -32,21 +32,37 @@ export function SportsStandingsSnippet({
   const activeCompetition = availableCompetitions[index % Math.max(availableCompetitions.length, 1)] ?? null;
   const standings = activeCompetition ? standingsByCompetition[activeCompetition] : null;
 
+  // Switching competitions used to swap the crest/name/table instantly —
+  // felt too abrupt. Same fade-in technique as PagedCarousel: force opacity
+  // 0 the instant the active competition changes, then flip it back to 1 on
+  // the next animation frame so the browser actually paints the 0 state
+  // before the CSS transition animates it. No auto-advance here (unlike the
+  // carousels) — only the effect was asked for.
+  const [faded, setFaded] = useState(true);
+  useEffect(() => {
+    setFaded(false);
+    const raf = requestAnimationFrame(() => setFaded(true));
+    return () => cancelAnimationFrame(raf);
+  }, [activeCompetition]);
+  const fadeStyle = { opacity: faded ? 1 : 0, transition: "opacity 300ms ease" };
+
   return (
     <>
       <div style={{ backgroundColor: BRAND, color: "white", padding: "0.625rem 1rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
-        {activeCompetition ? (
-          <TeamCrest src={COMPETITIONS[activeCompetition].logo} alt="" size={28} />
-        ) : (
-          <div style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.2)" }} />
-        )}
-        <div style={{ flex: 1, minWidth: 0 }}>
-          <div style={{ fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>{locale === "en" ? "Standings" : "Classificação"}</div>
-          {activeCompetition && (
-            <div style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.75)", marginTop: "0.0625rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
-              {locale === "en" ? COMPETITIONS[activeCompetition].name_en : COMPETITIONS[activeCompetition].name_pt}
-            </div>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flex: 1, minWidth: 0, ...fadeStyle }}>
+          {activeCompetition ? (
+            <TeamCrest src={COMPETITIONS[activeCompetition].logo} alt="" size={28} />
+          ) : (
+            <div style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.2)" }} />
           )}
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>{locale === "en" ? "Standings" : "Classificação"}</div>
+            {activeCompetition && (
+              <div style={{ fontSize: "0.6875rem", color: "rgba(255,255,255,0.75)", marginTop: "0.0625rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+                {locale === "en" ? COMPETITIONS[activeCompetition].name_en : COMPETITIONS[activeCompetition].name_pt}
+              </div>
+            )}
+          </div>
         </div>
         {availableCompetitions.length > 1 && (
           <div style={{ display: "flex", gap: "0.25rem", flexShrink: 0 }}>
@@ -70,7 +86,7 @@ export function SportsStandingsSnippet({
         )}
       </div>
 
-      <div style={{ padding: "0.875rem 1rem", backgroundColor: "var(--site-card)" }}>
+      <div style={{ padding: "0.875rem 1rem", backgroundColor: "var(--site-card)", ...fadeStyle }}>
         {!activeCompetition || !standings || standings.length === 0 ? (
           <div style={{ fontSize: "0.875rem", color: "var(--site-faint)", padding: "1rem 0" }}>
             {locale === "en" ? "Standings unavailable right now." : "Classificação indisponível no momento."}
