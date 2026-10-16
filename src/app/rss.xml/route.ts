@@ -20,7 +20,7 @@ export async function GET() {
     .order("published_at", { ascending: false })
     .limit(30);
 
-  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.vercel.app";
+  const baseUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br";
   type FeedItem = Pick<Article, "title_pt" | "slug" | "format" | "excerpt_pt" | "published_at"> & { categories: { slug: string } | null };
 
   const items = ((data ?? []) as FeedItem[])

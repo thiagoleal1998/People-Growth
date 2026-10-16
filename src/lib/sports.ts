@@ -605,7 +605,7 @@ export async function getLastResult(competition: Competition): Promise<Fixture |
 // the honesty/politeness choices (identified User-Agent, 30-min cache).
 
 const SCRAPE_CACHE_SECONDS = 1800; // 30min — a public page, not a rate-limited API; still deliberately not hammered
-const SCRAPE_USER_AGENT = "Mozilla/5.0 (compatible; FestinaBot/1.0; +https://grupofestina.vercel.app)";
+const SCRAPE_USER_AGENT = "Mozilla/5.0 (compatible; FestinaBot/1.0; +https://grupofestina.com.br)";
 
 async function fetchScrapedHtml(url: string): Promise<{ html: string; finalUrl: string } | null> {
   try {

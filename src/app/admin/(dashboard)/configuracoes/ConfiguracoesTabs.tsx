@@ -122,7 +122,7 @@ export function ConfiguracoesTabs({
 
         <div style={{ display: active === "tecnico" ? "block" : "none" }}>
           <div style={panelStyle}>
-            <Field label="URL do site" hint="Ex: https://people-growth.vercel.app — sem barra no final.">
+            <Field label="URL do site" hint="Ex: https://grupofestina.com.br — sem barra no final.">
               <Input name="site_url" defaultValue={values.site_url ?? ""} />
             </Field>
           </div>

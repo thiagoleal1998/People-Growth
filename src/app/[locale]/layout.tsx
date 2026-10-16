@@ -38,7 +38,7 @@ export async function generateMetadata({
     },
     description: config[descriptionKey] || t("heroSubtitle"),
     metadataBase: new URL(
-      process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.vercel.app"
+      process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br"
     ),
     icons: config.favicon_url ? { icon: config.favicon_url } : undefined,
     openGraph: {
@@ -81,7 +81,7 @@ export default async function LocaleLayout({
   const messages = await getMessages();
   const t = await getTranslations({ locale, namespace: "home" });
   const config = await getSiteConfig();
-  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.vercel.app";
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br";
   const summaryKey = locale === "en" ? "geo_ai_summary_en" : "geo_ai_summary_pt";
 
   const organizationSchema = {

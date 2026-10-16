@@ -139,7 +139,7 @@ export function AuthorArticleForm({ item, categories, otherAuthors, extraCategor
 
   const formatSegment = format === "opiniao" ? "mea-sententia" : "noticia";
   const categorySlug = categories.find((c) => c.id === categoryId)?.slug || "geral";
-  const previewUrl = `grupofestina.vercel.app › conteudo › ${formatSegment} › categoria › ${categorySlug} › ${slug || slugifyPreview(titlePt) || "..."}`;
+  const previewUrl = `grupofestina.com.br › conteudo › ${formatSegment} › categoria › ${categorySlug} › ${slug || slugifyPreview(titlePt) || "..."}`;
   const status = item?.status ?? "draft";
   const feedbackBlocks = item?.review_feedback ? parseFeedbackBlocks(item.review_feedback) : [];
   // The three action buttons live in the sidebar (see below) — this only
