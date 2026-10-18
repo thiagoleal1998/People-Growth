@@ -12,6 +12,7 @@ import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { alertDialog } from "@/components/admin/dialog-store";
 import { upsertOwnArticle } from "./actions";
 import type { Article, Author, Category } from "@/types/database.types";
+import { FORMAT_SEGMENT } from "@/lib/article-url";
 
 const tabs = [
   { id: "conteudo", label: "Conteúdo" },
@@ -137,7 +138,7 @@ export function AuthorArticleForm({ item, categories, otherAuthors, extraCategor
     }
   }
 
-  const formatSegment = format === "opiniao" ? "mea-sententia" : "noticia";
+  const formatSegment = FORMAT_SEGMENT[format];
   const categorySlug = categories.find((c) => c.id === categoryId)?.slug || "geral";
   const previewUrl = `grupofestina.com.br › conteudo › ${formatSegment} › categoria › ${categorySlug} › ${slug || slugifyPreview(titlePt) || "..."}`;
   const status = item?.status ?? "draft";
@@ -318,9 +319,10 @@ export function AuthorArticleForm({ item, categories, otherAuthors, extraCategor
             <Field label="Slug" hint="Deixe em branco para gerar automaticamente">
               <Input name="slug" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={slugifyPreview(titlePt)} />
             </Field>
-            <Field label="Tipo de conteúdo" hint="Notícia: reportagem/atualidade. Opinião: aparece com a tag Mea Sententia.">
+            <Field label="Tipo de conteúdo" hint="Notícia: fatos, de forma clara e verificável. Análise: interpreta e contextualiza os fatos. Opinião: ponto de vista do autor, aparece com a tag Mea Sententia.">
               <Select name="format" value={format} onChange={(e) => setFormat(e.target.value as Article["format"])}>
                 <option value="opiniao">Opinião (Mea Sententia)</option>
+                <option value="analise">Análise</option>
                 <option value="noticia">Notícia</option>
               </Select>
             </Field>

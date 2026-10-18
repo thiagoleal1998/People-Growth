@@ -5,11 +5,13 @@ import type { Article } from "@/types/database.types";
 // [format] segment actually matches the article it claims to be.
 export const FORMAT_SEGMENT: Record<Article["format"], string> = {
   noticia: "noticia",
+  analise: "analise",
   opiniao: "mea-sententia",
 };
 
 export const FORMAT_FROM_SEGMENT: Record<string, Article["format"]> = {
   noticia: "noticia",
+  analise: "analise",
   "mea-sententia": "opiniao",
 };
 

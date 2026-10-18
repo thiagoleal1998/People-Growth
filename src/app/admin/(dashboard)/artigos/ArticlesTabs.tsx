@@ -14,6 +14,12 @@ const statusConfig: Record<Article["status"], { label: string; tone: "success" |
   published: { label: "Publicado", tone: "success" },
 };
 
+const formatConfig: Record<Article["format"], { label: string; tone: "success" | "warning" | "neutral" }> = {
+  noticia: { label: "Notícia", tone: "neutral" },
+  analise: { label: "Análise", tone: "success" },
+  opiniao: { label: "Mea Sententia", tone: "warning" },
+};
+
 function formatDate(iso: string) {
   // timeZone pinned — this runs inside a "use client" component that Next.js
   // both server-renders and hydrates; with none set, the date formats in
@@ -110,7 +116,7 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
                     <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{a.title_pt}</div>
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <Badge tone={a.format === "opiniao" ? "warning" : "neutral"}>{a.format === "opiniao" ? "Mea Sententia" : "Notícia"}</Badge>
+                    <Badge tone={formatConfig[a.format].tone}>{formatConfig[a.format].label}</Badge>
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <Badge tone={statusConfig[a.status].tone}>{statusConfig[a.status].label}</Badge>

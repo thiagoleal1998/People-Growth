@@ -14,6 +14,12 @@ const statusConfig: Record<Article["status"], { label: string; tone: "success" |
   published: { label: "Publicado", tone: "success" },
 };
 
+const formatConfig: Record<Article["format"], { label: string; tone: "success" | "warning" | "neutral" }> = {
+  noticia: { label: "Notícia", tone: "neutral" },
+  analise: { label: "Análise", tone: "success" },
+  opiniao: { label: "Mea Sententia", tone: "warning" },
+};
+
 function formatDate(iso: string) {
   return new Date(iso).toLocaleDateString("pt-BR");
 }
@@ -88,7 +94,7 @@ export default async function MeusArtigosPage({ searchParams }: { searchParams: 
                     <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{a.title_pt}</div>
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <Badge tone={a.format === "opiniao" ? "warning" : "neutral"}>{a.format === "opiniao" ? "Mea Sententia" : "Notícia"}</Badge>
+                    <Badge tone={formatConfig[a.format].tone}>{formatConfig[a.format].label}</Badge>
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <Badge tone={statusConfig[a.status].tone}>{statusConfig[a.status].label}</Badge>

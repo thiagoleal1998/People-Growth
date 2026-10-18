@@ -13,6 +13,7 @@ import { alertDialog } from "@/components/admin/dialog-store";
 import { upsertArticle, approveAndSchedule } from "./actions";
 import type { Article, ArticleSource, Category, Author } from "@/types/database.types";
 import { AI_USAGE_OPTIONS, aiDisclosureText } from "@/lib/ai-disclosure";
+import { FORMAT_SEGMENT } from "@/lib/article-url";
 
 const tabs = [
   { id: "conteudo", label: "Conteúdo" },
@@ -146,7 +147,7 @@ export function ArticleForm({
     }
   }
 
-  const formatSegment = format === "opiniao" ? "mea-sententia" : "noticia";
+  const formatSegment = FORMAT_SEGMENT[format];
   const categorySlug = categories.find((c) => c.id === categoryId)?.slug || "geral";
   const previewUrl = `grupofestina.com.br › conteudo › ${formatSegment} › categoria › ${categorySlug} › ${slug || slugifyPreview(titlePt) || "..."}`;
 
@@ -389,9 +390,10 @@ export function ArticleForm({
                   <option value="secundario_3">Destaque secundário 3</option>
                 </Select>
               </Field>
-              <Field label="Tipo de conteúdo" hint="Notícia: reportagem/atualidade. Opinião: aparece com a tag Mea Sententia.">
+              <Field label="Tipo de conteúdo" hint="Notícia: fatos, de forma clara e verificável. Análise: interpreta e contextualiza os fatos. Opinião: ponto de vista do autor, aparece com a tag Mea Sententia.">
                 <Select name="format" value={format} onChange={(e) => setFormat(e.target.value as Article["format"])}>
                   <option value="noticia">Notícia</option>
+                  <option value="analise">Análise</option>
                   <option value="opiniao">Opinião (Mea Sententia)</option>
                 </Select>
               </Field>
