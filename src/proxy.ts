@@ -85,5 +85,11 @@ async function handlePanelAuth(request: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/", "/(pt|en)/:path*", "/((?!_next|_vercel|api|.*\\..*).*)"],
+  // `icon` is excluded alongside `api`/`_next`/`_vercel`: it's Next's
+  // generated-icon route-handler convention (src/app/icon.ts), served at
+  // the extensionless path `/icon` (the hash lives in the query string, so
+  // the dotted-path exclusion below doesn't catch it) — without this,
+  // next-intl's middleware 307-redirects it to `/pt/icon`, breaking the
+  // same-domain favicon <link> tag it's meant to fix.
+  matcher: ["/", "/(pt|en)/:path*", "/((?!_next|_vercel|api|icon|.*\\..*).*)"],
 };

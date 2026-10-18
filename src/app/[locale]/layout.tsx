@@ -40,7 +40,8 @@ export async function generateMetadata({
     metadataBase: new URL(
       process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br"
     ),
-    icons: config.favicon_url ? { icon: config.favicon_url } : undefined,
+    // No manual `icons` entry here: src/app/icon.ts auto-generates the
+    // <link rel="icon"> tag, proxied through our own domain.
     openGraph: {
       type: "website",
       locale: locale === "pt" ? "pt_BR" : "en_US",
