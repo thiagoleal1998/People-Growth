@@ -1,0 +1,116 @@
+import { Network } from "lucide-react";
+import { joinAuthorNames } from "@/lib/founder-data";
+import type { Author } from "@/types/database.types";
+
+const cardStyle = { backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", borderTop: "3px solid #315E9C", overflow: "hidden" } as const;
+const cardHeaderStyle = { padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--admin-border-strong)" } as const;
+
+// role_pt is a full sentence ("Fundador e CEO do Grupo Festina · ...") —
+// too long for a chart box, so this just pulls out the three-letter title
+// the founders' own role_pt already carries by convention.
+function shortRole(roleText: string | null | undefined): string | null {
+  if (!roleText) return null;
+  if (roleText.includes("CEO")) return "CEO";
+  if (roleText.includes("CCAO")) return "CCAO";
+  if (roleText.includes("CMO")) return "CMO";
+  return null;
+}
+
+function OrgBox({ author, compact }: { author: Author; compact?: boolean }) {
+  const role = shortRole(author.role_pt);
+  const size = compact ? "2.75rem" : "3.75rem";
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", width: compact ? "5.5rem" : "auto" }}>
+      <div
+        style={{
+          width: size,
+          height: size,
+          borderRadius: "50%",
+          flexShrink: 0,
+          background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+          border: "2px solid var(--admin-surface)",
+          boxShadow: "0 0 0 1px var(--admin-border-strong)",
+        }}
+      />
+      <div style={{ textAlign: "center" }}>
+        <div style={{ fontWeight: 800, fontSize: compact ? "0.75rem" : "0.875rem", color: "var(--admin-text)", lineHeight: 1.25 }}>{author.name}</div>
+        {role && !compact && (
+          <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#315E9C", letterSpacing: "0.03em", marginTop: "0.125rem" }}>{role}</div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Pure-CSS "⊤" connector between the CEO box above and the two boxes below
+// it: a short vertical drop, then a bar split in half where each half's
+// inner border turns the corner down into its own box — no SVG needed.
+function Connector() {
+  return (
+    <>
+      <div style={{ width: "2px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)" }} />
+      <div style={{ display: "flex", width: "100%", maxWidth: "260px" }}>
+        <div style={{ flex: 1, height: "1.25rem", borderTop: "2px solid var(--admin-border-strong)", borderRight: "2px solid var(--admin-border-strong)" }} />
+        <div style={{ flex: 1, height: "1.25rem", borderTop: "2px solid var(--admin-border-strong)", borderLeft: "2px solid var(--admin-border-strong)" }} />
+      </div>
+    </>
+  );
+}
+
+export function OrganogramaCard({ authors }: { authors: Author[] }) {
+  const founders = authors.filter((a) => a.is_founder);
+  // Only meaningful for exactly 3 founders (CEO + two others) — otherwise
+  // there's no clean pyramid to draw, so the card just doesn't render one.
+  const ceoFounder = founders.length === 3 ? (founders.find((a) => a.role_pt?.includes("CEO")) ?? null) : null;
+  const otherFounders = ceoFounder ? founders.filter((a) => a.id !== ceoFounder.id) : [];
+  const editorialAuthors = authors.filter((a) => !a.is_founder && a.status === "active");
+
+  if (!ceoFounder && editorialAuthors.length === 0) return null;
+
+  return (
+    <div style={{ ...cardStyle, marginBottom: "1.5rem" }}>
+      <div style={cardHeaderStyle}>
+        <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <Network size={17} color="#315E9C" /> Organograma
+        </h2>
+      </div>
+
+      <div style={{ padding: "2rem 1.5rem" }}>
+        {ceoFounder && (
+          <div style={{ marginBottom: editorialAuthors.length > 0 ? "2.5rem" : 0 }}>
+            <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
+              <div style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)" }}>Conselho Administrativo</div>
+              <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.125rem" }}>
+                {joinAuthorNames(founders.map((a) => a.name), "pt")}
+              </div>
+            </div>
+
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+              <OrgBox author={ceoFounder} />
+              <Connector />
+              <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center" }}>
+                {otherFounders.map((a) => (
+                  <OrgBox key={a.id} author={a} />
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {editorialAuthors.length > 0 && (
+          <div>
+            <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+              <div style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)" }}>Conselho Editorial</div>
+              <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.125rem" }}>Autores</div>
+            </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "1.25rem", justifyContent: "center" }}>
+              {editorialAuthors.map((a) => (
+                <OrgBox key={a.id} author={a} compact />
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
