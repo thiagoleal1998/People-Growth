@@ -4,10 +4,10 @@ import type { Author } from "@/types/database.types";
 const cardStyle = { backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", borderTop: "3px solid #315E9C", overflow: "hidden" } as const;
 const cardHeaderStyle = { padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--admin-border-strong)" } as const;
 
-// Sócios (founders) get a smaller photo than regular authors — on request,
-// to not visually outweigh the editorial team even though they're listed
-// first there.
-const FOUNDER_PHOTO_SIZE = "2.25rem";
+// Sócios (founders) still get a smaller photo than regular authors — just
+// not as tiny as before.
+const FOUNDER_PHOTO_SIZE = "3rem";
+const FOUNDER_CHIP_PHOTO_SIZE = "2.25rem";
 
 // role_pt is a full sentence ("Fundador e CEO do Grupo Festina · ...") —
 // too long for a chart box, so this just pulls out the three-letter title
@@ -22,14 +22,16 @@ function shortRole(roleText: string | null | undefined): string | null {
 
 function NameChip({ author }: { author: Author }) {
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
+    <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
       <div
         style={{
-          width: "1.25rem",
-          height: "1.25rem",
+          width: FOUNDER_CHIP_PHOTO_SIZE,
+          height: FOUNDER_CHIP_PHOTO_SIZE,
           borderRadius: "50%",
           flexShrink: 0,
           background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+          border: "2px solid var(--admin-surface)",
+          boxShadow: "0 0 0 1px var(--admin-border-strong)",
         }}
       />
       <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--admin-muted)" }}>{author.name}</span>
