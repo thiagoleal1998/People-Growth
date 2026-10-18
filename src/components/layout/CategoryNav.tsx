@@ -147,7 +147,7 @@ export async function CategoryNav() {
             position: fixed;
             top: 50%;
             left: 1.25rem;
-            width: 190px;
+            width: 220px;
             z-index: 40;
             border: none !important;
             border-radius: 0;
@@ -170,15 +170,21 @@ export async function CategoryNav() {
             display: flex;
             align-items: center;
             gap: 0.625rem;
-            padding: 0.45rem 0.9rem;
+            padding: 0.65rem 1.1rem;
             border-radius: 9999px;
             background: rgba(13, 27, 42, 0.92) !important;
             border: 1px solid rgba(255, 255, 255, 0.1);
             box-shadow: 0 8px 22px -10px rgba(15, 23, 42, 0.55);
             font-size: 0.75rem !important;
             color: rgba(255, 255, 255, 0.9) !important;
+            white-space: normal !important;
+            line-height: 1.4;
             animation: category-cta-in 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) both;
             transition: transform 0.2s, background-color 0.2s, color 0.2s;
+          }
+          .category-nav .category-nav-row a::before {
+            margin-top: 0.15rem;
+            align-self: flex-start;
           }
           .category-nav .category-nav-row a:nth-child(1) { animation-delay: 0.25s; }
           .category-nav .category-nav-row a:nth-child(2) { animation-delay: 0.37s; }
