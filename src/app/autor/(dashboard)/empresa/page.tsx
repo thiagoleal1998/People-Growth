@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/admin/ui";
-import { OrganogramaCard } from "@/components/autor/OrganogramaCard";
+import { OrganogramaCard } from "@/components/OrganogramaCard";
 import type { Author } from "@/types/database.types";
 
 export default async function EmpresaPage() {

@@ -30,6 +30,7 @@ import {
   ChevronDown,
   ChevronRight,
   Calendar,
+  Building2,
 } from "lucide-react";
 
 type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests";
@@ -68,6 +69,7 @@ const links: NavItem[] = [
   },
   { href: "/admin/seo", label: "SEO, GEO & AEO", icon: Search },
   { href: "/admin/usuarios", label: "Usuários", icon: KeyRound, countKey: "resetRequests", activeMatch: ["/admin/autores"] },
+  { href: "/admin/empresa", label: "A empresa", icon: Building2 },
   { href: "/admin/paginas", label: "Páginas Institucionais", icon: ScrollText },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];
