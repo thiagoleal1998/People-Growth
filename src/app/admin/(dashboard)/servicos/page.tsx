@@ -1,59 +1,8 @@
-import { createClient } from "@/lib/supabase/server";
-import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
-import { SavedToast } from "@/components/admin/SavedToast";
-import { Plus, Edit } from "lucide-react";
-import Link from "next/link";
-import { deleteService } from "./actions";
-import type { Service } from "@/types/database.types";
+import { redirect } from "next/navigation";
 
-export default async function ServicosPage({ searchParams }: { searchParams: Promise<{ saved?: string }> }) {
-  const { saved } = await searchParams;
-  const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any).from("services").select("*").order("order");
-  const services = (data ?? []) as Service[];
-
-  return (
-    <div>
-      <SavedToast show={saved === "1"} />
-      <PageHeader
-        title="Serviços"
-        subtitle={`${services.length} serviço${services.length === 1 ? "" : "s"}`}
-        action={<PrimaryLinkButton href="/admin/servicos/novo"><Plus size={16} /> Novo serviço</PrimaryLinkButton>}
-      />
-
-      <Card>
-        {services.length === 0 ? (
-          <EmptyState text="Nenhum serviço cadastrado." />
-        ) : (
-          <table style={{ width: "100%", borderCollapse: "collapse" }}>
-            <thead>
-              <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                {["Ordem", "Título", "Status", ""].map((h) => (
-                  <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody>
-              {services.map((s) => (
-                <tr key={s.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
-                  <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-faint)", fontSize: "0.875rem" }}>{s.order}</td>
-                  <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.875rem" }}>{s.title_pt}</td>
-                  <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <Badge tone={s.status === "active" ? "success" : "neutral"}>{s.status === "active" ? "Ativo" : "Rascunho"}</Badge>
-                  </td>
-                  <td style={{ padding: "0.875rem 1.25rem" }}>
-                    <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <Link href={`/admin/servicos/${s.id}`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
-                      <ConfirmDeleteButton confirmText={`Excluir o serviço "${s.title_pt}"?`} onDelete={deleteService.bind(null, s.id)} />
-                    </div>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        )}
-      </Card>
-    </div>
-  );
+// Serviços moved onto the Consultoria page as one of its four tabs, instead
+// of its own sidebar entry — this keeps the old URL (any bookmark, external
+// link) working by landing on that tab directly.
+export default function ServicosAdminPage() {
+  redirect("/admin/consultoria?tab=servicos");
 }

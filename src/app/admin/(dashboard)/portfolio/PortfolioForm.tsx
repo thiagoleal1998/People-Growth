@@ -16,7 +16,7 @@ export function PortfolioForm({ item }: { item?: PortfolioCase }) {
   const action = upsertPortfolioCase.bind(null, item?.id ?? null);
 
   return (
-    <FormShell title={item ? "Editar case" : "Novo case"} backHref="/admin/portfolio">
+    <FormShell title={item ? "Editar case" : "Novo case"} backHref="/admin/consultoria?tab=portfolio">
       <form action={action}>
         <Field label="Título (PT)">
           <Input name="title_pt" defaultValue={item?.title_pt} required />

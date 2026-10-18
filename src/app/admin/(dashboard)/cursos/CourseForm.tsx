@@ -8,7 +8,7 @@ export function CourseForm({ item }: { item?: Course }) {
   const action = upsertCourse.bind(null, item?.id ?? null);
 
   return (
-    <FormShell title={item ? "Editar curso" : "Novo curso"} backHref="/admin/cursos">
+    <FormShell title={item ? "Editar curso" : "Novo curso"} backHref="/admin/consultoria?tab=cursos">
       <form action={action}>
         <Field label="Título (PT)">
           <Input name="title_pt" defaultValue={item?.title_pt} required />

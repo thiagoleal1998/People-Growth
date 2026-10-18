@@ -50,9 +50,9 @@ export async function upsertService(id: string | null, formData: FormData) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: isNew ? "create" : "update", entityType: "serviço", entityLabel: title_pt });
   }
 
-  revalidatePath("/admin/servicos");
+  revalidatePath("/admin/consultoria");
   revalidatePath("/[locale]/servicos", "page");
-  redirect("/admin/servicos?saved=1");
+  redirect("/admin/consultoria?tab=servicos&saved=1");
 }
 
 export async function deleteService(id: string) {
@@ -65,5 +65,5 @@ export async function deleteService(id: string) {
   if (actor) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "serviço", entityLabel: service?.title_pt });
   }
-  revalidatePath("/admin/servicos");
+  revalidatePath("/admin/consultoria");
 }

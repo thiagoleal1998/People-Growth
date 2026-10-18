@@ -10,7 +10,7 @@ export function ServiceForm({ service }: { service?: Service }) {
   const action = upsertService.bind(null, service?.id ?? null);
 
   return (
-    <FormShell title={service ? "Editar serviço" : "Novo serviço"} backHref="/admin/servicos">
+    <FormShell title={service ? "Editar serviço" : "Novo serviço"} backHref="/admin/consultoria?tab=servicos">
       <form action={action}>
         <Field label="Título (PT)">
           <Input name="title_pt" defaultValue={service?.title_pt} required />

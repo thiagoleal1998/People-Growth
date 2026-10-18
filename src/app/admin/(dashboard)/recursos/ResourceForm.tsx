@@ -17,7 +17,7 @@ export function ResourceForm({ item }: { item?: Resource }) {
   const action = upsertResource.bind(null, item?.id ?? null);
 
   return (
-    <FormShell title={item ? "Editar recurso" : "Novo recurso"} backHref="/admin/recursos">
+    <FormShell title={item ? "Editar recurso" : "Novo recurso"} backHref="/admin/consultoria?tab=recursos">
       <form action={action}>
         <Field label="Título (PT)">
           <Input name="title_pt" defaultValue={item?.title_pt} required />

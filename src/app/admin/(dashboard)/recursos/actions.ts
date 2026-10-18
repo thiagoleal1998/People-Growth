@@ -38,8 +38,8 @@ export async function upsertResource(id: string | null, formData: FormData) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: isNew ? "create" : "update", entityType: "recurso", entityLabel: title_pt });
   }
 
-  revalidatePath("/admin/recursos");
-  redirect("/admin/recursos?saved=1");
+  revalidatePath("/admin/consultoria");
+  redirect("/admin/consultoria?tab=recursos&saved=1");
 }
 
 export async function deleteResource(id: string) {
@@ -52,5 +52,5 @@ export async function deleteResource(id: string) {
   if (actor) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "recurso", entityLabel: resource?.title_pt });
   }
-  revalidatePath("/admin/recursos");
+  revalidatePath("/admin/consultoria");
 }

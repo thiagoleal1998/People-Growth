@@ -6,7 +6,7 @@ import Link from "next/link";
 // being just another row in the resources table.
 export function ResourcesSubNav({ active }: { active: "all" | "tool" }) {
   const tabs = [
-    { key: "all" as const, href: "/admin/recursos", label: "Todos os recursos" },
+    { key: "all" as const, href: "/admin/consultoria?tab=recursos", label: "Todos os recursos" },
     { key: "tool" as const, href: "/admin/diagnosticos", label: "Diagnósticos de liderança" },
   ];
 

@@ -42,8 +42,8 @@ export async function upsertCourse(id: string | null, formData: FormData) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: isNew ? "create" : "update", entityType: "curso", entityLabel: title_pt });
   }
 
-  revalidatePath("/admin/cursos");
-  redirect("/admin/cursos?saved=1");
+  revalidatePath("/admin/consultoria");
+  redirect("/admin/consultoria?tab=cursos&saved=1");
 }
 
 export async function deleteCourse(id: string) {
@@ -56,5 +56,5 @@ export async function deleteCourse(id: string) {
   if (actor) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "curso", entityLabel: course?.title_pt });
   }
-  revalidatePath("/admin/cursos");
+  revalidatePath("/admin/consultoria");
 }

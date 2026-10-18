@@ -49,8 +49,8 @@ export async function upsertPortfolioCase(id: string | null, formData: FormData)
     await logActivity({ userId: actor.id, userEmail: actor.email, action: isNew ? "create" : "update", entityType: "case de portfólio", entityLabel: title_pt });
   }
 
-  revalidatePath("/admin/portfolio");
-  redirect("/admin/portfolio?saved=1");
+  revalidatePath("/admin/consultoria");
+  redirect("/admin/consultoria?tab=portfolio&saved=1");
 }
 
 export async function deletePortfolioCase(id: string) {
@@ -63,5 +63,5 @@ export async function deletePortfolioCase(id: string) {
   if (actor) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "case de portfólio", entityLabel: item?.title_pt });
   }
-  revalidatePath("/admin/portfolio");
+  revalidatePath("/admin/consultoria");
 }
