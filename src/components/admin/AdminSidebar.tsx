@@ -25,7 +25,6 @@ import {
   UserCircle,
   Search,
   KeyRound,
-  MessageCircle,
   ScrollText,
   Eye,
   Megaphone,
@@ -49,9 +48,8 @@ function isGroup(item: NavItem): item is NavGroup {
 const links: NavItem[] = [
   { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
   { href: "/admin/relatorios", label: "Relatórios", icon: BarChart3 },
-  { href: "/admin/artigos", label: "Artigos", icon: FileText },
+  { href: "/admin/artigos", label: "Artigos", icon: FileText, countKey: "comentarios", activeMatch: ["/admin/comentarios"] },
   { href: "/admin/calendario", label: "Calendário de Divulgação", icon: Calendar },
-  { href: "/admin/comentarios", label: "Comentários", icon: MessageCircle, countKey: "comentarios" },
   { href: "/admin/autores", label: "Autores", icon: UserCircle },
   { href: "/admin/portfolio", label: "Portfólio", icon: Briefcase },
   { href: "/admin/servicos", label: "Serviços", icon: Wrench },

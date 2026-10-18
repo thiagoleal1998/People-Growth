@@ -18,7 +18,7 @@ export async function updateCommentStatus(id: string, status: Comment["status"],
     const label = status === "rejected" && rejection_reason ? `${comment?.name} → rejeitado: ${rejection_reason}` : `${comment?.name} → ${status}`;
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "update", entityType: "comentário", entityLabel: label });
   }
-  revalidatePath("/admin/comentarios");
+  revalidatePath("/admin/artigos");
   revalidatePath("/[locale]/conteudo/[slug]", "page");
 }
 
@@ -32,6 +32,6 @@ export async function deleteComment(id: string) {
   if (actor) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "comentário", entityLabel: comment?.name });
   }
-  revalidatePath("/admin/comentarios");
+  revalidatePath("/admin/artigos");
   revalidatePath("/[locale]/conteudo/[slug]", "page");
 }
