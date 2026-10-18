@@ -42,6 +42,26 @@ const ACTIVITY_ACTION_LABELS: Record<string, { label: string; color: string }> =
   logout: { label: "Saiu", color: "var(--admin-faint)" },
 };
 
+// "há 3 dias", "há 2 horas" — no date library in this codebase, and the
+// granularity needed here (minute/hour/day/month) doesn't warrant adding
+// one. "agora mesmo" covers the admin's own current page load, since
+// last_seen_at is touched on every (dashboard)/layout.tsx render.
+function formatRelativeTime(iso: string | null): string {
+  if (!iso) return "nunca";
+  const diffMs = Date.now() - new Date(iso).getTime();
+  const minutes = Math.floor(diffMs / 60000);
+  if (minutes < 1) return "agora mesmo";
+  if (minutes < 60) return `há ${minutes} minuto${minutes === 1 ? "" : "s"}`;
+  const hours = Math.floor(minutes / 60);
+  if (hours < 24) return `há ${hours} hora${hours === 1 ? "" : "s"}`;
+  const days = Math.floor(hours / 24);
+  if (days < 30) return `há ${days} dia${days === 1 ? "" : "s"}`;
+  const months = Math.floor(days / 30);
+  if (months < 12) return `há ${months} ${months === 1 ? "mês" : "meses"}`;
+  const years = Math.floor(months / 12);
+  return `há ${years} ano${years === 1 ? "" : "s"}`;
+}
+
 function renderWordDiff(before: string, after: string) {
   return diffWords(before, after).map((part, i) => {
     if (part.added) {
@@ -340,6 +360,7 @@ export default async function RelatoriosPage({
   let activityLogs: ActivityLog[] = [];
   let activityUsers: { email: string; name: string }[] = [];
   let activityNameByEmail = new Map<string, string>();
+  let lastAccessRows: { email: string; name: string; role: "admin" | "author"; lastSeenAt: string | null }[] = [];
   if (tab === "atividade") {
     let activityQuery = client.from("activity_log").select("*").order("created_at", { ascending: false }).limit(150);
     if (since) activityQuery = activityQuery.gte("created_at", since);
@@ -355,11 +376,11 @@ export default async function RelatoriosPage({
 
     const [{ data: activityData }, { data: allUsersData }] = await Promise.all([
       activityQuery,
-      adminClient.from("user_profiles").select("email, author_id").order("email"),
+      adminClient.from("user_profiles").select("email, author_id, role, last_seen_at").order("email"),
     ]);
     activityLogs = (activityData ?? []) as ActivityLog[];
 
-    const profiles = (allUsersData ?? []) as { email: string; author_id: string | null }[];
+    const profiles = (allUsersData ?? []) as { email: string; author_id: string | null; role: "admin" | "author"; last_seen_at: string | null }[];
     const authorIds = profiles.map((p) => p.author_id).filter((id): id is string => Boolean(id));
     let authorNamesById = new Map<string, string>();
     if (authorIds.length > 0) {
@@ -372,6 +393,22 @@ export default async function RelatoriosPage({
       name: (p.author_id && authorNamesById.get(p.author_id)) || p.email,
     }));
     activityNameByEmail = new Map(activityUsers.map((u) => [u.email, u.name]));
+
+    // Most recently active first — surfaces who's gone quiet without
+    // having to scan a sorted-by-email list.
+    lastAccessRows = profiles
+      .map((p) => ({
+        email: p.email,
+        name: (p.author_id && authorNamesById.get(p.author_id)) || p.email,
+        role: p.role,
+        lastSeenAt: p.last_seen_at,
+      }))
+      .sort((a, b) => {
+        if (!a.lastSeenAt && !b.lastSeenAt) return 0;
+        if (!a.lastSeenAt) return 1;
+        if (!b.lastSeenAt) return -1;
+        return new Date(b.lastSeenAt).getTime() - new Date(a.lastSeenAt).getTime();
+      });
   }
 
   let chamadosStats: {
@@ -716,6 +753,46 @@ export default async function RelatoriosPage({
                 Filtrar
               </button>
             </form>
+          </div>
+
+          <div style={{ marginBottom: "1.25rem" }}>
+          <Card>
+            <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--admin-border-strong)" }}>
+              <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)" }}>Último acesso</h2>
+              <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.25rem" }}>Quando cada pessoa usou o painel pela última vez.</p>
+            </div>
+            {lastAccessRows.length === 0 ? (
+              <EmptyState text="Nenhum usuário cadastrado." />
+            ) : (
+              <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
+                    {["Usuário", "Papel", "Último acesso", "Há quanto tempo"].map((h) => (
+                      <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {lastAccessRows.map((u) => (
+                    <tr key={u.email} style={{ borderTop: "1px solid var(--admin-border)" }}>
+                      <td style={{ padding: "0.75rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.8125rem" }}>{u.name}</td>
+                      <td style={{ padding: "0.75rem 1.25rem" }}>
+                        <span style={{ fontSize: "0.75rem", fontWeight: 700, color: u.role === "admin" ? "#315E9C" : "#A07B3B", backgroundColor: u.role === "admin" ? "rgba(49, 94, 156,0.1)" : "rgba(200, 154, 74,0.1)", padding: "0.1875rem 0.5rem", borderRadius: "0.375rem" }}>
+                          {u.role === "admin" ? "Admin" : "Autor"}
+                        </span>
+                      </td>
+                      <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>
+                        {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
+                      </td>
+                      <td style={{ padding: "0.75rem 1.25rem", color: u.lastSeenAt ? "var(--admin-faint)" : "#dc2626", fontSize: "0.8125rem", fontWeight: u.lastSeenAt ? 400 : 700 }}>
+                        {formatRelativeTime(u.lastSeenAt)}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </Card>
           </div>
 
           <Card>
