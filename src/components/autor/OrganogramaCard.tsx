@@ -1,5 +1,4 @@
 import { Network } from "lucide-react";
-import { joinAuthorNames } from "@/lib/founder-data";
 import type { Author } from "@/types/database.types";
 
 const cardStyle = { backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", borderTop: "3px solid #315E9C", overflow: "hidden" } as const;
@@ -142,8 +141,10 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
             {otherAuthors.length > 0 && (
               <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
                 <div style={{ fontSize: "0.8125rem", fontWeight: 800, color: "var(--admin-text)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Autores</div>
-                <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.25rem" }}>
-                  {joinAuthorNames(otherAuthors.map((a) => a.name), "pt")}
+                <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                  {otherAuthors.map((a) => (
+                    <NameChip key={a.id} author={a} />
+                  ))}
                 </div>
               </div>
             )}
