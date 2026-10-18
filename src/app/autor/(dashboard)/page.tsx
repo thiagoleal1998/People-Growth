@@ -33,6 +33,22 @@ export default async function AutorHomePage() {
   const ownArticles = (ownArticlesData ?? []) as Article[];
   const announcements = (announcementsData ?? []) as Announcement[];
   const news = (newsData ?? []) as Article[];
+
+  // Marking as read happens on the dedicated /autor/comunicados page (see
+  // that page's own query) — this is read-only, just to know which of the
+  // 3 shown here are new so the card can stand out instead of blending in
+  // with "Nossas redes" next to it.
+  let unreadIds = new Set<string>();
+  if (profile?.id && announcements.length > 0) {
+    const { data: readRows } = await client
+      .from("announcement_reads")
+      .select("announcement_id")
+      .eq("user_id", profile.id)
+      .in("announcement_id", announcements.map((a) => a.id));
+    const readIds = new Set(((readRows ?? []) as { announcement_id: string }[]).map((r) => r.announcement_id));
+    unreadIds = new Set(announcements.filter((a) => !readIds.has(a.id)).map((a) => a.id));
+  }
+  const hasUnreadAnnouncements = unreadIds.size > 0;
   const authorNameById = new Map(((authorsData ?? []) as Pick<Author, "id" | "name">[]).map((a) => [a.id, a.name]));
   const categorySlugById = new Map(((categoriesData ?? []) as Pick<Category, "id" | "slug">[]).map((c) => [c.id, c.slug]));
   const ownName = profile?.author_id ? authorNameById.get(profile.author_id) : undefined;
@@ -104,11 +120,34 @@ export default async function AutorHomePage() {
       )}
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.5rem" }} className="autor-home-grid">
-        {/* Comunicados */}
-        <div style={cardStyle}>
-          <div style={cardHeaderStyle}>
+        {/* Comunicados — a thicker gold border, tinted header and a count
+            pill set it apart from the other cards while anything here is
+            unread; it quietly reverts to the plain look once everything's
+            been seen (on /autor/comunicados) with nothing left to flag. */}
+        <div
+          style={
+            hasUnreadAnnouncements
+              ? { ...cardStyle, borderTop: "3px solid #C89A4A", boxShadow: "0 8px 24px -14px rgba(200, 154, 74, 0.6)" }
+              : cardStyle
+          }
+        >
+          <div style={hasUnreadAnnouncements ? { ...cardHeaderStyle, backgroundColor: "rgba(200, 154, 74, 0.08)" } : cardHeaderStyle}>
             <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
-              <Megaphone size={17} color="#315E9C" /> Comunicados
+              <Megaphone size={17} color={hasUnreadAnnouncements ? "#C89A4A" : "#315E9C"} /> Comunicados
+              {hasUnreadAnnouncements && (
+                <span
+                  style={{
+                    fontSize: "0.6875rem",
+                    fontWeight: 800,
+                    color: "white",
+                    backgroundColor: "#C89A4A",
+                    padding: "0.125rem 0.5rem",
+                    borderRadius: "9999px",
+                  }}
+                >
+                  {unreadIds.size} {unreadIds.size === 1 ? "novo" : "novos"}
+                </span>
+              )}
             </h2>
             <Link href="/autor/comunicados" style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Ver todos →</Link>
           </div>
@@ -116,13 +155,28 @@ export default async function AutorHomePage() {
             <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum comunicado por enquanto.</div>
           ) : (
             <div>
-              {announcements.map((item) => (
-                <div key={item.id} style={{ padding: "1rem 1.5rem", borderTop: "1px solid var(--admin-border)" }}>
-                  <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--admin-text)" }}>{item.title}</div>
-                  <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.25rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.body}</div>
-                  <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.375rem" }}>{formatDate(item.created_at)}</div>
-                </div>
-              ))}
+              {announcements.map((item) => {
+                const isUnread = unreadIds.has(item.id);
+                return (
+                  <div
+                    key={item.id}
+                    style={{
+                      padding: "1rem 1.5rem",
+                      borderTop: "1px solid var(--admin-border)",
+                      backgroundColor: isUnread ? "rgba(200, 154, 74, 0.06)" : undefined,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--admin-text)" }}>{item.title}</div>
+                      {isUnread && (
+                        <span style={{ width: "0.5rem", height: "0.5rem", borderRadius: "9999px", backgroundColor: "#C89A4A", flexShrink: 0 }} />
+                      )}
+                    </div>
+                    <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.25rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.body}</div>
+                    <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.375rem" }}>{formatDate(item.created_at)}</div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
