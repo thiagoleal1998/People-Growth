@@ -32,9 +32,9 @@ export function ColumnistCarousel({ cards }: { cards: ColumnistCard[] }) {
           <div
             className="columnist-photo"
             style={{
-              width: "3.5rem",
-              height: "3.5rem",
-              borderRadius: "0.375rem",
+              width: "4.5rem",
+              height: "4.5rem",
+              borderRadius: "0.5rem",
               flexShrink: 0,
               background: author.photoUrl ? `url("${author.photoUrl}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
             }}
@@ -46,10 +46,6 @@ export function ColumnistCarousel({ cards }: { cards: ColumnistCard[] }) {
                 color: "var(--site-text-secondary)",
                 fontSize: "0.75rem",
                 lineHeight: 1.35,
-                display: "-webkit-box",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
-                overflow: "hidden",
               }}
             >
               {author.blurb}
