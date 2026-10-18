@@ -55,6 +55,8 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
   }
 
   revalidatePath("/admin/usuarios");
+  revalidatePath("/admin/empresa");
+  revalidatePath("/autor/empresa");
   revalidatePath("/[locale]/conteudo", "page");
   revalidatePath("/[locale]/sobre", "page");
   revalidatePath("/[locale]/sobre/[slug]", "page");
@@ -77,4 +79,6 @@ export async function deleteAuthor(id: string) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "autor", entityLabel: author?.name });
   }
   revalidatePath("/admin/usuarios");
+  revalidatePath("/admin/empresa");
+  revalidatePath("/autor/empresa");
 }
