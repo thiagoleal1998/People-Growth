@@ -37,6 +37,27 @@ function NameChip({ author }: { author: Author }) {
   );
 }
 
+// Authors get a much bigger photo than the small sócios chip above — on
+// request, so the editorial team's faces actually stand out.
+function AuthorChip({ author }: { author: Author }) {
+  return (
+    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", width: "6rem" }}>
+      <div
+        style={{
+          width: "4.5rem",
+          height: "4.5rem",
+          borderRadius: "50%",
+          flexShrink: 0,
+          background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+          border: "2px solid var(--admin-surface)",
+          boxShadow: "0 0 0 1px var(--admin-border-strong)",
+        }}
+      />
+      <span style={{ textAlign: "center", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-text)", lineHeight: 1.25 }}>{author.name}</span>
+    </div>
+  );
+}
+
 function FounderBox({ author }: { author: Author }) {
   const role = shortRole(author.role_pt);
   return (
@@ -141,9 +162,9 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
             {otherAuthors.length > 0 && (
               <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
                 <div style={{ fontSize: "0.8125rem", fontWeight: 800, color: "var(--admin-text)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Autores</div>
-                <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                <div style={{ display: "flex", justifyContent: "center", gap: "1.5rem", flexWrap: "wrap", marginTop: "1rem" }}>
                   {otherAuthors.map((a) => (
-                    <NameChip key={a.id} author={a} />
+                    <AuthorChip key={a.id} author={a} />
                   ))}
                 </div>
               </div>
