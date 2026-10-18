@@ -16,6 +16,7 @@ type Props = {
   videoEmbedUrl: string | null;
   sources?: ArticleSource[] | null;
   aiDisclosure?: { title: string; text: string } | null;
+  locale?: string;
 };
 
 export function ArticleBody({
@@ -29,6 +30,7 @@ export function ArticleBody({
   videoEmbedUrl,
   sources,
   aiDisclosure,
+  locale,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
   const bodyRef = useRef<HTMLDivElement>(null);
@@ -90,7 +92,7 @@ export function ArticleBody({
             <ChevronDown size={16} style={{ transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
           </button>
         )}
-        <TextToSpeechButton text={speechText} title={title} fill={!summary} />
+        <TextToSpeechButton text={speechText} title={title} locale={locale} fill={!summary} />
       </div>
 
       {videoEmbedUrl && (

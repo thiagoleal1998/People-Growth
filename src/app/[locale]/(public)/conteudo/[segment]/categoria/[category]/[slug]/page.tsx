@@ -364,6 +364,7 @@ export default async function ArticlePage({
               videoEmbedUrl={article.video_url ? toYouTubeEmbedUrl(article.video_url) : null}
               sources={article.sources}
               aiDisclosure={aiDisclosure}
+              locale={locale}
             />
 
             <ShareButtons title={pickLocale(locale, article.title_pt, article.title_en)} />
