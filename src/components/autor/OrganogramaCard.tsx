@@ -21,6 +21,23 @@ function shortRole(roleText: string | null | undefined): string | null {
   return null;
 }
 
+function NameChip({ author }: { author: Author }) {
+  return (
+    <div style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
+      <div
+        style={{
+          width: "1.25rem",
+          height: "1.25rem",
+          borderRadius: "50%",
+          flexShrink: 0,
+          background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+        }}
+      />
+      <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--admin-muted)" }}>{author.name}</span>
+    </div>
+  );
+}
+
 function FounderBox({ author }: { author: Author }) {
   const role = shortRole(author.role_pt);
   return (
@@ -84,8 +101,10 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
           <div style={{ backgroundColor: "rgba(49, 94, 156, 0.05)", border: "1px solid rgba(49, 94, 156, 0.15)", borderRadius: "0.875rem", padding: "1.75rem 1.25rem" }}>
             <div style={{ textAlign: "center", marginBottom: "1.75rem" }}>
               <div style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)" }}>Conselho Administrativo</div>
-              <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.125rem" }}>
-                {joinAuthorNames(founders.map((a) => a.name), "pt")}
+              <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                {founders.map((a) => (
+                  <NameChip key={a.id} author={a} />
+                ))}
               </div>
             </div>
 
