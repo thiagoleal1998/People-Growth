@@ -744,10 +744,10 @@ export default async function HomePage() {
                 display: flex;
                 overflow-x: auto;
                 scroll-snap-type: x mandatory;
-                scroll-padding-left: 1rem;
+                scroll-padding-left: 1.5rem;
                 gap: 1.5rem;
                 margin: 0 -1rem;
-                padding: 0 1rem 0.5rem;
+                padding: 0 1.5rem 0.5rem;
                 scrollbar-width: none;
               }
               .columnist-grid::-webkit-scrollbar { display: none; }
