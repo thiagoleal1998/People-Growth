@@ -127,11 +127,15 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
         )}
 
         {(founders.length > 0 || otherAuthors.length > 0) && (
-          <div style={{ backgroundColor: "rgba(200, 154, 74, 0.06)", border: "1px solid rgba(200, 154, 74, 0.2)", borderRadius: "0.875rem", padding: "1.75rem 1.25rem" }}>
-            <div style={{ textAlign: "center" }}>
-              <div style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)" }}>Conselho Editorial</div>
-              <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.125rem" }}>
-                {joinAuthorNames(founders.map((a) => a.name), "pt")}
+          <div>
+            <div style={{ backgroundColor: "rgba(200, 154, 74, 0.06)", border: "1px solid rgba(200, 154, 74, 0.2)", borderRadius: "0.875rem", padding: "1.25rem" }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)" }}>Conselho Editorial</div>
+                <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
+                  {founders.map((a) => (
+                    <NameChip key={a.id} author={a} />
+                  ))}
+                </div>
               </div>
             </div>
 
