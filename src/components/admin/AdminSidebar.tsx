@@ -19,7 +19,6 @@ import {
   MessageSquare,
   LogOut,
   Menu,
-  UserCircle,
   Search,
   KeyRound,
   ScrollText,
@@ -47,7 +46,6 @@ const links: NavItem[] = [
   { href: "/admin/relatorios", label: "Relatórios", icon: BarChart3 },
   { href: "/admin/artigos", label: "Artigos", icon: FileText, countKey: "comentarios", activeMatch: ["/admin/comentarios"] },
   { href: "/admin/calendario", label: "Calendário de Divulgação", icon: Calendar },
-  { href: "/admin/autores", label: "Autores", icon: UserCircle },
   {
     href: "/admin/consultoria",
     label: "Consultoria",
@@ -69,7 +67,7 @@ const links: NavItem[] = [
   { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
   { href: "/admin/midia", label: "Na Mídia", icon: Monitor },
   { href: "/admin/seo", label: "SEO, GEO & AEO", icon: Search },
-  { href: "/admin/usuarios", label: "Usuários", icon: KeyRound, countKey: "resetRequests" },
+  { href: "/admin/usuarios", label: "Usuários", icon: KeyRound, countKey: "resetRequests", activeMatch: ["/admin/autores"] },
   { href: "/admin/paginas", label: "Páginas Institucionais", icon: ScrollText },
   { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
 ];

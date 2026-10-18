@@ -67,7 +67,7 @@ export function AuthorForm({ item, imageError }: { item?: Author; imageError?: s
   return (
     <div style={{ maxWidth: "900px" }}>
       <div style={{ marginBottom: "1.5rem" }}>
-        <Link href="/admin/autores" style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>
+        <Link href="/admin/usuarios?tab=autores" style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>
           &larr; Voltar
         </Link>
         <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--admin-text)", marginTop: "0.5rem" }}>

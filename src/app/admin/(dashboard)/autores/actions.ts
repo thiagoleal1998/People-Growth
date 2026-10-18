@@ -54,7 +54,7 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: isNew ? "create" : "update", entityType: "autor", entityLabel: name });
   }
 
-  revalidatePath("/admin/autores");
+  revalidatePath("/admin/usuarios");
   revalidatePath("/[locale]/conteudo", "page");
   revalidatePath("/[locale]/sobre", "page");
   revalidatePath("/[locale]/sobre/[slug]", "page");
@@ -63,7 +63,7 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
   if (photoError && articleId) {
     redirect(`/admin/autores/${articleId}?imageError=${encodeURIComponent(photoError)}`);
   }
-  redirect("/admin/autores?saved=1");
+  redirect("/admin/usuarios?tab=autores&saved=1");
 }
 
 export async function deleteAuthor(id: string) {
@@ -76,5 +76,5 @@ export async function deleteAuthor(id: string) {
   if (actor) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "autor", entityLabel: author?.name });
   }
-  revalidatePath("/admin/autores");
+  revalidatePath("/admin/usuarios");
 }
