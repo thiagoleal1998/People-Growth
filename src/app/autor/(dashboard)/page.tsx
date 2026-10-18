@@ -6,7 +6,6 @@ import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import { articlePath } from "@/lib/article-url";
-import { OrganogramaCard } from "@/components/autor/OrganogramaCard";
 import type { Announcement, Article, Author, Category } from "@/types/database.types";
 
 function formatDate(iso: string) {
@@ -26,7 +25,7 @@ export default async function AutorHomePage() {
     profile?.author_id ? client.from("articles").select("*").eq("author_id", profile.author_id) : Promise.resolve({ data: [] }),
     client.from("announcements").select("*").order("created_at", { ascending: false }).limit(3),
     client.from("articles").select("*").eq("status", "published").order("published_at", { ascending: false }).limit(6),
-    client.from("authors").select("*").order("order"),
+    client.from("authors").select("id, name"),
     client.from("categories").select("id, slug"),
     client.from("site_config").select("*"),
   ]);
@@ -50,8 +49,7 @@ export default async function AutorHomePage() {
     unreadIds = new Set(announcements.filter((a) => !readIds.has(a.id)).map((a) => a.id));
   }
   const hasUnreadAnnouncements = unreadIds.size > 0;
-  const authors = (authorsData ?? []) as Author[];
-  const authorNameById = new Map(authors.map((a) => [a.id, a.name]));
+  const authorNameById = new Map(((authorsData ?? []) as Pick<Author, "id" | "name">[]).map((a) => [a.id, a.name]));
   const categorySlugById = new Map(((categoriesData ?? []) as Pick<Category, "id" | "slug">[]).map((c) => [c.id, c.slug]));
   const ownName = profile?.author_id ? authorNameById.get(profile.author_id) : undefined;
   const config = Object.fromEntries(((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""]));
@@ -221,8 +219,6 @@ export default async function AutorHomePage() {
           )}
         </div>
       </div>
-
-      <OrganogramaCard authors={authors} />
 
       {/* Últimos vídeos */}
       <div style={{ ...cardStyle, marginBottom: "1.5rem" }}>

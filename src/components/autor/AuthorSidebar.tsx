@@ -6,7 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { APP_VERSION } from "@/lib/version";
 import { NotificationBell } from "@/components/NotificationBell";
-import { Home, FileText, MessageCircle, Megaphone, UserCircle, Monitor, LogOut, LifeBuoy } from "lucide-react";
+import { Home, FileText, MessageCircle, Megaphone, UserCircle, Monitor, LogOut, LifeBuoy, Building2 } from "lucide-react";
 
 const links = [
   { href: "/autor", label: "Início", icon: Home },
@@ -14,6 +14,7 @@ const links = [
   { href: "/autor/comentarios", label: "Comentários", icon: MessageCircle },
   { href: "/autor/comunicados", label: "Comunicados", icon: Megaphone },
   { href: "/autor/chamados", label: "Chamados", icon: LifeBuoy },
+  { href: "/autor/empresa", label: "A empresa", icon: Building2 },
   { href: "/autor/perfil", label: "Meu perfil", icon: UserCircle },
 ];
 
