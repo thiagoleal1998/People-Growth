@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { List, ChevronDown } from "lucide-react";
+import { List, ChevronDown, X } from "lucide-react";
 import { TextToSpeechButton } from "./TextToSpeechButton";
 import type { ArticleSource } from "@/types/database.types";
 
@@ -33,7 +33,26 @@ export function ArticleBody({
   locale,
 }: Props) {
   const [expanded, setExpanded] = useState(false);
+  const [lightboxSrc, setLightboxSrc] = useState<string | null>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
+
+  // Tapping any in-article image (markdown-lite's figures) opens it full
+  // size — a delegated listener rather than per-image handlers, since this
+  // content is raw HTML from dangerouslySetInnerHTML, not JSX. Scoped to
+  // the body container so the cover photo and other page chrome aren't
+  // affected.
+  useEffect(() => {
+    const body = bodyRef.current;
+    if (!body) return;
+    function handleClick(e: MouseEvent) {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "IMG" && target.closest("figure")) {
+        setLightboxSrc((target as HTMLImageElement).src);
+      }
+    }
+    body.addEventListener("click", handleClick);
+    return () => body.removeEventListener("click", handleClick);
+  }, [bodyHtml]);
 
   // Highlights draw in once they scroll into view. Done here (not in CSS
   // scroll-driven animations) so it works in every browser — those only
@@ -195,9 +214,60 @@ export function ArticleBody({
         <div style={{ clear: "both" }} />
       </div>
 
+      {lightboxSrc && (
+        <div
+          onClick={() => setLightboxSrc(null)}
+          style={{
+            position: "fixed",
+            inset: 0,
+            zIndex: 999,
+            backgroundColor: "rgba(0,0,0,0.92)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            padding: "2rem 1.25rem",
+            cursor: "zoom-out",
+          }}
+        >
+          <button
+            type="button"
+            onClick={() => setLightboxSrc(null)}
+            aria-label="Fechar"
+            style={{
+              position: "absolute",
+              top: "1rem",
+              right: "1rem",
+              width: "2.75rem",
+              height: "2.75rem",
+              borderRadius: "50%",
+              border: "none",
+              backgroundColor: "rgba(255,255,255,0.12)",
+              color: "white",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: "pointer",
+            }}
+          >
+            <X size={22} />
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={lightboxSrc}
+            alt=""
+            onClick={(e) => e.stopPropagation()}
+            style={{ maxWidth: "100%", maxHeight: "100%", borderRadius: "0.5rem", objectFit: "contain", cursor: "default" }}
+          />
+        </div>
+      )}
+
       <style>{`
         @media (max-width: 640px) {
           .article-cover-figure { float: none !important; width: 100% !important; margin-left: 0 !important; }
+          /* A width the author picked for a wide desktop column reads as
+             tiny on an already-narrow phone screen — full width on mobile,
+             with the lightbox above as the way to see original detail. */
+          .article-img-figure { width: 100% !important; }
         }
         /* Animates from 0 to its natural content height with no JS height
            measuring: a single-row grid with height:auto on the container

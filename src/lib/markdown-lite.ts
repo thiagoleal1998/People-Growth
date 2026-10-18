@@ -128,7 +128,10 @@ export function renderMarkdownLite(text: string, options: { anchorHeadings?: boo
       const sourceLine = source ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Fonte: ${source}</span>` : "";
       const figcaption = alt || credit || source ? `<figcaption style="margin-top:0.625rem;font-size:0.8125rem;color:var(--site-muted);text-align:center">${captionLine}${creditLine}${sourceLine}</figcaption>` : "";
       const width = widthPct ? Math.min(100, Math.max(10, Number(widthPct))) : 100;
-      return protect("FIG", `<figure style="margin:2rem auto;width:${width}%"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block" />${figcaption}</figure>`);
+      // class (not just the inline width above) so a mobile media query can
+      // force full width regardless of what the author picked for desktop —
+      // a modest percentage of an already-narrow phone column reads as tiny.
+      return protect("FIG", `<figure class="article-img-figure" style="margin:2rem auto;width:${width}%"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block;cursor:zoom-in" />${figcaption}</figure>`);
     })
     // Same balanced-parens allowance as the image url above.
     .replace(/\[([^\]]+)\]\(((?:[^\s()]|\([^()]*\))+)\)/g, (_match, linkText: string, url: string) =>
