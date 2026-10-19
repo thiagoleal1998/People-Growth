@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getClientIp, checkRateLimit, looksLikeBot } from "@/lib/rate-limit";
+import { syncNewsletterSubscriber } from "@/lib/sender-net";
 
 export async function POST(req: NextRequest) {
   try {
@@ -30,6 +31,10 @@ export async function POST(req: NextRequest) {
     );
 
     if (error) throw error;
+
+    // Best-effort — a Sender.net hiccup shouldn't fail a subscription that
+    // already succeeded in our own database.
+    await syncNewsletterSubscriber(email, typeof name === "string" ? name : null);
 
     return NextResponse.json({ success: true });
   } catch (err) {

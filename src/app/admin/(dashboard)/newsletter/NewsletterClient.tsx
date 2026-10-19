@@ -1,10 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Search, Trash2 } from "lucide-react";
+import { Search, Trash2, RefreshCw } from "lucide-react";
 import type { Database } from "@/types/database.types";
-import { confirmDialog } from "@/components/admin/dialog-store";
-import { updateSubStatus, deleteSub } from "./actions";
+import { confirmDialog, alertDialog } from "@/components/admin/dialog-store";
+import { updateSubStatus, deleteSub, syncAllToSender } from "./actions";
 
 type Sub = Database["public"]["Tables"]["newsletter_subs"]["Row"];
 
@@ -15,22 +15,60 @@ function formatDate(iso: string) {
 
 export function NewsletterClient({ subs }: { subs: Sub[] }) {
   const [search, setSearch] = useState("");
+  const [syncing, setSyncing] = useState(false);
   const [, startTransition] = useTransition();
 
   const filtered = subs.filter((s) =>
     s.email.toLowerCase().includes(search.toLowerCase()) || (s.name ?? "").toLowerCase().includes(search.toLowerCase())
   );
 
+  async function handleSyncAll() {
+    setSyncing(true);
+    try {
+      const { synced } = await syncAllToSender();
+      await alertDialog(`${synced} inscrito${synced === 1 ? "" : "s"} ativo${synced === 1 ? "" : "s"} enviado${synced === 1 ? "" : "s"} pro Sender.net.`);
+    } catch {
+      await alertDialog("Falha ao sincronizar com o Sender.net. Confira se a SENDER_API_KEY está configurada.");
+    } finally {
+      setSyncing(false);
+    }
+  }
+
   return (
     <div>
-      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", backgroundColor: "var(--admin-surface)", borderRadius: "0.75rem", padding: "0.75rem 1rem", border: "1px solid var(--admin-border-strong)", marginBottom: "1.5rem", maxWidth: "400px" }}>
-        <Search size={16} color="var(--admin-faint)" />
-        <input
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          placeholder="Buscar inscrito..."
-          style={{ border: "none", outline: "none", fontSize: "0.9rem", color: "var(--admin-text)", width: "100%", background: "none" }}
-        />
+      <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", backgroundColor: "var(--admin-surface)", borderRadius: "0.75rem", padding: "0.75rem 1rem", border: "1px solid var(--admin-border-strong)", maxWidth: "400px", flex: 1 }}>
+          <Search size={16} color="var(--admin-faint)" />
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Buscar inscrito..."
+            style={{ border: "none", outline: "none", fontSize: "0.9rem", color: "var(--admin-text)", width: "100%", background: "none" }}
+          />
+        </div>
+        <button
+          type="button"
+          onClick={handleSyncAll}
+          disabled={syncing}
+          title="Envia todos os inscritos ativos pro Sender.net — útil pra quem assinou antes dessa integração existir; dali em diante, inscrição e cancelamento já sincronizam sozinhos"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.5rem",
+            padding: "0.75rem 1.125rem",
+            borderRadius: "0.625rem",
+            border: "1px solid var(--admin-border-strong)",
+            backgroundColor: "var(--admin-surface)",
+            color: "var(--admin-text)",
+            fontSize: "0.875rem",
+            fontWeight: 700,
+            cursor: syncing ? "default" : "pointer",
+            opacity: syncing ? 0.6 : 1,
+          }}
+        >
+          <RefreshCw size={15} className={syncing ? "admin-spin" : undefined} />
+          {syncing ? "Sincronizando..." : "Sincronizar com Sender.net"}
+        </button>
       </div>
 
       <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
