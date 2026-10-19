@@ -142,9 +142,9 @@ function DailyChart({ days }: { days: { date: string; impressions: number; click
 export default async function RelatoriosPage({
   searchParams,
 }: {
-  searchParams: Promise<{ period?: string; from?: string; to?: string; ad?: string; tab?: string; user?: string }>;
+  searchParams: Promise<{ period?: string; from?: string; to?: string; ad?: string; tab?: string; user?: string; view?: string }>;
 }) {
-  const { period = "30", from, to, ad: adParam, tab = "geral", user: userFilter } = await searchParams;
+  const { period = "30", from, to, ad: adParam, tab = "geral", user: userFilter, view = "log" } = await searchParams;
 
   // Guards against a malformed ?from=/?to= crashing the page with an
   // uncaught RangeError — only a strict YYYY-MM-DD value is accepted.
@@ -683,6 +683,67 @@ export default async function RelatoriosPage({
         </>
       ) : tab === "atividade" ? (
         <>
+          <div style={{ display: "flex", gap: "0.25rem", marginBottom: "1.25rem", width: "fit-content" }}>
+            {[{ key: "log", label: "Atividade" }, { key: "acesso", label: "Último acesso" }].map((v) => (
+              <Link
+                key={v.key}
+                href={`/admin/relatorios?tab=atividade&view=${v.key}${!usingCustomRange ? `&period=${period}` : ""}${from ? `&from=${from}` : ""}${to ? `&to=${to}` : ""}${userFilter ? `&user=${encodeURIComponent(userFilter)}` : ""}`}
+                style={{
+                  padding: "0.5rem 1rem",
+                  borderRadius: "0.5rem",
+                  fontSize: "0.8125rem",
+                  fontWeight: 700,
+                  textDecoration: "none",
+                  color: view === v.key ? "white" : "var(--admin-muted)",
+                  backgroundColor: view === v.key ? "#315E9C" : "var(--admin-surface)",
+                  border: "1px solid var(--admin-border)",
+                }}
+              >
+                {v.label}
+              </Link>
+            ))}
+          </div>
+
+          {view === "acesso" ? (
+            <Card>
+              <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--admin-border-strong)" }}>
+                <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)" }}>Último acesso</h2>
+                <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.25rem" }}>Quando cada pessoa usou o painel pela última vez.</p>
+              </div>
+              {lastAccessRows.length === 0 ? (
+                <EmptyState text="Nenhum usuário cadastrado." />
+              ) : (
+                <table style={{ width: "100%", borderCollapse: "collapse" }}>
+                  <thead>
+                    <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
+                      {["Usuário", "Papel", "Último acesso", "Há quanto tempo"].map((h) => (
+                        <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lastAccessRows.map((u) => (
+                      <tr key={u.email} style={{ borderTop: "1px solid var(--admin-border)" }}>
+                        <td style={{ padding: "0.75rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.8125rem" }}>{u.name}</td>
+                        <td style={{ padding: "0.75rem 1.25rem" }}>
+                          <span style={{ fontSize: "0.75rem", fontWeight: 700, color: u.role === "admin" ? "#315E9C" : "#A07B3B", backgroundColor: u.role === "admin" ? "rgba(49, 94, 156,0.1)" : "rgba(200, 154, 74,0.1)", padding: "0.1875rem 0.5rem", borderRadius: "0.375rem" }}>
+                            {u.role === "admin" ? "Admin" : "Autor"}
+                          </span>
+                        </td>
+                        <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>
+                          {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
+                        </td>
+                        <td style={{ padding: "0.75rem 1.25rem", color: u.lastSeenAt ? "var(--admin-faint)" : "#dc2626", fontSize: "0.8125rem", fontWeight: u.lastSeenAt ? 400 : 700 }}>
+                          {formatRelativeTime(u.lastSeenAt)}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              )}
+            </Card>
+          ) : (
+            <>
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center", marginBottom: "1.25rem" }}>
             <div style={{ display: "flex", gap: "0.25rem", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "0.625rem", padding: "0.25rem" }}>
               {PERIODS.map((p) => (
@@ -755,46 +816,6 @@ export default async function RelatoriosPage({
             </form>
           </div>
 
-          <div style={{ marginBottom: "1.25rem" }}>
-          <Card>
-            <div style={{ padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--admin-border-strong)" }}>
-              <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)" }}>Último acesso</h2>
-              <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.25rem" }}>Quando cada pessoa usou o painel pela última vez.</p>
-            </div>
-            {lastAccessRows.length === 0 ? (
-              <EmptyState text="Nenhum usuário cadastrado." />
-            ) : (
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                    {["Usuário", "Papel", "Último acesso", "Há quanto tempo"].map((h) => (
-                      <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {lastAccessRows.map((u) => (
-                    <tr key={u.email} style={{ borderTop: "1px solid var(--admin-border)" }}>
-                      <td style={{ padding: "0.75rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.8125rem" }}>{u.name}</td>
-                      <td style={{ padding: "0.75rem 1.25rem" }}>
-                        <span style={{ fontSize: "0.75rem", fontWeight: 700, color: u.role === "admin" ? "#315E9C" : "#A07B3B", backgroundColor: u.role === "admin" ? "rgba(49, 94, 156,0.1)" : "rgba(200, 154, 74,0.1)", padding: "0.1875rem 0.5rem", borderRadius: "0.375rem" }}>
-                          {u.role === "admin" ? "Admin" : "Autor"}
-                        </span>
-                      </td>
-                      <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>
-                        {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
-                      </td>
-                      <td style={{ padding: "0.75rem 1.25rem", color: u.lastSeenAt ? "var(--admin-faint)" : "#dc2626", fontSize: "0.8125rem", fontWeight: u.lastSeenAt ? 400 : 700 }}>
-                        {formatRelativeTime(u.lastSeenAt)}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            )}
-          </Card>
-          </div>
-
           <Card>
             {activityLogs.length === 0 ? (
               <EmptyState text="Nenhuma atividade registrada ainda." />
@@ -859,6 +880,8 @@ export default async function RelatoriosPage({
               </table>
             )}
           </Card>
+            </>
+          )}
         </>
       ) : (
         <>
