@@ -58,12 +58,24 @@ export default async function FounderPage({
   const tNav = await getTranslations("nav");
   const milestones = parseMilestones(pickLocale(locale, author.milestones_pt, author.milestones_en));
   const paragraphs = bioParagraphs(pickLocale(locale, author.bio_pt, author.bio_en));
-  // Reached both from the founders grid on /sobre and from the columnist
-  // cards on /conteudo/colunistas (which tag their links with ?from=) — the
-  // back link should return wherever the visitor actually came from
-  // instead of always assuming /sobre.
-  const backHref = from === "colunistas" ? "/conteudo/colunistas" : "/sobre";
-  const backLabel = from === "colunistas" ? (locale === "en" ? "Columnists" : "Colunistas") : tNav("about");
+  // Reached from three places: the founders grid on /sobre, the columnist
+  // cards on /conteudo/colunistas (tagged with ?from=colunistas), and
+  // (for non-founders, who never appear on the /sobre grid at all) direct
+  // links/search results with no ?from= present. The back link picks the
+  // most useful destination for each: wherever ?from= says, else back to
+  // /sobre only for an actual founder — a non-founder's "back" default is
+  // their own articles, since /sobre was never really their home.
+  const cameFromColunistas = from === "colunistas";
+  const backHref = cameFromColunistas
+    ? "/conteudo/colunistas"
+    : !author.is_founder
+    ? { pathname: "/conteudo/autor/[slug]" as const, params: { slug: author.slug } }
+    : "/sobre";
+  const backLabel = cameFromColunistas
+    ? (locale === "en" ? "Columnists" : "Colunistas")
+    : !author.is_founder
+    ? (locale === "en" ? "Author's content" : "Conteúdos do autor")
+    : tNav("about");
 
   return (
     <>
