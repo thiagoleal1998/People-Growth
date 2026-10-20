@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { X, Lightbulb, Bug, Plus, UserCog, ArrowUpCircle, BellRing, MessageSquare } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
+import { useImageLightbox } from "@/components/ImageLightbox";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
 import { formatTicketId } from "@/lib/display-id";
 import type { InternalTicket, TicketEvent, TicketComment } from "@/types/database.types";
@@ -62,6 +63,10 @@ export function TicketModal({
   const [sending, startSending] = useTransition();
   const t = typeConfig[ticket.type];
   const TypeIcon = t.icon;
+  // One instance covers both the description and every comment below it —
+  // they're all inside the ref'd scrollable body, so a single delegated
+  // listener catches images in either.
+  const { ref: bodyRef, lightbox } = useImageLightbox<HTMLDivElement>();
 
   function pushEvent(event_type: TicketEvent["event_type"], detail: string) {
     setEvents((prev) => [
@@ -192,7 +197,7 @@ export function TicketModal({
         </div>
 
         {/* Scrollable body */}
-        <div className="admin-scroll" style={{ padding: "1.25rem 1.5rem", overflowY: "auto", flex: 1 }}>
+        <div ref={bodyRef} className="admin-scroll" style={{ padding: "1.25rem 1.5rem", overflowY: "auto", flex: 1 }}>
           <div
             style={{ backgroundColor: "var(--admin-surface-alt)", borderRadius: "0.625rem", padding: "1rem 1.125rem", fontSize: "0.875rem", lineHeight: 1.6 }}
             dangerouslySetInnerHTML={{ __html: renderMarkdownLite(ticket.description) }}
@@ -343,6 +348,7 @@ export function TicketModal({
           </div>
         </form>
       </div>
+      {lightbox}
     </div>
   );
 }
