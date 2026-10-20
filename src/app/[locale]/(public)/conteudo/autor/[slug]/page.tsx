@@ -51,10 +51,13 @@ export async function generateMetadata({
 
 export default async function AuthorPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string; locale: string }>;
+  searchParams: Promise<{ from?: string }>;
 }) {
   const { slug, locale } = await params;
+  const { from } = await searchParams;
   const result = await getAuthorData(slug);
 
   if (!result) notFound();
@@ -62,6 +65,12 @@ export default async function AuthorPage({
   const { author, articles, categories } = result;
   const categoryById = new Map(categories.map((c) => [c.id, c]));
   const tNav = await getTranslations({ locale, namespace: "nav" });
+  // Reached both from general content links (byline on an article, the home
+  // carousel) and from the columnist cards on /conteudo/colunistas (tagged
+  // with ?from=) — the back link should return wherever the visitor
+  // actually came from instead of always assuming /conteudo.
+  const backHref = from === "colunistas" ? "/conteudo/colunistas" : "/conteudo";
+  const backLabel = from === "colunistas" ? (locale === "en" ? "Columnists" : "Colunistas") : tNav("newsletter");
 
   return (
     <>
@@ -75,7 +84,7 @@ export default async function AuthorPage({
       >
         <div className="container-xl" style={{ maxWidth: "720px" }}>
           <Link
-            href="/conteudo"
+            href={backHref}
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -86,7 +95,7 @@ export default async function AuthorPage({
               fontWeight: 500,
             }}
           >
-            <ArrowLeft size={16} /> {tNav("newsletter")}
+            <ArrowLeft size={16} /> {backLabel}
           </Link>
 
           <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", flexWrap: "wrap" }}>

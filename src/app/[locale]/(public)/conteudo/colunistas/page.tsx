@@ -148,13 +148,13 @@ function AuthorCard({ author, locale, accent }: { author: Author; locale: string
       )}
       <div style={{ display: "flex", gap: "1.25rem", marginTop: (author.tagline_pt || author.bio_pt) ? 0 : "auto", paddingTop: (author.tagline_pt || author.bio_pt) ? 0 : "1rem" }}>
         <Link
-          href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
+          href={{ pathname: "/sobre/[slug]", params: { slug: author.slug }, query: { from: "colunistas" } }}
           style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: accent, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
         >
           {locale === "en" ? "About" : "Sobre"} <ArrowRight size={15} />
         </Link>
         <Link
-          href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
+          href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug }, query: { from: "colunistas" } }}
           style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--site-muted)", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
         >
           {locale === "en" ? "View articles" : "Ver artigos"} <ArrowRight size={15} />

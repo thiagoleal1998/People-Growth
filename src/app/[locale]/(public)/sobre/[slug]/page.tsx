@@ -44,10 +44,13 @@ export async function generateMetadata({
 
 export default async function FounderPage({
   params,
+  searchParams,
 }: {
   params: Promise<{ slug: string; locale: string }>;
+  searchParams: Promise<{ from?: string }>;
 }) {
   const { slug, locale } = await params;
+  const { from } = await searchParams;
   const result = await getFounder(slug);
   if (!result) notFound();
 
@@ -55,6 +58,12 @@ export default async function FounderPage({
   const tNav = await getTranslations("nav");
   const milestones = parseMilestones(pickLocale(locale, author.milestones_pt, author.milestones_en));
   const paragraphs = bioParagraphs(pickLocale(locale, author.bio_pt, author.bio_en));
+  // Reached both from the founders grid on /sobre and from the columnist
+  // cards on /conteudo/colunistas (which tag their links with ?from=) — the
+  // back link should return wherever the visitor actually came from
+  // instead of always assuming /sobre.
+  const backHref = from === "colunistas" ? "/conteudo/colunistas" : "/sobre";
+  const backLabel = from === "colunistas" ? (locale === "en" ? "Columnists" : "Colunistas") : tNav("about");
 
   return (
     <>
@@ -68,7 +77,7 @@ export default async function FounderPage({
       >
         <div className="container-xl" style={{ maxWidth: "720px" }}>
           <Link
-            href="/sobre"
+            href={backHref}
             style={{
               display: "inline-flex",
               alignItems: "center",
@@ -79,7 +88,7 @@ export default async function FounderPage({
               fontWeight: 500,
             }}
           >
-            <ArrowLeft size={16} /> {tNav("about")}
+            <ArrowLeft size={16} /> {backLabel}
           </Link>
 
           <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", flexWrap: "wrap" }}>
