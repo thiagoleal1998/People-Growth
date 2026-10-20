@@ -47,6 +47,7 @@ export async function updateOwnAuthorProfile(formData: FormData) {
     linkedin_url: String(formData.get("linkedin_url") ?? "") || null,
     instagram_url: String(formData.get("instagram_url") ?? "") || null,
     whatsapp_url: String(formData.get("whatsapp_url") ?? "") || null,
+    website_url: String(formData.get("website_url") ?? "") || null,
   };
 
   await client.from("authors").update(payload).eq("id", profile.author_id);

@@ -172,6 +172,9 @@ export function MeuPerfilForm({ author, photoError }: { author: Author | null; p
         <Field label="WhatsApp (URL)" hint="Link completo, ex: https://wa.me/5511999999999">
           <Input name="whatsapp_url" defaultValue={author?.whatsapp_url ?? ""} placeholder="https://wa.me/5511999999999" />
         </Field>
+        <Field label="Site (URL)" hint="Seu site pessoal ou portfólio, se tiver um.">
+          <Input name="website_url" defaultValue={author?.website_url ?? ""} placeholder="https://seusite.com" />
+        </Field>
         </div>
 
         <SubmitButton>Salvar alterações</SubmitButton>

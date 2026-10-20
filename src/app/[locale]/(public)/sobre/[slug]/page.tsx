@@ -1,8 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { ArrowLeft, ArrowRight, Award, Linkedin, Instagram, Mail } from "lucide-react";
+import { ArrowLeft, ArrowRight, Award, Linkedin, Instagram, Mail, Globe } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { createClient } from "@/lib/supabase/server";
 import { pickLocale } from "@/lib/locale-content";
@@ -55,27 +54,20 @@ export default async function FounderPage({
   if (!result) notFound();
 
   const { author, articleCount } = result;
-  const tNav = await getTranslations("nav");
   const milestones = parseMilestones(pickLocale(locale, author.milestones_pt, author.milestones_en));
   const paragraphs = bioParagraphs(pickLocale(locale, author.bio_pt, author.bio_en));
-  // Reached from three places: the founders grid on /sobre, the columnist
-  // cards on /conteudo/colunistas (tagged with ?from=colunistas), and
-  // (for non-founders, who never appear on the /sobre grid at all) direct
-  // links/search results with no ?from= present. The back link picks the
-  // most useful destination for each: wherever ?from= says, else back to
-  // /sobre only for an actual founder — a non-founder's "back" default is
-  // their own articles, since /sobre was never really their home.
+  // Reached from the founders grid on /sobre, the columnist cards on
+  // /conteudo/colunistas (tagged with ?from=colunistas), or a direct
+  // link/search result with no ?from= at all — in every one of those except
+  // the colunistas case, the back link goes to this person's own articles
+  // rather than the institutional /sobre page, founder or not.
   const cameFromColunistas = from === "colunistas";
   const backHref = cameFromColunistas
     ? "/conteudo/colunistas"
-    : !author.is_founder
-    ? { pathname: "/conteudo/autor/[slug]" as const, params: { slug: author.slug } }
-    : "/sobre";
+    : { pathname: "/conteudo/autor/[slug]" as const, params: { slug: author.slug } };
   const backLabel = cameFromColunistas
     ? (locale === "en" ? "Columnists" : "Colunistas")
-    : !author.is_founder
-    ? (locale === "en" ? "Author's content" : "Conteúdos do autor")
-    : tNav("about");
+    : (locale === "en" ? "Author's content" : "Conteúdos do autor");
 
   return (
     <>
@@ -141,6 +133,11 @@ export default async function FounderPage({
                 {author.whatsapp_url && (
                   <a href={author.whatsapp_url} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" style={{ color: "rgba(255,255,255,0.6)" }}>
                     <WhatsAppIcon size={19} />
+                  </a>
+                )}
+                {author.website_url && (
+                  <a href={author.website_url} target="_blank" rel="noopener noreferrer" aria-label="Site" style={{ color: "rgba(255,255,255,0.6)" }}>
+                    <Globe size={19} />
                   </a>
                 )}
                 {author.email && (

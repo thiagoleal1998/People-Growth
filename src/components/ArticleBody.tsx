@@ -97,7 +97,7 @@ export function ArticleBody({
             <ChevronDown size={16} style={{ transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
           </button>
         )}
-        <TextToSpeechButton text={speechText} title={title} locale={locale} fill={!summary} />
+        <TextToSpeechButton text={speechText} title={title} locale={locale} fill />
       </div>
 
       {videoEmbedUrl && (

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
-import { ArrowLeft, Linkedin, Instagram, Mail, ChevronRight } from "lucide-react";
+import { ArrowLeft, Linkedin, Instagram, Mail, Globe, ChevronRight } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { FormatTag } from "@/components/FormatTag";
 import { PeopleGrowthBadge } from "@/components/PeopleGrowthBadge";
@@ -143,6 +143,11 @@ export default async function AuthorPage({
                   {author.whatsapp_url && (
                     <a href={author.whatsapp_url} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" style={{ color: "rgba(255,255,255,0.6)" }}>
                       <WhatsAppIcon size={19} />
+                    </a>
+                  )}
+                  {author.website_url && (
+                    <a href={author.website_url} target="_blank" rel="noopener noreferrer" aria-label="Site" style={{ color: "rgba(255,255,255,0.6)" }}>
+                      <Globe size={19} />
                     </a>
                   )}
                   {author.email && (

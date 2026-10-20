@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { notFound, permanentRedirect } from "next/navigation";
 import { Link } from "@/i18n/navigation";
-import { ArrowLeft, Clock, Calendar, ChevronRight, Linkedin, Instagram } from "lucide-react";
+import { ArrowLeft, Clock, Calendar, ChevronRight, Linkedin, Instagram, Globe } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
@@ -344,6 +344,11 @@ export default async function ArticlePage({
                         {a.whatsapp_url && (
                           <a href={a.whatsapp_url} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" style={{ color: "var(--site-text)" }}>
                             <WhatsAppIcon size={15} />
+                          </a>
+                        )}
+                        {a.website_url && (
+                          <a href={a.website_url} target="_blank" rel="noopener noreferrer" aria-label="Site" style={{ color: "var(--site-text)" }}>
+                            <Globe size={15} />
                           </a>
                         )}
                       </div>
