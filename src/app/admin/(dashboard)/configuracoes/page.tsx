@@ -2,23 +2,36 @@ import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
 import { ConfiguracoesTabs } from "./ConfiguracoesTabs";
+import { updateSeoConfig } from "../seo/actions";
+import { ADMIN_MENU_DEFAULTS, AUTHOR_MENU_DEFAULTS, applyMenuOverrides, isMenuGroup, type MenuOverride } from "@/lib/menu-registry";
+import type { MenuEditorItem } from "./MenuEditor";
 import type { Category } from "@/types/database.types";
 
 type SiteConfigRow = { key: string; value: string | null };
 
-export default async function ConfiguracoesPage({ searchParams }: { searchParams: Promise<{ saved?: string; logoError?: string; faviconError?: string }> }) {
-  const { saved, logoError, faviconError } = await searchParams;
+export default async function ConfiguracoesPage({ searchParams }: { searchParams: Promise<{ saved?: string; logoError?: string; faviconError?: string; tab?: string }> }) {
+  const { saved, logoError, faviconError, tab } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data }, { data: categoriesData }, { data: articlesData }, { data: extraCategoriesData }] = await Promise.all([
+  const [{ data }, { data: categoriesData }, { data: articlesData }, { data: extraCategoriesData }, { data: adminMenuOverrides }, { data: authorMenuOverrides }] = await Promise.all([
     client.from("site_config").select("*") as Promise<{ data: SiteConfigRow[] | null }>,
     client.from("categories").select("*").order("name_pt"),
     client.from("articles").select("id, category_id"),
     client.from("article_categories").select("article_id, category_id"),
+    client.from("menu_items").select("id,label,sort_order").eq("panel", "admin"),
+    client.from("menu_items").select("id,label,sort_order").eq("panel", "autor"),
   ]);
   const values = Object.fromEntries((data ?? []).map((row) => [row.key, row.value ?? ""]));
   const categories = (categoriesData ?? []) as Category[];
+
+  // Flattened to top-level rows for the editor — a group (Marketing) shows
+  // as one reorderable/renamable row; its own children keep their built-in
+  // order, out of scope for this editor (see menu-registry.ts).
+  const adminMenu = applyMenuOverrides(ADMIN_MENU_DEFAULTS, (adminMenuOverrides ?? []) as MenuOverride[]);
+  const authorMenu = applyMenuOverrides(AUTHOR_MENU_DEFAULTS, (authorMenuOverrides ?? []) as MenuOverride[]);
+  const adminMenuItems: MenuEditorItem[] = adminMenu.map((item) => ({ id: item.id, label: item.label, href: isMenuGroup(item) ? undefined : item.href }));
+  const authorMenuItems: MenuEditorItem[] = authorMenu.map((item) => ({ id: item.id, label: item.label, href: item.href }));
 
   // How many articles sit under each category — shown so deleting one isn't a
   // guess, and counting both an article's primary category and any additional
@@ -43,7 +56,18 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
       <SavedToast show={saved === "1"} />
       <PageHeader title="Configurações" subtitle="Identidade visual, contato e conteúdo exibido no site público" />
 
-      <ConfiguracoesTabs values={values} categories={categories} articleCounts={articleCounts} logoError={logoError} faviconError={faviconError} />
+      <ConfiguracoesTabs
+        values={values}
+        categories={categories}
+        articleCounts={articleCounts}
+        logoError={logoError}
+        faviconError={faviconError}
+        initialTab={tab}
+        updateSeoConfigAction={updateSeoConfig}
+        siteUrl={process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br"}
+        adminMenuItems={adminMenuItems}
+        authorMenuItems={authorMenuItems}
+      />
     </div>
   );
 }

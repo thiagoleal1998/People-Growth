@@ -22,7 +22,7 @@ export async function updateSeoConfig(formData: FormData) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "update", entityType: "SEO" });
   }
 
-  revalidatePath("/admin/seo");
+  revalidatePath("/admin/configuracoes");
   revalidatePath("/[locale]", "layout");
-  redirect("/admin/seo?saved=1");
+  redirect("/admin/configuracoes?tab=seo&saved=1");
 }

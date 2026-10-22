@@ -1,17 +1,20 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { AuthorSidebar } from "@/components/autor/AuthorSidebar";
+import { AUTHOR_MENU_DEFAULTS, applyMenuOverrides, type MenuOverride } from "@/lib/menu-registry";
 
 export default async function AuthorDashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const [{ data: configData }, profile] = await Promise.all([
+  const [{ data: configData }, profile, { data: menuOverridesData }] = await Promise.all([
     client.from("site_config").select("value").eq("key", "logo_url").single(),
     getCurrentProfile(),
+    client.from("menu_items").select("id,label,sort_order").eq("panel", "autor"),
   ]);
   const logoUrl = configData?.value as string | undefined;
+  const menu = applyMenuOverrides(AUTHOR_MENU_DEFAULTS, (menuOverridesData ?? []) as MenuOverride[]);
 
   if (profile?.id) {
     const admin = await createAdminClient();
@@ -47,7 +50,7 @@ export default async function AuthorDashboardLayout({ children }: { children: Re
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      <AuthorSidebar logoUrl={logoUrl} pendingComments={pendingComments} unreadAnnouncements={unreadAnnouncements} />
+      <AuthorSidebar menu={menu} logoUrl={logoUrl} pendingComments={pendingComments} unreadAnnouncements={unreadAnnouncements} />
       <main className="admin-scroll" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%" }}>{children}</main>
     </div>
   );

@@ -3,87 +3,25 @@
 import { useState } from "react";
 import { usePathname } from "next/navigation";
 import Link from "next/link";
-import type { LucideIcon } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { APP_VERSION } from "@/lib/version";
 import { NotificationBell } from "@/components/NotificationBell";
 import { ThemeToggle } from "./ThemeToggle";
-import {
-  LayoutDashboard,
-  FileText,
-  Briefcase,
-  Settings,
-  Users,
-  Mail,
-  Monitor,
-  MessageSquare,
-  LogOut,
-  Menu,
-  Search,
-  KeyRound,
-  ScrollText,
-  Eye,
-  Megaphone,
-  BarChart3,
-  LifeBuoy,
-  Tag,
-  ChevronDown,
-  ChevronRight,
-  Calendar,
-  Building2,
-} from "lucide-react";
-
-type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests";
-type NavLink = { href: string; label: string; icon: LucideIcon; countKey?: CountKey; activeMatch?: string[] };
-type NavGroup = { label: string; icon: LucideIcon; children: NavLink[] };
-type NavItem = NavLink | NavGroup;
-
-function isGroup(item: NavItem): item is NavGroup {
-  return "children" in item;
-}
-
-const links: NavItem[] = [
-  { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/admin/relatorios", label: "Relatórios", icon: BarChart3 },
-  { href: "/admin/artigos", label: "Artigos", icon: FileText, countKey: "comentarios", activeMatch: ["/admin/comentarios"] },
-  { href: "/admin/calendario", label: "Calendário de Divulgação", icon: Calendar },
-  {
-    href: "/admin/consultoria",
-    label: "Consultoria",
-    icon: Briefcase,
-    activeMatch: ["/admin/servicos", "/admin/portfolio", "/admin/cursos", "/admin/recursos", "/admin/diagnosticos"],
-  },
-  { href: "/admin/leads", label: "Leads / CRM", icon: Users, countKey: "leads" },
-  { href: "/admin/chamados", label: "Chamados", icon: LifeBuoy, countKey: "chamados" },
-  { href: "/admin/comunicados", label: "Comunicados", icon: Megaphone },
-  {
-    label: "Marketing",
-    icon: Megaphone,
-    children: [
-      { href: "/admin/newsletter", label: "Newsletter", icon: Mail },
-      { href: "/admin/publicidade", label: "Publicidade", icon: Megaphone },
-      { href: "/admin/promocoes", label: "Promoções", icon: Tag },
-      { href: "/admin/depoimentos", label: "Depoimentos", icon: MessageSquare },
-      { href: "/admin/midia", label: "Na Mídia", icon: Monitor },
-    ],
-  },
-  { href: "/admin/seo", label: "SEO, GEO & AEO", icon: Search },
-  { href: "/admin/usuarios", label: "Usuários", icon: KeyRound, countKey: "resetRequests", activeMatch: ["/admin/autores"] },
-  { href: "/admin/empresa", label: "A empresa", icon: Building2 },
-  { href: "/admin/paginas", label: "Páginas Institucionais", icon: ScrollText },
-  { href: "/admin/configuracoes", label: "Configurações", icon: Settings },
-];
+import { LogOut, Menu, Eye, Monitor, ChevronDown, ChevronRight } from "lucide-react";
+import { isMenuGroup, type MenuEntry, type MenuLink } from "@/lib/menu-registry";
 
 function isLinkActive(pathname: string, href: string) {
   return pathname === href || (href !== "/admin" && pathname.startsWith(href));
 }
 
 export function AdminSidebar({
+  menu,
   logoUrl,
   userName,
   userPhoto,
   counts,
 }: {
+  menu: MenuEntry[];
   logoUrl?: string;
   userName?: string;
   userPhoto?: string;
@@ -96,14 +34,14 @@ export function AdminSidebar({
   // link that's active.
   const [mobileOpen, setMobileOpen] = useState(false);
   const [openGroups, setOpenGroups] = useState<Set<string>>(
-    () => new Set(links.filter(isGroup).filter((g) => g.children.some((c) => isLinkActive(pathname, c.href))).map((g) => g.label))
+    () => new Set(menu.filter(isMenuGroup).filter((g) => g.children.some((c) => isLinkActive(pathname, c.href))).map((g) => g.id))
   );
 
-  function toggleGroup(label: string) {
+  function toggleGroup(id: string) {
     setOpenGroups((prev) => {
       const next = new Set(prev);
-      if (next.has(label)) next.delete(label);
-      else next.add(label);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
       return next;
     });
   }
@@ -179,16 +117,16 @@ export function AdminSidebar({
 
       {/* Nav */}
       <nav className="admin-sidebar-scroll" style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
-        {links.map((item) => {
-          if (isGroup(item)) {
-            const { label, icon: Icon, children } = item;
-            const open = openGroups.has(label);
+        {menu.map((item) => {
+          if (isMenuGroup(item)) {
+            const { id, label, icon: Icon, children } = item;
+            const open = openGroups.has(id);
             const groupActive = children.some((c) => isLinkActive(pathname, c.href));
             return (
-              <div key={label}>
+              <div key={id}>
                 <button
                   type="button"
-                  onClick={() => toggleGroup(label)}
+                  onClick={() => toggleGroup(id)}
                   style={{
                     display: "flex",
                     alignItems: "center",
@@ -212,14 +150,14 @@ export function AdminSidebar({
                 {open && (
                   <div style={{ display: "flex", flexDirection: "column", gap: "0.25rem", marginTop: "0.25rem" }}>
                     {children.map((child) => (
-                      <NavLinkItem key={child.href} link={child} pathname={pathname} counts={counts} indent />
+                      <NavLinkItem key={child.id} link={child} pathname={pathname} counts={counts} indent />
                     ))}
                   </div>
                 )}
               </div>
             );
           }
-          return <NavLinkItem key={item.href} link={item} pathname={pathname} counts={counts} />;
+          return <NavLinkItem key={item.id} link={item} pathname={pathname} counts={counts} />;
         })}
       </nav>
 
@@ -316,7 +254,7 @@ function NavLinkItem({
   counts,
   indent,
 }: {
-  link: NavLink;
+  link: MenuLink;
   pathname: string;
   counts?: { comentarios: number; leads: number; chamados: number; resetRequests: number };
   indent?: boolean;

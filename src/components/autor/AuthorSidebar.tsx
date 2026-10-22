@@ -6,19 +6,20 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { APP_VERSION } from "@/lib/version";
 import { NotificationBell } from "@/components/NotificationBell";
-import { Home, FileText, MessageCircle, Megaphone, UserCircle, Monitor, LogOut, LifeBuoy, Building2 } from "lucide-react";
+import { Monitor, LogOut } from "lucide-react";
+import type { MenuLink } from "@/lib/menu-registry";
 
-const links = [
-  { href: "/autor", label: "Início", icon: Home },
-  { href: "/autor/artigos", label: "Meus artigos", icon: FileText },
-  { href: "/autor/comentarios", label: "Comentários", icon: MessageCircle },
-  { href: "/autor/comunicados", label: "Comunicados", icon: Megaphone },
-  { href: "/autor/chamados", label: "Chamados", icon: LifeBuoy },
-  { href: "/autor/empresa", label: "A empresa", icon: Building2 },
-  { href: "/autor/perfil", label: "Meu perfil", icon: UserCircle },
-];
-
-export function AuthorSidebar({ logoUrl, pendingComments = 0, unreadAnnouncements = 0 }: { logoUrl?: string; pendingComments?: number; unreadAnnouncements?: number }) {
+export function AuthorSidebar({
+  menu,
+  logoUrl,
+  pendingComments = 0,
+  unreadAnnouncements = 0,
+}: {
+  menu: MenuLink[];
+  logoUrl?: string;
+  pendingComments?: number;
+  unreadAnnouncements?: number;
+}) {
   const pathname = usePathname();
   const [loggingOut, setLoggingOut] = useState(false);
 
@@ -71,7 +72,7 @@ export function AuthorSidebar({ logoUrl, pendingComments = 0, unreadAnnouncement
       </div>
 
       <nav className="admin-sidebar-scroll" style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
-        {links.map(({ href, label, icon: Icon }) => {
+        {menu.map(({ href, label, icon: Icon }) => {
           const isActive = pathname === href || (href !== "/autor" && pathname.startsWith(href));
           const badge = href === "/autor/comentarios" ? pendingComments : href === "/autor/comunicados" ? unreadAnnouncements : 0;
           return (

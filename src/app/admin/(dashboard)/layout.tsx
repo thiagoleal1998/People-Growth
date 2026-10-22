@@ -1,13 +1,14 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { ADMIN_MENU_DEFAULTS, applyMenuOverrides, type MenuOverride } from "@/lib/menu-registry";
 
 export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const [{ data: configData }, profile, { count: pendingComments }, { count: newLeads }, { count: newErrors }, { count: openTickets }, { count: pendingResets }] = await Promise.all([
+  const [{ data: configData }, profile, { count: pendingComments }, { count: newLeads }, { count: newErrors }, { count: openTickets }, { count: pendingResets }, { data: menuOverridesData }] = await Promise.all([
     client.from("site_config").select("value").eq("key", "logo_url").single(),
     getCurrentProfile(),
     client.from("comments").select("id", { count: "exact", head: true }).eq("status", "pending"),
@@ -15,8 +16,10 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     client.from("error_reports").select("id", { count: "exact", head: true }).eq("status", "new"),
     client.from("internal_tickets").select("id", { count: "exact", head: true }).neq("status", "resolved"),
     client.from("password_reset_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
+    client.from("menu_items").select("id,label,sort_order").eq("panel", "admin"),
   ]);
   const logoUrl = configData?.value as string | undefined;
+  const menu = applyMenuOverrides(ADMIN_MENU_DEFAULTS, (menuOverridesData ?? []) as MenuOverride[]);
 
   if (profile?.id) {
     const admin = await createAdminClient();
@@ -37,6 +40,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
   return (
     <div className="admin-shell" style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       <AdminSidebar
+        menu={menu}
         logoUrl={logoUrl}
         userName={userName ?? profile?.email}
         userPhoto={userPhoto}

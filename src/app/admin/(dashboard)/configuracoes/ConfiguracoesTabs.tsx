@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Field, Input, Select, SubmitButton, FieldGrid } from "@/components/admin/ui";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { CategoriesManager } from "./CategoriesManager";
+import { SeoTabs } from "../seo/SeoTabs";
+import { MenuEditor, type MenuEditorItem } from "./MenuEditor";
 import { updateSiteConfig } from "./actions";
 import type { Category } from "@/types/database.types";
 
@@ -47,6 +49,8 @@ const tabs = [
   { id: "esportes", label: "Esportes" },
   { id: "categorias", label: "Categorias" },
   { id: "secoes", label: "Seções do site" },
+  { id: "seo", label: "SEO, GEO & AEO" },
+  { id: "menus", label: "Menus" },
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -59,20 +63,33 @@ export function ConfiguracoesTabs({
   articleCounts,
   logoError,
   faviconError,
+  initialTab,
+  updateSeoConfigAction,
+  siteUrl,
+  adminMenuItems,
+  authorMenuItems,
 }: {
   values: Record<string, string>;
   categories: Category[];
   articleCounts: Record<string, number>;
   logoError?: string;
   faviconError?: string;
+  initialTab?: string;
+  updateSeoConfigAction: (formData: FormData) => void;
+  siteUrl: string;
+  adminMenuItems: MenuEditorItem[];
+  authorMenuItems: MenuEditorItem[];
 }) {
-  const [active, setActive] = useState<TabId>("identidade");
+  const [active, setActive] = useState<TabId>(tabs.some((t) => t.id === initialTab) ? (initialTab as TabId) : "identidade");
 
   return (
     <div>
       {/* Categories live outside the site_config form (their own table, saved
-          immediately per row) — the tab nav sits above both so switching tabs
-          never touches either. */}
+          immediately per row), and SEO/GEO/AEO is its own form entirely (its
+          own Server Action) — the tab nav sits above all three so switching
+          tabs never touches any of them. SEO renders outside the
+          site_config <form> below rather than as another tab inside it,
+          since a <form> nested in another <form> is invalid HTML. */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.25rem", borderBottom: "1px solid var(--admin-border)", paddingBottom: "1rem" }}>
         {tabs.map((tab) => (
           <button
@@ -95,6 +112,17 @@ export function ConfiguracoesTabs({
         ))}
       </div>
 
+      {active === "seo" ? (
+        <SeoTabs values={values} action={updateSeoConfigAction} siteUrl={siteUrl} />
+      ) : active === "menus" ? (
+        <div style={panelStyle}>
+          <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginBottom: "1.5rem" }}>
+            Ordem e nomes dos links nas sidebars do admin e do autor. Os caminhos (URLs) ficam fixos — só o texto exibido e a posição mudam.
+          </p>
+          <MenuEditor panel="admin" title="Menu do admin" items={adminMenuItems} />
+          <MenuEditor panel="autor" title="Menu do autor" items={authorMenuItems} />
+        </div>
+      ) : (
       <form action={updateSiteConfig} style={{ maxWidth: "1400px" }}>
         <div style={{ display: active === "identidade" ? "block" : "none" }}>
           <div style={panelStyle}>
@@ -248,6 +276,7 @@ export function ConfiguracoesTabs({
           <SubmitButton>Salvar alterações</SubmitButton>
         </div>
       </form>
+      )}
     </div>
   );
 }
