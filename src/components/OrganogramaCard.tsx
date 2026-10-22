@@ -9,14 +9,17 @@ const cardHeaderStyle = { padding: "1.25rem 1.5rem", borderBottom: "1px solid va
 const FOUNDER_PHOTO_SIZE = "3rem";
 const FOUNDER_CHIP_PHOTO_SIZE = "2.25rem";
 
-// role_pt is a full sentence ("Fundador e CEO do Grupo Festina · ...") —
-// too long for a chart box, so this just pulls out the three-letter title
-// the founders' own role_pt already carries by convention.
-function shortRole(roleText: string | null | undefined): string | null {
-  if (!roleText) return null;
-  if (roleText.includes("CEO")) return "CEO";
-  if (roleText.includes("CCAO")) return "CCAO";
-  if (roleText.includes("CMO")) return "CMO";
+// role_pt/role_en are a full sentence each ("Fundador e CEO do Grupo
+// Festina · ...") — too long for a chart box, so this just pulls out the
+// three-letter title. Checks both languages rather than only role_pt: an
+// edit can rephrase the Portuguese text without the acronym (e.g. role_pt
+// spelling out "Diretor de Assuntos Corporativos" instead of "CCAO") while
+// role_en keeps it, so relying on a single field silently drops the badge.
+function shortRole(author: Pick<Author, "role_pt" | "role_en">): string | null {
+  const text = `${author.role_pt ?? ""} ${author.role_en ?? ""}`;
+  if (text.includes("CEO")) return "CEO";
+  if (text.includes("CCAO")) return "CCAO";
+  if (text.includes("CMO")) return "CMO";
   return null;
 }
 
@@ -61,7 +64,7 @@ function AuthorChip({ author }: { author: Author }) {
 }
 
 function FounderBox({ author }: { author: Author }) {
-  const role = shortRole(author.role_pt);
+  const role = shortRole(author);
   return (
     <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", width: "5.5rem" }}>
       <div
@@ -104,7 +107,7 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
   const founders = authors.filter((a) => a.is_founder);
   // Only meaningful for exactly 3 founders (CEO + two others) — otherwise
   // there's no clean pyramid to draw, so the card just doesn't render one.
-  const ceoFounder = founders.length === 3 ? (founders.find((a) => a.role_pt?.includes("CEO")) ?? null) : null;
+  const ceoFounder = founders.length === 3 ? (founders.find((a) => shortRole(a) === "CEO") ?? null) : null;
   const otherFounders = ceoFounder ? founders.filter((a) => a.id !== ceoFounder.id) : [];
   const otherAuthors = authors.filter((a) => !a.is_founder && a.status === "active");
 
