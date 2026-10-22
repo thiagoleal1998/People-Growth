@@ -119,7 +119,7 @@ export function AdminSidebar({
       <nav className="admin-sidebar-scroll" style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
         {menu.map((item) => {
           if (isMenuGroup(item)) {
-            const { id, label, icon: Icon, children } = item;
+            const { id, label, icon, children } = item;
             const open = openGroups.has(id);
             const groupActive = children.some((c) => isLinkActive(pathname, c.href));
             return (
@@ -143,7 +143,7 @@ export function AdminSidebar({
                     transition: "all 0.15s",
                   }}
                 >
-                  <Icon size={17} />
+                  {icon}
                   {label}
                   {open ? <ChevronDown size={15} style={{ marginLeft: "auto" }} /> : <ChevronRight size={15} style={{ marginLeft: "auto" }} />}
                 </button>
@@ -259,7 +259,7 @@ function NavLinkItem({
   counts?: { comentarios: number; leads: number; chamados: number; resetRequests: number };
   indent?: boolean;
 }) {
-  const { href, label, icon: Icon, countKey, activeMatch } = link;
+  const { href, label, icon, countKey, activeMatch } = link;
   const isActive = isLinkActive(pathname, href) || (activeMatch?.some((m) => isLinkActive(pathname, m)) ?? false);
   const count = countKey ? counts?.[countKey] ?? 0 : 0;
   return (
@@ -280,7 +280,7 @@ function NavLinkItem({
         transition: "all 0.15s",
       }}
     >
-      <Icon size={17} />
+      {icon}
       {label}
       {count > 0 && (
         <span

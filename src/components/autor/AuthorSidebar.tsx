@@ -72,7 +72,7 @@ export function AuthorSidebar({
       </div>
 
       <nav className="admin-sidebar-scroll" style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
-        {menu.map(({ href, label, icon: Icon }) => {
+        {menu.map(({ href, label, icon }) => {
           const isActive = pathname === href || (href !== "/autor" && pathname.startsWith(href));
           const badge = href === "/autor/comentarios" ? pendingComments : href === "/autor/comunicados" ? unreadAnnouncements : 0;
           return (
@@ -93,7 +93,7 @@ export function AuthorSidebar({
                 transition: "all 0.15s",
               }}
             >
-              <Icon size={17} />
+              {icon}
               {label}
               {badge > 0 && (
                 <span
