@@ -23,10 +23,11 @@ function shortRole(author: Pick<Author, "role_pt" | "role_en">): string | null {
   return null;
 }
 
-function NameChip({ author }: { author: Author }) {
+function NameChip({ author, index }: { author: Author; index: number }) {
   return (
-    <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem" }}>
+    <div className="og-item" style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", animationDelay: `${index * 60}ms` }}>
       <div
+        className="og-avatar"
         style={{
           width: FOUNDER_CHIP_PHOTO_SIZE,
           height: FOUNDER_CHIP_PHOTO_SIZE,
@@ -37,37 +38,39 @@ function NameChip({ author }: { author: Author }) {
           boxShadow: "0 0 0 1px var(--admin-border-strong)",
         }}
       />
-      <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--admin-muted)" }}>{author.name}</span>
+      <span className="og-name" style={{ fontSize: "0.8125rem", fontWeight: 600, color: "var(--admin-muted)" }}>{author.name}</span>
     </div>
   );
 }
 
 // Authors get a much bigger photo than the small sócios chip above — on
 // request, so the editorial team's faces actually stand out.
-function AuthorChip({ author }: { author: Author }) {
+function AuthorChip({ author, index }: { author: Author; index: number }) {
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", width: "6rem" }}>
+    <div className="og-item" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", width: "6rem", animationDelay: `${index * 60}ms` }}>
       <div
+        className="og-avatar"
         style={{
           width: "4.5rem",
           height: "4.5rem",
           borderRadius: "50%",
           flexShrink: 0,
-          background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+          background: `url("${author.photo_url}") center/cover`,
           border: "2px solid var(--admin-surface)",
           boxShadow: "0 0 0 1px var(--admin-border-strong)",
         }}
       />
-      <span style={{ textAlign: "center", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-text)", lineHeight: 1.25 }}>{author.name}</span>
+      <span className="og-name" style={{ textAlign: "center", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-text)", lineHeight: 1.25 }}>{author.name}</span>
     </div>
   );
 }
 
-function FounderBox({ author }: { author: Author }) {
+function FounderBox({ author, index }: { author: Author; index: number }) {
   const role = shortRole(author);
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", width: "5.5rem" }}>
+    <div className="og-item" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", width: "5.5rem", animationDelay: `${index * 60}ms` }}>
       <div
+        className="og-avatar"
         style={{
           width: FOUNDER_PHOTO_SIZE,
           height: FOUNDER_PHOTO_SIZE,
@@ -79,7 +82,7 @@ function FounderBox({ author }: { author: Author }) {
         }}
       />
       <div style={{ textAlign: "center" }}>
-        <div style={{ fontWeight: 800, fontSize: "0.75rem", color: "var(--admin-text)", lineHeight: 1.25 }}>{author.name}</div>
+        <div className="og-name" style={{ fontWeight: 800, fontSize: "0.75rem", color: "var(--admin-text)", lineHeight: 1.25 }}>{author.name}</div>
         {role && (
           <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#315E9C", letterSpacing: "0.03em", marginTop: "0.125rem" }}>{role}</div>
         )}
@@ -109,7 +112,9 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
   // there's no clean pyramid to draw, so the card just doesn't render one.
   const ceoFounder = founders.length === 3 ? (founders.find((a) => shortRole(a) === "CEO") ?? null) : null;
   const otherFounders = ceoFounder ? founders.filter((a) => a.id !== ceoFounder.id) : [];
-  const otherAuthors = authors.filter((a) => !a.is_founder && a.status === "active");
+  // Placeholder entries (no photo yet, or an empty name) don't belong in a
+  // chart whose whole point is putting a face to each person.
+  const otherAuthors = authors.filter((a) => !a.is_founder && a.status === "active" && a.photo_url && a.name?.trim());
 
   if (!ceoFounder && founders.length === 0 && otherAuthors.length === 0) return null;
 
@@ -128,8 +133,8 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)" }}>Conselho Administrativo</div>
                 <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
-                  {founders.map((a) => (
-                    <NameChip key={a.id} author={a} />
+                  {founders.map((a, i) => (
+                    <NameChip key={a.id} author={a} index={i} />
                   ))}
                 </div>
               </div>
@@ -140,11 +145,11 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
             </div>
 
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              <FounderBox author={ceoFounder} />
+              <FounderBox author={ceoFounder} index={0} />
               <Connector />
               <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center" }}>
-                {otherFounders.map((a) => (
-                  <FounderBox key={a.id} author={a} />
+                {otherFounders.map((a, i) => (
+                  <FounderBox key={a.id} author={a} index={i + 1} />
                 ))}
               </div>
             </div>
@@ -157,8 +162,8 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)" }}>Conselho Editorial</div>
                 <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
-                  {founders.map((a) => (
-                    <NameChip key={a.id} author={a} />
+                  {founders.map((a, i) => (
+                    <NameChip key={a.id} author={a} index={i} />
                   ))}
                 </div>
               </div>
@@ -168,8 +173,8 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
               <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
                 <div style={{ fontSize: "0.8125rem", fontWeight: 800, color: "var(--admin-text)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Autores</div>
                 <div style={{ display: "flex", justifyContent: "center", gap: "1.5rem", flexWrap: "wrap", marginTop: "1rem" }}>
-                  {otherAuthors.map((a) => (
-                    <AuthorChip key={a.id} author={a} />
+                  {otherAuthors.map((a, i) => (
+                    <AuthorChip key={a.id} author={a} index={i} />
                   ))}
                 </div>
               </div>
@@ -177,6 +182,29 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
           </div>
         )}
       </div>
+
+      <style>{`
+        @keyframes ogFadeIn {
+          from { opacity: 0; transform: translateY(10px) scale(0.92); }
+          to { opacity: 1; transform: none; }
+        }
+        .og-item {
+          animation: ogFadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+        }
+        .og-avatar {
+          transition: transform 0.25s ease, box-shadow 0.25s ease;
+        }
+        .og-item:hover .og-avatar {
+          transform: scale(1.1) translateY(-3px);
+          box-shadow: 0 0 0 2px #315E9C, 0 10px 22px rgba(49, 94, 156, 0.3);
+        }
+        .og-name {
+          transition: color 0.2s ease;
+        }
+        .og-item:hover .og-name {
+          color: #315E9C;
+        }
+      `}</style>
     </div>
   );
 }
