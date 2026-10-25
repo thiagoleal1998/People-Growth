@@ -4,10 +4,29 @@ import { SavedToast } from "@/components/admin/SavedToast";
 import { ConfiguracoesTabs } from "./ConfiguracoesTabs";
 import { updateSeoConfig } from "../seo/actions";
 import { ADMIN_MENU_DEFAULTS, AUTHOR_MENU_DEFAULTS, applyMenuOverrides, isMenuGroup, type MenuOverride } from "@/lib/menu-registry";
+import { formatName, getGovernorRace, getPresidentRace, raceStatus, UF_IN_RUNOFF, UF_OPTIONS, type TseRace } from "@/lib/tse";
 import type { MenuEditorItem } from "./MenuEditor";
 import type { Category } from "@/types/database.types";
+import type { ElectionStatusRow } from "./ConfiguracoesTabs";
 
 type SiteConfigRow = { key: string; value: string | null };
+
+// Read-only status for the "Eleições 2026" tab — there's nothing to configure
+// here (round detection is automatic, see lib/tse.ts), just a way to see at a
+// glance which races are currently in a 2nd round without opening the site.
+function electionRow(label: string, race: TseRace | null): ElectionStatusRow | null {
+  if (!race) return null;
+  const status = raceStatus(race, true);
+  const statusText =
+    status.kind === "elected"
+      ? `Eleito: ${status.names.map(formatName).join(" e ")}`
+      : status.kind === "runoff"
+        ? `Segundo turno: ${status.names.map(formatName).join(" x ")}`
+        : race.round === 2
+          ? "Segundo turno em apuração"
+          : "Apuração em andamento";
+  return { label, round: race.round, statusText, sectionsPct: race.sectionsPct };
+}
 
 export default async function ConfiguracoesPage({ searchParams }: { searchParams: Promise<{ saved?: string; logoError?: string; faviconError?: string; tab?: string }> }) {
   const { saved, logoError, faviconError, tab } = await searchParams;
@@ -51,6 +70,12 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
   }
   for (const [categoryId, ids] of counted) articleCounts[categoryId] = ids.size;
 
+  const [presidentRace, ...governorRaces] = await Promise.all([getPresidentRace(), ...UF_IN_RUNOFF.map((uf) => getGovernorRace(uf))]);
+  const electionsStatus: ElectionStatusRow[] = [
+    electionRow("Presidente", presidentRace),
+    ...governorRaces.map((race, i) => electionRow(`Governador — ${UF_OPTIONS.find((o) => o.code === UF_IN_RUNOFF[i])?.name ?? UF_IN_RUNOFF[i]}`, race)),
+  ].filter((row): row is ElectionStatusRow => row !== null);
+
   return (
     <div>
       <SavedToast show={saved === "1"} />
@@ -67,6 +92,7 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
         siteUrl={process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br"}
         adminMenuItems={adminMenuItems}
         authorMenuItems={authorMenuItems}
+        electionsStatus={electionsStatus}
       />
     </div>
   );

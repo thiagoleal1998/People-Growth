@@ -9,6 +9,11 @@ import { MenuEditor, type MenuEditorItem } from "./MenuEditor";
 import { updateSiteConfig } from "./actions";
 import type { Category } from "@/types/database.types";
 
+// Read-only — round detection is automatic (lib/tse.ts tries the 2nd-round
+// TSE file first and falls back to the 1st round on its own), there's
+// nothing to toggle here, just a way to see the current state at a glance.
+export type ElectionStatusRow = { label: string; round: 1 | 2; statusText: string; sectionsPct: string };
+
 const contactFields: { key: string; label: string; placeholder?: string }[] = [
   { key: "contact_email", label: "E-mail de contato" },
   { key: "whatsapp", label: "WhatsApp", placeholder: "+55 11 99999-9999" },
@@ -68,6 +73,7 @@ export function ConfiguracoesTabs({
   siteUrl,
   adminMenuItems,
   authorMenuItems,
+  electionsStatus,
 }: {
   values: Record<string, string>;
   categories: Category[];
@@ -79,6 +85,7 @@ export function ConfiguracoesTabs({
   siteUrl: string;
   adminMenuItems: MenuEditorItem[];
   authorMenuItems: MenuEditorItem[];
+  electionsStatus: ElectionStatusRow[];
 }) {
   const [active, setActive] = useState<TabId>(tabs.some((t) => t.id === initialTab) ? (initialTab as TabId) : "identidade");
 
@@ -229,6 +236,50 @@ export function ConfiguracoesTabs({
                 Sim, mostrar o bloco de eleições
               </label>
             </Field>
+
+            <div style={{ marginTop: "1.5rem", paddingTop: "1.5rem", borderTop: "1px solid var(--admin-border)" }}>
+              <div style={{ fontSize: "0.8125rem", fontWeight: 800, color: "var(--admin-text)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "0.25rem" }}>
+                Turno atual de cada corrida
+              </div>
+              <p style={{ fontSize: "0.75rem", color: "var(--admin-muted)", marginBottom: "0.875rem" }}>
+                Só leitura — o site detecta sozinho quando uma corrida vai pro 2º turno, direto nos dados do TSE. Nada aqui precisa ser ajustado manualmente.
+              </p>
+              <div style={{ border: "1px solid var(--admin-border)", borderRadius: "0.75rem", overflow: "hidden" }}>
+                {electionsStatus.map((row, i) => (
+                  <div
+                    key={row.label}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.75rem",
+                      padding: "0.625rem 0.875rem",
+                      borderTop: i > 0 ? "1px solid var(--admin-border)" : "none",
+                      backgroundColor: "var(--admin-surface)",
+                      flexWrap: "wrap",
+                    }}
+                  >
+                    <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text)", minWidth: "13rem" }}>{row.label}</span>
+                    <span
+                      style={{
+                        fontSize: "0.6875rem",
+                        fontWeight: 800,
+                        padding: "0.0625rem 0.4375rem",
+                        borderRadius: "0.25rem",
+                        backgroundColor: row.round === 2 ? "#FACC15" : "var(--admin-border-strong)",
+                        color: row.round === 2 ? "#1F2937" : "var(--admin-text-secondary)",
+                      }}
+                    >
+                      {row.round === 2 ? "2º turno" : "1º turno"}
+                    </span>
+                    <span style={{ fontSize: "0.8125rem", color: "var(--admin-text-secondary)", flex: 1, minWidth: "12rem" }}>{row.statusText}</span>
+                    <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>{row.sectionsPct}% apurado</span>
+                  </div>
+                ))}
+                {electionsStatus.length === 0 && (
+                  <div style={{ padding: "0.875rem", fontSize: "0.8125rem", color: "var(--admin-faint)" }}>Sem dados do TSE no momento.</div>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
