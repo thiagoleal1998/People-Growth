@@ -211,11 +211,26 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
 
   return (
     <section style={{ borderTop: `3px solid ${BRAND}`, paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
-      <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.625rem", textAlign: "center", fontSize: "clamp(1.375rem, 3vw, 1.75rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem", paddingBottom: "1rem", borderBottom: "1px solid var(--site-border)" }}>
+      <h2 style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.625rem", flexWrap: "wrap", textAlign: "center", fontSize: "clamp(1.375rem, 3vw, 1.75rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem", paddingBottom: "1rem", borderBottom: "1px solid var(--site-border)" }}>
         <BrazilFlag width={34} />
         <span>
           Eleições <span style={{ color: "#E8B400", fontWeight: 800 }}>/</span> 2026
         </span>
+        {president?.round === 2 && (
+          <span
+            style={{
+              fontSize: "0.75rem",
+              fontWeight: 800,
+              letterSpacing: "0.04em",
+              padding: "0.25rem 0.6875rem",
+              borderRadius: "9999px",
+              backgroundColor: "#FACC15",
+              color: "#1F2937",
+            }}
+          >
+            2º TURNO HOJE
+          </span>
+        )}
       </h2>
 
       <div className="election-grid" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.25rem", alignItems: "start" }}>

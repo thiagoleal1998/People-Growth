@@ -6,18 +6,29 @@ import { formatName, partyColor, raceStatus, type TseCandidate, type TseRace } f
 export function ElectionBanner({ president, locale }: { president: TseRace; locale: string }) {
   const status = raceStatus(president, true);
   const first = president.candidates[0];
+  const isRunoffDay = president.round === 2 && status.kind !== "elected";
   // Votes start at 0 for every candidate the moment a round opens, so "leads
-  // with 0,00%" would read as a lead that doesn't exist yet.
-  const headline =
-    status.kind === "runoff"
+  // with 0,00%" would read as a lead that doesn't exist yet. On the runoff's
+  // own day the headline leads with what's actually at stake — who wins
+  // decides the country's direction — with the race-specific status (who's
+  // ahead, or that it's still just opening) as a second line underneath,
+  // instead of competing for the same headline.
+  const headline = isRunoffDay
+    ? "Os brasileiros decidem hoje o rumo do país"
+    : status.kind === "runoff"
       ? `${status.names.map(formatName).join(" e ")} vão disputar o 2º turno`
       : status.kind === "elected"
         ? `${formatName(status.names[0])} é eleito presidente`
         : first && first.votes > 0
-          ? `${formatName(first.name)} lidera ${president.round === 2 ? "o 2º turno" : "a apuração"} com ${first.pct}%`
-          : president.round === 2
-            ? "Segundo turno em apuração"
-            : "Apuração em andamento";
+          ? `${formatName(first.name)} lidera a apuração com ${first.pct}%`
+          : "Apuração em andamento";
+  const subline = isRunoffDay
+    ? status.kind === "runoff"
+      ? `Segundo turno: ${status.names.map(formatName).join(" x ")}`
+      : first && first.votes > 0
+        ? `${formatName(first.name)} lidera o 2º turno com ${first.pct}%`
+        : "Segundo turno: apuração começando"
+    : null;
   // The two leaders: in a runoff these are the finalists.
   const faces: TseCandidate[] = president.candidates.slice(0, 2);
 
@@ -40,10 +51,28 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
       }}
     >
       <div style={{ minWidth: 0, flex: "1 1 320px" }}>
-        <div style={{ fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#FACC15", marginBottom: "0.5rem" }}>
-          Eleições 2026 · Presidente
+        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem", flexWrap: "wrap" }}>
+          <span style={{ fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#FACC15" }}>
+            Eleições 2026 · Presidente
+          </span>
+          {isRunoffDay && (
+            <span
+              style={{
+                fontSize: "0.6875rem",
+                fontWeight: 800,
+                letterSpacing: "0.04em",
+                padding: "0.125rem 0.5rem",
+                borderRadius: "9999px",
+                backgroundColor: "#FACC15",
+                color: "#1F2937",
+              }}
+            >
+              2º TURNO
+            </span>
+          )}
         </div>
         <div style={{ fontSize: "clamp(1.375rem, 3.2vw, 2rem)", fontWeight: 800, lineHeight: 1.2 }}>{headline}</div>
+        {subline && <div style={{ fontSize: "1rem", fontWeight: 700, color: "#FACC15", marginTop: "0.375rem" }}>{subline}</div>}
         <div style={{ fontSize: "0.8125rem", color: "rgba(255,255,255,0.75)", marginTop: "0.5rem" }}>
           {president.sectionsPct}% das urnas apuradas · Fonte: TSE
         </div>
