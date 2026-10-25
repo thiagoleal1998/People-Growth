@@ -91,6 +91,29 @@ function isRunoffFinalist(candidate: TseCandidate, index: number, runoff: boolea
   return !candidate.elected && (candidate.inRunoff || (runoff && index < 2));
 }
 
+// A small "1º turno" / "2º turno" pill, so a page mixing races that are
+// already final (Senado, Câmara, Assembleia never have a round 2) with ones
+// still being decided today (Presidente, Governador when in a runoff) never
+// leaves it ambiguous which is which.
+function RoundBadge({ round }: { round: 1 | 2 }) {
+  return (
+    <span
+      style={{
+        fontSize: "0.625rem",
+        fontWeight: 800,
+        letterSpacing: "0.03em",
+        padding: "0.0625rem 0.375rem",
+        borderRadius: "0.25rem",
+        whiteSpace: "nowrap",
+        backgroundColor: round === 2 ? "#FACC15" : "var(--site-border-strong)",
+        color: round === 2 ? "#1F2937" : "var(--site-text-secondary)",
+      }}
+    >
+      {round === 2 ? "2º TURNO" : "1º turno"}
+    </span>
+  );
+}
+
 function SideCard({ title, race, status, uf, cargo }: { title: string; race: TseRace | null; status: RaceStatus; uf: string; cargo: Cargo }) {
   const isDeputy = cargo === "federal" || cargo === "estadual";
   const deputies = race && isDeputy ? deputyList(race) : null;
@@ -99,7 +122,10 @@ function SideCard({ title, race, status, uf, cargo }: { title: string; race: Tse
   return (
     <div style={cardStyle}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.5rem", marginBottom: "0.75rem" }}>
-        <span style={{ fontWeight: 800, fontSize: "0.9375rem", color: "var(--site-text)" }}>{title}</span>
+        <span style={{ display: "flex", alignItems: "center", gap: "0.375rem", flexWrap: "wrap", fontWeight: 800, fontSize: "0.9375rem", color: "var(--site-text)" }}>
+          {title}
+          {race && <RoundBadge round={race.round} />}
+        </span>
         {race && (
           <span style={{ fontSize: "0.8125rem", color: "var(--site-muted)", whiteSpace: "nowrap" }}>
             {deputies ? `${shown.length} ${deputies.projected ? "projetados" : "eleitos"}` : `${race.sectionsPct}%`}
@@ -192,9 +218,10 @@ function CompactRow({ candidate }: { candidate: TseCandidate }) {
   );
 }
 
-function StatusBanner({ status }: { status: RaceStatus }) {
+function StatusBanner({ status, round }: { status: RaceStatus; round: 1 | 2 }) {
   if (status.kind === "open") {
-    return <p style={{ fontSize: "0.875rem", color: "var(--site-muted)", marginBottom: "0.75rem" }}>Apuração em andamento.</p>;
+    const text = round === 2 ? "Segundo turno em apuração." : "Apuração em andamento.";
+    return <p style={{ fontSize: "0.875rem", color: "var(--site-muted)", marginBottom: "0.75rem" }}>{text}</p>;
   }
   const text =
     status.kind === "elected"
@@ -212,12 +239,18 @@ function StatusBanner({ status }: { status: RaceStatus }) {
 function OutlookLine({ race }: { race: TseRace }) {
   if (Number(race.sectionsPct.replace(",", ".")) >= 100) return null;
   const outlook = secondRoundOutlook(race);
+  // A head-to-head runoff can only end "decided" or still "open" — "nobody
+  // can reach 50%" isn't a real outcome once there are just two candidates.
   const text =
-    outlook.kind === "decided"
-      ? `Vitória matematicamente garantida no 1º turno: ${formatName(outlook.name)}.`
-      : outlook.kind === "runoff"
-        ? "Segundo turno matematicamente garantido: ninguém mais consegue chegar a 50% dos votos válidos."
-        : "Ainda é possível decidir no 1º turno.";
+    race.round === 2
+      ? outlook.kind === "decided"
+        ? `Vitória matematicamente garantida: ${formatName(outlook.name)}.`
+        : "A apuração do 2º turno ainda está em aberto."
+      : outlook.kind === "decided"
+        ? `Vitória matematicamente garantida no 1º turno: ${formatName(outlook.name)}.`
+        : outlook.kind === "runoff"
+          ? "Segundo turno matematicamente garantido: ninguém mais consegue chegar a 50% dos votos válidos."
+          : "Ainda é possível decidir no 1º turno.";
   return (
     <p style={{ fontSize: "0.8125rem", color: "var(--site-text-secondary)", marginBottom: "0.75rem" }}>
       {text} <span style={{ color: "var(--site-faint)" }}>(cálculo pelas seções apuradas)</span>
@@ -290,7 +323,10 @@ function MainCard({ title, race, cargo, status }: { title: string; race: TseRace
   return (
     <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.75rem" }}>
-        <h2 style={{ fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)" }}>{title}</h2>
+        <h2 style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap", fontSize: "1.375rem", fontWeight: 800, color: "var(--site-text)" }}>
+          {title}
+          {race && <RoundBadge round={race.round} />}
+        </h2>
         {race && <span style={{ fontSize: "0.875rem", color: "var(--site-muted)" }}>{race.sectionsPct}% urnas apuradas</span>}
       </div>
 
@@ -304,7 +340,7 @@ function MainCard({ title, race, cargo, status }: { title: string; race: TseRace
         <DeputyBody race={race} />
       ) : (
         <>
-          <StatusBanner status={status} />
+          <StatusBanner status={status} round={race.round} />
           {MAJORITY.includes(cargo) && <OutlookLine race={race} />}
           <IrregularNote race={race} />
           {race.candidates.slice(0, 5).map((candidate, index) => (
@@ -514,6 +550,9 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
                 href={`?cargo=${option}&uf=${uf}`}
                 aria-current={option === cargo ? "page" : undefined}
                 style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.375rem",
                   padding: "0.5rem 1.125rem",
                   borderRadius: "0.5rem",
                   border: `1px solid ${option === cargo ? BRAND : "var(--site-border-strong)"}`,
@@ -524,6 +563,7 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
                 }}
               >
                 {CARGO_LABEL[option]}
+                {races[option].race?.round === 2 && <RoundBadge round={2} />}
               </a>
             ))}
           </nav>
