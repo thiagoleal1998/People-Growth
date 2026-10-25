@@ -13,6 +13,7 @@ import {
   raceStatus,
   secondRoundOutlook,
   shortName,
+  UF_IN_RUNOFF,
   type RaceStatus,
   type TseCandidate,
   type TseRace,
@@ -386,7 +387,7 @@ async function allStates(fetchState: (uf: string) => Promise<TseRace | null>): P
 
 export default async function EleicoesPage({ searchParams }: { searchParams: Promise<{ uf?: string; cargo?: string }> }) {
   const { uf: requestedUf, cargo: requestedCargo } = await searchParams;
-  const uf = UF_OPTIONS.some((option) => option.code === requestedUf) ? (requestedUf as string) : "sp";
+  const uf = UF_OPTIONS.some((option) => option.code === requestedUf) ? (requestedUf as string) : (UF_IN_RUNOFF[0] ?? "sp");
   const cargo: Cargo = CARGOS.includes(requestedCargo as Cargo) ? (requestedCargo as Cargo) : "presidente";
   const [president, governor, senate, federal, state] = await Promise.all([
     getPresidentRace(),

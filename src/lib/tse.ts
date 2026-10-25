@@ -18,6 +18,12 @@ const STATE_ELECTION = "6259";
 const STATE_ELECTION_ROUND2 = "6260";
 const CACHE_SECONDS = 60;
 
+// States whose governor race went to a 2nd round on 2026-10-25, found by
+// probing resultados.tse.jus.br (see STATE_ELECTION_ROUND2 above) — used to
+// default the home/eleicoes state picker to one of these instead of São
+// Paulo, since those are the races actually live today.
+export const UF_IN_RUNOFF = ["ac", "am", "df", "es", "rn", "to"];
+
 export const UF_OPTIONS = [
   { code: "ac", name: "Acre" }, { code: "al", name: "Alagoas" }, { code: "ap", name: "Amapá" },
   { code: "am", name: "Amazonas" }, { code: "ba", name: "Bahia" }, { code: "ce", name: "Ceará" },

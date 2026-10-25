@@ -25,7 +25,7 @@ import { AdBanner } from "@/components/AdBanner";
 import { Reveal } from "@/components/Reveal";
 import { VideoFacade } from "@/components/VideoFacade";
 import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/youtube";
-import { getGovernorRace, getPresidentRace, getSenateRace } from "@/lib/tse";
+import { getGovernorRace, getPresidentRace, getSenateRace, UF_IN_RUNOFF } from "@/lib/tse";
 import { ElectionResults } from "@/components/ElectionResults";
 import { ElectionBanner } from "@/components/ElectionBanner";
 import {
@@ -234,8 +234,12 @@ export default async function HomePage() {
   const mediaEnabled = config.media_enabled !== "false";
   const testimonialsEnabled = config.testimonials_enabled !== "false";
   const electionsEnabled = config.tse_widget_enabled !== "false";
+  // Defaults to a state that's actually in a 2nd-round governor race, when
+  // there is one, instead of São Paulo — that's the live, undecided race
+  // worth leading with; São Paulo's was already decided in round 1.
+  const electionsUf = UF_IN_RUNOFF[0] ?? "sp";
   const electionsInitial = electionsEnabled
-    ? { uf: "sp", president: await getPresidentRace(), governor: await getGovernorRace("sp"), senate: await getSenateRace("sp") }
+    ? { uf: electionsUf, president: await getPresidentRace(), governor: await getGovernorRace(electionsUf), senate: await getSenateRace(electionsUf) }
     : null;
   const sportsEnabled = config.sports_widget_enabled !== "false";
   // Standings: the full table, scraped from api-futebol.com.br's public
