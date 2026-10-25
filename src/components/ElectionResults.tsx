@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { UF_OPTIONS, formatName, partyColor, raceStatus, shortName, type RaceStatus, type TseCandidate, type TseRace } from "@/lib/tse";
+import { UF_IN_RUNOFF, UF_OPTIONS, formatName, partyColor, raceStatus, shortName, type RaceStatus, type TseCandidate, type TseRace } from "@/lib/tse";
 import { BrazilFlag } from "@/components/BrazilFlag";
 import { ElectionTag } from "@/components/ElectionTag";
 
@@ -91,9 +91,12 @@ function RaceCard({ race, stateSelect, count, runoff }: { race: TseRace | null; 
 }
 
 // A state picker styled as a pill with a list that opens below it, in place of the
-// browser's own dropdown.
-function StateDropdown({ value, onChange }: { value: string; onChange: (uf: string) => void }) {
+// browser's own dropdown. `onlyUfs`, when given, narrows the list down to just
+// those states — used for Governador, where only states with a runoff are
+// worth picking from; Senado has no runoff concept, so it always lists all 27.
+function StateDropdown({ value, onChange, onlyUfs }: { value: string; onChange: (uf: string) => void; onlyUfs?: string[] }) {
   const [open, setOpen] = useState(false);
+  const options = onlyUfs ? UF_OPTIONS.filter((option) => onlyUfs.includes(option.code)) : UF_OPTIONS;
   const current = UF_OPTIONS.find((option) => option.code === value)?.name ?? "";
   return (
     <div style={{ position: "relative", alignSelf: "flex-start" }}>
@@ -141,7 +144,7 @@ function StateDropdown({ value, onChange }: { value: string; onChange: (uf: stri
             boxShadow: "0 12px 30px rgba(0,0,0,0.18)",
           }}
         >
-          {UF_OPTIONS.map((option) => (
+          {options.map((option) => (
             <li key={option.code}>
               <button
                 type="button"
@@ -204,7 +207,7 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
   const sideRace = tab === "governor" ? governor : senate;
   const presidentRunoff = raceStatus(president, true).kind === "runoff";
   const sideRunoff = raceStatus(sideRace, tab === "governor").kind === "runoff";
-  const stateSelect = <StateDropdown value={uf} onChange={setUf} />;
+  const stateSelect = <StateDropdown value={uf} onChange={setUf} onlyUfs={tab === "governor" ? UF_IN_RUNOFF : undefined} />;
 
   return (
     <section style={{ borderTop: `3px solid ${BRAND}`, paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
