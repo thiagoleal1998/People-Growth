@@ -1,13 +1,21 @@
 // Official 2026 election results published by the TSE as public JSON files
 // (https://resultados.tse.jus.br). Ids are the ones in the TSE's own
 // configuration file: 6257 is the federal election (president), 6259 the state
-// election (governors and senators). The TSE asks for no more than 100 requests
-// per second per IP, so results are fetched on the server and cached for a minute.
-// Candidate photos come from the same TSE site.
+// election (governors and senators). The runoff on 2026-10-25 got its own ids —
+// 6258 for president, 6260 for the states that have a governor runoff — found
+// by probing resultados.tse.jus.br directly, since the TSE doesn't publish an
+// index of them. A state's round-2 file 404s if that state's governor race
+// didn't go to a runoff, which is what getStateElectionRace() below relies on
+// to fall back to round 1 automatically, state by state, with no admin toggle
+// needed. The TSE asks for no more than 100 requests per second per IP, so
+// results are fetched on the server and cached for a minute. Candidate photos
+// come from the same TSE site.
 
 const BASE = "https://resultados.tse.jus.br/oficial/ele2026";
 const FEDERAL_ELECTION = "6257";
+const FEDERAL_ELECTION_ROUND2 = "6258";
 const STATE_ELECTION = "6259";
+const STATE_ELECTION_ROUND2 = "6260";
 const CACHE_SECONDS = 60;
 
 export const UF_OPTIONS = [
@@ -59,6 +67,9 @@ export type TseRace = {
   totals: TseTotals | null;
   updatedAt: string;
   final: boolean;
+  // Which round this data actually is. Senado/deputados are always 1 — only
+  // presidente/governador can reach round 2.
+  round: 1 | 2;
 };
 
 // e is "s" for both the elected and the candidates in a runoff, so the TSE's status
@@ -168,7 +179,7 @@ function projectDeputies(carg: RawCarg): Set<string> {
   return elected;
 }
 
-function parseRace(file: RawFile, office: string, election: string, scope: string): TseRace | null {
+function parseRace(file: RawFile, office: string, election: string, scope: string, round: 1 | 2): TseRace | null {
   // The TSE writes the office code as a number in some files and text in others.
   const carg = (file.carg ?? []).find((c) => String(c.cd) === office);
   if (!carg) return null;
@@ -221,6 +232,7 @@ function parseRace(file: RawFile, office: string, election: string, scope: strin
     totals,
     updatedAt: [file.dt, file.ht].filter(Boolean).join(" "),
     final: file.tf === "s",
+    round,
   };
 }
 
@@ -234,25 +246,39 @@ async function fetchJson(url: string): Promise<RawFile | null> {
   }
 }
 
+// Tries the runoff file first; a state (or the national file) that isn't in a
+// runoff simply 404s there, so this falls back to round 1 with no flag or
+// admin toggle needed — it reflects whatever the TSE is actually publishing.
 export async function getPresidentRace(): Promise<TseRace | null> {
+  const round2 = await fetchJson(`${BASE}/${FEDERAL_ELECTION_ROUND2}/dados/br/br-c0001-e00${FEDERAL_ELECTION_ROUND2}-u.json`);
+  if (round2) return parseRace(round2, "1", FEDERAL_ELECTION_ROUND2, "br", 2);
   const file = await fetchJson(`${BASE}/${FEDERAL_ELECTION}/dados/br/br-c0001-e00${FEDERAL_ELECTION}-u.json`);
-  return file ? parseRace(file, "1", FEDERAL_ELECTION, "br") : null;
+  return file ? parseRace(file, "1", FEDERAL_ELECTION, "br", 1) : null;
 }
 
 // The presidential vote as counted in one state, for the state map.
 export async function getPresidentRaceInState(uf: string): Promise<TseRace | null> {
   if (!UF_OPTIONS.some((option) => option.code === uf)) return null;
+  const round2 = await fetchJson(`${BASE}/${FEDERAL_ELECTION_ROUND2}/dados/${uf}/${uf}-c0001-e00${FEDERAL_ELECTION_ROUND2}-u.json`);
+  if (round2) return parseRace(round2, "1", FEDERAL_ELECTION_ROUND2, uf, 2);
   const file = await fetchJson(`${BASE}/${FEDERAL_ELECTION}/dados/${uf}/${uf}-c0001-e00${FEDERAL_ELECTION}-u.json`);
-  return file ? parseRace(file, "1", FEDERAL_ELECTION, uf) : null;
+  return file ? parseRace(file, "1", FEDERAL_ELECTION, uf, 1) : null;
 }
 
 // Governor, senator and both kinds of deputy share the state-election folder;
 // the office code (cd) in the file tells them apart: 3 governor, 5 senator,
-// 6 federal deputy, 7 state deputy.
+// 6 federal deputy, 7 state deputy. Only governor (3) can go to a runoff —
+// senator/deputy never do — so round 2 is only tried for that office, and
+// only per state: most states' governor race was decided in round 1, a few
+// (AC, AM, DF, ES, RN, TO as of 2026-10-25) went to a runoff.
 async function getStateElectionRace(uf: string, office: string): Promise<TseRace | null> {
   if (!UF_OPTIONS.some((option) => option.code === uf)) return null;
+  if (office === "3") {
+    const round2 = await fetchJson(`${BASE}/${STATE_ELECTION_ROUND2}/dados/${uf}/${uf}-c${office.padStart(4, "0")}-e00${STATE_ELECTION_ROUND2}-u.json`);
+    if (round2) return parseRace(round2, office, STATE_ELECTION_ROUND2, uf, 2);
+  }
   const file = await fetchJson(`${BASE}/${STATE_ELECTION}/dados/${uf}/${uf}-c${office.padStart(4, "0")}-e00${STATE_ELECTION}-u.json`);
-  return file ? parseRace(file, office, STATE_ELECTION, uf) : null;
+  return file ? parseRace(file, office, STATE_ELECTION, uf, 1) : null;
 }
 
 export async function getGovernorRace(uf: string): Promise<TseRace | null> {

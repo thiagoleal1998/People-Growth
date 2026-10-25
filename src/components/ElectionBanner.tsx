@@ -6,14 +6,18 @@ import { formatName, partyColor, raceStatus, type TseCandidate, type TseRace } f
 export function ElectionBanner({ president, locale }: { president: TseRace; locale: string }) {
   const status = raceStatus(president, true);
   const first = president.candidates[0];
+  // Votes start at 0 for every candidate the moment a round opens, so "leads
+  // with 0,00%" would read as a lead that doesn't exist yet.
   const headline =
     status.kind === "runoff"
       ? `${status.names.map(formatName).join(" e ")} vão disputar o 2º turno`
       : status.kind === "elected"
         ? `${formatName(status.names[0])} é eleito presidente`
-        : first
-          ? `${formatName(first.name)} lidera a apuração com ${first.pct}%`
-          : "Apuração em andamento";
+        : first && first.votes > 0
+          ? `${formatName(first.name)} lidera ${president.round === 2 ? "o 2º turno" : "a apuração"} com ${first.pct}%`
+          : president.round === 2
+            ? "Segundo turno em apuração"
+            : "Apuração em andamento";
   // The two leaders: in a runoff these are the finalists.
   const faces: TseCandidate[] = president.candidates.slice(0, 2);
 

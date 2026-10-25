@@ -43,9 +43,10 @@ function CandidateItem({ candidate, runoff }: { candidate: TseCandidate; runoff:
 }
 
 // The line under each card: who won, or the runoff pairing. Nothing while the count is open.
-function StatusLine({ status }: { status: RaceStatus }) {
+function StatusLine({ status, round }: { status: RaceStatus; round: 1 | 2 }) {
   if (status.kind === "open") {
-    return <div style={{ marginTop: "0.5rem", fontSize: "0.8125rem", color: "var(--site-muted)" }}>Apuração em andamento</div>;
+    const label = round === 2 ? "Segundo turno em apuração" : "Apuração em andamento";
+    return <div style={{ marginTop: "0.5rem", fontSize: "0.8125rem", color: "var(--site-muted)" }}>{label}</div>;
   }
   const text =
     status.kind === "elected"
@@ -223,7 +224,7 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
             </a>
           </div>
           <RaceCard race={president} count={2} runoff={presidentRunoff} />
-          <StatusLine status={raceStatus(president, true)} />
+          <StatusLine status={raceStatus(president, true)} round={president?.round ?? 1} />
         </div>
 
         <div>
@@ -256,12 +257,13 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
             </a>
           </div>
           <RaceCard race={sideRace} count={2} stateSelect={stateSelect} runoff={sideRunoff} />
-          <StatusLine status={raceStatus(sideRace, tab === "governor")} />
+          <StatusLine status={raceStatus(sideRace, tab === "governor")} round={sideRace?.round ?? 1} />
         </div>
       </div>
 
       <p style={{ marginTop: "1rem", padding: "0.75rem 1rem", borderRadius: "0.625rem", backgroundColor: "var(--site-surface-alt)", fontSize: "0.8125rem", lineHeight: 1.55, color: "var(--site-text-secondary)" }}>
-        <strong style={{ color: BRAND }}>O que é o segundo turno?</strong> Se nenhum candidato passar de 50% dos votos válidos (brancos e nulos não contam), os dois mais votados disputam um segundo turno, em 25 de outubro de 2026.{" "}
+        <strong style={{ color: BRAND }}>O que é o segundo turno?</strong> Se nenhum candidato passar de 50% dos votos válidos (brancos e nulos não contam), os dois mais votados disputam um segundo turno —{" "}
+        {president?.round === 2 || sideRace?.round === 2 ? "a votação é hoje, 25 de outubro de 2026." : "em 25 de outubro de 2026."}{" "}
         <a href={`/${locale}/eleicoes?cargo=presidente`} style={{ color: BRAND, fontWeight: 700, textDecoration: "none" }}>
           Veja a apuração ›
         </a>

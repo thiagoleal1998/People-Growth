@@ -366,7 +366,10 @@ function stateMapData(rows: StateRow[]): { winners: Record<string, StateWinner>;
     const top = race?.candidates[0];
     if (!race || !top) continue;
     const second = race.candidates[1];
-    const runoff = status.kind === "runoff";
+    // status.kind only says "runoff" while round-1 data is still being shown
+    // (the TSE flags the two finalists as they're decided); once the race's
+    // own data IS the round-2 file, race.round says so directly instead.
+    const runoff = status.kind === "runoff" || race.round === 2;
     const outcome = status.kind === "elected" ? `Eleito: ${formatName(status.names[0])}` : runoff ? "2º turno" : "em apuração";
     const detail = `1º ${formatName(top.name)} (${top.party}) ${top.pct}%${second ? ` · 2º ${formatName(second.name)} (${second.party}) ${second.pct}%` : ""}`;
     const color = partyColor(top.party);
@@ -419,7 +422,7 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
         subtitle: cargo === "presidente" ? "Brasil" : stateName,
         people: race.candidates.filter((c) => c.elected).map((c) => person(c, "elected")),
       };
-    } else if (current.status.kind === "runoff") {
+    } else if (current.status.kind === "runoff" || race.round === 2) {
       const finalists = race.candidates.filter((c) => c.inRunoff);
       const pair = finalists.length >= 2 ? finalists.slice(0, 2) : race.candidates.slice(0, 2);
       popup = {
@@ -543,7 +546,9 @@ export default async function EleicoesPage({ searchParams }: { searchParams: Pro
                   <p style={{ fontSize: "0.8125rem", color: "var(--site-text-secondary)", marginBottom: "0.5rem" }}>
                     {races.presidente.status.kind === "runoff"
                       ? `Segundo turno nacional: ${races.presidente.status.names.map(formatName).join(" x ")}.`
-                      : "A apuração nacional ainda não define o segundo turno."}
+                      : races.presidente.race?.round === 2
+                        ? `Segundo turno nacional: ${races.presidente.race.candidates.slice(0, 2).map((c) => formatName(c.name)).join(" x ")}.`
+                        : "A apuração nacional ainda não define o segundo turno."}
                   </p>
                 )}
                 <p style={{ fontSize: "0.8125rem", color: "var(--site-muted)", marginBottom: "1rem" }}>Passe o cursor em cada estado para ver o 1º e o 2º colocados.</p>
