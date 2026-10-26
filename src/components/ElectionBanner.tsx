@@ -6,6 +6,12 @@ import { formatName, partyColor, raceStatus, secondRoundOutlook, type TseCandida
 const VICTORY_PHOTO_URL = "https://lqgkxpoyymokrratgabe.supabase.co/storage/v1/object/public/site-assets/eleicoes/1792976692057-lula-vitoria.webp";
 const VICTORY_PHOTO_CREDIT = "Foto: Paulo Pinto/Agência Brasil";
 
+// Lula is the sitting president (term 2023-2026) — a win in the 2026 runoff is
+// a consecutive reelection, not a first election, so the headline needs the
+// right verb. Candidate.name is already run through formatName() by the time
+// it gets here (see parseRace() in lib/tse.ts), hence the title case.
+const INCUMBENT_SEEKING_REELECTION = "Lula";
+
 // A headline banner for the presidential race, placed between the results block and
 // the news. It says what the count means right now: who is elected, who goes to a
 // runoff, or who leads while the count is open.
@@ -33,7 +39,7 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
   // ahead, or that it's still just opening) as a second line underneath,
   // instead of competing for the same headline.
   const headline = officiallyElected
-    ? `${formatName(winnerName!)} é eleito presidente`
+    ? `${formatName(winnerName!)} é ${winnerName === INCUMBENT_SEEKING_REELECTION ? "reeleito" : "eleito"} presidente`
     : mathDecided
       ? `${formatName(winnerName!)} vence o 2º turno`
       : isRunoffDay
