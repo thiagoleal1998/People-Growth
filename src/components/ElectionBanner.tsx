@@ -48,6 +48,56 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
   // The two leaders: in a runoff these are the finalists.
   const faces: TseCandidate[] = president.candidates.slice(0, 2);
 
+  // Decided: a photo of Lula full and unobscured needs its own panel — a
+  // dark overlay heavy enough to keep text readable also buried him, since
+  // he sits exactly where that overlay was darkest. Splitting the banner
+  // into a solid-colour text panel and a clean photo panel sidesteps that
+  // fight entirely: neither one has to compromise for the other.
+  const textPanel = (
+    <div
+      style={{
+        minWidth: 0,
+        flex: "1 1 360px",
+        padding: decided ? "2.25rem 2rem" : "1.5rem 1.75rem",
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem", flexWrap: "wrap" }}>
+        <span style={{ fontSize: decided ? "0.875rem" : "0.75rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#FACC15" }}>
+          Eleições 2026 · Presidente
+        </span>
+        {isRunoffDay && (
+          <span
+            style={{
+              fontSize: decided ? "0.8125rem" : "0.6875rem",
+              fontWeight: 800,
+              letterSpacing: "0.04em",
+              padding: decided ? "0.1875rem 0.625rem" : "0.125rem 0.5rem",
+              borderRadius: "9999px",
+              backgroundColor: decided ? "#16A34A" : "#FACC15",
+              color: decided ? "white" : "#1F2937",
+            }}
+          >
+            {decided ? "RESULTADO DECIDIDO" : "2º TURNO"}
+          </span>
+        )}
+      </div>
+      <div style={{ fontSize: decided ? "clamp(1.75rem, 4.4vw, 2.75rem)" : "clamp(1.375rem, 3.2vw, 2rem)", fontWeight: 800, lineHeight: 1.15 }}>{headline}</div>
+      {subline && <div style={{ fontSize: decided ? "1.1875rem" : "1rem", fontWeight: 700, color: "#FACC15", marginTop: "0.5rem" }}>{subline}</div>}
+      <div style={{ fontSize: "0.8125rem", color: "rgba(255,255,255,0.75)", marginTop: "0.625rem" }}>
+        {president.sectionsPct}% das urnas apuradas · Fonte: TSE
+      </div>
+      <a
+        href={`/${locale}/eleicoes?cargo=presidente`}
+        style={{ display: "inline-block", marginTop: "1.25rem", padding: decided ? "0.625rem 1.25rem" : "0.5rem 1rem", borderRadius: "9999px", backgroundColor: "white", color: "#1d3b8a", fontWeight: 800, fontSize: decided ? "1rem" : "0.875rem", textDecoration: "none", alignSelf: "flex-start" }}
+      >
+        Acompanhe a apuração ›
+      </a>
+    </div>
+  );
+
   return (
     <div
       className="election-banner"
@@ -55,87 +105,72 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
         position: "relative",
         maxWidth: "1180px",
         margin: "0 auto",
-        padding: decided ? "2.25rem 2rem" : "1.5rem 1.75rem",
         borderRadius: "1rem",
         overflow: "hidden",
-        minHeight: decided ? "400px" : undefined,
-        background: decided
-          ? `linear-gradient(100deg, rgba(13,27,42,0.97) 0%, rgba(13,27,42,0.82) 45%, rgba(13,27,42,0.35) 100%), url("${VICTORY_PHOTO_URL}") center 25%/cover`
-          : "linear-gradient(120deg, #0d1b2a 0%, #1d3b8a 60%, #315E9C 100%)",
+        minHeight: decided ? "380px" : undefined,
+        background: decided ? "#0d1b2a" : "linear-gradient(120deg, #0d1b2a 0%, #1d3b8a 60%, #315E9C 100%)",
         color: "white",
         display: "flex",
-        alignItems: "center",
+        alignItems: decided ? "stretch" : "center",
         justifyContent: "space-between",
-        gap: "1.5rem",
         flexWrap: "wrap",
         boxShadow: "0 18px 40px -18px rgba(49, 94, 156,0.6)",
       }}
     >
-      <div style={{ minWidth: 0, flex: "1 1 320px" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem", flexWrap: "wrap" }}>
-          <span style={{ fontSize: decided ? "0.875rem" : "0.75rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#FACC15" }}>
-            Eleições 2026 · Presidente
-          </span>
-          {isRunoffDay && (
+      {decided ? (
+        <>
+          <div style={{ background: "linear-gradient(145deg, #0d1b2a 0%, #17356b 100%)", flex: "1 1 360px", display: "flex" }}>{textPanel}</div>
+          <div style={{ position: "relative", flex: "1 1 320px", minHeight: "260px" }}>
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={VICTORY_PHOTO_URL}
+              alt={`${formatName(outlook.name)} discursa em comício com a bandeira do Brasil ao fundo`}
+              style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "28% 22%", display: "block" }}
+            />
             <span
               style={{
-                fontSize: decided ? "0.8125rem" : "0.6875rem",
-                fontWeight: 800,
-                letterSpacing: "0.04em",
-                padding: decided ? "0.1875rem 0.625rem" : "0.125rem 0.5rem",
-                borderRadius: "9999px",
-                backgroundColor: decided ? "#16A34A" : "#FACC15",
-                color: decided ? "white" : "#1F2937",
+                position: "absolute",
+                bottom: "0.5rem",
+                left: "0.625rem",
+                fontSize: "0.6875rem",
+                color: "rgba(255,255,255,0.9)",
+                backgroundColor: "rgba(0,0,0,0.45)",
+                padding: "0.125rem 0.5rem",
+                borderRadius: "0.25rem",
               }}
             >
-              {decided ? "RESULTADO DECIDIDO" : "2º TURNO"}
+              {VICTORY_PHOTO_CREDIT}
             </span>
-          )}
-        </div>
-        <div style={{ fontSize: decided ? "clamp(1.75rem, 4.4vw, 2.75rem)" : "clamp(1.375rem, 3.2vw, 2rem)", fontWeight: 800, lineHeight: 1.15 }}>{headline}</div>
-        {subline && <div style={{ fontSize: decided ? "1.1875rem" : "1rem", fontWeight: 700, color: "#FACC15", marginTop: "0.5rem" }}>{subline}</div>}
-        <div style={{ fontSize: "0.8125rem", color: "rgba(255,255,255,0.75)", marginTop: "0.625rem" }}>
-          {president.sectionsPct}% das urnas apuradas · Fonte: TSE
-        </div>
-        <a
-          href={`/${locale}/eleicoes?cargo=presidente`}
-          style={{ display: "inline-block", marginTop: "1.25rem", padding: decided ? "0.625rem 1.25rem" : "0.5rem 1rem", borderRadius: "9999px", backgroundColor: "white", color: "#1d3b8a", fontWeight: 800, fontSize: decided ? "1rem" : "0.875rem", textDecoration: "none" }}
-        >
-          Acompanhe a apuração ›
-        </a>
-      </div>
-
-      {!decided && (
-        <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-          {faces.map((candidate, index) => (
-            <div key={`${candidate.name}-${index}`} style={{ marginLeft: index === 0 ? 0 : "-0.75rem", textAlign: "center" }}>
-              <div
-                style={{
-                  width: "6.5rem",
-                  height: "6.5rem",
-                  borderRadius: "50%",
-                  overflow: "hidden",
-                  backgroundColor: "rgba(255,255,255,0.12)",
-                  boxShadow: `0 0 0 3px ${partyColor(candidate.party)}`,
-                  border: "3px solid white",
-                }}
-              >
-                {candidate.photo && (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img src={candidate.photo} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-                )}
+          </div>
+        </>
+      ) : (
+        <>
+          {textPanel}
+          <div style={{ display: "flex", alignItems: "center", flexShrink: 0, padding: "0 1.75rem" }}>
+            {faces.map((candidate, index) => (
+              <div key={`${candidate.name}-${index}`} style={{ marginLeft: index === 0 ? 0 : "-0.75rem", textAlign: "center" }}>
+                <div
+                  style={{
+                    width: "6.5rem",
+                    height: "6.5rem",
+                    borderRadius: "50%",
+                    overflow: "hidden",
+                    backgroundColor: "rgba(255,255,255,0.12)",
+                    boxShadow: `0 0 0 3px ${partyColor(candidate.party)}`,
+                    border: "3px solid white",
+                  }}
+                >
+                  {candidate.photo && (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={candidate.photo} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                  )}
+                </div>
+                <div style={{ fontSize: "0.8125rem", fontWeight: 700, marginTop: "0.5rem" }}>{formatName(candidate.name).split(" ").slice(-1)[0]}</div>
+                <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)" }}>{candidate.pct}%</div>
               </div>
-              <div style={{ fontSize: "0.8125rem", fontWeight: 700, marginTop: "0.5rem" }}>{formatName(candidate.name).split(" ").slice(-1)[0]}</div>
-              <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)" }}>{candidate.pct}%</div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {decided && (
-        <span style={{ position: "absolute", bottom: "0.625rem", left: "0.875rem", fontSize: "0.6875rem", color: "rgba(255,255,255,0.65)" }}>
-          {VICTORY_PHOTO_CREDIT}
-        </span>
+            ))}
+          </div>
+        </>
       )}
 
       <style>{`
