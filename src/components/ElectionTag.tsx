@@ -1,8 +1,10 @@
-// Small status tags shown next to a candidate's name: "Eleito" in green, "2º Turno" in
+// Small status tags shown next to a candidate's name: "Eleito(a)" in green, "2º Turno" in
 // yellow, "Projetado" as an outline for deputies counted so far, and "Sub judice" in
-// grey for candidacies whose votes the TSE annulled.
+// grey for candidacies whose votes the TSE annulled. The TSE's own data has no gender
+// field (its raw status text is "Eleito" regardless of the candidate's gender), so this
+// uses the standard gender-neutral form rather than guessing from the name.
 export function ElectionTag({ kind }: { kind: "elected" | "runoff" | "projected" | "irregular"; color?: string }) {
-  const label = kind === "elected" ? "Eleito" : kind === "runoff" ? "2º Turno" : kind === "projected" ? "Projetado" : "Sub judice";
+  const label = kind === "elected" ? "Eleito(a)" : kind === "runoff" ? "2º Turno" : kind === "projected" ? "Projetado" : "Sub judice";
   const styles =
     kind === "elected"
       ? { backgroundColor: "#16A34A", color: "#ffffff", border: "none" }

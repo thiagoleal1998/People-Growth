@@ -61,7 +61,7 @@ function StatusLine({ status, race }: { status: RaceStatus; race: TseRace | null
   }
   const text =
     status.kind === "elected"
-      ? `${status.names.length > 1 ? "Eleitos" : "Eleito"}: ${status.names.map(formatName).join(" e ")}`
+      ? `${status.names.length > 1 ? "Eleitos" : "Eleito(a)"}: ${status.names.map(formatName).join(" e ")}`
       : `Segundo turno: ${status.names.map(formatName).join(" x ")}`;
   return <div style={{ marginTop: "0.5rem", fontSize: "0.8125rem", fontWeight: 700, color: BRAND }}>{text}</div>;
 }

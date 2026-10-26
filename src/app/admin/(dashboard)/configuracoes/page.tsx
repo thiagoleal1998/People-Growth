@@ -19,7 +19,7 @@ function electionRow(label: string, race: TseRace | null): ElectionStatusRow | n
   const status = raceStatus(race, true);
   const statusText =
     status.kind === "elected"
-      ? `Eleito: ${status.names.map(formatName).join(" e ")}`
+      ? `Eleito(a): ${status.names.map(formatName).join(" e ")}`
       : status.kind === "runoff"
         ? `Segundo turno: ${status.names.map(formatName).join(" x ")}`
         : race.round === 2

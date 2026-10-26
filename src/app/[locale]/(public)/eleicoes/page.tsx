@@ -225,7 +225,7 @@ function StatusBanner({ status, round }: { status: RaceStatus; round: 1 | 2 }) {
   }
   const text =
     status.kind === "elected"
-      ? `${status.names.length > 1 ? "Eleitos" : "Eleito"}: ${status.names.map(formatName).join(" e ")}`
+      ? `${status.names.length > 1 ? "Eleitos" : "Eleito(a)"}: ${status.names.map(formatName).join(" e ")}`
       : `Segundo turno: ${status.names.map(formatName).join(" x ")}`;
   return (
     <div style={{ padding: "0.75rem 1rem", borderRadius: "0.625rem", backgroundColor: `${BRAND}14`, color: BRAND, fontWeight: 800, fontSize: "0.9375rem", marginBottom: "0.75rem" }}>
@@ -421,7 +421,7 @@ function stateMapData(rows: StateRow[]): { winners: Record<string, StateWinner>;
     // (the TSE flags the two finalists as they're decided); once the race's
     // own data IS the round-2 file, race.round says so directly instead.
     const runoff = status.kind === "runoff" || race.round === 2;
-    const outcome = status.kind === "elected" ? `Eleito: ${formatName(status.names[0])}` : runoff ? "2º turno" : "em apuração";
+    const outcome = status.kind === "elected" ? `Eleito(a): ${formatName(status.names[0])}` : runoff ? "2º turno" : "em apuração";
     const detail = `1º ${formatName(top.name)} (${top.party}) ${top.pct}%${second ? ` · 2º ${formatName(second.name)} (${second.party}) ${second.pct}%` : ""}`;
     const color = partyColor(top.party);
     winners[uf] = { color, label: `${detail} — ${outcome}`, runoff };
