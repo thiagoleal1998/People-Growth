@@ -55,10 +55,10 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
         position: "relative",
         maxWidth: "1180px",
         margin: "0 auto",
-        padding: "1.5rem 1.75rem",
+        padding: decided ? "2.25rem 2rem" : "1.5rem 1.75rem",
         borderRadius: "1rem",
         overflow: "hidden",
-        minHeight: decided ? "260px" : undefined,
+        minHeight: decided ? "400px" : undefined,
         background: decided
           ? `linear-gradient(100deg, rgba(13,27,42,0.97) 0%, rgba(13,27,42,0.82) 45%, rgba(13,27,42,0.35) 100%), url("${VICTORY_PHOTO_URL}") center 25%/cover`
           : "linear-gradient(120deg, #0d1b2a 0%, #1d3b8a 60%, #315E9C 100%)",
@@ -73,16 +73,16 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
     >
       <div style={{ minWidth: 0, flex: "1 1 320px" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem", flexWrap: "wrap" }}>
-          <span style={{ fontSize: "0.75rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#FACC15" }}>
+          <span style={{ fontSize: decided ? "0.875rem" : "0.75rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#FACC15" }}>
             Eleições 2026 · Presidente
           </span>
           {isRunoffDay && (
             <span
               style={{
-                fontSize: "0.6875rem",
+                fontSize: decided ? "0.8125rem" : "0.6875rem",
                 fontWeight: 800,
                 letterSpacing: "0.04em",
-                padding: "0.125rem 0.5rem",
+                padding: decided ? "0.1875rem 0.625rem" : "0.125rem 0.5rem",
                 borderRadius: "9999px",
                 backgroundColor: decided ? "#16A34A" : "#FACC15",
                 color: decided ? "white" : "#1F2937",
@@ -92,14 +92,14 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
             </span>
           )}
         </div>
-        <div style={{ fontSize: "clamp(1.375rem, 3.2vw, 2rem)", fontWeight: 800, lineHeight: 1.2 }}>{headline}</div>
-        {subline && <div style={{ fontSize: "1rem", fontWeight: 700, color: "#FACC15", marginTop: "0.375rem" }}>{subline}</div>}
-        <div style={{ fontSize: "0.8125rem", color: "rgba(255,255,255,0.75)", marginTop: "0.5rem" }}>
+        <div style={{ fontSize: decided ? "clamp(1.75rem, 4.4vw, 2.75rem)" : "clamp(1.375rem, 3.2vw, 2rem)", fontWeight: 800, lineHeight: 1.15 }}>{headline}</div>
+        {subline && <div style={{ fontSize: decided ? "1.1875rem" : "1rem", fontWeight: 700, color: "#FACC15", marginTop: "0.5rem" }}>{subline}</div>}
+        <div style={{ fontSize: "0.8125rem", color: "rgba(255,255,255,0.75)", marginTop: "0.625rem" }}>
           {president.sectionsPct}% das urnas apuradas · Fonte: TSE
         </div>
         <a
           href={`/${locale}/eleicoes?cargo=presidente`}
-          style={{ display: "inline-block", marginTop: "1rem", padding: "0.5rem 1rem", borderRadius: "9999px", backgroundColor: "white", color: "#1d3b8a", fontWeight: 800, fontSize: "0.875rem", textDecoration: "none" }}
+          style={{ display: "inline-block", marginTop: "1.25rem", padding: decided ? "0.625rem 1.25rem" : "0.5rem 1rem", borderRadius: "9999px", backgroundColor: "white", color: "#1d3b8a", fontWeight: 800, fontSize: decided ? "1rem" : "0.875rem", textDecoration: "none" }}
         >
           Acompanhe a apuração ›
         </a>
