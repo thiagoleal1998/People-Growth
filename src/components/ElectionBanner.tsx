@@ -1,16 +1,10 @@
-import { formatName, partyColor, raceStatus, secondRoundOutlook, type TseCandidate, type TseRace } from "@/lib/tse";
+import { formatName, INCUMBENT_SEEKING_REELECTION, partyColor, raceStatus, secondRoundOutlook, type TseCandidate, type TseRace } from "@/lib/tse";
 
 // Rally photo shown once the 2nd round is mathematically decided — cleared for
 // republishing by Agência Brasil's own terms ("A republicação é gratuita desde
 // que citada a fonte"), credit kept visible on the image per those terms.
 const VICTORY_PHOTO_URL = "https://lqgkxpoyymokrratgabe.supabase.co/storage/v1/object/public/site-assets/eleicoes/1792976692057-lula-vitoria.webp";
 const VICTORY_PHOTO_CREDIT = "Foto: Paulo Pinto/Agência Brasil";
-
-// Lula is the sitting president (term 2023-2026) — a win in the 2026 runoff is
-// a consecutive reelection, not a first election, so the headline needs the
-// right verb. Candidate.name is already run through formatName() by the time
-// it gets here (see parseRace() in lib/tse.ts), hence the title case.
-const INCUMBENT_SEEKING_REELECTION = "Lula";
 
 // A headline banner for the presidential race, placed between the results block and
 // the news. It says what the count means right now: who is elected, who goes to a
@@ -108,7 +102,7 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
         href={`/${locale}/eleicoes?cargo=presidente`}
         style={{ display: "inline-block", marginTop: "1.25rem", padding: decided ? "0.625rem 1.25rem" : "0.5rem 1rem", borderRadius: "9999px", backgroundColor: "white", color: "#1d3b8a", fontWeight: 800, fontSize: decided ? "1rem" : "0.875rem", textDecoration: "none", alignSelf: "flex-start" }}
       >
-        Acompanhe a apuração ›
+        {officiallyElected ? "Apuração completa" : "Acompanhe a apuração"} ›
       </a>
     </div>
   );

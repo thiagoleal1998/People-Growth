@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import type { ReactNode } from "react";
 import {
+  INCUMBENT_SEEKING_REELECTION,
   UF_OPTIONS,
   formatName,
   getFederalDeputyRace,
@@ -146,7 +147,7 @@ function SideCard({ title, race, status, uf, cargo }: { title: string; race: Tse
                 <div style={{ minWidth: 0, flex: 1 }}>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", minWidth: 0, flexWrap: "wrap" }}>
                     <span style={{ fontSize: "0.875rem", fontWeight: 600, color: "var(--site-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shortName(candidate.name)}</span>
-                    {candidate.elected && <ElectionTag kind="elected" />}
+                    {candidate.elected && <ElectionTag kind="elected" label={candidate.name === INCUMBENT_SEEKING_REELECTION ? "Reeleito(a)" : undefined} />}
                     {!candidate.elected && deputies?.projected && <ElectionTag kind="projected" />}
                     {!deputies && isRunoffFinalist(candidate, index, runoff) && <ElectionTag kind="runoff" />}
                   </div>
@@ -181,7 +182,7 @@ function BigRow({ candidate, leading, runoffFinalist }: { candidate: TseCandidat
         <div style={{ minWidth: 0, flex: 1 }}>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
             <span style={{ fontWeight: leading ? 800 : 600, fontSize: "1.0625rem", color: "var(--site-text)" }}>{formatName(candidate.name)}</span>
-            {candidate.elected && <ElectionTag kind="elected" />}
+            {candidate.elected && <ElectionTag kind="elected" label={candidate.name === INCUMBENT_SEEKING_REELECTION ? "Reeleito(a)" : undefined} />}
             {runoffFinalist && <ElectionTag kind="runoff" />}
             {candidate.irregular && <ElectionTag kind="irregular" />}
           </div>
@@ -225,7 +226,7 @@ function StatusBanner({ status, round }: { status: RaceStatus; round: 1 | 2 }) {
   }
   const text =
     status.kind === "elected"
-      ? `${status.names.length > 1 ? "Eleitos" : "Eleito(a)"}: ${status.names.map(formatName).join(" e ")}`
+      ? `${status.names.length > 1 ? "Eleitos" : status.names[0] === INCUMBENT_SEEKING_REELECTION ? "Reeleito(a)" : "Eleito(a)"}: ${status.names.map(formatName).join(" e ")}`
       : `Segundo turno: ${status.names.map(formatName).join(" x ")}`;
   return (
     <div style={{ padding: "0.75rem 1rem", borderRadius: "0.625rem", backgroundColor: `${BRAND}14`, color: BRAND, fontWeight: 800, fontSize: "0.9375rem", marginBottom: "0.75rem" }}>
@@ -421,7 +422,12 @@ function stateMapData(rows: StateRow[]): { winners: Record<string, StateWinner>;
     // (the TSE flags the two finalists as they're decided); once the race's
     // own data IS the round-2 file, race.round says so directly instead.
     const runoff = status.kind === "runoff" || race.round === 2;
-    const outcome = status.kind === "elected" ? `Eleito(a): ${formatName(status.names[0])}` : runoff ? "2º turno" : "em apuração";
+    const outcome =
+      status.kind === "elected"
+        ? `${status.names[0] === INCUMBENT_SEEKING_REELECTION ? "Reeleito(a)" : "Eleito(a)"}: ${formatName(status.names[0])}`
+        : runoff
+          ? "2º turno"
+          : "em apuração";
     const detail = `1º ${formatName(top.name)} (${top.party}) ${top.pct}%${second ? ` · 2º ${formatName(second.name)} (${second.party}) ${second.pct}%` : ""}`;
     const color = partyColor(top.party);
     winners[uf] = { color, label: `${detail} — ${outcome}`, runoff };

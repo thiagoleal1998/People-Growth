@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { UF_IN_RUNOFF, UF_OPTIONS, formatName, partyColor, raceStatus, secondRoundOutlook, shortName, type RaceStatus, type TseCandidate, type TseRace } from "@/lib/tse";
+import { INCUMBENT_SEEKING_REELECTION, UF_IN_RUNOFF, UF_OPTIONS, formatName, partyColor, raceStatus, secondRoundOutlook, shortName, type RaceStatus, type TseCandidate, type TseRace } from "@/lib/tse";
 import { BrazilFlag } from "@/components/BrazilFlag";
 import { ElectionTag } from "@/components/ElectionTag";
 
-type Payload = { uf: string; president: TseRace | null; governor: TseRace | null; senate: TseRace | null };
-type SideTab = "governor" | "senate";
+type Payload = { uf: string; president: TseRace | null; governor: TseRace | null };
 
 // Festina's own colour. Candidates use their party's colour instead.
 const BRAND = "#315E9C";
@@ -31,7 +30,7 @@ function CandidateItem({ candidate, runoff }: { candidate: TseCandidate; runoff:
       <div style={{ minWidth: 0 }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", minWidth: 0, flexWrap: "wrap" }}>
           <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shortName(candidate.name)}</span>
-          {candidate.elected && <ElectionTag kind="elected" color={color} />}
+          {candidate.elected && <ElectionTag kind="elected" color={color} label={candidate.name === INCUMBENT_SEEKING_REELECTION ? "Reeleito(a)" : undefined} />}
           {!candidate.elected && runoff && <ElectionTag kind="runoff" />}
         </div>
         <div style={{ marginTop: "0.125rem" }}>
@@ -61,7 +60,7 @@ function StatusLine({ status, race }: { status: RaceStatus; race: TseRace | null
   }
   const text =
     status.kind === "elected"
-      ? `${status.names.length > 1 ? "Eleitos" : "Eleito(a)"}: ${status.names.map(formatName).join(" e ")}`
+      ? `${status.names.length > 1 ? "Eleitos" : status.names[0] === INCUMBENT_SEEKING_REELECTION ? "Reeleito(a)" : "Eleito(a)"}: ${status.names.map(formatName).join(" e ")}`
       : `Segundo turno: ${status.names.map(formatName).join(" x ")}`;
   return <div style={{ marginTop: "0.5rem", fontSize: "0.8125rem", fontWeight: 700, color: BRAND }}>{text}</div>;
 }
@@ -189,10 +188,34 @@ function StateDropdown({ value, onChange, onlyUfs }: { value: string; onChange: 
   );
 }
 
+// Static pill matching StateDropdown's own look, standing in for it on the
+// Presidente card — that race has no state to pick (it's national), but the
+// empty space without it threw the two cards' alignment out of sync.
+function BrasilBadge() {
+  return (
+    <div
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        padding: "0.375rem 0.75rem",
+        borderRadius: "9999px",
+        border: "1px solid var(--site-border-strong)",
+        backgroundColor: "var(--site-card)",
+        color: BRAND,
+        fontWeight: 700,
+        fontSize: "0.875rem",
+        alignSelf: "flex-start",
+        boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+      }}
+    >
+      Brasil
+    </div>
+  );
+}
+
 export function ElectionResults({ initial, locale }: { initial: Payload; locale: string }) {
   const [data, setData] = useState<Payload>(initial);
   const [uf, setUf] = useState(initial.uf);
-  const [tab, setTab] = useState<SideTab>("governor");
 
   useEffect(() => {
     let cancelled = false;
@@ -214,11 +237,10 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
     };
   }, [uf]);
 
-  const { president, governor, senate } = data;
-  const sideRace = tab === "governor" ? governor : senate;
+  const { president, governor } = data;
   const presidentRunoff = raceStatus(president, true).kind === "runoff";
-  const sideRunoff = raceStatus(sideRace, tab === "governor").kind === "runoff";
-  const stateSelect = <StateDropdown value={uf} onChange={setUf} onlyUfs={tab === "governor" ? UF_IN_RUNOFF : undefined} />;
+  const governorRunoff = raceStatus(governor, true).kind === "runoff";
+  const stateSelect = <StateDropdown value={uf} onChange={setUf} onlyUfs={UF_IN_RUNOFF} />;
   const presidentStatus = raceStatus(president, true);
   const presidentOfficial = president?.round === 2 && presidentStatus.kind === "elected";
   const presidentOutlook = president?.round === 2 && presidentStatus.kind === "open" ? secondRoundOutlook(president) : null;
@@ -256,47 +278,28 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
               apuração completa ›
             </a>
           </div>
-          <RaceCard race={president} count={2} runoff={presidentRunoff} />
+          <RaceCard race={president} count={2} runoff={presidentRunoff} stateSelect={<BrasilBadge />} />
           <StatusLine status={raceStatus(president, true)} race={president} />
         </div>
 
         <div>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", gap: "0.5rem", flexWrap: "wrap" }}>
-            <div style={{ display: "inline-flex", padding: "0.1875rem", borderRadius: "9999px", backgroundColor: "var(--site-surface-alt)" }}>
-              {(["governor", "senate"] as const).map((option) => (
-                <button
-                  key={option}
-                  type="button"
-                  onClick={() => setTab(option)}
-                  aria-pressed={tab === option}
-                  style={{
-                    border: "none",
-                    cursor: "pointer",
-                    padding: "0.3125rem 0.9375rem",
-                    borderRadius: "9999px",
-                    fontSize: "0.8125rem",
-                    fontWeight: 600,
-                    color: tab === option ? "var(--site-text)" : "var(--site-muted)",
-                    backgroundColor: tab === option ? "var(--site-card)" : "transparent",
-                    boxShadow: tab === option ? "0 1px 3px rgba(0,0,0,0.12)" : "none",
-                  }}
-                >
-                  {option === "governor" ? "Governador" : "Senado"}
-                </button>
-              ))}
-            </div>
-            <a href={`/${locale}/eleicoes?cargo=${tab === "governor" ? "governador" : "senado"}&uf=${uf}`} style={{ color: BRAND, fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", marginBottom: "0.75rem", gap: "0.5rem" }}>
+            {/* Senado has no runoff — today's widget is only about races that
+                do, so it's Governador only here. The full /eleicoes page
+                still covers Senado, Câmara and Assembleia normally. */}
+            <span style={{ fontSize: "1.25rem", color: "var(--site-text)" }}>Governador</span>
+            <a href={`/${locale}/eleicoes?cargo=governador&uf=${uf}`} style={{ color: BRAND, fontSize: "0.8125rem", textDecoration: "none", fontWeight: 600 }}>
               apuração completa ›
             </a>
           </div>
-          <RaceCard race={sideRace} count={2} stateSelect={stateSelect} runoff={sideRunoff} />
-          <StatusLine status={raceStatus(sideRace, tab === "governor")} race={sideRace} />
+          <RaceCard race={governor} count={2} stateSelect={stateSelect} runoff={governorRunoff} />
+          <StatusLine status={raceStatus(governor, true)} race={governor} />
         </div>
       </div>
 
       <p style={{ marginTop: "1rem", padding: "0.75rem 1rem", borderRadius: "0.625rem", backgroundColor: "var(--site-surface-alt)", fontSize: "0.8125rem", lineHeight: 1.55, color: "var(--site-text-secondary)" }}>
         <strong style={{ color: BRAND }}>O que é o segundo turno?</strong> Se nenhum candidato passar de 50% dos votos válidos (brancos e nulos não contam), os dois mais votados disputam um segundo turno —{" "}
-        {president?.round === 2 || sideRace?.round === 2 ? "a votação é hoje, 25 de outubro de 2026." : "em 25 de outubro de 2026."}{" "}
+        {president?.round === 2 || governor?.round === 2 ? "a votação é hoje, 25 de outubro de 2026." : "em 25 de outubro de 2026."}{" "}
         <a href={`/${locale}/eleicoes?cargo=presidente`} style={{ color: BRAND, fontWeight: 700, textDecoration: "none" }}>
           Veja a apuração ›
         </a>

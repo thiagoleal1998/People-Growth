@@ -25,7 +25,7 @@ import { AdBanner } from "@/components/AdBanner";
 import { Reveal } from "@/components/Reveal";
 import { VideoFacade } from "@/components/VideoFacade";
 import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/youtube";
-import { getGovernorRace, getPresidentRace, getSenateRace, UF_IN_RUNOFF } from "@/lib/tse";
+import { getGovernorRace, getPresidentRace, UF_IN_RUNOFF } from "@/lib/tse";
 import { ElectionResults } from "@/components/ElectionResults";
 import { ElectionBanner } from "@/components/ElectionBanner";
 import {
@@ -239,7 +239,7 @@ export default async function HomePage() {
   // worth leading with; São Paulo's was already decided in round 1.
   const electionsUf = UF_IN_RUNOFF[0] ?? "sp";
   const electionsInitial = electionsEnabled
-    ? { uf: electionsUf, president: await getPresidentRace(), governor: await getGovernorRace(electionsUf), senate: await getSenateRace(electionsUf) }
+    ? { uf: electionsUf, president: await getPresidentRace(), governor: await getGovernorRace(electionsUf) }
     : null;
   const sportsEnabled = config.sports_widget_enabled !== "false";
   // Standings: the full table, scraped from api-futebol.com.br's public

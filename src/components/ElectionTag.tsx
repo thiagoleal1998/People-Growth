@@ -3,8 +3,8 @@
 // grey for candidacies whose votes the TSE annulled. The TSE's own data has no gender
 // field (its raw status text is "Eleito" regardless of the candidate's gender), so this
 // uses the standard gender-neutral form rather than guessing from the name.
-export function ElectionTag({ kind }: { kind: "elected" | "runoff" | "projected" | "irregular"; color?: string }) {
-  const label = kind === "elected" ? "Eleito(a)" : kind === "runoff" ? "2º Turno" : kind === "projected" ? "Projetado" : "Sub judice";
+export function ElectionTag({ kind, label: labelOverride }: { kind: "elected" | "runoff" | "projected" | "irregular"; color?: string; label?: string }) {
+  const label = labelOverride ?? (kind === "elected" ? "Eleito(a)" : kind === "runoff" ? "2º Turno" : kind === "projected" ? "Projetado" : "Sub judice");
   const styles =
     kind === "elected"
       ? { backgroundColor: "#16A34A", color: "#ffffff", border: "none" }

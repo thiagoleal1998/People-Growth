@@ -24,6 +24,13 @@ const CACHE_SECONDS = 60;
 // Paulo, since those are the races actually live today.
 export const UF_IN_RUNOFF = ["ac", "am", "df", "es", "rn", "to"];
 
+// Lula is the sitting president (term 2023-2026) — a win in the 2026 runoff is
+// a consecutive reelection, not a first election, so "Eleito(a)" needs to say
+// "Reeleito(a)" for him specifically. Matched against candidate.name, which by
+// the time it reaches this comparison has already been through formatName()
+// (see parseRace() below), hence the title case.
+export const INCUMBENT_SEEKING_REELECTION = "Lula";
+
 export const UF_OPTIONS = [
   { code: "ac", name: "Acre" }, { code: "al", name: "Alagoas" }, { code: "ap", name: "Amapá" },
   { code: "am", name: "Amazonas" }, { code: "ba", name: "Bahia" }, { code: "ce", name: "Ceará" },

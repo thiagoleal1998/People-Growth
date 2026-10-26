@@ -4,7 +4,7 @@ import { SavedToast } from "@/components/admin/SavedToast";
 import { ConfiguracoesTabs } from "./ConfiguracoesTabs";
 import { updateSeoConfig } from "../seo/actions";
 import { ADMIN_MENU_DEFAULTS, AUTHOR_MENU_DEFAULTS, applyMenuOverrides, isMenuGroup, type MenuOverride } from "@/lib/menu-registry";
-import { formatName, getGovernorRace, getPresidentRace, raceStatus, UF_IN_RUNOFF, UF_OPTIONS, type TseRace } from "@/lib/tse";
+import { formatName, getGovernorRace, getPresidentRace, INCUMBENT_SEEKING_REELECTION, raceStatus, UF_IN_RUNOFF, UF_OPTIONS, type TseRace } from "@/lib/tse";
 import type { MenuEditorItem } from "./MenuEditor";
 import type { Category } from "@/types/database.types";
 import type { ElectionStatusRow } from "./ConfiguracoesTabs";
@@ -19,7 +19,7 @@ function electionRow(label: string, race: TseRace | null): ElectionStatusRow | n
   const status = raceStatus(race, true);
   const statusText =
     status.kind === "elected"
-      ? `Eleito(a): ${status.names.map(formatName).join(" e ")}`
+      ? `${status.names.length > 1 ? "Eleitos" : status.names[0] === INCUMBENT_SEEKING_REELECTION ? "Reeleito(a)" : "Eleito(a)"}: ${status.names.map(formatName).join(" e ")}`
       : status.kind === "runoff"
         ? `Segundo turno: ${status.names.map(formatName).join(" x ")}`
         : race.round === 2
