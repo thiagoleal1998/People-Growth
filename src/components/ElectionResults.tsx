@@ -255,10 +255,6 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
   const presidentRunoff = raceStatus(president, true).kind === "runoff";
   const governorRunoff = raceStatus(governor, true).kind === "runoff";
   const stateSelect = <StateDropdown value={uf} onChange={setUf} onlyUfs={UF_IN_RUNOFF} />;
-  const presidentStatus = raceStatus(president, true);
-  const presidentOfficial = president?.round === 2 && presidentStatus.kind === "elected";
-  const presidentOutlook = president?.round === 2 && presidentStatus.kind === "open" ? secondRoundOutlook(president) : null;
-  const presidentDecided = presidentOfficial || presidentOutlook?.kind === "decided";
 
   return (
     <section style={{ borderTop: `3px solid ${BRAND}`, paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
@@ -267,6 +263,11 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
         <span>
           Eleições <span style={{ color: "#E8B400", fontWeight: 800 }}>/</span> 2026
         </span>
+        {/* This badge is next to "Eleições / 2026" — the section title
+            covering both Presidente and Governador, not a label about one
+            race's own result — so it only ever says a 2nd round is on,
+            never escalates to a specific race's outcome (that belongs on
+            each card instead, see the "Eleito(a)"/"Reeleito(a)" tags below). */}
         {president?.round === 2 && (
           <span
             style={{
@@ -275,17 +276,11 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
               letterSpacing: "0.04em",
               padding: "0.25rem 0.6875rem",
               borderRadius: "9999px",
-              backgroundColor: presidentDecided ? "#16A34A" : "#FACC15",
-              color: presidentDecided ? "white" : "#1F2937",
+              backgroundColor: "#FACC15",
+              color: "#1F2937",
             }}
           >
-            {presidentOfficial
-              ? presidentStatus.kind === "elected" && presidentStatus.names[0] === INCUMBENT_SEEKING_REELECTION
-                ? "REELEITO"
-                : "ELEITO"
-              : presidentDecided
-                ? "RESULTADO DECIDIDO"
-                : "2º TURNO HOJE"}
+            2º TURNO HOJE
           </span>
         )}
       </h2>
