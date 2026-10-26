@@ -12,39 +12,48 @@ const VICTORY_PHOTO_CREDIT = "Foto: Paulo Pinto/Agência Brasil";
 export function ElectionBanner({ president, locale }: { president: TseRace; locale: string }) {
   const status = raceStatus(president, true);
   const first = president.candidates[0];
-  const isRunoffDay = president.round === 2 && status.kind !== "elected";
+  const isRound2 = president.round === 2;
+  const isRunoffDay = isRound2 && status.kind !== "elected";
   // The arithmetic can make the outcome certain (nobody left uncounted can
-  // flip it) before the TSE's own "Eleito" flag appears — shown as its own
-  // tier, explicitly not the same claim as an official result, since that
-  // distinction matters more here than almost anywhere else on the site.
+  // flip it) before the TSE's own "Eleito" flag appears — tracked as its own
+  // tier, distinct from the official result, since that distinction matters
+  // more here than almost anywhere else on the site.
   const outlook = isRunoffDay ? secondRoundOutlook(president) : null;
-  const decided = outlook?.kind === "decided";
+  const mathDecided = outlook?.kind === "decided";
+  const officiallyElected = isRound2 && status.kind === "elected";
+  // The victory photo applies to both: the race is effectively over either
+  // way, whether that's "the math already says so" or "the TSE confirmed
+  // it" — only the headline/subline wording differs between the two.
+  const decided = isRound2 && (mathDecided || officiallyElected);
+  const winnerName = officiallyElected ? status.names[0] : mathDecided ? outlook!.name : null;
   // Votes start at 0 for every candidate the moment a round opens, so "leads
   // with 0,00%" would read as a lead that doesn't exist yet. On the runoff's
   // own day the headline leads with what's actually at stake — who wins
   // decides the country's direction — with the race-specific status (who's
   // ahead, or that it's still just opening) as a second line underneath,
   // instead of competing for the same headline.
-  const headline = decided
-    ? `${formatName(outlook.name)} vence o 2º turno`
-    : isRunoffDay
-      ? "Os brasileiros decidem hoje o rumo do país"
-      : status.kind === "runoff"
-        ? `${status.names.map(formatName).join(" e ")} vão disputar o 2º turno`
-        : status.kind === "elected"
-          ? `${formatName(status.names[0])} é eleito presidente`
+  const headline = officiallyElected
+    ? `${formatName(winnerName!)} é eleito presidente`
+    : mathDecided
+      ? `${formatName(winnerName!)} vence o 2º turno`
+      : isRunoffDay
+        ? "Os brasileiros decidem hoje o rumo do país"
+        : status.kind === "runoff"
+          ? `${status.names.map(formatName).join(" e ")} vão disputar o 2º turno`
           : first && first.votes > 0
             ? `${formatName(first.name)} lidera a apuração com ${first.pct}%`
             : "Apuração em andamento";
-  const subline = decided
-    ? "Resultado já decidido pela apuração — aguardando a confirmação oficial do TSE"
-    : isRunoffDay
-      ? status.kind === "runoff"
-        ? `Segundo turno: ${status.names.map(formatName).join(" x ")}`
-        : first && first.votes > 0
-          ? `${formatName(first.name)} lidera o 2º turno com ${first.pct}%`
-          : "Segundo turno: apuração começando"
-      : null;
+  const subline = officiallyElected
+    ? "Resultado oficial confirmado pelo TSE"
+    : mathDecided
+      ? "Resultado já decidido pela apuração — aguardando a confirmação oficial do TSE"
+      : isRunoffDay
+        ? status.kind === "runoff"
+          ? `Segundo turno: ${status.names.map(formatName).join(" x ")}`
+          : first && first.votes > 0
+            ? `${formatName(first.name)} lidera o 2º turno com ${first.pct}%`
+            : "Segundo turno: apuração começando"
+        : null;
   // The two leaders: in a runoff these are the finalists.
   const faces: TseCandidate[] = president.candidates.slice(0, 2);
 
@@ -68,7 +77,7 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
         <span style={{ fontSize: decided ? "0.875rem" : "0.75rem", fontWeight: 800, letterSpacing: "0.08em", textTransform: "uppercase", color: "#FACC15" }}>
           Eleições 2026 · Presidente
         </span>
-        {isRunoffDay && (
+        {isRound2 && (
           <span
             style={{
               fontSize: decided ? "0.8125rem" : "0.6875rem",
@@ -80,7 +89,7 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
               color: decided ? "white" : "#1F2937",
             }}
           >
-            {decided ? "RESULTADO DECIDIDO" : "2º TURNO"}
+            {officiallyElected ? "ELEITO" : mathDecided ? "RESULTADO DECIDIDO" : "2º TURNO"}
           </span>
         )}
       </div>
@@ -124,7 +133,7 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={VICTORY_PHOTO_URL}
-              alt={`${formatName(outlook.name)} discursa em comício com a bandeira do Brasil ao fundo`}
+              alt={`${formatName(winnerName!)} discursa em comício com a bandeira do Brasil ao fundo`}
               style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover", objectPosition: "28% 22%", display: "block" }}
             />
             <span

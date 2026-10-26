@@ -220,8 +220,9 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
   const sideRunoff = raceStatus(sideRace, tab === "governor").kind === "runoff";
   const stateSelect = <StateDropdown value={uf} onChange={setUf} onlyUfs={tab === "governor" ? UF_IN_RUNOFF : undefined} />;
   const presidentStatus = raceStatus(president, true);
+  const presidentOfficial = president?.round === 2 && presidentStatus.kind === "elected";
   const presidentOutlook = president?.round === 2 && presidentStatus.kind === "open" ? secondRoundOutlook(president) : null;
-  const presidentDecided = presidentOutlook?.kind === "decided";
+  const presidentDecided = presidentOfficial || presidentOutlook?.kind === "decided";
 
   return (
     <section style={{ borderTop: `3px solid ${BRAND}`, paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
@@ -242,7 +243,7 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
               color: presidentDecided ? "white" : "#1F2937",
             }}
           >
-            {presidentDecided ? "RESULTADO DECIDIDO" : "2º TURNO HOJE"}
+            {presidentOfficial ? "ELEITO" : presidentDecided ? "RESULTADO DECIDIDO" : "2º TURNO HOJE"}
           </span>
         )}
       </h2>
