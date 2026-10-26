@@ -26,6 +26,7 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
   // it" — only the headline/subline wording differs between the two.
   const decided = isRound2 && (mathDecided || officiallyElected);
   const winnerName = officiallyElected ? status.names[0] : mathDecided ? outlook!.name : null;
+  const isReelection = winnerName === INCUMBENT_SEEKING_REELECTION;
   // Votes start at 0 for every candidate the moment a round opens, so "leads
   // with 0,00%" would read as a lead that doesn't exist yet. On the runoff's
   // own day the headline leads with what's actually at stake — who wins
@@ -33,7 +34,7 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
   // ahead, or that it's still just opening) as a second line underneath,
   // instead of competing for the same headline.
   const headline = officiallyElected
-    ? `${formatName(winnerName!)} é ${winnerName === INCUMBENT_SEEKING_REELECTION ? "reeleito" : "eleito"} presidente`
+    ? `${formatName(winnerName!)} é ${isReelection ? "reeleito" : "eleito"} presidente`
     : mathDecided
       ? `${formatName(winnerName!)} vence o 2º turno`
       : isRunoffDay
@@ -89,7 +90,7 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
               color: decided ? "white" : "#1F2937",
             }}
           >
-            {officiallyElected ? "ELEITO" : mathDecided ? "RESULTADO DECIDIDO" : "2º TURNO"}
+            {officiallyElected ? (isReelection ? "REELEITO" : "ELEITO") : mathDecided ? "RESULTADO DECIDIDO" : "2º TURNO"}
           </span>
         )}
       </div>

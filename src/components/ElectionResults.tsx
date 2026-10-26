@@ -28,7 +28,12 @@ function CandidateItem({ candidate, runoff }: { candidate: TseCandidate; runoff:
     <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", minWidth: 0, flex: "1 1 0" }}>
       <CandidatePhoto src={candidate.photo} color={color} />
       <div style={{ minWidth: 0 }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", minWidth: 0, flexWrap: "wrap" }}>
+        {/* minHeight reserves room for two lines (name, then tag below it)
+            whether or not this candidate's own name+tag happen to need it —
+            a longer name (wraps) sitting next to a shorter one (doesn't) in
+            the same card otherwise throws that candidate's whole row, and by
+            extension this card against the one beside it, out of alignment. */}
+        <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", minWidth: 0, minHeight: "2.875rem", flexWrap: "wrap" }}>
           <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{shortName(candidate.name)}</span>
           {candidate.elected && <ElectionTag kind="elected" color={color} label={candidate.name === INCUMBENT_SEEKING_REELECTION ? "Reeleito(a)" : undefined} />}
           {!candidate.elected && runoff && <ElectionTag kind="runoff" />}
@@ -192,8 +197,15 @@ function StateDropdown({ value, onChange, onlyUfs }: { value: string; onChange: 
 // Presidente card — that race has no state to pick (it's national), but the
 // empty space without it threw the two cards' alignment out of sync.
 function BrasilBadge() {
+  // A <button>, not a <div> — matching StateDropdown's trigger element for
+  // element type too, not just its inline styles: a button carries its own
+  // user-agent box-model quirks (line-height, font metrics) that a div
+  // doesn't, so a div with identical padding still renders a few pixels
+  // shorter and throws off both cards' vertical alignment.
   return (
-    <div
+    <button
+      type="button"
+      disabled
       style={{
         display: "inline-flex",
         alignItems: "center",
@@ -204,12 +216,14 @@ function BrasilBadge() {
         color: BRAND,
         fontWeight: 700,
         fontSize: "0.875rem",
+        fontFamily: "inherit",
         alignSelf: "flex-start",
         boxShadow: "0 1px 2px rgba(0,0,0,0.06)",
+        cursor: "default",
       }}
     >
       Brasil
-    </div>
+    </button>
   );
 }
 
@@ -265,7 +279,13 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
               color: presidentDecided ? "white" : "#1F2937",
             }}
           >
-            {presidentOfficial ? "ELEITO" : presidentDecided ? "RESULTADO DECIDIDO" : "2º TURNO HOJE"}
+            {presidentOfficial
+              ? presidentStatus.kind === "elected" && presidentStatus.names[0] === INCUMBENT_SEEKING_REELECTION
+                ? "REELEITO"
+                : "ELEITO"
+              : presidentDecided
+                ? "RESULTADO DECIDIDO"
+                : "2º TURNO HOJE"}
           </span>
         )}
       </h2>
