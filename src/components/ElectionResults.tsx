@@ -280,7 +280,7 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
               color: "#1F2937",
             }}
           >
-            2º TURNO HOJE
+            2º TURNO
           </span>
         )}
       </h2>
@@ -314,7 +314,7 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
 
       <p style={{ marginTop: "1rem", padding: "0.75rem 1rem", borderRadius: "0.625rem", backgroundColor: "var(--site-surface-alt)", fontSize: "0.8125rem", lineHeight: 1.55, color: "var(--site-text-secondary)" }}>
         <strong style={{ color: BRAND }}>O que é o segundo turno?</strong> Se nenhum candidato passar de 50% dos votos válidos (brancos e nulos não contam), os dois mais votados disputam um segundo turno —{" "}
-        {president?.round === 2 || governor?.round === 2 ? "a votação é hoje, 25 de outubro de 2026." : "em 25 de outubro de 2026."}{" "}
+        {president?.round === 2 || governor?.round === 2 ? "a votação foi em 25 de outubro de 2026." : "em 25 de outubro de 2026."}{" "}
         <a href={`/${locale}/eleicoes?cargo=presidente`} style={{ color: BRAND, fontWeight: 700, textDecoration: "none" }}>
           Veja a apuração ›
         </a>

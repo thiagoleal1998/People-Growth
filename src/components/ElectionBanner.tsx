@@ -45,7 +45,9 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
             ? `${formatName(first.name)} lidera a apuração com ${first.pct}%`
             : "Apuração em andamento";
   const subline = officiallyElected
-    ? "Resultado oficial confirmado pelo TSE"
+    ? isReelection
+      ? "Lula vai para o quarto mandato com o desafio de um Congresso mais conservador pela frente"
+      : "Resultado oficial confirmado pelo TSE"
     : mathDecided
       ? "Resultado já decidido pela apuração — aguardando a confirmação oficial do TSE"
       : isRunoffDay
