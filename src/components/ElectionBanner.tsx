@@ -1,5 +1,11 @@
 import { formatName, partyColor, raceStatus, secondRoundOutlook, type TseCandidate, type TseRace } from "@/lib/tse";
 
+// Rally photo shown once the 2nd round is mathematically decided — cleared for
+// republishing by Agência Brasil's own terms ("A republicação é gratuita desde
+// que citada a fonte"), credit kept visible on the image per those terms.
+const VICTORY_PHOTO_URL = "https://lqgkxpoyymokrratgabe.supabase.co/storage/v1/object/public/site-assets/eleicoes/1792976692057-lula-vitoria.webp";
+const VICTORY_PHOTO_CREDIT = "Foto: Paulo Pinto/Agência Brasil";
+
 // A headline banner for the presidential race, placed between the results block and
 // the news. It says what the count means right now: who is elected, who goes to a
 // runoff, or who leads while the count is open.
@@ -46,11 +52,16 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
     <div
       className="election-banner"
       style={{
+        position: "relative",
         maxWidth: "1180px",
         margin: "0 auto",
         padding: "1.5rem 1.75rem",
         borderRadius: "1rem",
-        background: "linear-gradient(120deg, #0d1b2a 0%, #1d3b8a 60%, #315E9C 100%)",
+        overflow: "hidden",
+        minHeight: decided ? "260px" : undefined,
+        background: decided
+          ? `linear-gradient(100deg, rgba(13,27,42,0.97) 0%, rgba(13,27,42,0.82) 45%, rgba(13,27,42,0.35) 100%), url("${VICTORY_PHOTO_URL}") center 25%/cover`
+          : "linear-gradient(120deg, #0d1b2a 0%, #1d3b8a 60%, #315E9C 100%)",
         color: "white",
         display: "flex",
         alignItems: "center",
@@ -94,10 +105,9 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
         </a>
       </div>
 
-      <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-        {faces.map((candidate, index) => {
-          const isWinner = decided && candidate.name === outlook.name;
-          return (
+      {!decided && (
+        <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
+          {faces.map((candidate, index) => (
             <div key={`${candidate.name}-${index}`} style={{ marginLeft: index === 0 ? 0 : "-0.75rem", textAlign: "center" }}>
               <div
                 style={{
@@ -106,7 +116,7 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
                   borderRadius: "50%",
                   overflow: "hidden",
                   backgroundColor: "rgba(255,255,255,0.12)",
-                  boxShadow: isWinner ? "0 0 0 3px #16A34A, 0 0 0 6px rgba(22,163,74,0.35)" : `0 0 0 3px ${partyColor(candidate.party)}`,
+                  boxShadow: `0 0 0 3px ${partyColor(candidate.party)}`,
                   border: "3px solid white",
                 }}
               >
@@ -118,9 +128,15 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
               <div style={{ fontSize: "0.8125rem", fontWeight: 700, marginTop: "0.5rem" }}>{formatName(candidate.name).split(" ").slice(-1)[0]}</div>
               <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)" }}>{candidate.pct}%</div>
             </div>
-          );
-        })}
-      </div>
+          ))}
+        </div>
+      )}
+
+      {decided && (
+        <span style={{ position: "absolute", bottom: "0.625rem", left: "0.875rem", fontSize: "0.6875rem", color: "rgba(255,255,255,0.65)" }}>
+          {VICTORY_PHOTO_CREDIT}
+        </span>
+      )}
 
       <style>{`
         @media (max-width: 560px) {
