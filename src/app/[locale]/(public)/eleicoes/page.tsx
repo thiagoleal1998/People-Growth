@@ -251,6 +251,20 @@ function OutlookLine({ race }: { race: TseRace }) {
         : outlook.kind === "runoff"
           ? "Segundo turno matematicamente garantido: ninguém mais consegue chegar a 50% dos votos válidos."
           : "Ainda é possível decidir no 1º turno.";
+  // A guaranteed winner gets the same visual weight as StatusBanner above —
+  // this is the moment readers most want to see clearly — but stays visually
+  // distinct (green, not the brand colour) and says outright that it's our
+  // own calculation, not the TSE's official word yet.
+  if (outlook.kind === "decided") {
+    return (
+      <div style={{ padding: "0.75rem 1rem", borderRadius: "0.625rem", backgroundColor: "rgba(22,163,74,0.1)", border: "1px solid rgba(22,163,74,0.3)", marginBottom: "0.75rem" }}>
+        <div style={{ color: "#16A34A", fontWeight: 800, fontSize: "0.9375rem" }}>{text}</div>
+        <div style={{ color: "var(--site-text-secondary)", fontSize: "0.75rem", marginTop: "0.25rem" }}>
+          Cálculo pelas seções apuradas — aguardando a confirmação oficial do TSE.
+        </div>
+      </div>
+    );
+  }
   return (
     <p style={{ fontSize: "0.8125rem", color: "var(--site-text-secondary)", marginBottom: "0.75rem" }}>
       {text} <span style={{ color: "var(--site-faint)" }}>(cálculo pelas seções apuradas)</span>

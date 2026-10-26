@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, type CSSProperties, type ReactNode } from "react";
-import { UF_IN_RUNOFF, UF_OPTIONS, formatName, partyColor, raceStatus, shortName, type RaceStatus, type TseCandidate, type TseRace } from "@/lib/tse";
+import { UF_IN_RUNOFF, UF_OPTIONS, formatName, partyColor, raceStatus, secondRoundOutlook, shortName, type RaceStatus, type TseCandidate, type TseRace } from "@/lib/tse";
 import { BrazilFlag } from "@/components/BrazilFlag";
 import { ElectionTag } from "@/components/ElectionTag";
 
@@ -42,10 +42,21 @@ function CandidateItem({ candidate, runoff }: { candidate: TseCandidate; runoff:
   );
 }
 
-// The line under each card: who won, or the runoff pairing. Nothing while the count is open.
-function StatusLine({ status, round }: { status: RaceStatus; round: 1 | 2 }) {
+// The line under each card: who won, or the runoff pairing. While the count is
+// still open but the arithmetic already makes the outcome certain (nobody left
+// can reach 50%), that's shown too — distinct from the TSE's own "Eleito"
+// flag, which is what actually turns this into an elected/runoff line above.
+function StatusLine({ status, race }: { status: RaceStatus; race: TseRace | null }) {
   if (status.kind === "open") {
-    const label = round === 2 ? "Segundo turno em apuração" : "Apuração em andamento";
+    const outlook = race?.round === 2 ? secondRoundOutlook(race) : null;
+    if (outlook?.kind === "decided") {
+      return (
+        <div style={{ marginTop: "0.5rem", fontSize: "0.8125rem", fontWeight: 700, color: "#16A34A" }}>
+          {formatName(outlook.name)} vence — apuração em fechamento
+        </div>
+      );
+    }
+    const label = race?.round === 2 ? "Segundo turno em apuração" : "Apuração em andamento";
     return <div style={{ marginTop: "0.5rem", fontSize: "0.8125rem", color: "var(--site-muted)" }}>{label}</div>;
   }
   const text =
@@ -208,6 +219,9 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
   const presidentRunoff = raceStatus(president, true).kind === "runoff";
   const sideRunoff = raceStatus(sideRace, tab === "governor").kind === "runoff";
   const stateSelect = <StateDropdown value={uf} onChange={setUf} onlyUfs={tab === "governor" ? UF_IN_RUNOFF : undefined} />;
+  const presidentStatus = raceStatus(president, true);
+  const presidentOutlook = president?.round === 2 && presidentStatus.kind === "open" ? secondRoundOutlook(president) : null;
+  const presidentDecided = presidentOutlook?.kind === "decided";
 
   return (
     <section style={{ borderTop: `3px solid ${BRAND}`, paddingTop: "1.25rem", paddingBottom: "1.5rem", marginBottom: "2rem" }}>
@@ -224,11 +238,11 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
               letterSpacing: "0.04em",
               padding: "0.25rem 0.6875rem",
               borderRadius: "9999px",
-              backgroundColor: "#FACC15",
-              color: "#1F2937",
+              backgroundColor: presidentDecided ? "#16A34A" : "#FACC15",
+              color: presidentDecided ? "white" : "#1F2937",
             }}
           >
-            2º TURNO HOJE
+            {presidentDecided ? "RESULTADO DECIDIDO" : "2º TURNO HOJE"}
           </span>
         )}
       </h2>
@@ -242,7 +256,7 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
             </a>
           </div>
           <RaceCard race={president} count={2} runoff={presidentRunoff} />
-          <StatusLine status={raceStatus(president, true)} round={president?.round ?? 1} />
+          <StatusLine status={raceStatus(president, true)} race={president} />
         </div>
 
         <div>
@@ -275,7 +289,7 @@ export function ElectionResults({ initial, locale }: { initial: Payload; locale:
             </a>
           </div>
           <RaceCard race={sideRace} count={2} stateSelect={stateSelect} runoff={sideRunoff} />
-          <StatusLine status={raceStatus(sideRace, tab === "governor")} round={sideRace?.round ?? 1} />
+          <StatusLine status={raceStatus(sideRace, tab === "governor")} race={sideRace} />
         </div>
       </div>
 

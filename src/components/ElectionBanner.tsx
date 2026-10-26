@@ -1,4 +1,4 @@
-import { formatName, partyColor, raceStatus, type TseCandidate, type TseRace } from "@/lib/tse";
+import { formatName, partyColor, raceStatus, secondRoundOutlook, type TseCandidate, type TseRace } from "@/lib/tse";
 
 // A headline banner for the presidential race, placed between the results block and
 // the news. It says what the count means right now: who is elected, who goes to a
@@ -7,28 +7,38 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
   const status = raceStatus(president, true);
   const first = president.candidates[0];
   const isRunoffDay = president.round === 2 && status.kind !== "elected";
+  // The arithmetic can make the outcome certain (nobody left uncounted can
+  // flip it) before the TSE's own "Eleito" flag appears — shown as its own
+  // tier, explicitly not the same claim as an official result, since that
+  // distinction matters more here than almost anywhere else on the site.
+  const outlook = isRunoffDay ? secondRoundOutlook(president) : null;
+  const decided = outlook?.kind === "decided";
   // Votes start at 0 for every candidate the moment a round opens, so "leads
   // with 0,00%" would read as a lead that doesn't exist yet. On the runoff's
   // own day the headline leads with what's actually at stake — who wins
   // decides the country's direction — with the race-specific status (who's
   // ahead, or that it's still just opening) as a second line underneath,
   // instead of competing for the same headline.
-  const headline = isRunoffDay
-    ? "Os brasileiros decidem hoje o rumo do país"
-    : status.kind === "runoff"
-      ? `${status.names.map(formatName).join(" e ")} vão disputar o 2º turno`
-      : status.kind === "elected"
-        ? `${formatName(status.names[0])} é eleito presidente`
+  const headline = decided
+    ? `${formatName(outlook.name)} vence o 2º turno`
+    : isRunoffDay
+      ? "Os brasileiros decidem hoje o rumo do país"
+      : status.kind === "runoff"
+        ? `${status.names.map(formatName).join(" e ")} vão disputar o 2º turno`
+        : status.kind === "elected"
+          ? `${formatName(status.names[0])} é eleito presidente`
+          : first && first.votes > 0
+            ? `${formatName(first.name)} lidera a apuração com ${first.pct}%`
+            : "Apuração em andamento";
+  const subline = decided
+    ? "Resultado já decidido pela apuração — aguardando a confirmação oficial do TSE"
+    : isRunoffDay
+      ? status.kind === "runoff"
+        ? `Segundo turno: ${status.names.map(formatName).join(" x ")}`
         : first && first.votes > 0
-          ? `${formatName(first.name)} lidera a apuração com ${first.pct}%`
-          : "Apuração em andamento";
-  const subline = isRunoffDay
-    ? status.kind === "runoff"
-      ? `Segundo turno: ${status.names.map(formatName).join(" x ")}`
-      : first && first.votes > 0
-        ? `${formatName(first.name)} lidera o 2º turno com ${first.pct}%`
-        : "Segundo turno: apuração começando"
-    : null;
+          ? `${formatName(first.name)} lidera o 2º turno com ${first.pct}%`
+          : "Segundo turno: apuração começando"
+      : null;
   // The two leaders: in a runoff these are the finalists.
   const faces: TseCandidate[] = president.candidates.slice(0, 2);
 
@@ -63,11 +73,11 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
                 letterSpacing: "0.04em",
                 padding: "0.125rem 0.5rem",
                 borderRadius: "9999px",
-                backgroundColor: "#FACC15",
-                color: "#1F2937",
+                backgroundColor: decided ? "#16A34A" : "#FACC15",
+                color: decided ? "white" : "#1F2937",
               }}
             >
-              2º TURNO
+              {decided ? "RESULTADO DECIDIDO" : "2º TURNO"}
             </span>
           )}
         </div>
@@ -85,18 +95,31 @@ export function ElectionBanner({ president, locale }: { president: TseRace; loca
       </div>
 
       <div style={{ display: "flex", alignItems: "center", flexShrink: 0 }}>
-        {faces.map((candidate, index) => (
-          <div key={`${candidate.name}-${index}`} style={{ marginLeft: index === 0 ? 0 : "-0.75rem", textAlign: "center" }}>
-            <div style={{ width: "6.5rem", height: "6.5rem", borderRadius: "50%", overflow: "hidden", backgroundColor: "rgba(255,255,255,0.12)", boxShadow: `0 0 0 3px ${partyColor(candidate.party)}`, border: "3px solid white" }}>
-              {candidate.photo && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={candidate.photo} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
-              )}
+        {faces.map((candidate, index) => {
+          const isWinner = decided && candidate.name === outlook.name;
+          return (
+            <div key={`${candidate.name}-${index}`} style={{ marginLeft: index === 0 ? 0 : "-0.75rem", textAlign: "center" }}>
+              <div
+                style={{
+                  width: "6.5rem",
+                  height: "6.5rem",
+                  borderRadius: "50%",
+                  overflow: "hidden",
+                  backgroundColor: "rgba(255,255,255,0.12)",
+                  boxShadow: isWinner ? "0 0 0 3px #16A34A, 0 0 0 6px rgba(22,163,74,0.35)" : `0 0 0 3px ${partyColor(candidate.party)}`,
+                  border: "3px solid white",
+                }}
+              >
+                {candidate.photo && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={candidate.photo} alt="" loading="lazy" style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }} />
+                )}
+              </div>
+              <div style={{ fontSize: "0.8125rem", fontWeight: 700, marginTop: "0.5rem" }}>{formatName(candidate.name).split(" ").slice(-1)[0]}</div>
+              <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)" }}>{candidate.pct}%</div>
             </div>
-            <div style={{ fontSize: "0.8125rem", fontWeight: 700, marginTop: "0.5rem" }}>{formatName(candidate.name).split(" ").slice(-1)[0]}</div>
-            <div style={{ fontSize: "0.75rem", color: "rgba(255,255,255,0.8)" }}>{candidate.pct}%</div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <style>{`
