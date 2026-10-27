@@ -255,20 +255,22 @@ export default async function ArticlePage({
           </Link>
 
           {(categoryRow?.is_people_growth || categoryRow?.is_ponto_de_replica) && (
-            <div style={{ marginBottom: "1rem" }}>
+            <div style={{ marginBottom: "1rem", display: "flex", gap: "0.75rem" }}>
               {categoryRow?.is_people_growth && (
-                // The source file is dark-navy-on-white (unlike the other two
-                // sub-brand logos, already cut for a black background) — it
-                // needs its own light card here or its darker half vanishes
-                // against the hero's dark gradient.
+                // Both logos read poorly straight on the hero's dark
+                // gradient (People & Growth is navy-on-white; Ponto de
+                // Réplica's metallic green/gold has too little contrast
+                // against navy too) — a white card behind each fixes it.
                 <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: "0.5rem 0.875rem" }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={PEOPLE_GROWTH_LOGO_URL} alt="People & Growth" style={{ height: "2.25rem", width: "auto", objectFit: "contain", display: "block" }} />
                 </div>
               )}
               {categoryRow?.is_ponto_de_replica && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ height: "3.5rem", width: "auto", objectFit: "contain" }} />
+                <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: "0.375rem 0.75rem" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ height: "2.75rem", width: "auto", objectFit: "contain", display: "block" }} />
+                </div>
               )}
             </div>
           )}
