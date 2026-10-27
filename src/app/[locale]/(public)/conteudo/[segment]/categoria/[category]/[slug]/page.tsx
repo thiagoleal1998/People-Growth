@@ -6,8 +6,7 @@ import { ArrowLeft, Clock, Calendar, ChevronRight, Linkedin, Instagram, Globe } 
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
-import { PeopleGrowthBadge } from "@/components/PeopleGrowthBadge";
-import { PontoDeReplicaBadge } from "@/components/PontoDeReplicaBadge";
+import { PEOPLE_GROWTH_LOGO_URL, PONTO_DE_REPLICA_LOGO_URL } from "@/lib/brand-logos";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Comments } from "@/components/Comments";
 import { AdBanner } from "@/components/AdBanner";
@@ -255,10 +254,27 @@ export default async function ArticlePage({
             <ArrowLeft size={16} /> {tNav("newsletter")}
           </Link>
 
+          {(categoryRow?.is_people_growth || categoryRow?.is_ponto_de_replica) && (
+            <div style={{ marginBottom: "1rem" }}>
+              {categoryRow?.is_people_growth && (
+                // The source file is dark-navy-on-white (unlike the other two
+                // sub-brand logos, already cut for a black background) — it
+                // needs its own light card here or its darker half vanishes
+                // against the hero's dark gradient.
+                <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: "0.5rem 0.875rem" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={PEOPLE_GROWTH_LOGO_URL} alt="People & Growth" style={{ height: "2.25rem", width: "auto", objectFit: "contain", display: "block" }} />
+                </div>
+              )}
+              {categoryRow?.is_ponto_de_replica && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ height: "3.5rem", width: "auto", objectFit: "contain" }} />
+              )}
+            </div>
+          )}
+
           <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
             <FormatTag format={article.format} locale={locale} />
-            {categoryRow?.is_people_growth && <PeopleGrowthBadge />}
-            {categoryRow?.is_ponto_de_replica && <PontoDeReplicaBadge />}
             {categoryRow && (
               <span
                 style={{

@@ -44,13 +44,19 @@ export function ShareButtons({ title }: { title: string }) {
 
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
+  // WhatsApp's own share links (its "Share" button on an article, not just a
+  // bare link someone pastes) use this exact shape: *bold title*, a blank
+  // line, "Leia mais: <url>", a blank line, then a one-line brand sign-off —
+  // the structure the user pointed at with CNN's "Pense bem, pense CNN".
+  // *asterisks* are WhatsApp's own bold markdown, not ours.
+  const whatsappText = `*${title}*\n\nLeia mais: ${url}\n\nFestina — apressa-te devagar`;
 
   const links = [
     {
       label: "WhatsApp",
       icon: WhatsAppIcon,
       color: "#25D366",
-      href: `https://wa.me/?text=${encodedTitle}%20${encodedUrl}`,
+      href: `https://wa.me/?text=${encodeURIComponent(whatsappText)}`,
     },
     {
       label: "LinkedIn",
