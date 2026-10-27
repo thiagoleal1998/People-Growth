@@ -6,6 +6,8 @@ import { ArrowLeft, Clock, Calendar, ChevronRight, Linkedin, Instagram, Globe } 
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
+import { PeopleGrowthBadge } from "@/components/PeopleGrowthBadge";
+import { PontoDeReplicaBadge } from "@/components/PontoDeReplicaBadge";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Comments } from "@/components/Comments";
 import { AdBanner } from "@/components/AdBanner";
@@ -16,6 +18,7 @@ import { createClient } from "@/lib/supabase/server";
 import { renderMarkdownLite, stripMarkdownLite } from "@/lib/markdown-lite";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import { articleHref, articlePath, FORMAT_SEGMENT, UNCATEGORIZED_SEGMENT } from "@/lib/article-url";
+import { ogImageUrl } from "@/lib/og-image";
 import { pickLocale } from "@/lib/locale-content";
 import { aiDisclosureText } from "@/lib/ai-disclosure";
 import { aboutAuthorLabel, isAuthorPubliclyVisible, joinAuthorNames } from "@/lib/founder-data";
@@ -116,8 +119,21 @@ export async function generateMetadata({
 
   const title = pickLocale(locale, result.article.seo_title_pt, result.article.seo_title_en) || pickLocale(locale, result.article.title_pt, result.article.title_en);
   const description = pickLocale(locale, result.article.seo_desc_pt, result.article.seo_desc_en) || pickLocale(locale, result.article.excerpt_pt, result.article.excerpt_en) || undefined;
-  const images = result.article.cover_image ? [{ url: result.article.cover_image, width: 1200, height: 630 }] : undefined;
   const allAuthorNames = [result.author, ...result.coauthors].filter((a): a is Author => Boolean(a)).map((a) => a.name);
+
+  // Falls back to the site-wide default OG image (admin-configurable, same
+  // one the homepage uses) when the article itself has no cover — a share
+  // with no image at all looks broken, same as one whose image a crawler
+  // silently drops.
+  let coverSrc = result.article.cover_image;
+  if (!coverSrc) {
+    const supabase = await createClient();
+    const { data } = await (supabase as any).from("site_config").select("value").eq("key", "seo_og_image").maybeSingle();
+    coverSrc = (data?.value as string | undefined) || null;
+  }
+  const ogImage = ogImageUrl(coverSrc);
+  const images = ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : undefined;
+  const url = articlePath(result.article, result.article.categories?.slug, locale === "en" ? "en" : "pt");
 
   return {
     title,
@@ -127,6 +143,9 @@ export async function generateMetadata({
       title,
       description,
       images,
+      url,
+      siteName: "Festina",
+      locale: locale === "pt" ? "pt_BR" : "en_US",
       publishedTime: result.article.published_at ?? undefined,
       authors: allAuthorNames.length > 0 ? allAuthorNames : undefined,
     },
@@ -134,7 +153,7 @@ export async function generateMetadata({
       card: "summary_large_image",
       title,
       description,
-      images: result.article.cover_image ? [result.article.cover_image] : undefined,
+      images: ogImage ? [ogImage] : undefined,
     },
   };
 }
@@ -238,6 +257,8 @@ export default async function ArticlePage({
 
           <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
             <FormatTag format={article.format} locale={locale} />
+            {categoryRow?.is_people_growth && <PeopleGrowthBadge />}
+            {categoryRow?.is_ponto_de_replica && <PontoDeReplicaBadge />}
             {categoryRow && (
               <span
                 style={{
