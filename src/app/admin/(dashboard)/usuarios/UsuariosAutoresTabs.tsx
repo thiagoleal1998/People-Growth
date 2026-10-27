@@ -143,9 +143,22 @@ export function UsuariosAutoresTabs({
                         <Badge tone={a.status === "active" ? "success" : "neutral"}>{a.status === "active" ? "Ativo" : "Inativo"}</Badge>
                       </td>
                       <td style={{ padding: "0.875rem 1.25rem" }}>
-                        <Badge tone={a.terms_accepted_at ? "success" : a.terms_declined_at ? "danger" : "warning"}>
+                        {/* Badge's own "success" tone is gold, not green (matches
+                            "Ativo" above) — accept/decline wants real green/red,
+                            same colors already used in TermsGate and the author
+                            detail page, so a plain span instead of <Badge>. */}
+                        <span
+                          style={{
+                            padding: "0.2rem 0.625rem",
+                            borderRadius: "9999px",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            backgroundColor: a.terms_accepted_at ? "rgba(22,163,74,0.1)" : a.terms_declined_at ? "rgba(220,38,38,0.1)" : "rgba(255,183,3,0.15)",
+                            color: a.terms_accepted_at ? "#16A34A" : a.terms_declined_at ? "#dc2626" : "#cc9200",
+                          }}
+                        >
                           {a.terms_accepted_at ? "Aceito" : a.terms_declined_at ? "Recusado" : "Pendente"}
-                        </Badge>
+                        </span>
                       </td>
                       <td style={{ padding: "0.875rem 1.25rem" }}>
                         <div style={{ display: "flex", gap: "0.5rem" }}>

@@ -49,6 +49,7 @@ import { NflPreview } from "@/components/NflPreview";
 import { NbaPreview } from "@/components/NbaPreview";
 import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
 import { articleHref } from "@/lib/article-url";
+import { ClampedNewsList } from "@/components/home/ClampedNewsList";
 import { isAuthorPubliclyVisible } from "@/lib/founder-data";
 import type { Article, Author, Testimonial, MediaItem, Category } from "@/types/database.types";
 
@@ -65,7 +66,7 @@ function shuffled<T>(items: T[]): T[] {
   return arr;
 }
 
-type ArticleWithCategory = Article & { categories: Pick<Category, "slug" | "is_people_growth" | "is_ponto_de_replica"> | null };
+export type ArticleWithCategory = Article & { categories: Pick<Category, "slug" | "is_people_growth" | "is_ponto_de_replica"> | null };
 
 function FounderEntry({ author, locale }: { author: Author; locale: string }) {
   return (
@@ -503,95 +504,21 @@ export default async function HomePage() {
                   <NewsletterForm light />
                 </div>
 
-                {/* More news, alternating formats */}
+                {/* More news, alternating formats — clamped in the browser to
+                    line up with the sidebar's own height, see ClampedNewsList. */}
                 {moreNews.length > 0 && (
-                  <div style={{ marginTop: "0.5rem" }}>
-                    <h2 style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--site-muted)", marginTop: "1.5rem", marginBottom: "0.5rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                      Mais notícias
-                    </h2>
-                    {moreNews.map((article, i) => (
-                      <Link
-                        key={article.id}
-                        href={articleHref(article, article.categories?.slug)}
-                        className="more-news-row"
-                        style={{
-                          display: "flex",
-                          gap: "1rem",
-                          alignItems: "flex-start",
-                          textDecoration: "none",
-                          padding: "1rem 0",
-                          borderTop: "1px solid var(--site-border)",
-                        }}
-                      >
-                        {article.cover_image && (
-                          <div
-                            className="more-news-img"
-                            style={{
-                              width: "110px",
-                              height: "80px",
-                              flexShrink: 0,
-                              borderRadius: "0.375rem",
-                              background: `url("${article.cover_image}") center/cover`,
-                            }}
-                          />
-                        )}
-                        <div style={{ flex: 1 }}>
-                          <div style={{ marginBottom: "0.375rem" }}>
-                            <FormatTag format={article.format} locale={locale} />
-                            {article.categories?.is_people_growth && <PeopleGrowthBadge />}
-                            {article.categories?.is_ponto_de_replica && <PontoDeReplicaBadge />}
-                          </div>
-                          <h4
-                            style={{
-                              fontWeight: 700,
-                              fontSize: i % 2 === 0 ? "1rem" : "0.9375rem",
-                              color: "var(--site-text)",
-                              lineHeight: 1.35,
-                              marginBottom: "0.25rem",
-                            }}
-                          >
-                            {pickLocale(locale, article.title_pt, article.title_en)}
-                          </h4>
-                          {i % 2 === 0 && article.excerpt_pt && (
-                            <p style={{ color: "var(--site-muted)", fontSize: "0.8125rem", lineHeight: 1.5, marginBottom: "0.25rem" }}>
-                              {pickLocale(locale, article.excerpt_pt, article.excerpt_en)}
-                            </p>
-                          )}
-                          <span style={{ fontSize: "0.75rem", color: "var(--site-faint)" }}>
-                            {article.author_id && authorById.get(article.author_id) && <>{tc("by")} {authorById.get(article.author_id)!.name} · </>}
-                            {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
-                          </span>
-                        </div>
-                      </Link>
-                    ))}
-                    {moreNews.length > 0 && (
-                      <Link
-                        href="/conteudo"
-                        className="hover-cta"
-                        style={{
-                          display: "flex",
-                          alignItems: "center",
-                          justifyContent: "center",
-                          gap: "0.5rem",
-                          marginTop: "1rem",
-                          padding: "0.75rem",
-                          borderRadius: "0.625rem",
-                          border: "1px solid var(--site-border-strong)",
-                          color: "var(--site-text)",
-                          fontWeight: 700,
-                          fontSize: "0.875rem",
-                          textDecoration: "none",
-                        }}
-                      >
-                        Ver todas as notícias <ArrowRight size={16} />
-                      </Link>
-                    )}
-                  </div>
+                  <ClampedNewsList
+                    articles={moreNews}
+                    authorNames={Object.fromEntries([...authorById].map(([id, a]) => [id, a.name]))}
+                    locale={locale}
+                    byLabel={tc("by")}
+                    sidebarId="home-sidebar-videos"
+                  />
                 )}
               </div>
 
               {/* Sidebar */}
-              <aside>
+              <aside id="home-sidebar-videos">
                 {showLiveBox && (
                   <div style={{ borderRadius: "0.5rem", overflow: "hidden", border: `2px solid ${isLive ? "#dc2626" : "#315E9C"}`, marginBottom: "0.875rem" }}>
                     <div style={{ backgroundColor: isLive ? "#dc2626" : "#315E9C", color: "white", padding: "0.5rem 0.75rem", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
