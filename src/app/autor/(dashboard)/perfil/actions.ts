@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { uploadPublicImage } from "@/lib/supabase/storage";
+import { logActivity } from "@/lib/activity-log";
 
 // Thrown rather than redirected — called directly from a small standalone form
 // (ChangePasswordCard), not the big profile form, so a mistake here never
@@ -58,4 +59,45 @@ export async function updateOwnAuthorProfile(formData: FormData) {
   revalidatePath("/[locale]/sobre/[slug]", "page");
   revalidatePath("/[locale]", "page");
   redirect(`/autor/perfil?saved=1${photoError ? `&photoError=${encodeURIComponent(photoError)}` : ""}`);
+}
+
+// Common revalidation after terms_accepted_at/terms_declined_at changes: the
+// author panel itself (the blocking modal reads this on every layout render)
+// plus every public page that can link to or list this author's profile,
+// since accepting/declining must take effect immediately, not after the
+// public pages' own ISR window expires.
+function revalidateAfterTermsChange() {
+  revalidatePath("/autor", "layout");
+  revalidatePath("/[locale]/conteudo", "page");
+  revalidatePath("/[locale]/conteudo/colunistas", "page");
+  revalidatePath("/[locale]/conteudo/autor/[slug]", "page");
+  revalidatePath("/[locale]/sobre", "page");
+  revalidatePath("/[locale]/sobre/[slug]", "page");
+  revalidatePath("/[locale]", "page");
+}
+
+export async function acceptTerms() {
+  const profile = await getCurrentProfile();
+  if (!profile?.author_id) return;
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  await client.from("authors").update({ terms_accepted_at: new Date().toISOString(), terms_declined_at: null }).eq("id", profile.author_id);
+
+  await logActivity({ userId: profile.id, userEmail: profile.email, action: "accept", entityType: "termo_aceite", entityLabel: "Termo de Aceite — Colunistas" });
+  revalidateAfterTermsChange();
+}
+
+export async function declineTerms() {
+  const profile = await getCurrentProfile();
+  if (!profile?.author_id) return;
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  await client.from("authors").update({ terms_declined_at: new Date().toISOString(), terms_accepted_at: null }).eq("id", profile.author_id);
+
+  await logActivity({ userId: profile.id, userEmail: profile.email, action: "decline", entityType: "termo_aceite", entityLabel: "Termo de Aceite — Colunistas" });
+  revalidateAfterTermsChange();
 }

@@ -5,4 +5,5 @@ export const INSTITUTIONAL_PAGES: { slug: string; label: string; path: string }[
   { slug: "normas-de-seguranca-e-privacidade", label: "Normas de Segurança e Privacidade", path: "/normas-de-seguranca-e-privacidade" },
   { slug: "termos-de-uso", label: "Termos de Uso", path: "/termos-de-uso" },
   { slug: "o-que-e-o-grupo-festina", label: "O que é o Grupo Festina", path: "/sobre/o-que-e-o-grupo-festina" },
+  { slug: "termo-aceite-colunistas", label: "Termo de Aceite — Colunistas", path: "/termo-aceite-colunistas" },
 ];

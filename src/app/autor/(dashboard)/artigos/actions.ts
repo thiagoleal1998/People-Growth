@@ -49,6 +49,15 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
   }
 
   const supabase = await createClient();
+  // UI-level convenience check — RLS (063_author_terms_acceptance.sql,
+  // current_user_terms_accepted()) is the actual enforcement, this only
+  // avoids an author filling out the whole form before hitting the wall.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: authorRow } = await (supabase as any).from("authors").select("terms_accepted_at").eq("id", profile.author_id).single();
+  if (!authorRow?.terms_accepted_at) {
+    redirect("/autor?error=" + encodeURIComponent("Você precisa aceitar o Termo de Aceite para criar ou editar conteúdo."));
+  }
+
   const { url: coverImageUrl, error: imageError } = await uploadPublicImage(formData.get("cover_image_file"), "articles");
 
   const title_pt = String(formData.get("title_pt") ?? "");

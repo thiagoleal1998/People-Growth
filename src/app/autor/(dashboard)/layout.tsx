@@ -1,7 +1,10 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { AuthorSidebar } from "@/components/autor/AuthorSidebar";
+import { TermsGate } from "@/components/autor/TermsGate";
 import { AUTHOR_MENU_DEFAULTS, applyMenuOverrides, type MenuOverride } from "@/lib/menu-registry";
+import { renderMarkdownLite } from "@/lib/markdown-lite";
+import { INSTITUTIONAL_DEFAULTS } from "@/lib/institutional-defaults";
 
 export default async function AuthorDashboardLayout({ children }: { children: React.ReactNode }) {
   const supabase = await createClient();
@@ -48,10 +51,35 @@ export default async function AuthorDashboardLayout({ children }: { children: Re
     unreadAnnouncements = Math.max(0, (totalCount ?? 0) - (readCount ?? 0));
   }
 
+  // The acceptance gate only applies to actual columnists — an admin who
+  // follows "Ver painel do colaborador" to preview this panel isn't the
+  // audience the Termo de Aceite addresses, and shouldn't get blocked by it.
+  let termsGate: React.ReactNode = null;
+  if (profile?.role === "author" && profile.author_id) {
+    const [{ data: authorData }, { data: termsPage }] = await Promise.all([
+      client.from("authors").select("terms_accepted_at,terms_declined_at").eq("id", profile.author_id).single(),
+      client.from("institutional_pages").select("title_pt,body_pt").eq("slug", "termo-aceite-colunistas").single(),
+    ]);
+    const defaults = INSTITUTIONAL_DEFAULTS["termo-aceite-colunistas"];
+    const title = termsPage?.title_pt || defaults.titlePt || "Termo de Aceite";
+    const body = termsPage?.body_pt || defaults.bodyPt;
+    termsGate = (
+      <TermsGate
+        termsAcceptedAt={authorData?.terms_accepted_at ?? null}
+        termsDeclinedAt={authorData?.terms_declined_at ?? null}
+        termsTitle={title}
+        termsBodyHtml={renderMarkdownLite(body)}
+      />
+    );
+  }
+
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       <AuthorSidebar menu={menu} logoUrl={logoUrl} pendingComments={pendingComments} unreadAnnouncements={unreadAnnouncements} />
-      <main className="admin-scroll" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%" }}>{children}</main>
+      <main className="admin-scroll" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%" }}>
+        {termsGate}
+        {children}
+      </main>
     </div>
   );
 }

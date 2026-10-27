@@ -31,6 +31,26 @@ function TaglineField({ name, label, defaultValue }: { name: string; label: stri
   );
 }
 
+function formatDateTime(iso: string) {
+  return new Date(iso).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" });
+}
+
+// Read-only — the author answers this themselves from their own panel
+// (TermsGate), never editable from here. Just a way for the admin to see
+// at a glance whether/when each columnist accepted.
+function TermsAcceptanceStatus({ author }: { author: Author }) {
+  const info = author.terms_accepted_at
+    ? { label: `Aceito em ${formatDateTime(author.terms_accepted_at)}`, color: "#16A34A" }
+    : author.terms_declined_at
+      ? { label: `Recusado em ${formatDateTime(author.terms_declined_at)}`, color: "#dc2626" }
+      : { label: "Pendente — ainda não respondeu", color: "var(--admin-muted)" };
+  return (
+    <Field label="Termo de Aceite" hint="Respondido pelo próprio autor no painel dele, assim que ele entra.">
+      <div style={{ fontSize: "0.875rem", fontWeight: 700, color: info.color }}>{info.label}</div>
+    </Field>
+  );
+}
+
 const tabs = [
   { id: "perfil", label: "Perfil" },
   { id: "bio", label: "Bio & Trajetória" },
@@ -222,6 +242,7 @@ export function AuthorForm({ item, imageError }: { item?: Author; imageError?: s
                 É um dos fundadores do Festina
               </label>
             </Field>
+            {item && <TermsAcceptanceStatus author={item} />}
           </div>
         </div>
 

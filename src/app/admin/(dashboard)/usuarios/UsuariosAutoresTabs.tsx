@@ -118,7 +118,7 @@ export function UsuariosAutoresTabs({
               <table style={{ width: "100%", borderCollapse: "collapse" }}>
                 <thead>
                   <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                    {["Nome", "Cargo", "Status", ""].map((h) => (
+                    {["Nome", "Cargo", "Status", "Termo de Aceite", ""].map((h) => (
                       <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
                     ))}
                   </tr>
@@ -141,6 +141,11 @@ export function UsuariosAutoresTabs({
                       <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.875rem" }}>{a.role_pt ?? "—"}</td>
                       <td style={{ padding: "0.875rem 1.25rem" }}>
                         <Badge tone={a.status === "active" ? "success" : "neutral"}>{a.status === "active" ? "Ativo" : "Inativo"}</Badge>
+                      </td>
+                      <td style={{ padding: "0.875rem 1.25rem" }}>
+                        <Badge tone={a.terms_accepted_at ? "success" : a.terms_declined_at ? "danger" : "warning"}>
+                          {a.terms_accepted_at ? "Aceito" : a.terms_declined_at ? "Recusado" : "Pendente"}
+                        </Badge>
                       </td>
                       <td style={{ padding: "0.875rem 1.25rem" }}>
                         <div style={{ display: "flex", gap: "0.5rem" }}>

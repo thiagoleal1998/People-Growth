@@ -1,6 +1,6 @@
 import { createAdminClient } from "@/lib/supabase/server";
 
-export type ActivityAction = "create" | "update" | "delete" | "publish" | "login" | "logout";
+export type ActivityAction = "create" | "update" | "delete" | "publish" | "login" | "logout" | "accept" | "decline";
 
 export type FieldChange = { field: string; before: string; after: string };
 

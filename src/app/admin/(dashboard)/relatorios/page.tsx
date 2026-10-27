@@ -40,6 +40,8 @@ const ACTIVITY_ACTION_LABELS: Record<string, { label: string; color: string }> =
   publish: { label: "Publicou", color: "#A07B3B" },
   login: { label: "Entrou", color: "#FFB703" },
   logout: { label: "Saiu", color: "var(--admin-faint)" },
+  accept: { label: "Aceitou", color: "#16A34A" },
+  decline: { label: "Recusou", color: "#dc2626" },
 };
 
 // "há 3 dias", "há 2 horas" — no date library in this codebase, and the

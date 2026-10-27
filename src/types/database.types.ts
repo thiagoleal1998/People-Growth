@@ -323,6 +323,8 @@ type AuthorRow = {
   status: "active" | "inactive";
   order: number;
   is_founder: boolean;
+  terms_accepted_at: string | null;
+  terms_declined_at: string | null;
   created_at: string;
   updated_at: string;
 };

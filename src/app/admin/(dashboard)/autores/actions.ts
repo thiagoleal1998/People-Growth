@@ -17,7 +17,10 @@ export async function upsertAuthor(id: string | null, formData: FormData) {
   const name = String(formData.get("name") ?? "");
   const slugInput = String(formData.get("slug") ?? "").trim();
 
-  const payload: Omit<Author, "id" | "created_at" | "updated_at"> = {
+  // terms_accepted_at/terms_declined_at are deliberately excluded — the
+  // author answers that themselves from their own panel (TermsGate), this
+  // form only ever shows it read-only (see TermsAcceptanceStatus below).
+  const payload: Omit<Author, "id" | "created_at" | "updated_at" | "terms_accepted_at" | "terms_declined_at"> = {
     name,
     slug: slugInput || slugify(name, { lower: true, strict: true }),
     gender: (String(formData.get("gender") ?? "masculino")) as Author["gender"],

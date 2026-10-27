@@ -5,9 +5,12 @@ export type Milestone = { year: string; label: string };
 // A columnist only becomes publicly visible once their profile has enough
 // to actually show: a real photo (not the gradient placeholder), their
 // name, and a tagline — otherwise an unfinished profile (no photo, no
-// tagline) ends up listed everywhere looking broken/empty.
-export function isAuthorPubliclyVisible(author: Pick<Author, "photo_url" | "name" | "tagline_pt">): boolean {
-  return Boolean(author.photo_url?.trim() && author.name?.trim() && author.tagline_pt?.trim());
+// tagline) ends up listed everywhere looking broken/empty. Declining the
+// columnist acceptance terms also hides the profile (their already-published
+// articles stay up — this only affects the profile page and the links to
+// it, see every call site of this function).
+export function isAuthorPubliclyVisible(author: Pick<Author, "photo_url" | "name" | "tagline_pt" | "terms_declined_at">): boolean {
+  return Boolean(author.photo_url?.trim() && author.name?.trim() && author.tagline_pt?.trim() && !author.terms_declined_at);
 }
 
 // "Sobre o autor"/"Sobre a autora" only works for the binary genders this
