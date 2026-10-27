@@ -90,6 +90,15 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
   // renderer's paragraph/list/quote splitting only recognizes plain "\n\n".
   const contentPt = String(formData.get("content_pt") ?? "").replace(/\r\n?/g, "\n");
 
+  // Mandatory AI-use declaration — the radio group lives on the "Detalhes"
+  // tab, which is display:none (not removed) when inactive, so the native
+  // HTML `required` attribute alone can't be trusted to block submission if
+  // the author never opens that tab. This is the real enforcement.
+  const aiUsedRaw = formData.get("ai_used");
+  if (aiUsedRaw !== "yes" && aiUsedRaw !== "no") {
+    throw new Error("Responda se este artigo utilizou inteligência artificial (aba Detalhes) antes de salvar.");
+  }
+
   const payload = {
     title_pt,
     title_en: String(formData.get("title_en") ?? "") || null,
@@ -107,6 +116,7 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
     category_id: String(formData.get("category_id") ?? "") || null,
     seo_title_pt: String(formData.get("seo_title_pt") ?? "") || null,
     seo_desc_pt: String(formData.get("seo_desc_pt") ?? "") || null,
+    ai_usage: aiUsedRaw === "yes" ? formData.getAll("ai_usage").map((value) => String(value)) : [],
     read_time: calculateReadTime(contentPt),
     format,
     status,

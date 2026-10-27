@@ -13,6 +13,7 @@ import { alertDialog } from "@/components/admin/dialog-store";
 import { upsertOwnArticle } from "./actions";
 import type { Article, Author, Category } from "@/types/database.types";
 import { FORMAT_SEGMENT } from "@/lib/article-url";
+import { AI_USAGE_OPTIONS, aiDisclosureText } from "@/lib/ai-disclosure";
 
 const tabs = [
   { id: "conteudo", label: "Conteúdo" },
@@ -78,6 +79,15 @@ export function AuthorArticleForm({ item, categories, otherAuthors, extraCategor
   const [coauthors, setCoauthors] = useState<string[]>(coauthorIds ?? []);
   function toggleCoauthor(id: string) {
     setCoauthors((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
+  }
+  // null = not answered yet — only a brand-new article starts this way, so
+  // the author is forced to make an explicit choice instead of silently
+  // publishing under a default. An article that was already saved before
+  // (even with an empty ai_usage) already has an answer on record ("Não").
+  const [aiUsed, setAiUsed] = useState<"yes" | "no" | null>(item ? ((item.ai_usage ?? []).length > 0 ? "yes" : "no") : null);
+  const [aiUsage, setAiUsage] = useState<string[]>(item?.ai_usage ?? []);
+  function toggleAiUsage(value: string) {
+    setAiUsage((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
   }
   const [translating, setTranslating] = useState(false);
   const [generatingExcerpt, setGeneratingExcerpt] = useState(false);
@@ -403,6 +413,48 @@ export function AuthorArticleForm({ item, categories, otherAuthors, extraCategor
             >
               <DateTimePicker name="scheduled_for" defaultValue={item?.scheduled_for} />
             </Field>
+
+            <div style={{ marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid var(--admin-border)" }}>
+              <div style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--admin-text)", marginBottom: "0.5rem" }}>
+                Inteligência artificial utilizada neste artigo? *
+              </div>
+              <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "0.75rem", lineHeight: 1.6 }}>
+                Se sim, o artigo recebe uma declaração de transparência ao final do texto, antes das fontes. Resposta obrigatória.
+              </p>
+              <div style={{ display: "flex", gap: "1.25rem", marginBottom: "1rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.375rem", cursor: "pointer" }}>
+                  <input type="radio" name="ai_used" value="no" checked={aiUsed === "no"} onChange={() => setAiUsed("no")} required />
+                  Não
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.375rem", cursor: "pointer" }}>
+                  <input type="radio" name="ai_used" value="yes" checked={aiUsed === "yes"} onChange={() => setAiUsed("yes")} required />
+                  Sim
+                </label>
+              </div>
+              {aiUsed === "yes" && (
+                <div>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--admin-text-secondary)", marginBottom: "0.5rem" }}>
+                    Como a inteligência artificial foi utilizada?
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "0.5rem 1rem", marginBottom: "1rem" }}>
+                    {AI_USAGE_OPTIONS.map((option) => (
+                      <label key={option.value} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)", cursor: "pointer" }}>
+                        <input type="checkbox" name="ai_usage" value={option.value} checked={aiUsage.includes(option.value)} onChange={() => toggleAiUsage(option.value)} />
+                        {option.label}
+                      </label>
+                    ))}
+                  </div>
+                  <div style={{ padding: "0.875rem 1rem", borderRadius: "0.625rem", backgroundColor: "rgba(49, 94, 156,0.05)", border: "1px solid rgba(49, 94, 156,0.15)" }}>
+                    <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--admin-faint)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.375rem" }}>
+                      Declaração que aparecerá no artigo
+                    </div>
+                    <div style={{ fontSize: "0.875rem", fontStyle: "italic", color: "var(--admin-text-secondary)", lineHeight: 1.6 }}>
+                      {aiDisclosureText(aiUsage, "pt") ?? "Escolha pelo menos uma forma de uso."}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           </div>
         </div>
