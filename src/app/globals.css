@@ -109,6 +109,15 @@
   font-size: 0.95rem;
   line-height: 1.6;
   color: var(--admin-text);
+  /* !important: ProseMirror's own injected base stylesheet sets
+     `word-wrap: break-word` on `.ProseMirror` (same element, equal
+     selector specificity, loaded after this file) — break-word only
+     breaks as a last resort inside an already-sized box and is ignored
+     by grid/flex automatic minimum-size calculations, so a long
+     unbroken run (e.g. a URL used as its own link text) still forced
+     the whole editor column wider than the viewport. `anywhere` is
+     the value that actually shrinks the min-content contribution. */
+  overflow-wrap: anywhere !important;
 }
 
 .tiptap-content p {

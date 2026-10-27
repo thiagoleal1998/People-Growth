@@ -155,7 +155,7 @@ export function ArticleBody({
 
         <div
           ref={bodyRef}
-          style={{ fontSize: "1.0625rem", lineHeight: 1.85, color: "var(--site-text-secondary)" }}
+          style={{ fontSize: "1.0625rem", lineHeight: 1.85, color: "var(--site-text-secondary)", overflowWrap: "anywhere" }}
           dangerouslySetInnerHTML={{ __html: bodyHtml }}
         />
 
