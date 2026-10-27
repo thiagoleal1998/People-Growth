@@ -51,11 +51,13 @@ export default async function AuthorDashboardLayout({ children }: { children: Re
     unreadAnnouncements = Math.max(0, (totalCount ?? 0) - (readCount ?? 0));
   }
 
-  // The acceptance gate only applies to actual columnists — an admin who
-  // follows "Ver painel do colaborador" to preview this panel isn't the
-  // audience the Termo de Aceite addresses, and shouldn't get blocked by it.
+  // Applies to any login linked to an authors row, admin or not — a founder
+  // writing columns is still a columnist for this purpose. This only ever
+  // gates the author-panel self-service write path (see the RLS policies in
+  // 063_author_terms_acceptance.sql); an admin's own /admin powers, which
+  // run through a separate unconditional RLS policy, are unaffected either way.
   let termsGate: React.ReactNode = null;
-  if (profile?.role === "author" && profile.author_id) {
+  if (profile?.author_id) {
     const [{ data: authorData }, { data: termsPage }] = await Promise.all([
       client.from("authors").select("terms_accepted_at,terms_declined_at").eq("id", profile.author_id).single(),
       client.from("institutional_pages").select("title_pt,body_pt").eq("slug", "termo-aceite-colunistas").single(),
