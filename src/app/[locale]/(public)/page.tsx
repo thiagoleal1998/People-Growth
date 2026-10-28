@@ -595,7 +595,12 @@ export default async function HomePage() {
                     <Zap size={16} color="#dc2626" fill="#dc2626" />
                     <span style={{ color: "#dc2626", fontWeight: 800, fontSize: "0.9375rem", letterSpacing: "0.02em" }}>SHORTS</span>
                   </div>
-                  <div style={{ position: "relative", width: "100%", aspectRatio: "9/16", backgroundColor: "#000" }}>
+                  {/* A Short is genuinely 9:16 — at the sidebar's full width that's
+                      very tall (it was running off the bottom of the screen).
+                      Narrowing and centering the box keeps the real portrait
+                      proportions (no stretching/cropping the video) while
+                      cutting the absolute height roughly in half. */}
+                  <div style={{ position: "relative", width: "42%", margin: "0 auto", aspectRatio: "9/16", backgroundColor: "#000" }}>
                     {shortsVideoUrl ? (
                       <iframe
                         src={shortsVideoUrl}
