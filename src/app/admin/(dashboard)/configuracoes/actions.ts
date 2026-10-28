@@ -32,6 +32,8 @@ export async function updateSiteConfig(formData: FormData) {
       key !== "tse_widget_enabled" &&
       key !== "sports_widget_enabled" &&
       key !== "testimonials_enabled" &&
+      key !== "portfolio_enabled" &&
+      key !== "courses_enabled" &&
       key !== "logo_file" &&
       key !== "favicon_file"
   );
@@ -41,6 +43,8 @@ export async function updateSiteConfig(formData: FormData) {
   await client.from("site_config").upsert({ key: "tse_widget_enabled", value: formData.get("tse_widget_enabled") === "on" ? "true" : "false" });
   await client.from("site_config").upsert({ key: "sports_widget_enabled", value: formData.get("sports_widget_enabled") === "on" ? "true" : "false" });
   await client.from("site_config").upsert({ key: "testimonials_enabled", value: formData.get("testimonials_enabled") === "on" ? "true" : "false" });
+  await client.from("site_config").upsert({ key: "portfolio_enabled", value: formData.get("portfolio_enabled") === "on" ? "true" : "false" });
+  await client.from("site_config").upsert({ key: "courses_enabled", value: formData.get("courses_enabled") === "on" ? "true" : "false" });
 
   for (const [key, value] of entries) {
     await client.from("site_config").upsert({ key, value: String(value) });

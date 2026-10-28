@@ -36,6 +36,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function CasePage({ params }: { params: Promise<{ slug: string; locale: string }> }) {
   const { slug, locale } = await params;
+  const supabase = await createClient();
+  const { data: configRow } = await (supabase as any).from("site_config").select("value").eq("key", "portfolio_enabled").maybeSingle();
+  if (configRow?.value === "false") notFound();
+
   const c = await getCase(slug);
 
   if (!c) notFound();

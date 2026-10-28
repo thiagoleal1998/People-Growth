@@ -17,9 +17,11 @@ type FooterProps = {
   x?: string;
   mediaEnabled?: boolean;
   sportsEnabled?: boolean;
+  portfolioEnabled?: boolean;
+  coursesEnabled?: boolean;
 };
 
-export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, youtube, x, mediaEnabled = true, sportsEnabled = true }: FooterProps) {
+export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, youtube, x, mediaEnabled = true, sportsEnabled = true, portfolioEnabled = true, coursesEnabled = true }: FooterProps) {
   const t = useTranslations("footer");
   const nav = useTranslations("nav");
   const year = new Date().getFullYear();
@@ -168,7 +170,7 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
                 { key: "sports", href: "/esportes" as const },
                 { key: "contact", href: "/contato" as const },
               ]
-                .filter((l) => (mediaEnabled || l.key !== "media") && (sportsEnabled || l.key !== "sports"))
+                .filter((l) => (mediaEnabled || l.key !== "media") && (sportsEnabled || l.key !== "sports") && (portfolioEnabled || l.key !== "portfolio"))
                 .map(({ key, href }) => (
                 <li key={key}>
                   <Link
@@ -199,13 +201,15 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
           <FooterSection title={t("resources")}>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
               {[
-                { label: "Mea Sententia", href: "/conteudo" as const },
-                { label: t("freeResources"), href: "/recursos" as const },
-                { label: nav("courses"), href: "/cursos" as const },
-                { label: nav("aiLab"), href: "/laboratorio-ia" as const },
-                { label: nav("tools"), href: "/ferramentas" as const },
-                { label: "FAQ", href: "/faq" as const },
-              ].map(({ label, href }) => (
+                { key: "meaSententia", label: "Mea Sententia", href: "/conteudo" as const },
+                { key: "freeResources", label: t("freeResources"), href: "/recursos" as const },
+                { key: "courses", label: nav("courses"), href: "/cursos" as const },
+                { key: "aiLab", label: nav("aiLab"), href: "/laboratorio-ia" as const },
+                { key: "tools", label: nav("tools"), href: "/ferramentas" as const },
+                { key: "faq", label: "FAQ", href: "/faq" as const },
+              ]
+                .filter((l) => coursesEnabled || l.key !== "courses")
+                .map(({ label, href }) => (
                 <li key={label}>
                   <Link href={href} style={{ fontSize: "0.875rem", transition: "color 0.2s" }}>
                     {label}

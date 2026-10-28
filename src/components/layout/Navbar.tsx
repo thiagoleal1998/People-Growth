@@ -36,13 +36,26 @@ const navGroups = [
   },
 ];
 
-export function Navbar({ logoUrl, mediaEnabled = true }: { logoUrl?: string | null; mediaEnabled?: boolean }) {
+export function Navbar({
+  logoUrl,
+  mediaEnabled = true,
+  portfolioEnabled = true,
+  coursesEnabled = true,
+}: {
+  logoUrl?: string | null;
+  mediaEnabled?: boolean;
+  portfolioEnabled?: boolean;
+  coursesEnabled?: boolean;
+}) {
   const t = useTranslations("nav");
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
   const visibleNavGroups = navGroups
-    .map((g) => ({ ...g, items: g.items.filter((l) => mediaEnabled || l.key !== "media") }))
+    .map((g) => ({
+      ...g,
+      items: g.items.filter((l) => (mediaEnabled || l.key !== "media") && (portfolioEnabled || l.key !== "portfolio") && (coursesEnabled || l.key !== "courses")),
+    }))
     .filter((g) => g.items.length > 0);
 
   return (

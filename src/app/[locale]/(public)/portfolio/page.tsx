@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { notFound } from "next/navigation";
 import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight } from "lucide-react";
@@ -27,8 +28,15 @@ export default async function PortfolioPage() {
   const t = await getTranslations("portfolio");
   const locale = await getLocale();
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any).from("portfolio_cases").select("*").eq("status", "active").order("order");
+  const client = supabase as any;
+  const [{ data }, { data: configRow }] = await Promise.all([
+    client.from("portfolio_cases").select("*").eq("status", "active").order("order"),
+    client.from("site_config").select("value").eq("key", "portfolio_enabled").maybeSingle(),
+  ]);
+  // Defaults to enabled — the key only exists once an admin has explicitly
+  // toggled it off via Configurações. Direct links 404 while disabled,
+  // matching it being pulled from the nav/footer/sitemap.
+  if (configRow?.value === "false") notFound();
   const cases = (data ?? []) as PortfolioCase[];
 
   return (

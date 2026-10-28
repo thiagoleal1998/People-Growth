@@ -30,11 +30,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const { data: mediaConfigRow } = await client.from("site_config").select("value").eq("key", "media_enabled").maybeSingle();
-  const mediaEnabled = mediaConfigRow?.value !== "false";
+  const { data: configRows } = await client.from("site_config").select("key,value").in("key", ["media_enabled", "portfolio_enabled", "courses_enabled"]);
+  const configByKey = Object.fromEntries(((configRows ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value]));
+  const mediaEnabled = configByKey.media_enabled !== "false";
+  const portfolioEnabled = configByKey.portfolio_enabled !== "false";
+  const coursesEnabled = configByKey.courses_enabled !== "false";
 
   const staticEntries: MetadataRoute.Sitemap = routes
-    .filter(({ path }) => mediaEnabled || path !== "/na-midia")
+    .filter(({ path }) => (mediaEnabled || path !== "/na-midia") && (portfolioEnabled || path !== "/portfolio") && (coursesEnabled || path !== "/cursos"))
     .flatMap(({ path, priority }) =>
       locales.map((locale) => ({
         url: `${baseUrl}/${locale}${path}`,

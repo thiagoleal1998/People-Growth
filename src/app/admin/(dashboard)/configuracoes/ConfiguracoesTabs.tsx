@@ -320,6 +320,18 @@ export function ConfiguracoesTabs({
                 Sim, mostrar os depoimentos
               </label>
             </Field>
+            <Field label="Mostrar o Portfólio?" hint="Desative para ocultar o link no menu/rodapé e a página /portfolio, sem apagar os cases cadastrados.">
+              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                <input type="checkbox" name="portfolio_enabled" defaultChecked={values.portfolio_enabled !== "false"} />
+                Sim, mostrar o Portfólio
+              </label>
+            </Field>
+            <Field label="Mostrar Cursos?" hint="Desative para ocultar o link no menu/rodapé e a página /cursos, sem apagar os cursos cadastrados.">
+              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                <input type="checkbox" name="courses_enabled" defaultChecked={values.courses_enabled !== "false"} />
+                Sim, mostrar Cursos
+              </label>
+            </Field>
           </div>
         </div>
 
