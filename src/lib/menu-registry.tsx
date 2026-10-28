@@ -18,6 +18,7 @@ import {
   Building2,
   Home,
   MessageCircle,
+  ListChecks,
   UserCircle,
 } from "lucide-react";
 
@@ -54,6 +55,7 @@ export const ADMIN_MENU_DEFAULTS: MenuEntry[] = [
   { id: "leads", href: "/admin/leads", label: "Leads / CRM", icon: <Users size={17} />, countKey: "leads" },
   { id: "chamados", href: "/admin/chamados", label: "Chamados", icon: <LifeBuoy size={17} />, countKey: "chamados" },
   { id: "comunicados", href: "/admin/comunicados", label: "Comunicados", icon: <Megaphone size={17} /> },
+  { id: "instrucoes", href: "/admin/instrucoes", label: "Canal de Instruções", icon: <ListChecks size={17} /> },
   {
     id: "marketing",
     label: "Marketing",
@@ -77,6 +79,7 @@ export const AUTHOR_MENU_DEFAULTS: MenuLink[] = [
   { id: "artigos", href: "/autor/artigos", label: "Meus artigos", icon: <FileText size={17} /> },
   { id: "comentarios", href: "/autor/comentarios", label: "Comentários", icon: <MessageCircle size={17} /> },
   { id: "comunicados", href: "/autor/comunicados", label: "Comunicados", icon: <Megaphone size={17} /> },
+  { id: "instrucoes", href: "/autor/instrucoes", label: "Canal de Instruções", icon: <ListChecks size={17} /> },
   { id: "chamados", href: "/autor/chamados", label: "Chamados", icon: <LifeBuoy size={17} /> },
   { id: "empresa", href: "/autor/empresa", label: "A empresa", icon: <Building2 size={17} /> },
   { id: "perfil", href: "/autor/perfil", label: "Meu perfil", icon: <UserCircle size={17} /> },

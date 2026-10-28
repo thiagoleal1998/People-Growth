@@ -455,6 +455,16 @@ type AnnouncementRow = {
   updated_at: string;
 };
 
+type InstructionItemRow = {
+  id: string;
+  kind: "faq" | "step";
+  title: string;
+  body: string;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 type AnnouncementReadRow = {
   announcement_id: string;
   user_id: string;
@@ -501,6 +511,7 @@ export type Database = {
       content_calendar_items: { Row: ContentCalendarItemRow; Insert: Omit<ContentCalendarItemRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<ContentCalendarItemRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       announcements: { Row: AnnouncementRow; Insert: Omit<AnnouncementRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AnnouncementRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       announcement_reads: { Row: AnnouncementReadRow; Insert: Omit<AnnouncementReadRow, "read_at">; Update: Partial<AnnouncementReadRow>; Relationships: [] };
+      instruction_items: { Row: InstructionItemRow; Insert: Omit<InstructionItemRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<InstructionItemRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -543,3 +554,4 @@ export type InstitutionalPage = InstitutionalPageRow;
 export type ContentCalendarItem = ContentCalendarItemRow;
 export type Announcement = AnnouncementRow;
 export type AnnouncementRead = AnnouncementReadRow;
+export type InstructionItem = InstructionItemRow;
