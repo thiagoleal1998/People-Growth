@@ -224,6 +224,7 @@ export default async function HomePage() {
   const heroVideoThumbnail = config.hero_video_url ? getYouTubeThumbnail(config.hero_video_url) : null;
   const featuredVideoUrl = config.featured_video_url ? toYouTubeEmbedUrl(config.featured_video_url) : "";
   const shortsVideoUrl = config.shorts_video_url ? toYouTubeEmbedUrl(config.shorts_video_url) : "";
+  const shortsThumbnail = config.shorts_video_url ? getYouTubeThumbnail(config.shorts_video_url) : null;
   // The admin picks whether the box is labelled "Ao vivo" or "Replay"; the
   // video follows that choice, and the box shows only when is_live is on.
   // With no live link set there is nothing to play live, so the box falls back
@@ -597,10 +598,26 @@ export default async function HomePage() {
                   </div>
                   {/* A Short is genuinely 9:16 — at the sidebar's full width that's
                       very tall (it was running off the bottom of the screen).
-                      Narrowing and centering the box keeps the real portrait
-                      proportions (no stretching/cropping the video) while
-                      cutting the absolute height roughly in half. */}
-                  <div style={{ position: "relative", width: "42%", margin: "0 auto", aspectRatio: "9/16", backgroundColor: "#000" }}>
+                      Narrowing and centering the video keeps its real portrait
+                      proportions (no stretching/cropping) while cutting the
+                      absolute height roughly in half; the blurred thumbnail
+                      fills the empty sides instead of leaving bare black bars,
+                      which read as a layout bug rather than a design choice. */}
+                  <div style={{ position: "relative", width: "100%", backgroundColor: "#000", overflow: "hidden" }}>
+                    {shortsThumbnail && (
+                      <div
+                        style={{
+                          position: "absolute",
+                          inset: 0,
+                          backgroundImage: `url("${shortsThumbnail}")`,
+                          backgroundSize: "cover",
+                          backgroundPosition: "center",
+                          filter: "blur(24px) brightness(0.55)",
+                          transform: "scale(1.15)",
+                        }}
+                      />
+                    )}
+                    <div style={{ position: "relative", width: "42%", margin: "0 auto", aspectRatio: "9/16" }}>
                     {shortsVideoUrl ? (
                       <iframe
                         src={shortsVideoUrl}
@@ -626,6 +643,7 @@ export default async function HomePage() {
                         Em breve
                       </div>
                     )}
+                    </div>
                   </div>
                 </div>
 
