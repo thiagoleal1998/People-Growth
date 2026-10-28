@@ -49,7 +49,7 @@ export function ShareButtons({ title }: { title: string }) {
   // line, "Leia mais: <url>", a blank line, then a one-line brand sign-off —
   // the structure the user pointed at with CNN's "Pense bem, pense CNN".
   // *asterisks* are WhatsApp's own bold markdown, not ours.
-  const whatsappText = `*${title}*\n\nLeia mais: ${url}\n\nFestina — apressa-te devagar`;
+  const whatsappText = `*${title}*\n\nLeia mais: ${url}\n\n*Festina — apressa-te devagar*`;
 
   const links = [
     {
