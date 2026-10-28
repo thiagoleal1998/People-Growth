@@ -116,6 +116,13 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
   // chart whose whole point is putting a face to each person.
   const otherAuthors = authors.filter((a) => !a.is_founder && a.status === "active" && a.photo_url && a.name?.trim());
 
+  // Alphabetical by request, for every section except the C-Level pyramid
+  // below (which keeps the hierarchy order the unsorted `founders`/
+  // `otherFounders` above already encode — CEO on top, the others under it).
+  const byName = (a: Author, b: Author) => a.name.localeCompare(b.name, "pt");
+  const foundersAlpha = [...founders].sort(byName);
+  const otherAuthorsAlpha = [...otherAuthors].sort(byName);
+
   if (!ceoFounder && founders.length === 0 && otherAuthors.length === 0) return null;
 
   return (
@@ -133,7 +140,7 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)" }}>Conselho Administrativo</div>
                 <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
-                  {founders.map((a, i) => (
+                  {foundersAlpha.map((a, i) => (
                     <NameChip key={a.id} author={a} index={i} />
                   ))}
                 </div>
@@ -162,7 +169,7 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
               <div style={{ textAlign: "center" }}>
                 <div style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)" }}>Conselho Editorial</div>
                 <div style={{ display: "flex", justifyContent: "center", gap: "1rem", flexWrap: "wrap", marginTop: "0.5rem" }}>
-                  {founders.map((a, i) => (
+                  {foundersAlpha.map((a, i) => (
                     <NameChip key={a.id} author={a} index={i} />
                   ))}
                 </div>
@@ -173,7 +180,7 @@ export function OrganogramaCard({ authors }: { authors: Author[] }) {
               <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
                 <div style={{ fontSize: "0.8125rem", fontWeight: 800, color: "var(--admin-text)", textTransform: "uppercase", letterSpacing: "0.04em" }}>Autores</div>
                 <div style={{ display: "flex", justifyContent: "center", gap: "1.5rem", flexWrap: "wrap", marginTop: "1rem" }}>
-                  {otherAuthors.map((a, i) => (
+                  {otherAuthorsAlpha.map((a, i) => (
                     <AuthorChip key={a.id} author={a} index={i} />
                   ))}
                 </div>
