@@ -187,6 +187,19 @@ export default async function ArticlePage({
     permanentRedirect(articlePath(article, article.categories?.slug, locale === "en" ? "en" : "pt"));
   }
 
+  // Exactly one sub-brand logo per article, never more than one — a piece
+  // can only really belong to one of these at a time. Format wins over the
+  // category's flags: an opinion piece (Mea Sententia) keeps that identity
+  // even if its category also happens to be flagged for one of the other two.
+  const subBrandLogo =
+    article.format === "opiniao"
+      ? { url: MEA_SENTENTIA_LOGO_URL, alt: "Mea Sententia", height: "2.75rem", padding: "0.375rem 0.75rem" }
+      : categoryRow?.is_ponto_de_replica
+        ? { url: PONTO_DE_REPLICA_LOGO_URL, alt: "Ponto de Réplica", height: "2.75rem", padding: "0.375rem 0.75rem" }
+        : categoryRow?.is_people_growth
+          ? { url: PEOPLE_GROWTH_LOGO_URL, alt: "People & Growth", height: "2.25rem", padding: "0.5rem 0.875rem" }
+          : null;
+
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br";
   const canonicalPath = articlePath(article, article.categories?.slug, "pt");
   const aiText = aiDisclosureText(article.ai_usage, locale);
@@ -254,30 +267,16 @@ export default async function ArticlePage({
             <ArrowLeft size={16} /> {tNav("newsletter")}
           </Link>
 
-          {(categoryRow?.is_people_growth || categoryRow?.is_ponto_de_replica || article.format === "opiniao") && (
-            <div style={{ marginBottom: "1rem", display: "flex", gap: "0.75rem" }}>
-              {categoryRow?.is_people_growth && (
-                // All three logos read poorly straight on the hero's dark
-                // gradient (People & Growth is navy-on-white; the other two
-                // are metallic tones with too little contrast against navy
-                // too) — a white card behind each fixes it.
-                <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: "0.5rem 0.875rem" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={PEOPLE_GROWTH_LOGO_URL} alt="People & Growth" style={{ height: "2.25rem", width: "auto", objectFit: "contain", display: "block" }} />
-                </div>
-              )}
-              {categoryRow?.is_ponto_de_replica && (
-                <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: "0.375rem 0.75rem" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ height: "2.75rem", width: "auto", objectFit: "contain", display: "block" }} />
-                </div>
-              )}
-              {article.format === "opiniao" && (
-                <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: "0.375rem 0.75rem" }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={MEA_SENTENTIA_LOGO_URL} alt="Mea Sententia" style={{ height: "2.75rem", width: "auto", objectFit: "contain", display: "block" }} />
-                </div>
-              )}
+          {subBrandLogo && (
+            <div style={{ marginBottom: "1rem" }}>
+              {/* All three logos read poorly straight on the hero's dark
+                  gradient (People & Growth is navy-on-white; the other two
+                  are metallic tones with too little contrast against navy
+                  too) — a white card behind each fixes it. */}
+              <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: subBrandLogo.padding }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={subBrandLogo.url} alt={subBrandLogo.alt} style={{ height: subBrandLogo.height, width: "auto", objectFit: "contain", display: "block" }} />
+              </div>
             </div>
           )}
 
