@@ -11,10 +11,14 @@ import { getClientIp, checkRateLimit } from "@/lib/rate-limit";
 // (Google Cloud TTS's free tier is the natural fallback) without touching
 // the player UI, since everything else only depends on this route
 // returning { url }.
-export const maxDuration = 60;
+// A real ~30k-char article measured at ~111s end-to-end — 60s wasn't
+// enough even before raising MAX_CHARS below. 300s (Vercel Pro's Fluid
+// Compute allows up to 800s) gives real headroom for the longest articles
+// plus slower runs under load, without being anywhere near the ceiling.
+export const maxDuration = 300;
 
 const BUCKET = "site-assets";
-const MAX_CHARS = 20000;
+const MAX_CHARS = 45000;
 const CHUNK_CHARS = 1800;
 
 const VOICE_BY_LOCALE: Record<string, string> = {
