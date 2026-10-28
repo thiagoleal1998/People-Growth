@@ -6,7 +6,7 @@ import { ArrowLeft, Clock, Calendar, ChevronRight, Linkedin, Instagram, Globe } 
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
-import { PEOPLE_GROWTH_LOGO_URL, PONTO_DE_REPLICA_LOGO_URL } from "@/lib/brand-logos";
+import { PEOPLE_GROWTH_LOGO_URL, PONTO_DE_REPLICA_LOGO_URL, MEA_SENTENTIA_LOGO_URL } from "@/lib/brand-logos";
 import { ShareButtons } from "@/components/ShareButtons";
 import { Comments } from "@/components/Comments";
 import { AdBanner } from "@/components/AdBanner";
@@ -254,13 +254,13 @@ export default async function ArticlePage({
             <ArrowLeft size={16} /> {tNav("newsletter")}
           </Link>
 
-          {(categoryRow?.is_people_growth || categoryRow?.is_ponto_de_replica) && (
+          {(categoryRow?.is_people_growth || categoryRow?.is_ponto_de_replica || article.format === "opiniao") && (
             <div style={{ marginBottom: "1rem", display: "flex", gap: "0.75rem" }}>
               {categoryRow?.is_people_growth && (
-                // Both logos read poorly straight on the hero's dark
-                // gradient (People & Growth is navy-on-white; Ponto de
-                // Réplica's metallic green/gold has too little contrast
-                // against navy too) — a white card behind each fixes it.
+                // All three logos read poorly straight on the hero's dark
+                // gradient (People & Growth is navy-on-white; the other two
+                // are metallic tones with too little contrast against navy
+                // too) — a white card behind each fixes it.
                 <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: "0.5rem 0.875rem" }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={PEOPLE_GROWTH_LOGO_URL} alt="People & Growth" style={{ height: "2.25rem", width: "auto", objectFit: "contain", display: "block" }} />
@@ -270,6 +270,12 @@ export default async function ArticlePage({
                 <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: "0.375rem 0.75rem" }}>
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img src={PONTO_DE_REPLICA_LOGO_URL} alt="Ponto de Réplica" style={{ height: "2.75rem", width: "auto", objectFit: "contain", display: "block" }} />
+                </div>
+              )}
+              {article.format === "opiniao" && (
+                <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: "0.375rem 0.75rem" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={MEA_SENTENTIA_LOGO_URL} alt="Mea Sententia" style={{ height: "2.75rem", width: "auto", objectFit: "contain", display: "block" }} />
                 </div>
               )}
             </div>
