@@ -357,6 +357,47 @@ export default async function HomePage() {
         <AdBanner slotKey="home-top" />
       </div>
 
+      {featured && featured.is_special_feature && featured.cover_image && (
+        // "Destaque especial": full-bleed cover image spanning the whole
+        // page width (respects container-xl margins), headline overlaid
+        // (dark gradient) and the same pinned secondary articles as a
+        // chevron-linked strip underneath — rendered as its own section
+        // above the football results widget and the news-lead grid, for
+        // maximum emphasis. Admin toggle: ArticleForm.tsx "Destaque
+        // especial" field.
+        <div className="container-xl" style={{ paddingTop: "1.5rem" }}>
+          <Link href={articleHref(featured, featured.categories?.slug)} style={{ display: "block", textDecoration: "none" }}>
+            <div style={{ position: "relative", borderRadius: "1.25rem", overflow: "hidden", minHeight: "420px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={featured.cover_image} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 32%, rgba(0,0,0,0.1) 68%, transparent 100%)" }} />
+
+              <div style={{ position: "relative", padding: "2rem 2rem 1.5rem", color: "white" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.875rem", flexWrap: "wrap" }}>
+                  <FormatTag format={featured.format} locale={locale} />
+                  {featured.categories?.is_people_growth && <PeopleGrowthBadge />}
+                  {featured.categories?.is_ponto_de_replica && <PontoDeReplicaBadge />}
+                </div>
+                <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", lineHeight: 1.15 }}>
+                  {pickLocale(locale, featured.title_pt, featured.title_en)}
+                </h1>
+              </div>
+
+              {secondary.length > 0 && (
+                <div style={{ position: "relative", borderTop: "1px solid rgba(255,255,255,0.15)", padding: "1.125rem 2rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(180px, 100%), 1fr))", gap: "0.875rem 1.25rem" }}>
+                  {secondary.map((article) => (
+                    <Link key={article.id} href={articleHref(article, article.categories?.slug)} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "white", textDecoration: "none", minWidth: 0 }}>
+                      <ChevronRight size={16} color="#DC2626" style={{ flexShrink: 0, marginTop: "0.125rem" }} />
+                      <span style={{ fontSize: "0.8125rem", fontWeight: 700, lineHeight: 1.4 }}>{pickLocale(locale, article.title_pt, article.title_en)}</span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          </Link>
+        </div>
+      )}
+
       {electionsInitial && (
         <div className="container-xl" style={{ maxWidth: "1180px", margin: "0 auto", paddingTop: "1.5rem" }}>
           <ElectionResults initial={electionsInitial} locale={locale} />
@@ -398,41 +439,7 @@ export default async function HomePage() {
             <div className="home-lead-grid" style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: "1.5rem", alignItems: "start" }}>
               {/* Main column */}
               <div>
-                {featured.is_special_feature && featured.cover_image ? (
-                  // "Destaque especial": full-bleed cover image with the
-                  // headline overlaid (dark gradient) and the same pinned
-                  // secondary articles as a chevron-linked strip underneath
-                  // — admin toggle, ArticleForm.tsx "Posição na home" field.
-                  <Link href={articleHref(featured, featured.categories?.slug)} style={{ display: "block", textDecoration: "none" }}>
-                    <div style={{ position: "relative", borderRadius: "1.25rem", overflow: "hidden", minHeight: "420px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={featured.cover_image} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 32%, rgba(0,0,0,0.1) 68%, transparent 100%)" }} />
-
-                      <div style={{ position: "relative", padding: "2rem 2rem 1.5rem", color: "white" }}>
-                        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.875rem", flexWrap: "wrap" }}>
-                          <FormatTag format={featured.format} locale={locale} />
-                          {featured.categories?.is_people_growth && <PeopleGrowthBadge />}
-                          {featured.categories?.is_ponto_de_replica && <PontoDeReplicaBadge />}
-                        </div>
-                        <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", lineHeight: 1.15 }}>
-                          {pickLocale(locale, featured.title_pt, featured.title_en)}
-                        </h1>
-                      </div>
-
-                      {secondary.length > 0 && (
-                        <div style={{ position: "relative", borderTop: "1px solid rgba(255,255,255,0.15)", padding: "1.125rem 2rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(180px, 100%), 1fr))", gap: "0.875rem 1.25rem" }}>
-                          {secondary.map((article) => (
-                            <Link key={article.id} href={articleHref(article, article.categories?.slug)} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "white", textDecoration: "none", minWidth: 0 }}>
-                              <ChevronRight size={16} color="#DC2626" style={{ flexShrink: 0, marginTop: "0.125rem" }} />
-                              <span style={{ fontSize: "0.8125rem", fontWeight: 700, lineHeight: 1.4 }}>{pickLocale(locale, article.title_pt, article.title_en)}</span>
-                            </Link>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  </Link>
-                ) : (
+                {!(featured.is_special_feature && featured.cover_image) && (
                   <>
                     <Link
                       href={articleHref(featured, featured.categories?.slug)}
