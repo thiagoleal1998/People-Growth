@@ -14,7 +14,8 @@ import { MostRead } from "@/components/MostRead";
 import { ReadingProgress } from "@/components/ReadingProgress";
 import { ArticleBody } from "@/components/ArticleBody";
 import { createClient } from "@/lib/supabase/server";
-import { renderMarkdownLite, stripMarkdownLite } from "@/lib/markdown-lite";
+import { renderMarkdownLite, stripMarkdownLite, extractH2Headings } from "@/lib/markdown-lite";
+import { ArticleToc } from "@/components/ArticleToc";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import { articleHref, articlePath, FORMAT_SEGMENT, UNCATEGORIZED_SEGMENT } from "@/lib/article-url";
 import { ogImageUrl } from "@/lib/og-image";
@@ -176,6 +177,10 @@ export default async function ArticlePage({
   const allAuthors = [author, ...coauthors]
     .filter((a): a is Author => Boolean(a))
     .filter((a, i, arr) => arr.findIndex((b) => b.id === a.id) === i);
+
+  // A sidebar table of contents only earns its place on a long article —
+  // one or zero "## " headings isn't worth a box of its own.
+  const articleChapters = extractH2Headings(pickLocale(locale, article.content_pt, article.content_en));
 
   // Self-healing canonical URL: if the format/category in the address bar
   // doesn't match this article's actual data (stale link, category changed
@@ -538,6 +543,10 @@ export default async function ArticlePage({
 
           {/* Sidebar */}
           <aside style={{ display: "flex", flexDirection: "column", gap: "1.5rem", position: "sticky", top: "5rem" }}>
+            {articleChapters.length > 1 && (
+              <ArticleToc headings={articleChapters} label={locale === "en" ? "In this article" : "Nesta matéria"} />
+            )}
+
             <div
               style={{
                 background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)",

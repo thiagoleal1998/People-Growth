@@ -29,11 +29,29 @@ export function headingSlug(title: string): string {
     .replace(/^-+|-+$/g, "");
 }
 
+// Strips the inline emphasis markers a heading might carry (bold, italic,
+// underline, highlight) down to plain text — both for what's shown in a
+// table of contents and for the id it slugs to (headingSlug() discards
+// punctuation either way, so stripping first vs. not produces the same id
+// for any heading with spaces between words; the two must still run the
+// same strip, since renderMarkdownLite's own h2 id generation does too).
+function stripHeadingEmphasis(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "$1")
+    .replace(/_(.+?)_/g, "$1")
+    .replace(/\+\+(.+?)\+\+/g, "$1")
+    .replace(/==(.+?)==/g, "$1");
+}
+
 export function extractH2Headings(text: string): { id: string; title: string }[] {
   const seen = new Map<string, number>();
   const headings: { id: string; title: string }[] = [];
   for (const match of text.replace(/\r\n?/g, "\n").matchAll(/^## (.+)$/gm)) {
-    const title = match[1].replace(/\*\*(.+?)\*\*/g, "$1").trim();
+    const title = stripHeadingEmphasis(match[1]).trim();
+    // A "## Fontes" (or "## Bibliografia"/"## Referências") heading is the
+    // citation section, not a content chapter — never belongs in a table
+    // of contents or the home hero's chapter strip.
+    if (!title || SOURCE_HEADING_RE.test(title)) continue;
     headings.push({ id: uniqueId(headingSlug(title), seen), title });
   }
   return headings;
@@ -73,7 +91,7 @@ export function renderMarkdownLite(text: string, options: { anchorHeadings?: boo
     .replace(/\r\n?/g, "\n")
     .replace(/^### (.+)$/gm, '<h3 style="font-size:1.25rem;font-weight:800;color:var(--site-text);margin:1.75rem 0 0.875rem">$1</h3>\n')
     .replace(/^## (.+)$/gm, (_match, title: string) => {
-      const plain = title.replace(/\*\*(.+?)\*\*/g, "$1").trim();
+      const plain = stripHeadingEmphasis(title).trim();
       const id = options.anchorHeadings ? ` id="${uniqueId(headingSlug(plain), headingIds)}"` : "";
       return `<h2${id} style="font-size:1.5rem;font-weight:800;color:var(--site-text);margin:2rem 0 1rem;scroll-margin-top:7rem">${title}</h2>\n`;
     })
