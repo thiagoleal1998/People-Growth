@@ -200,12 +200,6 @@ export default async function ArticlePage({
           ? { url: PEOPLE_GROWTH_LOGO_URL, alt: "People & Growth", height: "2.25rem", padding: "0.5rem 0.875rem" }
           : null;
 
-  // "Destaque especial": a full-bleed image hero with the headline overlaid
-  // and a strip of same-category related links underneath, replacing the
-  // normal dark-gradient header — admin-only toggle (ArticleForm.tsx),
-  // falls back to the normal hero without a cover image to show.
-  const isSpecialFeature = article.is_special_feature && Boolean(article.cover_image);
-
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br";
   const canonicalPath = articlePath(article, article.categories?.slug, "pt");
   const aiText = aiDisclosureText(article.ai_usage, locale);
@@ -240,167 +234,97 @@ export default async function ArticlePage({
       <ReadingProgress />
 
       {/* Header */}
-      {isSpecialFeature ? (
-        <section style={{ backgroundColor: "var(--site-bg)", paddingTop: "6rem", paddingBottom: "1.5rem" }}>
-          <style>{`
-            @media (max-width: 768px) {
-              .special-hero-section { padding-top: 1.5rem !important; }
-              .article-body-section { padding-top: 1.5rem !important; }
-            }
-          `}</style>
-          <div className="container-xl special-hero-section" style={{ maxWidth: "1100px" }}>
-            <Link
-              href="/conteudo"
-              style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "var(--site-faint)", fontSize: "0.875rem", marginBottom: "1.5rem", fontWeight: 500 }}
-            >
-              <ArrowLeft size={16} /> {tNav("newsletter")}
-            </Link>
+      <section
+        className="article-hero"
+        style={{
+          background: "linear-gradient(135deg, #0d1b2a 0%, #1a1f3e 100%)",
+          paddingTop: "6rem",
+          paddingBottom: "4rem",
+          color: "white",
+        }}
+      >
+        {/* Phones already get the navbar offset from the layout, so the hero
+            doesn't need its own large top gap there. */}
+        <style>{`
+          @media (max-width: 768px) {
+            .article-hero { padding-top: 1.5rem !important; padding-bottom: 2.5rem !important; }
+            .article-body-section { padding-top: 1.5rem !important; }
+          }
+        `}</style>
+        <div className="container-xl" style={{ maxWidth: "800px" }}>
+          <Link
+            href="/conteudo"
+            style={{
+              display: "inline-flex",
+              alignItems: "center",
+              gap: "0.375rem",
+              color: "rgba(255,255,255,0.5)",
+              fontSize: "0.875rem",
+              marginBottom: "1.5rem",
+              fontWeight: 500,
+            }}
+          >
+            <ArrowLeft size={16} /> {tNav("newsletter")}
+          </Link>
 
-            <div style={{ position: "relative", borderRadius: "1.25rem", overflow: "hidden", minHeight: "440px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={article.cover_image!} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 32%, rgba(0,0,0,0.1) 68%, transparent 100%)" }} />
-
-              <div style={{ position: "relative", padding: "2rem 2rem 1.5rem", color: "white" }}>
-                {subBrandLogo && (
-                  <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: subBrandLogo.padding, marginBottom: "0.875rem" }}>
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={subBrandLogo.url} alt={subBrandLogo.alt} style={{ height: subBrandLogo.height, width: "auto", objectFit: "contain", display: "block" }} />
-                  </div>
-                )}
-                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.875rem", flexWrap: "wrap" }}>
-                  <FormatTag format={article.format} locale={locale} />
-                  {categoryRow && (
-                    <span style={{ display: "inline-block", backgroundColor: `${categoryRow.color ?? "#315E9C"}30`, color: "white", padding: "0.25rem 0.875rem", borderRadius: "9999px", fontSize: "0.8125rem", fontWeight: 700 }}>
-                      {pickLocale(locale, categoryRow.name_pt, categoryRow.name_en)}
-                    </span>
-                  )}
-                </div>
-                <h1 style={{ fontSize: "clamp(1.5rem, 4vw, 2.5rem)", fontWeight: 800, lineHeight: 1.2 }}>
-                  {pickLocale(locale, article.title_pt, article.title_en)}
-                </h1>
+          {subBrandLogo && (
+            <div style={{ marginBottom: "1rem" }}>
+              {/* All three logos read poorly straight on the hero's dark
+                  gradient (People & Growth is navy-on-white; the other two
+                  are metallic tones with too little contrast against navy
+                  too) — a white card behind each fixes it. */}
+              <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: subBrandLogo.padding }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={subBrandLogo.url} alt={subBrandLogo.alt} style={{ height: subBrandLogo.height, width: "auto", objectFit: "contain", display: "block" }} />
               </div>
-
-              {related.length > 0 && (
-                <div style={{ position: "relative", borderTop: "1px solid rgba(255,255,255,0.15)", padding: "1.125rem 2rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(200px, 100%), 1fr))", gap: "0.875rem 1.5rem" }}>
-                  {related.map((r) => (
-                    <Link key={r.id} href={articleHref(r, r.categories?.slug)} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "white", textDecoration: "none", minWidth: 0 }}>
-                      <ChevronRight size={16} color="#DC2626" style={{ flexShrink: 0, marginTop: "0.125rem" }} />
-                      <span style={{ fontSize: "0.8125rem", fontWeight: 700, lineHeight: 1.4 }}>{pickLocale(locale, r.title_pt, r.title_en)}</span>
-                    </Link>
-                  ))}
-                </div>
-              )}
             </div>
+          )}
 
-            <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", color: "var(--site-muted)", fontSize: "0.875rem", flexWrap: "wrap", marginTop: "1.25rem" }}>
-              {article.published_at && (
-                <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                  <Calendar size={14} /> {new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
-                </span>
-              )}
-              {article.read_time && (
-                <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                  <Clock size={14} /> {article.read_time} {tc("minutes")}
-                </span>
-              )}
-              {allAuthors.length > 0 && <span>{tc("by")} {joinAuthorNames(allAuthors.map((a) => a.name), locale)}</span>}
-            </div>
-          </div>
-        </section>
-      ) : (
-        <section
-          className="article-hero"
-          style={{
-            background: "linear-gradient(135deg, #0d1b2a 0%, #1a1f3e 100%)",
-            paddingTop: "6rem",
-            paddingBottom: "4rem",
-            color: "white",
-          }}
-        >
-          {/* Phones already get the navbar offset from the layout, so the hero
-              doesn't need its own large top gap there. */}
-          <style>{`
-            @media (max-width: 768px) {
-              .article-hero { padding-top: 1.5rem !important; padding-bottom: 2.5rem !important; }
-              .article-body-section { padding-top: 1.5rem !important; }
-            }
-          `}</style>
-          <div className="container-xl" style={{ maxWidth: "800px" }}>
-            <Link
-              href="/conteudo"
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.375rem",
-                color: "rgba(255,255,255,0.5)",
-                fontSize: "0.875rem",
-                marginBottom: "1.5rem",
-                fontWeight: 500,
-              }}
-            >
-              <ArrowLeft size={16} /> {tNav("newsletter")}
-            </Link>
-
-            {subBrandLogo && (
-              <div style={{ marginBottom: "1rem" }}>
-                {/* All three logos read poorly straight on the hero's dark
-                    gradient (People & Growth is navy-on-white; the other two
-                    are metallic tones with too little contrast against navy
-                    too) — a white card behind each fixes it. */}
-                <div style={{ display: "inline-block", backgroundColor: "white", borderRadius: "0.5rem", padding: subBrandLogo.padding }}>
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={subBrandLogo.url} alt={subBrandLogo.alt} style={{ height: subBrandLogo.height, width: "auto", objectFit: "contain", display: "block" }} />
-                </div>
-              </div>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
+            <FormatTag format={article.format} locale={locale} />
+            {categoryRow && (
+              <span
+                style={{
+                  display: "inline-block",
+                  backgroundColor: `${categoryRow.color ?? "#315E9C"}25`,
+                  color: categoryRow.color ?? "#315E9C",
+                  padding: "0.25rem 0.875rem",
+                  borderRadius: "9999px",
+                  fontSize: "0.8125rem",
+                  fontWeight: 700,
+                }}
+              >
+                {pickLocale(locale, categoryRow.name_pt, categoryRow.name_en)}
+              </span>
             )}
-
-            <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.25rem", flexWrap: "wrap" }}>
-              <FormatTag format={article.format} locale={locale} />
-              {categoryRow && (
-                <span
-                  style={{
-                    display: "inline-block",
-                    backgroundColor: `${categoryRow.color ?? "#315E9C"}25`,
-                    color: categoryRow.color ?? "#315E9C",
-                    padding: "0.25rem 0.875rem",
-                    borderRadius: "9999px",
-                    fontSize: "0.8125rem",
-                    fontWeight: 700,
-                  }}
-                >
-                  {pickLocale(locale, categoryRow.name_pt, categoryRow.name_en)}
-                </span>
-              )}
-            </div>
-
-            <h1
-              style={{
-                fontSize: "clamp(1.75rem, 5vw, 3rem)",
-                fontWeight: 800,
-                lineHeight: 1.15,
-                marginBottom: "1.5rem",
-              }}
-            >
-              {pickLocale(locale, article.title_pt, article.title_en)}
-            </h1>
-
-            <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", flexWrap: "wrap" }}>
-              {article.published_at && (
-                <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                  <Calendar size={14} /> {new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
-                </span>
-              )}
-              {article.read_time && (
-                <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
-                  <Clock size={14} /> {article.read_time} {tc("minutes")}
-                </span>
-              )}
-              {allAuthors.length > 0 && <span>{tc("by")} {joinAuthorNames(allAuthors.map((a) => a.name), locale)}</span>}
-            </div>
           </div>
-        </section>
-      )}
+
+          <h1
+            style={{
+              fontSize: "clamp(1.75rem, 5vw, 3rem)",
+              fontWeight: 800,
+              lineHeight: 1.15,
+              marginBottom: "1.5rem",
+            }}
+          >
+            {pickLocale(locale, article.title_pt, article.title_en)}
+          </h1>
+
+          <div style={{ display: "flex", alignItems: "center", gap: "1.5rem", color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", flexWrap: "wrap" }}>
+            {article.published_at && (
+              <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                <Calendar size={14} /> {new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+              </span>
+            )}
+            {article.read_time && (
+              <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}>
+                <Clock size={14} /> {article.read_time} {tc("minutes")}
+              </span>
+            )}
+            {allAuthors.length > 0 && <span>{tc("by")} {joinAuthorNames(allAuthors.map((a) => a.name), locale)}</span>}
+          </div>
+        </div>
+      </section>
 
       {/* Content */}
       <section className="section-padding article-body-section" style={{ backgroundColor: "var(--site-bg)" }}>

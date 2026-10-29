@@ -10,6 +10,7 @@ import {
   Sparkles,
   Zap,
   Radio,
+  ChevronRight,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { getFaqEntriesFromConfig } from "@/lib/faq";
@@ -397,56 +398,94 @@ export default async function HomePage() {
             <div className="home-lead-grid" style={{ display: "grid", gridTemplateColumns: "3fr 2fr", gap: "1.5rem", alignItems: "start" }}>
               {/* Main column */}
               <div>
-                <Link
-                  href={articleHref(featured, featured.categories?.slug)}
-                  style={{ display: "flex", textDecoration: "none", gap: "1rem", alignItems: "flex-start" }}
-                  className="home-featured-link"
-                >
-                  <div
-                    style={{
-                      width: "200px",
-                      height: "160px",
-                      flexShrink: 0,
-                      borderRadius: "0.375rem",
-                      background: featured.cover_image ? `url("${featured.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
-                    }}
-                  />
-                  <div>
-                    <div style={{ marginBottom: "0.5rem" }}>
-                      <FormatTag format={featured.format} locale={locale} />
-                      {featured.categories?.is_people_growth && <PeopleGrowthBadge />}
-                      {featured.categories?.is_ponto_de_replica && <PontoDeReplicaBadge />}
-                    </div>
-                    <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "var(--site-text)", lineHeight: 1.1, marginBottom: "0.5rem" }}>
-                      {pickLocale(locale, featured.title_pt, featured.title_en)}
-                    </h1>
-                    {featured.excerpt_pt && (
-                      <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", lineHeight: 1.5 }}>
-                        {pickLocale(locale, featured.excerpt_pt, featured.excerpt_en)}
-                      </p>
-                    )}
-                    {featured.author_id && authorById.get(featured.author_id) && (
-                      <span style={{ display: "block", marginTop: "0.5rem", fontSize: "0.875rem", color: "var(--site-faint)" }}>
-                        {tc("by")} {authorById.get(featured.author_id)!.name}
-                      </span>
-                    )}
-                  </div>
-                </Link>
+                {featured.is_special_feature && featured.cover_image ? (
+                  // "Destaque especial": full-bleed cover image with the
+                  // headline overlaid (dark gradient) and the same pinned
+                  // secondary articles as a chevron-linked strip underneath
+                  // — admin toggle, ArticleForm.tsx "Posição na home" field.
+                  <Link href={articleHref(featured, featured.categories?.slug)} style={{ display: "block", textDecoration: "none" }}>
+                    <div style={{ position: "relative", borderRadius: "1.25rem", overflow: "hidden", minHeight: "420px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={featured.cover_image} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                      <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 32%, rgba(0,0,0,0.1) 68%, transparent 100%)" }} />
 
-                {secondary.length > 0 && (
-                  <ul style={{ listStyle: "none", margin: "0.875rem 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "0.4375rem" }}>
-                    {secondary.map((article) => (
-                      <li key={article.id}>
-                        <Link
-                          href={articleHref(article, article.categories?.slug)}
-                          style={{ display: "flex", alignItems: "baseline", gap: "0.625rem", textDecoration: "none", color: "var(--site-text-secondary)", fontSize: "0.9375rem", fontWeight: 500 }}
-                        >
-                          <span style={{ width: "0.4375rem", height: "0.4375rem", backgroundColor: "#315E9C", flexShrink: 0 }} />
-                          {pickLocale(locale, article.title_pt, article.title_en)}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
+                      <div style={{ position: "relative", padding: "2rem 2rem 1.5rem", color: "white" }}>
+                        <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.875rem", flexWrap: "wrap" }}>
+                          <FormatTag format={featured.format} locale={locale} />
+                          {featured.categories?.is_people_growth && <PeopleGrowthBadge />}
+                          {featured.categories?.is_ponto_de_replica && <PontoDeReplicaBadge />}
+                        </div>
+                        <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", lineHeight: 1.15 }}>
+                          {pickLocale(locale, featured.title_pt, featured.title_en)}
+                        </h1>
+                      </div>
+
+                      {secondary.length > 0 && (
+                        <div style={{ position: "relative", borderTop: "1px solid rgba(255,255,255,0.15)", padding: "1.125rem 2rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(180px, 100%), 1fr))", gap: "0.875rem 1.25rem" }}>
+                          {secondary.map((article) => (
+                            <Link key={article.id} href={articleHref(article, article.categories?.slug)} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "white", textDecoration: "none", minWidth: 0 }}>
+                              <ChevronRight size={16} color="#DC2626" style={{ flexShrink: 0, marginTop: "0.125rem" }} />
+                              <span style={{ fontSize: "0.8125rem", fontWeight: 700, lineHeight: 1.4 }}>{pickLocale(locale, article.title_pt, article.title_en)}</span>
+                            </Link>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  </Link>
+                ) : (
+                  <>
+                    <Link
+                      href={articleHref(featured, featured.categories?.slug)}
+                      style={{ display: "flex", textDecoration: "none", gap: "1rem", alignItems: "flex-start" }}
+                      className="home-featured-link"
+                    >
+                      <div
+                        style={{
+                          width: "200px",
+                          height: "160px",
+                          flexShrink: 0,
+                          borderRadius: "0.375rem",
+                          background: featured.cover_image ? `url("${featured.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                        }}
+                      />
+                      <div>
+                        <div style={{ marginBottom: "0.5rem" }}>
+                          <FormatTag format={featured.format} locale={locale} />
+                          {featured.categories?.is_people_growth && <PeopleGrowthBadge />}
+                          {featured.categories?.is_ponto_de_replica && <PontoDeReplicaBadge />}
+                        </div>
+                        <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", color: "var(--site-text)", lineHeight: 1.1, marginBottom: "0.5rem" }}>
+                          {pickLocale(locale, featured.title_pt, featured.title_en)}
+                        </h1>
+                        {featured.excerpt_pt && (
+                          <p style={{ color: "var(--site-muted)", fontSize: "1.0625rem", lineHeight: 1.5 }}>
+                            {pickLocale(locale, featured.excerpt_pt, featured.excerpt_en)}
+                          </p>
+                        )}
+                        {featured.author_id && authorById.get(featured.author_id) && (
+                          <span style={{ display: "block", marginTop: "0.5rem", fontSize: "0.875rem", color: "var(--site-faint)" }}>
+                            {tc("by")} {authorById.get(featured.author_id)!.name}
+                          </span>
+                        )}
+                      </div>
+                    </Link>
+
+                    {secondary.length > 0 && (
+                      <ul style={{ listStyle: "none", margin: "0.875rem 0 0", padding: 0, display: "flex", flexDirection: "column", gap: "0.4375rem" }}>
+                        {secondary.map((article) => (
+                          <li key={article.id}>
+                            <Link
+                              href={articleHref(article, article.categories?.slug)}
+                              style={{ display: "flex", alignItems: "baseline", gap: "0.625rem", textDecoration: "none", color: "var(--site-text-secondary)", fontSize: "0.9375rem", fontWeight: 500 }}
+                            >
+                              <span style={{ width: "0.4375rem", height: "0.4375rem", backgroundColor: "#315E9C", flexShrink: 0 }} />
+                              {pickLocale(locale, article.title_pt, article.title_en)}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+                  </>
                 )}
 
                 {secondary.length > 0 && (

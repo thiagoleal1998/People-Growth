@@ -391,7 +391,7 @@ export function ArticleForm({
                   <option value="secundario_3">Destaque secundário 3</option>
                 </Select>
               </Field>
-              <Field label="Destaque especial" hint='Troca o cabeçalho padrão do artigo por um bloco de imagem cheia com o título por cima e matérias relacionadas da mesma categoria embaixo — precisa de imagem de capa cadastrada na aba Detalhes.'>
+              <Field label="Destaque especial" hint="Quando essa matéria está em uma posição de destaque na home (acima), troca o bloco padrão por uma imagem cheia com o título por cima e as matérias secundárias fixadas embaixo — precisa de imagem de capa cadastrada na aba Detalhes.">
                 <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
                   <input type="checkbox" name="is_special_feature" checked={isSpecialFeature} onChange={(e) => setIsSpecialFeature(e.target.checked)} />
                   Usar o destaque especial nesse artigo
