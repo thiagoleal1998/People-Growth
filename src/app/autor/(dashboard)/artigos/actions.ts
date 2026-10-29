@@ -8,7 +8,14 @@ import { getCurrentProfile } from "@/lib/auth/profile";
 import { uploadPublicImage } from "@/lib/supabase/storage";
 import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
 import { calculateReadTime } from "@/lib/markdown-lite";
-import type { Article } from "@/types/database.types";
+import type { Article, ArticleSource } from "@/types/database.types";
+
+// Rows come in as parallel source_label / source_url fields; rows without a label are dropped.
+function parseSources(formData: FormData): ArticleSource[] {
+  const labels = formData.getAll("source_label").map((value) => String(value).trim());
+  const urls = formData.getAll("source_url").map((value) => String(value).trim());
+  return labels.map((label, i) => ({ label, url: urls[i] || null })).filter((source) => source.label !== "");
+}
 
 // Authors have no RLS permission to insert into `notifications` at all —
 // only "Admins can create notifications for anyone" exists (migration 038)
@@ -117,6 +124,7 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
     seo_title_pt: String(formData.get("seo_title_pt") ?? "") || null,
     seo_desc_pt: String(formData.get("seo_desc_pt") ?? "") || null,
     ai_usage: aiUsedRaw === "yes" ? formData.getAll("ai_usage").map((value) => String(value)) : [],
+    sources: parseSources(formData),
     read_time: calculateReadTime(contentPt),
     format,
     status,
