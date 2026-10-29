@@ -386,6 +386,25 @@ export default async function HomePage() {
                     <FormatTag format={featured.format} locale={locale} />
                     {featured.categories?.is_people_growth && <PeopleGrowthBadge />}
                     {featured.categories?.is_ponto_de_replica && <PontoDeReplicaBadge />}
+                    {featured.is_updating && (
+                      <span
+                        style={{
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.3125rem",
+                          backgroundColor: "white",
+                          color: "#dc2626",
+                          padding: "0.1875rem 0.5rem",
+                          borderRadius: "9999px",
+                          fontWeight: 800,
+                          fontSize: "0.6875rem",
+                          letterSpacing: "0.03em",
+                        }}
+                      >
+                        <span className="updating-dot" style={{ width: "0.4375rem", height: "0.4375rem", borderRadius: "50%", backgroundColor: "#dc2626", flexShrink: 0 }} />
+                        MATÉRIA EM ATUALIZAÇÃO
+                      </span>
+                    )}
                   </div>
                   <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", lineHeight: 1.15 }}>
                     {pickLocale(locale, featured.title_pt, featured.title_en)}
@@ -412,6 +431,15 @@ export default async function HomePage() {
               </div>
             )}
           </div>
+          {featured.is_updating && (
+            <style>{`
+              .updating-dot { animation: updating-pulse 1.4s ease-in-out infinite; }
+              @keyframes updating-pulse {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.25; }
+              }
+            `}</style>
+          )}
         </div>
       )}
 

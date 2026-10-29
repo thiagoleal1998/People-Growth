@@ -98,6 +98,7 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     sources: parseSources(formData),
     home_slot: parseHomeSlot(formData),
     is_special_feature: formData.get("is_special_feature") === "on",
+    is_updating: formData.get("is_updating") === "on",
     ai_usage: formData.get("ai_used") === "yes" ? formData.getAll("ai_usage").map((value) => String(value)) : [],
     category_id: categoryId || null,
     format,

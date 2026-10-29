@@ -78,6 +78,7 @@ export function ArticleForm({
   const [slug, setSlug] = useState(item?.slug ?? "");
   const [format, setFormat] = useState<Article["format"]>(item?.format ?? "noticia");
   const [isSpecialFeature, setIsSpecialFeature] = useState(item?.is_special_feature ?? false);
+  const [isUpdating, setIsUpdating] = useState(item?.is_updating ?? false);
   const [categoryId, setCategoryId] = useState(item?.category_id ?? "");
   const [extraCategories, setExtraCategories] = useState<string[]>(extraCategoryIds ?? []);
   function toggleExtraCategory(id: string) {
@@ -395,6 +396,12 @@ export function ArticleForm({
                 <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
                   <input type="checkbox" name="is_special_feature" checked={isSpecialFeature} onChange={(e) => setIsSpecialFeature(e.target.checked)} />
                   Usar o destaque especial nesse artigo
+                </label>
+              </Field>
+              <Field label="Matéria em atualização" hint="Mostra a tag com ponto vermelho piscando 'MATÉRIA EM ATUALIZAÇÃO' junto com as outras tags do destaque especial, na home. Só aparece se a matéria também estiver com o destaque especial ativo acima.">
+                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                  <input type="checkbox" name="is_updating" checked={isUpdating} onChange={(e) => setIsUpdating(e.target.checked)} />
+                  Marcar como em atualização
                 </label>
               </Field>
               <Field label="Tipo de conteúdo" hint="Notícia: fatos, de forma clara e verificável. Análise: interpreta e contextualiza os fatos. Opinião: ponto de vista do autor, aparece com a tag Mea Sententia.">
