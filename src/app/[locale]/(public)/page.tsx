@@ -45,8 +45,6 @@ import {
 } from "@/lib/sports";
 import { SportsLiveWidget } from "@/components/SportsLiveWidget";
 import { ColumnistCarousel } from "@/components/ColumnistCarousel";
-import { NflPreview } from "@/components/NflPreview";
-import { NbaPreview } from "@/components/NbaPreview";
 import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
 import { articleHref } from "@/lib/article-url";
 import { ClampedNewsList } from "@/components/home/ClampedNewsList";
@@ -722,9 +720,6 @@ export default async function HomePage() {
           `}</style>
         </section>
       )}
-
-      <NflPreview />
-      <NbaPreview />
 
       {/* Hero */}
       <section

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft } from "lucide-react";
@@ -63,6 +63,12 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function CategoryPage({ params }: { params: Promise<{ slug: string; locale: string }> }) {
   const { slug, locale } = await params;
+  // /esportes absorbed this category's article feed (plus live scores/
+  // standings/NFL/NBA) as part of unifying the site's sports pages — this
+  // slug alone redirects there instead of rendering the generic template.
+  if (slug === "esporte") {
+    permanentRedirect(locale === "en" ? "/en/sports?tab=artigos" : "/pt/esportes?tab=artigos");
+  }
   const result = await getCategoryData(slug);
 
   if (!result) notFound();
