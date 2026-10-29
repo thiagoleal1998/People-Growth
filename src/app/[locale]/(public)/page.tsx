@@ -147,6 +147,13 @@ const services = [
 
 export const revalidate = 300;
 
+// Authors often number chapter headings ("1. ", "1- ", "1) ") for the
+// reading flow of the article itself, but that numbering reads oddly once
+// the title is pulled out into the home hero's standalone chevron strip.
+function stripChapterNumbering(title: string): string {
+  return title.replace(/^\d+\s*[.\-)]\s*/, "").trim();
+}
+
 export default async function HomePage() {
   const t = await getTranslations("home");
   const tNewsletter = await getTranslations("newsletter");
@@ -330,10 +337,17 @@ export default async function HomePage() {
   const moreNews = queue;
   // "Destaque especial" links to the featured article's own "## " chapter
   // headings (anchored via ArticleBody's anchorHeadings) instead of other
-  // articles, so a click jumps straight to that section of the piece.
+  // articles, so a click jumps straight to that section of the piece. A
+  // random sample (not just the first 4, in document order) so the strip
+  // doesn't always show the article's opening sections.
   const specialFeatureChapters =
     featured?.is_special_feature
-      ? extractH2Headings(pickLocale(locale, featured.content_pt, featured.content_en)).slice(0, 4)
+      ? // This is a Server Component with no client-side re-render of its
+        // own, so there's no hydration mismatch to worry about here — the
+        // shuffle just needs to vary across the server's 300s revalidation
+        // window (see `revalidate` above), which Math.random() does fine.
+        // eslint-disable-next-line react-hooks/purity
+        [...extractH2Headings(pickLocale(locale, featured.content_pt, featured.content_en))].sort(() => Math.random() - 0.5).slice(0, 4)
       : [];
 
   return (
@@ -425,7 +439,7 @@ export default async function HomePage() {
                   // appended to articleHref()'s pathname/params object.
                   <a key={chapter.id} href={`${articlePath(featured, featured.categories?.slug, locale as "pt" | "en")}#${chapter.id}`} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "white", textDecoration: "none", minWidth: 0 }}>
                     <ChevronRight size={16} color="#DC2626" style={{ flexShrink: 0, marginTop: "0.125rem" }} />
-                    <span style={{ fontSize: "0.8125rem", fontWeight: 700, lineHeight: 1.4 }}>{chapter.title}</span>
+                    <span style={{ fontSize: "0.8125rem", fontWeight: 700, lineHeight: 1.4 }}>{stripChapterNumbering(chapter.title)}</span>
                   </a>
                 ))}
               </div>
