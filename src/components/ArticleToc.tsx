@@ -49,7 +49,7 @@ export function ArticleToc({ headings, label }: { headings: { id: string; title:
       <div style={{ fontSize: "0.6875rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--site-muted)", marginBottom: "0.625rem", padding: "0 0.25rem" }}>
         {label}
       </div>
-      <ul style={{ listStyle: "none", margin: 0, padding: "0 0.25rem 0.375rem 0", maxHeight: "21rem", overflowY: "auto" }}>
+      <ul style={{ listStyle: "none", margin: 0, padding: "0 0.25rem 0.375rem 0" }}>
         {headings.map((heading, index) => (
           <li key={heading.id}>
             <a href={`#${heading.id}`} onClick={(event) => handleClick(event, heading.id)}>
@@ -60,7 +60,6 @@ export function ArticleToc({ headings, label }: { headings: { id: string; title:
         ))}
       </ul>
       <style>{`
-        .article-toc ul { scrollbar-width: thin; }
         .article-toc li + li { margin-top: 0.125rem; }
         .article-toc li a {
           display: flex;

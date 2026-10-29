@@ -43,16 +43,30 @@ function stripHeadingEmphasis(text: string): string {
     .replace(/==(.+?)==/g, "$1");
 }
 
+// Authors often number chapter headings ("1. ", "1- ", "1) ") for the
+// reading flow of the article itself — left in the heading as rendered in
+// the article body, but stripped from what a table of contents displays,
+// since those already show their own position (a numbered badge, or just
+// list order) and showing both reads oddly ("2  2. A entrada...").
+function stripLeadingNumber(text: string): string {
+  return text.replace(/^\d+\s*[.\-)]\s*/, "").trim();
+}
+
 export function extractH2Headings(text: string): { id: string; title: string }[] {
   const seen = new Map<string, number>();
   const headings: { id: string; title: string }[] = [];
   for (const match of text.replace(/\r\n?/g, "\n").matchAll(/^## (.+)$/gm)) {
-    const title = stripHeadingEmphasis(match[1]).trim();
+    // The id is slugged from the emphasis-stripped (but still numbered)
+    // text — it must match what renderMarkdownLite's own h2 id generation
+    // produces, which never strips the leading number, or the anchor
+    // links here would point at ids that don't exist on the page.
+    const plain = stripHeadingEmphasis(match[1]).trim();
+    const title = stripLeadingNumber(plain);
     // A "## Fontes" (or "## Bibliografia"/"## Referências") heading is the
     // citation section, not a content chapter — never belongs in a table
     // of contents or the home hero's chapter strip.
     if (!title || SOURCE_HEADING_RE.test(title)) continue;
-    headings.push({ id: uniqueId(headingSlug(title), seen), title });
+    headings.push({ id: uniqueId(headingSlug(plain), seen), title });
   }
   return headings;
 }
