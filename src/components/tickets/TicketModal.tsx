@@ -21,11 +21,11 @@ const typeConfig: Record<InternalTicket["type"], { label: string; icon: typeof B
 };
 
 function formatDateShort(iso: string) {
-  return new Date(iso).toLocaleDateString("pt-BR");
+  return new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo" });
 }
 
 function formatDateTime(iso: string) {
-  return new Date(iso).toLocaleString("pt-BR");
+  return new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
 }
 
 type TimelineItem =

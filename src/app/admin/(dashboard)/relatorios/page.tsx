@@ -733,7 +733,7 @@ export default async function RelatoriosPage({
                           </span>
                         </td>
                         <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>
-                          {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" }) : "—"}
+                          {u.lastSeenAt ? new Date(u.lastSeenAt).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }) : "—"}
                         </td>
                         <td style={{ padding: "0.75rem 1.25rem", color: u.lastSeenAt ? "var(--admin-faint)" : "#dc2626", fontSize: "0.8125rem", fontWeight: u.lastSeenAt ? 400 : 700 }}>
                           {formatRelativeTime(u.lastSeenAt)}
@@ -836,7 +836,7 @@ export default async function RelatoriosPage({
                     return (
                       <tr key={log.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
                         <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>
-                          {new Date(log.created_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                          {new Date(log.created_at).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" })}
                         </td>
                         <td style={{ padding: "0.75rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.8125rem" }}>{activityNameByEmail.get(log.user_email) ?? log.user_email}</td>
                         <td style={{ padding: "0.75rem 1.25rem" }}>

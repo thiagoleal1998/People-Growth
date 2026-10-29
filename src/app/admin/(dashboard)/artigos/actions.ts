@@ -255,7 +255,7 @@ export async function approveAndSchedule(id: string) {
   }
   await notifyAuthor(article.author_id, {
     title: `"${article.title_pt}" foi aprovado e agendado`,
-    body: `Vai ao ar em ${new Date(article.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}.`,
+    body: `Vai ao ar em ${new Date(article.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" })}.`,
     link: `/autor/artigos/${id}`,
   });
   revalidatePath("/admin/artigos");

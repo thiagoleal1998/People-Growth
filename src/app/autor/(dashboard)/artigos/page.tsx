@@ -101,7 +101,7 @@ export default async function MeusArtigosPage({ searchParams }: { searchParams: 
                     {a.scheduled_for && (a.status === "pending" || a.status === "scheduled") && (
                       <div style={{ fontSize: "0.75rem", color: "#94a3b8", marginTop: "0.25rem" }}>
                         {a.status === "scheduled" ? "Vai ao ar em " : "Data pedida: "}
-                        {new Date(a.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit" })}
+                        {new Date(a.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" })}
                       </div>
                     )}
                   </td>
