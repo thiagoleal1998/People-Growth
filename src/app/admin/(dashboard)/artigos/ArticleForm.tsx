@@ -77,6 +77,7 @@ export function ArticleForm({
   const [seoDescPt, setSeoDescPt] = useState(item?.seo_desc_pt ?? "");
   const [slug, setSlug] = useState(item?.slug ?? "");
   const [format, setFormat] = useState<Article["format"]>(item?.format ?? "noticia");
+  const [isSpecialFeature, setIsSpecialFeature] = useState(item?.is_special_feature ?? false);
   const [categoryId, setCategoryId] = useState(item?.category_id ?? "");
   const [extraCategories, setExtraCategories] = useState<string[]>(extraCategoryIds ?? []);
   function toggleExtraCategory(id: string) {
@@ -389,6 +390,12 @@ export function ArticleForm({
                   <option value="secundario_2">Destaque secundário 2</option>
                   <option value="secundario_3">Destaque secundário 3</option>
                 </Select>
+              </Field>
+              <Field label="Destaque especial" hint='Troca o cabeçalho padrão do artigo por um bloco de imagem cheia com o título por cima e matérias relacionadas da mesma categoria embaixo — precisa de imagem de capa cadastrada na aba Detalhes.'>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                  <input type="checkbox" name="is_special_feature" checked={isSpecialFeature} onChange={(e) => setIsSpecialFeature(e.target.checked)} />
+                  Usar o destaque especial nesse artigo
+                </label>
               </Field>
               <Field label="Tipo de conteúdo" hint="Notícia: fatos, de forma clara e verificável. Análise: interpreta e contextualiza os fatos. Opinião: ponto de vista do autor, aparece com a tag Mea Sententia.">
                 <Select name="format" value={format} onChange={(e) => setFormat(e.target.value as Article["format"])}>

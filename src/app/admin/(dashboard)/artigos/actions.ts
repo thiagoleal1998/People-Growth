@@ -97,6 +97,7 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     video_url: String(formData.get("video_url") ?? "").trim() || null,
     sources: parseSources(formData),
     home_slot: parseHomeSlot(formData),
+    is_special_feature: formData.get("is_special_feature") === "on",
     ai_usage: formData.get("ai_used") === "yes" ? formData.getAll("ai_usage").map((value) => String(value)) : [],
     category_id: categoryId || null,
     format,
