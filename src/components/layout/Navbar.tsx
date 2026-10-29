@@ -74,27 +74,43 @@ export function Navbar({
     >
       <nav className="container-xl" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", height: "4.18rem" }}>
         {/* Logo */}
-        <Link href="/" style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.1875rem" }}>
-          {logoUrl ? (
-            <>
-              <span style={{ fontSize: "0.5625rem", fontWeight: 700, color: "rgba(255,255,255,0.45)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
-                Grupo
+        <Link href="/" style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-start", gap: "0.1875rem" }}>
+            {logoUrl ? (
+              <>
+                <span style={{ fontSize: "0.5625rem", fontWeight: 700, color: "rgba(255,255,255,0.45)", letterSpacing: "0.14em", textTransform: "uppercase" }}>
+                  Grupo
+                </span>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={logoUrl} alt="Festina" style={{ height: "2.43rem", width: "auto" }} />
+              </>
+            ) : (
+              <span
+                style={{
+                  fontWeight: 800,
+                  fontSize: "1.25rem",
+                  background: "linear-gradient(135deg, #315E9C, #C89A4A)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  letterSpacing: "-0.02em",
+                }}
+              >
+                Festina
               </span>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={logoUrl} alt="Festina" style={{ height: "2.43rem", width: "auto" }} />
-            </>
-          ) : (
+            )}
+          </div>
+          {(pathname === "/esportes" || pathname.startsWith("/esportes/")) && (
             <span
               style={{
+                fontSize: "1.0625rem",
                 fontWeight: 800,
-                fontSize: "1.25rem",
-                background: "linear-gradient(135deg, #315E9C, #C89A4A)",
-                WebkitBackgroundClip: "text",
-                WebkitTextFillColor: "transparent",
-                letterSpacing: "-0.02em",
+                color: "white",
+                letterSpacing: "-0.01em",
+                borderLeft: "1px solid rgba(255,255,255,0.25)",
+                paddingLeft: "0.625rem",
               }}
             >
-              Festina
+              Esportes
             </span>
           )}
         </Link>

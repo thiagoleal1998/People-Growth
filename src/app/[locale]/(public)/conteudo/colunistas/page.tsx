@@ -76,16 +76,24 @@ export default async function ColunistasPage() {
                   {foundersBottomRow.length > 0 && (
                     <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem" }}>
                       {foundersBottomRow.map((author) => (
-                        // Matches the top row's own column width exactly (same
-                        // minmax(min(280px, 100%), 1fr) math, just via flex-basis
-                        // since this is a 1-item row) — same size as Gustavo's
-                        // and Raul's cards, just centered on its own line below them.
-                        <div key={author.id} style={{ flex: "0 1 calc(50% - 0.75rem)", minWidth: "min(280px, 100%)" }}>
+                        // Full width below the same breakpoint where the top
+                        // row's own grid (minmax(min(280px, 100%), 1fr)) falls
+                        // back to one column — a fixed "min-width: 280px" alone
+                        // left this card visibly narrower than Raul's/Gustavo's
+                        // on phones under ~360px wide, where the grid above
+                        // goes full-width but this stayed capped at 280px.
+                        <div key={author.id} className="founders-bottom-card">
                           <AuthorCard author={author} locale={locale} accent="#C89A4A" />
                         </div>
                       ))}
                     </div>
                   )}
+                  <style>{`
+                    .founders-bottom-card { width: 100%; }
+                    @media (min-width: 600px) {
+                      .founders-bottom-card { width: calc(50% - 0.75rem); }
+                    }
+                  `}</style>
                 </div>
               )}
 

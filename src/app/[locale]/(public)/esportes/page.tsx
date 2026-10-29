@@ -46,7 +46,7 @@ const cardStyle = {
 
 const TABS = [
   { id: "artigos", label: "Artigos" },
-  { id: "brasileirao", label: "Brasileirão" },
+  { id: "brasileirao", label: "Futebol" },
   { id: "nfl", label: "NFL" },
   { id: "nba", label: "NBA" },
 ] as const;
@@ -354,7 +354,7 @@ export default async function EsportesPage({
           ← Voltar para o início
         </Link>
 
-        <div style={{ color: BRAND, fontWeight: 700, fontSize: "0.9375rem", marginBottom: "1rem" }}>Grupo Festina Esportes</div>
+        <div style={{ color: BRAND, fontWeight: 700, fontSize: "0.9375rem", marginBottom: "1rem" }}>Esportes</div>
 
         <TabNav active={tab} />
 
