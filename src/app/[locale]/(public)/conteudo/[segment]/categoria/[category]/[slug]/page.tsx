@@ -406,7 +406,7 @@ export default async function ArticlePage({
               title={pickLocale(locale, article.title_pt, article.title_en)}
               summary={pickLocale(locale, article.summary_pt, article.summary_en)}
               speechText={stripMarkdownLite(pickLocale(locale, article.content_pt, article.content_en))}
-              bodyHtml={renderMarkdownLite(pickLocale(locale, article.content_pt, article.content_en))}
+              bodyHtml={renderMarkdownLite(pickLocale(locale, article.content_pt, article.content_en), { anchorHeadings: true })}
               coverImage={article.cover_image}
               coverImageCaption={article.cover_image_caption}
               coverImageCredit={article.cover_image_credit}

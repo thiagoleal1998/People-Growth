@@ -15,6 +15,7 @@ import {
 import { createClient } from "@/lib/supabase/server";
 import { getFaqEntriesFromConfig } from "@/lib/faq";
 import { pickLocale } from "@/lib/locale-content";
+import { extractH2Headings } from "@/lib/markdown-lite";
 import { FaqAccordion } from "@/components/FaqAccordion";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
@@ -47,7 +48,7 @@ import {
 import { SportsLiveWidget } from "@/components/SportsLiveWidget";
 import { ColumnistCarousel } from "@/components/ColumnistCarousel";
 import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
-import { articleHref } from "@/lib/article-url";
+import { articleHref, articlePath } from "@/lib/article-url";
 import { ClampedNewsList } from "@/components/home/ClampedNewsList";
 import { isAuthorPubliclyVisible } from "@/lib/founder-data";
 import type { Article, Author, Testimonial, MediaItem, Category } from "@/types/database.types";
@@ -327,6 +328,13 @@ export default async function HomePage() {
   // fundamentally different units (video aspect ratio vs. text rows) — the
   // only stable option is to let this one run its natural length.
   const moreNews = queue;
+  // "Destaque especial" links to the featured article's own "## " chapter
+  // headings (anchored via ArticleBody's anchorHeadings) instead of other
+  // articles, so a click jumps straight to that section of the piece.
+  const specialFeatureChapters =
+    featured?.is_special_feature
+      ? extractH2Headings(pickLocale(locale, featured.content_pt, featured.content_en)).slice(0, 4)
+      : [];
 
   return (
     <>
@@ -366,35 +374,44 @@ export default async function HomePage() {
         // maximum emphasis. Admin toggle: ArticleForm.tsx "Destaque
         // especial" field.
         <div className="container-xl" style={{ paddingTop: "1.5rem" }}>
-          <Link href={articleHref(featured, featured.categories?.slug)} style={{ display: "block", textDecoration: "none" }}>
-            <div style={{ position: "relative", borderRadius: "1.25rem", overflow: "hidden", minHeight: "420px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={featured.cover_image} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
-              <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 32%, rgba(0,0,0,0.1) 68%, transparent 100%)" }} />
+          <div style={{ position: "relative", borderRadius: "1.25rem", overflow: "hidden" }}>
+            <Link href={articleHref(featured, featured.categories?.slug)} style={{ display: "block", textDecoration: "none" }}>
+              <div style={{ position: "relative", minHeight: "420px", display: "flex", flexDirection: "column", justifyContent: "flex-end" }}>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={featured.cover_image} alt="" style={{ position: "absolute", inset: 0, width: "100%", height: "100%", objectFit: "cover" }} />
+                <div style={{ position: "absolute", inset: 0, background: "linear-gradient(to top, rgba(0,0,0,0.95) 0%, rgba(0,0,0,0.8) 32%, rgba(0,0,0,0.1) 68%, transparent 100%)" }} />
 
-              <div style={{ position: "relative", padding: "2rem 2rem 1.5rem", color: "white" }}>
-                <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.875rem", flexWrap: "wrap" }}>
-                  <FormatTag format={featured.format} locale={locale} />
-                  {featured.categories?.is_people_growth && <PeopleGrowthBadge />}
-                  {featured.categories?.is_ponto_de_replica && <PontoDeReplicaBadge />}
+                <div style={{ position: "relative", padding: "2rem 2rem 1.5rem", color: "white" }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "0.875rem", flexWrap: "wrap" }}>
+                    <FormatTag format={featured.format} locale={locale} />
+                    {featured.categories?.is_people_growth && <PeopleGrowthBadge />}
+                    {featured.categories?.is_ponto_de_replica && <PontoDeReplicaBadge />}
+                  </div>
+                  <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", lineHeight: 1.15 }}>
+                    {pickLocale(locale, featured.title_pt, featured.title_en)}
+                  </h1>
                 </div>
-                <h1 style={{ fontWeight: 800, fontSize: "clamp(1.625rem, 3.5vw, 2.5rem)", lineHeight: 1.15 }}>
-                  {pickLocale(locale, featured.title_pt, featured.title_en)}
-                </h1>
               </div>
+            </Link>
 
-              {secondary.length > 0 && (
-                <div style={{ position: "relative", borderTop: "1px solid rgba(255,255,255,0.15)", padding: "1.125rem 2rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(180px, 100%), 1fr))", gap: "0.875rem 1.25rem" }}>
-                  {secondary.map((article) => (
-                    <Link key={article.id} href={articleHref(article, article.categories?.slug)} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "white", textDecoration: "none", minWidth: 0 }}>
-                      <ChevronRight size={16} color="#DC2626" style={{ flexShrink: 0, marginTop: "0.125rem" }} />
-                      <span style={{ fontSize: "0.8125rem", fontWeight: 700, lineHeight: 1.4 }}>{pickLocale(locale, article.title_pt, article.title_en)}</span>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
-          </Link>
+            {specialFeatureChapters.length > 0 && (
+              // Each link jumps straight to that "## " section inside the
+              // article itself (id set by ArticleBody's anchorHeadings) —
+              // not to other articles, unlike the rest of the home page.
+              <div style={{ backgroundColor: "#05070d", borderTop: "1px solid rgba(255,255,255,0.15)", padding: "1.125rem 2rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "0.875rem 1.25rem" }}>
+                {specialFeatureChapters.map((chapter) => (
+                  // A plain <a>, not the locale-aware <Link>: articlePath()
+                  // already returns the full locale-prefixed path, and
+                  // typed routes don't accept an arbitrary "#id" hash
+                  // appended to articleHref()'s pathname/params object.
+                  <a key={chapter.id} href={`${articlePath(featured, featured.categories?.slug, locale as "pt" | "en")}#${chapter.id}`} style={{ display: "flex", alignItems: "flex-start", gap: "0.5rem", color: "white", textDecoration: "none", minWidth: 0 }}>
+                    <ChevronRight size={16} color="#DC2626" style={{ flexShrink: 0, marginTop: "0.125rem" }} />
+                    <span style={{ fontSize: "0.8125rem", fontWeight: 700, lineHeight: 1.4 }}>{chapter.title}</span>
+                  </a>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       )}
 
