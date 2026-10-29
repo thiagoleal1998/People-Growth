@@ -240,7 +240,16 @@ function groupSourceSections(renderedBlocks: string[], protectedBlocks: string[]
 
   for (let i = 0; i < renderedBlocks.length; i++) {
     const headingMatch = renderedBlocks[i].match(/^<h[23][^>]*>([\s\S]*?)<\/h[23]>$/);
-    const headingText = headingMatch ? headingMatch[1].replace(/<[^>]+>/g, "").trim() : null;
+    // Authors don't reliably use "## Fontes" — plenty just bold the word
+    // ("**Fontes**" or "**FONTES**") as a paragraph of its own instead of a
+    // real heading. Treat a paragraph that's nothing but a single bold run
+    // the same way, so the design applies regardless of which one they used.
+    const boldOnlyMatch = renderedBlocks[i].match(/^<p[^>]*><strong[^>]*>([\s\S]*?)<\/strong><\/p>$/);
+    const headingText = headingMatch
+      ? headingMatch[1].replace(/<[^>]+>/g, "").trim()
+      : boldOnlyMatch
+        ? boldOnlyMatch[1].replace(/<[^>]+>/g, "").trim()
+        : null;
     if (!headingText || !SOURCE_HEADING_RE.test(headingText)) continue;
 
     const groupStart = i;
