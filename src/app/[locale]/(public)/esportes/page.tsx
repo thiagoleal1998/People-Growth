@@ -231,8 +231,14 @@ function AmericanGameCard({ game }: { game: NflGame | NbaGame }) {
 
 function NflDivisionTable({ division }: { division: NflDivisionStandings }) {
   return (
-    <div style={{ ...cardStyle, padding: "1rem" }}>
+    // minWidth: 0 — this card is a grid item in a repeat(auto-fit,
+    // minmax(280px, 1fr)) track; without it the card refuses to shrink
+    // below the table's natural content width (a long club name + 4 stat
+    // columns), forcing the card wider than its track and spilling past
+    // the rounded border instead of truncating the name.
+    <div style={{ ...cardStyle, padding: "1rem", minWidth: 0 }}>
       <h3 style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.625rem" }}>{division.division}</h3>
+      <div style={{ overflowX: "auto" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
         <thead>
           <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
@@ -260,14 +266,16 @@ function NflDivisionTable({ division }: { division: NflDivisionStandings }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
 
 function NbaDivisionTable({ division }: { division: NbaDivisionStandings }) {
   return (
-    <div style={{ ...cardStyle, padding: "1rem" }}>
+    <div style={{ ...cardStyle, padding: "1rem", minWidth: 0 }}>
       <h3 style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.625rem" }}>{division.division}</h3>
+      <div style={{ overflowX: "auto" }}>
       <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
         <thead>
           <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
@@ -293,6 +301,7 @@ function NbaDivisionTable({ division }: { division: NbaDivisionStandings }) {
           ))}
         </tbody>
       </table>
+      </div>
     </div>
   );
 }
@@ -345,7 +354,7 @@ export default async function EsportesPage({
           ← Voltar para o início
         </Link>
 
-        <div style={{ color: BRAND, fontWeight: 700, fontSize: "0.9375rem", marginBottom: "1rem" }}>Esportes</div>
+        <div style={{ color: BRAND, fontWeight: 700, fontSize: "0.9375rem", marginBottom: "1rem" }}>Grupo Festina Esportes</div>
 
         <TabNav active={tab} />
 
