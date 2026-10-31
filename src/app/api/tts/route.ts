@@ -20,6 +20,9 @@ export const maxDuration = 300;
 const BUCKET = "site-assets";
 const MAX_CHARS = 45000;
 const CHUNK_CHARS = 1800;
+// Leaves real margin under maxDuration (300s) for the retry loop below to
+// give up and respond before Vercel kills the function outright.
+const SYNTHESIS_BUDGET_MS = 260_000;
 
 const VOICE_BY_LOCALE: Record<string, string> = {
   pt: "pt-BR-ThalitaMultilingualNeural",
@@ -93,18 +96,29 @@ async function synthesizeOnce(text: string, voice: string): Promise<Buffer> {
 }
 
 // This is a free, unofficial consumer endpoint (not a documented API with
-// an SLA) — a short burst of requests can get a transient 429 that clears
-// within seconds. One retry with a short backoff absorbs that without
-// surfacing an error to the reader for something that fixes itself.
+// an SLA) — besides the occasional transient 429, its websocket also just
+// drops mid-synthesis ("Stream closed before the synthesis completed (no
+// turn.end received)") on a large fraction of otherwise-ordinary calls.
+// Measured by hand: only about 1 in 3 cold calls succeeds, so a single
+// retry isn't reliable enough and gating it to 429 missed most of the real
+// failures — this reader-facing "Tentar de novo" error was the result.
+// Keep retrying with a fresh connection, on any error, until the time
+// budget runs out: cheap for the common short-article case (each attempt
+// takes ~1s, so dozens fit easily), and still at least one retry for a
+// long article whose single synthesis pass eats most of the budget itself.
 async function synthesize(text: string, voice: string): Promise<Buffer> {
-  try {
-    return await synthesizeOnce(text, voice);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    if (!message.includes("429")) throw err;
-    await new Promise((resolve) => setTimeout(resolve, 2000));
-    return synthesizeOnce(text, voice);
-  }
+  const deadline = Date.now() + SYNTHESIS_BUDGET_MS;
+  let lastErr: unknown;
+  do {
+    try {
+      return await synthesizeOnce(text, voice);
+    } catch (err) {
+      lastErr = err;
+      if (Date.now() + 500 >= deadline) break;
+      await new Promise((resolve) => setTimeout(resolve, Math.min(1500, deadline - Date.now())));
+    }
+  } while (Date.now() < deadline);
+  throw lastErr;
 }
 
 export async function POST(req: NextRequest) {
