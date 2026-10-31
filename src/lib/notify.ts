@@ -1,13 +1,8 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { sendPushToUser } from "@/lib/push";
+import { renderTemplateText, type NotificationTemplateKey } from "@/lib/notification-template-text";
 
-export type NotificationTemplateKey =
-  | "article_published"
-  | "article_approved_scheduled"
-  | "article_changes_requested"
-  | "ticket_member_notified"
-  | "article_submitted_for_approval"
-  | "article_resubmitted_for_approval";
+export type { NotificationTemplateKey };
 
 // Falls back here if notification_templates is ever missing a row (migration
 // not run yet, or a key typo) — same text that used to be hardcoded at each
@@ -21,10 +16,6 @@ export const DEFAULT_TEMPLATES: Record<NotificationTemplateKey, { title: string;
   article_resubmitted_for_approval: { title: '"{{title}}" foi revisado e reenviado para aprovação', body: null },
 };
 
-function render(template: string, vars: Record<string, string>): string {
-  return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_match, key: string) => vars[key] ?? "");
-}
-
 export async function renderNotificationTemplate(
   key: NotificationTemplateKey,
   vars: Record<string, string>
@@ -34,8 +25,8 @@ export async function renderNotificationTemplate(
   const { data } = await (admin as any).from("notification_templates").select("title_template, body_template").eq("key", key).single();
   const template = data ? { title: data.title_template, body: data.body_template } : DEFAULT_TEMPLATES[key];
   return {
-    title: render(template.title, vars),
-    body: template.body ? render(template.body, vars) : null,
+    title: renderTemplateText(template.title, vars),
+    body: template.body ? renderTemplateText(template.body, vars) : null,
   };
 }
 

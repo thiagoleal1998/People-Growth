@@ -1,10 +1,11 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { Bell } from "lucide-react";
 import { Field, Textarea } from "@/components/admin/ui";
 import { updateNotificationTemplate, resetNotificationTemplate } from "./notification-template-actions";
+import { renderTemplateText, NOTIFICATION_TEMPLATE_PREVIEW_VARS, type NotificationTemplateKey } from "@/lib/notification-template-text";
 import type { NotificationTemplate } from "@/types/database.types";
-import type { NotificationTemplateKey } from "@/lib/notify";
 
 const titleInputStyle = { width: "100%", padding: "0.625rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.9rem", boxSizing: "border-box" as const, fontFamily: "inherit", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" };
 
@@ -54,6 +55,27 @@ function TemplateCard({ template }: { template: NotificationTemplate }) {
       <Field label="Corpo (opcional)">
         <Textarea value={bodyTemplate} onChange={(e) => setBodyTemplate(e.target.value)} rows={2} />
       </Field>
+
+      <div style={{ marginBottom: "0.5rem" }}>
+        <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "0.375rem" }}>
+          Prévia (com dados de exemplo)
+        </div>
+        <div style={{ borderRadius: "0.5rem", border: "1px solid var(--admin-border)", backgroundColor: "rgba(49, 94, 156,0.06)", padding: "0.75rem 1rem", display: "flex", alignItems: "flex-start", gap: "0.5rem" }}>
+          <Bell size={15} style={{ flexShrink: 0, marginTop: "0.125rem", color: "#315E9C" }} />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text)" }}>
+              {renderTemplateText(titleTemplate, NOTIFICATION_TEMPLATE_PREVIEW_VARS[template.key as NotificationTemplateKey]) || "(título vazio)"}
+            </div>
+            {bodyTemplate.trim() && (
+              <div style={{ fontSize: "0.75rem", color: "var(--admin-muted)", marginTop: "0.125rem" }}>
+                {renderTemplateText(bodyTemplate, NOTIFICATION_TEMPLATE_PREVIEW_VARS[template.key as NotificationTemplateKey])}
+              </div>
+            )}
+            <div style={{ fontSize: "0.6875rem", color: "var(--admin-faint)", marginTop: "0.25rem" }}>agora</div>
+          </div>
+        </div>
+      </div>
+
       <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginTop: "0.5rem" }}>
         <button
           type="button"
