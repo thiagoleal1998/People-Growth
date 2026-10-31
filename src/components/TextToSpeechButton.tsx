@@ -6,6 +6,19 @@ import { CirclePlay, CirclePause, Loader2, RotateCcw, RotateCw } from "lucide-re
 const SPEEDS = [1, 1.25, 1.5, 1.75, 2];
 const SKIP_SECONDS = 10;
 
+// /api/tts can take a while on a long article (or if the free Edge TTS
+// service needed a few retries, see that route) — a single static
+// "Carregando áudio…" starts reading as stuck past a few seconds. Cycling
+// through these keeps it clearly alive without promising a specific time.
+const LOADING_MESSAGES = [
+  "Carregando áudio…",
+  "Preparando a narração…",
+  "Ainda carregando…",
+  "Pode levar alguns segundos…",
+  "Quase lá…",
+];
+const LOADING_MESSAGE_INTERVAL_MS = 4000;
+
 function formatTime(seconds: number) {
   if (!Number.isFinite(seconds)) return "0:00";
   const m = Math.floor(seconds / 60);
@@ -27,6 +40,7 @@ export function TextToSpeechButton({ text, title, locale, fill }: { text: string
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [speedIndex, setSpeedIndex] = useState(0);
+  const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   useEffect(() => {
@@ -35,9 +49,18 @@ export function TextToSpeechButton({ text, title, locale, fill }: { text: string
     };
   }, []);
 
+  useEffect(() => {
+    if (status !== "loading") return;
+    const interval = setInterval(() => {
+      setLoadingMessageIndex((i) => Math.min(i + 1, LOADING_MESSAGES.length - 1));
+    }, LOADING_MESSAGE_INTERVAL_MS);
+    return () => clearInterval(interval);
+  }, [status]);
+
   async function ensureAudio(): Promise<HTMLAudioElement | null> {
     if (audioRef.current) return audioRef.current;
     setStatus("loading");
+    setLoadingMessageIndex(0);
     try {
       const res = await fetch("/api/tts", {
         method: "POST",
@@ -134,7 +157,7 @@ export function TextToSpeechButton({ text, title, locale, fill }: { text: string
         }}
       >
         {status === "loading" ? <Loader2 size={20} className="tts-spin" /> : <CirclePlay size={20} />}
-        {status === "loading" ? "Carregando áudio…" : status === "error" ? "Tentar de novo" : "Ouvir"}
+        {status === "loading" ? LOADING_MESSAGES[loadingMessageIndex] : status === "error" ? "Tentar de novo" : "Ouvir"}
         <style>{`.tts-spin { animation: tts-spin 0.9s linear infinite; } @keyframes tts-spin { to { transform: rotate(360deg); } }`}</style>
       </button>
     );
