@@ -288,6 +288,16 @@ type NotificationTemplateRow = {
   updated_at: string;
 };
 
+type PushSubscriptionRow = {
+  id: string;
+  user_id: string;
+  endpoint: string;
+  p256dh: string;
+  auth: string;
+  user_agent: string | null;
+  created_at: string;
+};
+
 type CommentRow = {
   id: string;
   article_id: string;
@@ -507,6 +517,7 @@ export type Database = {
       ticket_comments: { Row: TicketCommentRow; Insert: Omit<TicketCommentRow, "id" | "created_at">; Update: Partial<Omit<TicketCommentRow, "id" | "created_at">>; Relationships: [] };
       notifications: { Row: NotificationRow; Insert: Omit<NotificationRow, "id" | "created_at" | "read">; Update: Partial<Omit<NotificationRow, "id" | "created_at">>; Relationships: [] };
       notification_templates: { Row: NotificationTemplateRow; Insert: Omit<NotificationTemplateRow, "updated_at">; Update: Partial<Omit<NotificationTemplateRow, "key" | "updated_at">>; Relationships: [] };
+      push_subscriptions: { Row: PushSubscriptionRow; Insert: Omit<PushSubscriptionRow, "id" | "created_at">; Update: Partial<Omit<PushSubscriptionRow, "id" | "created_at">>; Relationships: [] };
       password_reset_requests: { Row: PasswordResetRequestRow; Insert: Omit<PasswordResetRequestRow, "id" | "created_at" | "status" | "resolved_at">; Update: Partial<Omit<PasswordResetRequestRow, "id" | "created_at">>; Relationships: [] };
       activity_log: { Row: ActivityLogRow; Insert: Omit<ActivityLogRow, "id" | "created_at">; Update: Partial<Omit<ActivityLogRow, "id" | "created_at">>; Relationships: [] };
       comments: { Row: CommentRow; Insert: Omit<CommentRow, "id" | "created_at" | "likes" | "reports" | "rejection_reason">; Update: Partial<Omit<CommentRow, "id" | "created_at">>; Relationships: [] };
@@ -551,6 +562,7 @@ export type TicketEvent = TicketEventRow;
 export type TicketComment = TicketCommentRow;
 export type Notification = NotificationRow;
 export type NotificationTemplate = NotificationTemplateRow;
+export type PushSubscription = PushSubscriptionRow;
 export type PasswordResetRequest = PasswordResetRequestRow;
 export type ActivityLog = ActivityLogRow;
 export type Comment = CommentRow;

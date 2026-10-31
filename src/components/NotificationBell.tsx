@@ -4,10 +4,15 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { useRouter } from "next/navigation";
 import { Bell } from "lucide-react";
+import { PushOptIn } from "@/components/PushOptIn";
 import type { Notification } from "@/types/database.types";
 
+// timeZone pinned — this is a "use client" component Next.js both
+// server-renders and hydrates; with none set, UTC on the server vs. the
+// viewer's own local zone in the browser is a real hydration mismatch
+// (same reasoning as ArticlesExplorer.tsx's formatDate).
 function formatDate(iso: string) {
-  return new Date(iso).toLocaleString("pt-BR");
+  return new Date(iso).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
 }
 
 export function NotificationBell({ compact = false }: { compact?: boolean }) {
@@ -224,6 +229,7 @@ export function NotificationBell({ compact = false }: { compact?: boolean }) {
               ))
             )}
           </div>
+          <PushOptIn />
         </div>,
         document.body
       )}
