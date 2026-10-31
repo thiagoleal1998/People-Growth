@@ -1,6 +1,7 @@
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { AdminSidebar } from "@/components/admin/AdminSidebar";
+import { PushReminderBanner } from "@/components/PushReminderBanner";
 import { ADMIN_MENU_DEFAULTS, applyMenuOverrides, type MenuOverride } from "@/lib/menu-registry";
 
 export default async function AdminDashboardLayout({ children }: { children: React.ReactNode }) {
@@ -46,7 +47,10 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
         userPhoto={userPhoto}
         counts={{ comentarios: pendingComments ?? 0, leads: newLeads ?? 0, chamados: (newErrors ?? 0) + (openTickets ?? 0), resetRequests: pendingResets ?? 0 }}
       />
-      <main className="admin-scroll admin-main" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%", minWidth: 0 }}>{children}</main>
+      <main className="admin-scroll admin-main" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%", minWidth: 0 }}>
+        <PushReminderBanner />
+        {children}
+      </main>
       <style>{`
         @media (max-width: 900px) {
           .admin-shell { display: block !important; height: auto !important; overflow: visible !important; }

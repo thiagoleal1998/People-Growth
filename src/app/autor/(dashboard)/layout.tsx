@@ -2,6 +2,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { AuthorSidebar } from "@/components/autor/AuthorSidebar";
 import { TermsGate } from "@/components/autor/TermsGate";
+import { PushReminderBanner } from "@/components/PushReminderBanner";
 import { AUTHOR_MENU_DEFAULTS, applyMenuOverrides, type MenuOverride } from "@/lib/menu-registry";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
 import { INSTITUTIONAL_DEFAULTS } from "@/lib/institutional-defaults";
@@ -80,6 +81,7 @@ export default async function AuthorDashboardLayout({ children }: { children: Re
       <AuthorSidebar menu={menu} logoUrl={logoUrl} pendingComments={pendingComments} unreadAnnouncements={unreadAnnouncements} />
       <main className="admin-scroll" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%" }}>
         {termsGate}
+        <PushReminderBanner />
         {children}
       </main>
     </div>
