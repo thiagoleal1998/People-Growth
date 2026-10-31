@@ -6,8 +6,9 @@ import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { CategoriesManager } from "./CategoriesManager";
 import { SeoTabs } from "../seo/SeoTabs";
 import { MenuEditor, type MenuEditorItem } from "./MenuEditor";
+import { NotificationTemplatesManager } from "./NotificationTemplatesManager";
 import { updateSiteConfig } from "./actions";
-import type { Category } from "@/types/database.types";
+import type { Category, NotificationTemplate } from "@/types/database.types";
 
 // Read-only — round detection is automatic (lib/tse.ts tries the 2nd-round
 // TSE file first and falls back to the 1st round on its own), there's
@@ -53,6 +54,7 @@ const tabs = [
   { id: "eleicoes", label: "Eleições 2026" },
   { id: "esportes", label: "Esportes" },
   { id: "categorias", label: "Categorias" },
+  { id: "notificacoes", label: "Modelos de notificação" },
   { id: "secoes", label: "Seções do site" },
   { id: "seo", label: "SEO, GEO & AEO" },
   { id: "menus", label: "Menus" },
@@ -66,6 +68,7 @@ export function ConfiguracoesTabs({
   values,
   categories,
   articleCounts,
+  notificationTemplates,
   logoError,
   faviconError,
   initialTab,
@@ -78,6 +81,7 @@ export function ConfiguracoesTabs({
   values: Record<string, string>;
   categories: Category[];
   articleCounts: Record<string, number>;
+  notificationTemplates: NotificationTemplate[];
   logoError?: string;
   faviconError?: string;
   initialTab?: string;
@@ -303,6 +307,15 @@ export function ConfiguracoesTabs({
               Categorias usadas nos artigos, na barra de categorias e nas páginas de conteúdo. Mudanças aqui salvam na hora, sem precisar clicar em &quot;Salvar alterações&quot; no fim da página.
             </p>
             <CategoriesManager categories={categories} articleCounts={articleCounts} />
+          </div>
+        </div>
+
+        <div style={{ display: active === "notificacoes" ? "block" : "none" }}>
+          <div style={panelStyle}>
+            <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginBottom: "1.125rem" }}>
+              Texto das notificações (sino do painel, e futuramente push) enviadas a autores e admins. Mudanças aqui salvam na hora, sem precisar clicar em &quot;Salvar alterações&quot; no fim da página.
+            </p>
+            <NotificationTemplatesManager templates={notificationTemplates} />
           </div>
         </div>
 

@@ -6,7 +6,7 @@ import { updateSeoConfig } from "../seo/actions";
 import { ADMIN_MENU_DEFAULTS, AUTHOR_MENU_DEFAULTS, applyMenuOverrides, isMenuGroup, type MenuOverride } from "@/lib/menu-registry";
 import { formatName, getGovernorRace, getPresidentRace, INCUMBENT_SEEKING_REELECTION, raceStatus, UF_IN_RUNOFF, UF_OPTIONS, type TseRace } from "@/lib/tse";
 import type { MenuEditorItem } from "./MenuEditor";
-import type { Category } from "@/types/database.types";
+import type { Category, NotificationTemplate } from "@/types/database.types";
 import type { ElectionStatusRow } from "./ConfiguracoesTabs";
 
 type SiteConfigRow = { key: string; value: string | null };
@@ -33,16 +33,21 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data }, { data: categoriesData }, { data: articlesData }, { data: extraCategoriesData }, { data: adminMenuOverrides }, { data: authorMenuOverrides }] = await Promise.all([
+  const [{ data }, { data: categoriesData }, { data: articlesData }, { data: extraCategoriesData }, { data: adminMenuOverrides }, { data: authorMenuOverrides }, { data: notificationTemplatesData }] = await Promise.all([
     client.from("site_config").select("*") as Promise<{ data: SiteConfigRow[] | null }>,
     client.from("categories").select("*").order("name_pt"),
     client.from("articles").select("id, category_id"),
     client.from("article_categories").select("article_id, category_id"),
     client.from("menu_items").select("id,label,sort_order").eq("panel", "admin"),
     client.from("menu_items").select("id,label,sort_order").eq("panel", "autor"),
+    // Table doesn't exist until migration 067 runs — tolerate the error
+    // (data comes back null, not a thrown rejection) so the rest of the
+    // Configurações page still loads fine in the meantime.
+    client.from("notification_templates").select("*").order("key"),
   ]);
   const values = Object.fromEntries((data ?? []).map((row) => [row.key, row.value ?? ""]));
   const categories = (categoriesData ?? []) as Category[];
+  const notificationTemplates = (notificationTemplatesData ?? []) as NotificationTemplate[];
 
   // Flattened to top-level rows for the editor — a group (Marketing) shows
   // as one reorderable/renamable row; its own children keep their built-in
@@ -85,6 +90,7 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
         values={values}
         categories={categories}
         articleCounts={articleCounts}
+        notificationTemplates={notificationTemplates}
         logoError={logoError}
         faviconError={faviconError}
         initialTab={tab}

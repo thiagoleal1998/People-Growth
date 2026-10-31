@@ -8,6 +8,7 @@ import { getCurrentProfile } from "@/lib/auth/profile";
 import { uploadPublicImage } from "@/lib/supabase/storage";
 import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
 import { calculateReadTime } from "@/lib/markdown-lite";
+import { insertNotification, type NotificationTemplateKey } from "@/lib/notify";
 import type { Article, ArticleSource } from "@/types/database.types";
 
 // Rows come in as parallel source_label / source_url fields; rows without a label are dropped.
@@ -22,13 +23,12 @@ function parseSources(formData: FormData): ArticleSource[] {
 // — so this has to run entirely on the service-role client, both to list
 // who the admins are (user_profiles RLS also only allows reading your own
 // row) and to write the rows.
-async function notifyAdmins(notification: { title: string; body?: string; link: string }) {
+async function notifyAdmins(key: NotificationTemplateKey, vars: Record<string, string>, link: string) {
   const admin = await createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: admins } = await (admin as any).from("user_profiles").select("id").eq("role", "admin");
   if (!admins || admins.length === 0) return;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (admin as any).from("notifications").insert(admins.map((a: { id: string }) => ({ user_id: a.id, ...notification })));
+  await Promise.all(admins.map((a: { id: string }) => insertNotification(admin, a.id, key, vars, link)));
 }
 
 export async function upsertOwnArticle(id: string | null, formData: FormData) {
@@ -203,12 +203,11 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
   const wasPending = oldArticle?.status === "pending";
   if (status === "pending" && !wasPending) {
     const cameFromChangesRequested = Boolean(oldArticle?.review_feedback);
-    await notifyAdmins({
-      title: cameFromChangesRequested
-        ? `"${title_pt}" foi revisado e reenviado para aprovação`
-        : `"${title_pt}" foi enviado para aprovação`,
-      link: `/admin/artigos/${articleId}/revisar`,
-    });
+    await notifyAdmins(
+      cameFromChangesRequested ? "article_resubmitted_for_approval" : "article_submitted_for_approval",
+      { title: title_pt },
+      `/admin/artigos/${articleId}/revisar`
+    );
   }
 
   revalidatePath("/autor");

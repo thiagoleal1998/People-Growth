@@ -5,6 +5,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile, resolveActorName } from "@/lib/auth/profile";
 import { logActivity } from "@/lib/activity-log";
 import { formatTicketId } from "@/lib/display-id";
+import { insertNotification } from "@/lib/notify";
 import type { ErrorReport, InternalTicket } from "@/types/database.types";
 
 const STATUS_LABEL: Record<InternalTicket["status"], string> = {
@@ -169,12 +170,13 @@ export async function notifyTicketMember(id: string) {
   const assigneeName = await resolveActorName(assigneeProfile);
 
   const ticketCode = formatTicketId(ticket.ticket_number);
-  await client.from("notifications").insert({
-    user_id: ticket.assigned_to,
-    title: `Você foi notificado no chamado ${ticketCode}`,
-    body: ticket.title,
-    link: assigneeProfile.role === "admin" ? "/admin/chamados" : "/autor/chamados",
-  });
+  await insertNotification(
+    client,
+    ticket.assigned_to,
+    "ticket_member_notified",
+    { ticket_code: ticketCode, ticket_title: ticket.title },
+    assigneeProfile.role === "admin" ? "/admin/chamados" : "/autor/chamados"
+  );
   await client.from("ticket_events").insert({
     ticket_id: id,
     event_type: "notified",

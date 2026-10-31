@@ -8,21 +8,21 @@ import { uploadPublicImage } from "@/lib/supabase/storage";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
 import { calculateReadTime } from "@/lib/markdown-lite";
+import { insertNotification, type NotificationTemplateKey } from "@/lib/notify";
 import type { Article, ArticleSource } from "@/types/database.types";
 
 // Shared by publishArticle/approveAndSchedule/requestChanges — resolves
 // which login is linked to an author (user_profiles' own RLS only allows
 // reading your own row, hence the admin client) and drops a notification
-// in their bell.
-async function notifyAuthor(authorId: string | null, notification: { title: string; body?: string; link: string }) {
+// in their bell (text comes from notification_templates, see src/lib/notify.ts).
+async function notifyAuthor(authorId: string | null, key: NotificationTemplateKey, vars: Record<string, string>, link: string) {
   if (!authorId) return;
   const admin = await createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: authorProfile } = await (admin as any).from("user_profiles").select("id").eq("author_id", authorId).single();
   if (!authorProfile) return;
   const supabase = await createClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (supabase as any).from("notifications").insert({ user_id: authorProfile.id, ...notification });
+  await insertNotification(supabase, authorProfile.id, key, vars, link);
 }
 
 // Rows come in as parallel source_label / source_url fields; rows without a label are dropped.
@@ -234,10 +234,7 @@ export async function publishArticle(id: string) {
   if (profile) {
     await logActivity({ userId: profile.id, userEmail: profile.email, action: "publish", entityType: "artigo", entityLabel: article?.title_pt });
   }
-  await notifyAuthor(article?.author_id ?? null, {
-    title: `"${article?.title_pt}" foi publicado`,
-    link: `/autor/artigos/${id}`,
-  });
+  await notifyAuthor(article?.author_id ?? null, "article_published", { title: article?.title_pt ?? "" }, `/autor/artigos/${id}`);
   revalidatePath("/admin/artigos");
   revalidatePath("/[locale]", "page");
 }
@@ -253,11 +250,15 @@ export async function approveAndSchedule(id: string) {
   if (profile) {
     await logActivity({ userId: profile.id, userEmail: profile.email, action: "publish", entityType: "artigo", entityLabel: `${article.title_pt} (agendado)` });
   }
-  await notifyAuthor(article.author_id, {
-    title: `"${article.title_pt}" foi aprovado e agendado`,
-    body: `Vai ao ar em ${new Date(article.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" })}.`,
-    link: `/autor/artigos/${id}`,
-  });
+  await notifyAuthor(
+    article.author_id,
+    "article_approved_scheduled",
+    {
+      title: article.title_pt,
+      scheduled_for: new Date(article.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }),
+    },
+    `/autor/artigos/${id}`
+  );
   revalidatePath("/admin/artigos");
   revalidatePath(`/admin/artigos/${id}`);
 }
@@ -278,11 +279,7 @@ export async function requestChanges(id: string, feedback: string) {
 
   await client.from("articles").update({ status: "draft", review_feedback: feedback }).eq("id", id);
 
-  await notifyAuthor(article.author_id, {
-    title: `Alterações solicitadas em "${article.title_pt}"`,
-    body: feedback,
-    link: `/autor/artigos/${id}`,
-  });
+  await notifyAuthor(article.author_id, "article_changes_requested", { title: article.title_pt, feedback }, `/autor/artigos/${id}`);
 
   // The article's own review_feedback column only ever holds the CURRENT
   // note — it's nulled out once the author acts on it (see upsertOwnArticle
