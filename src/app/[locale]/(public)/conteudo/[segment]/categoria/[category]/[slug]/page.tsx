@@ -544,7 +544,12 @@ export default async function ArticlePage({
           </article>
 
           {/* Sidebar */}
-          <aside style={{ display: "flex", flexDirection: "column", gap: "1.5rem", position: "sticky", top: "5rem" }}>
+          {/* top: 7rem, not 5rem — the fixed site navbar (ticker + nav row,
+              Navbar.tsx) is ~6.43rem tall; 5rem left the sidebar's sticky
+              content sliding in partly behind it. Matches the same 7rem
+              used for this exact reason on the institutional pages'
+              sticky TOC (InstitutionalToc.tsx). */}
+          <aside style={{ display: "flex", flexDirection: "column", gap: "1.5rem", position: "sticky", top: "7rem" }}>
             {articleChapters.length > 1 && (
               <ArticleToc headings={articleChapters} label={locale === "en" ? "In this article" : "Nesta matéria"} />
             )}

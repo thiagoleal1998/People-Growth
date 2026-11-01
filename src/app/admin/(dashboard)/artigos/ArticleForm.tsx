@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import Link from "next/link";
-import { Eye, Languages, Sparkles, Check, Loader2 } from "lucide-react";
+import { Eye, Languages, Sparkles, Check, Loader2, TriangleAlert } from "lucide-react";
 import { Field, Input, Textarea, Select, SubmitButton, FieldGrid } from "@/components/admin/ui";
 import { MarkdownEditor, type MarkdownEditorHandle } from "@/components/admin/MarkdownEditor";
 import { DateTimePicker } from "@/components/admin/DateTimePicker";
@@ -14,6 +14,7 @@ import { upsertArticle, approveAndSchedule } from "./actions";
 import type { Article, ArticleSource, Category, Author } from "@/types/database.types";
 import { AI_USAGE_OPTIONS, aiDisclosureText } from "@/lib/ai-disclosure";
 import { FORMAT_SEGMENT } from "@/lib/article-url";
+import { isExternalCoverImageUrl } from "@/lib/cover-image";
 
 const tabs = [
   { id: "conteudo", label: "Conteúdo" },
@@ -55,6 +56,7 @@ export function ArticleForm({
 }) {
   const action = upsertArticle.bind(null, item?.id ?? null);
   const [active, setActive] = useState<TabId>("conteudo");
+  const [coverImageUrl, setCoverImageUrl] = useState("");
   const [sources, setSources] = useState<ArticleSource[]>(item?.sources ?? []);
   const [aiUsed, setAiUsed] = useState((item?.ai_usage ?? []).length > 0);
   const [aiUsage, setAiUsage] = useState<string[]>(item?.ai_usage ?? []);
@@ -531,7 +533,13 @@ export function ArticleForm({
               <ErrorBanner message={imageError} />
             </Field>
             <Field label="...ou URL da imagem" hint="Alternativa ao envio de arquivo acima — cole o link de uma imagem já publicada em outro lugar, para não usar espaço de armazenamento do site. Se os dois campos forem preenchidos, o arquivo enviado tem prioridade.">
-              <Input name="cover_image_url" placeholder="https://..." />
+              <Input name="cover_image_url" placeholder="https://..." value={coverImageUrl} onChange={(e) => setCoverImageUrl(e.target.value)} />
+              {isExternalCoverImageUrl(coverImageUrl) && (
+                <p style={{ display: "flex", alignItems: "flex-start", gap: "0.375rem", marginTop: "0.5rem", padding: "0.625rem 0.75rem", borderRadius: "0.5rem", backgroundColor: "rgba(200,154,74,0.12)", border: "1px solid rgba(200,154,74,0.3)", color: "#8a6523", fontSize: "0.8125rem", lineHeight: 1.45 }}>
+                  <TriangleAlert size={15} style={{ flexShrink: 0, marginTop: "0.125rem" }} />
+                  Esse link é de outro site, não do nosso armazenamento — a foto não vai aparecer quando a matéria for compartilhada no WhatsApp/redes sociais. Pra isso funcionar, envie o arquivo no campo acima em vez de colar o link.
+                </p>
+              )}
             </Field>
             <FieldGrid>
               <Field label="Legenda da imagem" hint="Descrição curta exibida junto da foto no início do artigo.">
