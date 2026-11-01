@@ -1,12 +1,22 @@
-// Matches /api/og-image's own allowlist — a cover_image URL outside this
-// prefix (an external link, a temporary AI-image-generation URL, etc.) gets
-// rejected by that route, which means a shared link's WhatsApp/social
-// preview won't show a photo at all. Used to warn an admin/author at the
-// point they paste the URL, instead of the problem only surfacing once
-// someone shares the published link and nothing shows up.
-export function isExternalCoverImageUrl(url: string): boolean {
+// Hosts known to serve temporary/signed URLs for AI-generated images —
+// explicitly designed to expire (ChatGPT's own image attachments are
+// typically gone within about an hour) rather than meant for permanent
+// hosting. A stable external URL (a press kit photo, a wire service image)
+// is NOT flagged here and works fine as a cover image directly — only
+// these specific, known-ephemeral hosts are a real problem: by the time
+// anyone opens the published article, or it gets shared, the link can
+// already be dead. Confirmed by hand on a real article whose cover had
+// quietly become unusable this way.
+const EPHEMERAL_IMAGE_HOSTS = ["images.openai.com", "oaiusercontent.com"];
+
+export function isEphemeralCoverImageUrl(url: string): boolean {
   const trimmed = url.trim();
   if (!trimmed) return false;
-  const prefix = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/`;
-  return !trimmed.startsWith(prefix);
+  let hostname: string;
+  try {
+    hostname = new URL(trimmed).hostname;
+  } catch {
+    return false;
+  }
+  return EPHEMERAL_IMAGE_HOSTS.some((host) => hostname === host || hostname.endsWith(`.${host}`));
 }
