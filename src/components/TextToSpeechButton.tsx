@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { CirclePlay, CirclePause, Loader2, RotateCcw, RotateCw } from "lucide-react";
+import { buildWordSpans, alignWords, findActiveWord, type AlignedWord, type WordTiming } from "@/lib/speech-sync";
 
 const SPEEDS = [1, 1.25, 1.5, 1.75, 2];
 const SKIP_SECONDS = 10;
@@ -33,7 +34,21 @@ type Status = "idle" | "loading" | "ready" | "error";
  * speechSynthesis: far more natural-sounding, and consistent across every
  * visitor's device instead of depending on whatever voices happen to be
  * installed locally. */
-export function TextToSpeechButton({ text, title, locale, fill }: { text: string; title: string; locale?: string; fill?: boolean }) {
+export function TextToSpeechButton({
+  text,
+  title,
+  locale,
+  fill,
+  highlightRef,
+}: {
+  text: string;
+  title: string;
+  locale?: string;
+  fill?: boolean;
+  /** The rendered article body to highlight word-by-word as it's read, if
+   * the server returned word timings for this narration (see /api/tts). */
+  highlightRef?: React.RefObject<HTMLElement | null>;
+}) {
   const [status, setStatus] = useState<Status>("idle");
   const [playing, setPlaying] = useState(false);
   const [buffering, setBuffering] = useState(false);
@@ -42,12 +57,45 @@ export function TextToSpeechButton({ text, title, locale, fill }: { text: string
   const [speedIndex, setSpeedIndex] = useState(0);
   const [loadingMessageIndex, setLoadingMessageIndex] = useState(0);
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  // Not state — this drives a per-frame rAF loop, so it must never trigger
+  // a re-render on its own.
+  const alignedWordsRef = useRef<AlignedWord[] | null>(null);
+  const activeWordRef = useRef<HTMLElement | null>(null);
+
+  function clearActiveWord() {
+    activeWordRef.current?.classList.remove("tts-active-word");
+    activeWordRef.current = null;
+  }
 
   useEffect(() => {
     return () => {
       audioRef.current?.pause();
+      clearActiveWord();
     };
   }, []);
+
+  // Highlights the word currently being spoken while playing. Separate from
+  // the `ontimeupdate`-driven currentTime state above — that fires too
+  // coarsely/irregularly for a per-word highlight to look smooth.
+  useEffect(() => {
+    if (!playing) return;
+    let frameId: number;
+    function tick() {
+      const audio = audioRef.current;
+      const aligned = alignedWordsRef.current;
+      if (audio && aligned) {
+        const active = findActiveWord(aligned, audio.currentTime * 1000);
+        if ((active?.span ?? null) !== activeWordRef.current) {
+          activeWordRef.current?.classList.remove("tts-active-word");
+          active?.span.classList.add("tts-active-word");
+          activeWordRef.current = active?.span ?? null;
+        }
+      }
+      frameId = requestAnimationFrame(tick);
+    }
+    frameId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frameId);
+  }, [playing]);
 
   useEffect(() => {
     if (status !== "loading") return;
@@ -68,14 +116,38 @@ export function TextToSpeechButton({ text, title, locale, fill }: { text: string
         body: JSON.stringify({ text: `${title}. ${text}`, locale: locale ?? "pt" }),
       });
       if (!res.ok) throw new Error("tts request failed");
-      const data = (await res.json()) as { url?: string };
+      const data = (await res.json()) as { url?: string; timingsUrl?: string | null };
       if (!data.url) throw new Error("tts response missing url");
+
+      // Word timings are a bonus layer — fetched best-effort, never block
+      // (or fail) playback over them. Missing for narrations cached before
+      // this feature shipped, or if the fetch itself fails.
+      if (data.timingsUrl && highlightRef?.current) {
+        try {
+          const timingsRes = await fetch(data.timingsUrl);
+          if (timingsRes.ok) {
+            const timings = (await timingsRes.json()) as WordTiming[];
+            // The synthesized text is "{title}. {text}" — drop the title's
+            // own words so word 0 of the alignment lines up with the first
+            // word actually rendered inside highlightRef. alignWords()'s
+            // lookahead matching tolerates this count being approximate.
+            const titleWordCount = title.trim().split(/\s+/).filter(Boolean).length;
+            const spans = buildWordSpans(highlightRef.current);
+            alignedWordsRef.current = alignWords(timings.slice(titleWordCount), spans);
+          }
+        } catch {
+          alignedWordsRef.current = null;
+        }
+      }
 
       const audio = new Audio(data.url);
       audio.playbackRate = SPEEDS[speedIndex];
       audio.onplay = () => setPlaying(true);
       audio.onpause = () => setPlaying(false);
-      audio.onended = () => setPlaying(false);
+      audio.onended = () => {
+        setPlaying(false);
+        clearActiveWord();
+      };
       audio.onwaiting = () => setBuffering(true);
       audio.onplaying = () => setBuffering(false);
       audio.onloadedmetadata = () => setDuration(audio.duration);

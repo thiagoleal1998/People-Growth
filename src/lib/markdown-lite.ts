@@ -191,7 +191,7 @@ export function renderMarkdownLite(text: string, options: { anchorHeadings?: boo
     return `<blockquote style="position:relative;margin:2rem 0;padding:0.5rem 1rem 0.5rem 2.75rem;border-left:3px solid #315E9C">
       <span style="position:absolute;left:0.5rem;top:-0.5rem;font-size:3rem;line-height:1;color:#315E9C;font-family:Georgia,serif;font-weight:800">&ldquo;</span>
       <p style="font-size:1.1875rem;font-weight:700;font-style:italic;color:var(--site-text);line-height:1.5;margin:0">${quoteText}</p>
-      ${attribution ? `<p style="margin:0.625rem 0 0;font-size:0.875rem;font-weight:700;color:var(--site-muted)">— ${attribution}</p>` : ""}
+      ${attribution ? `<p data-speech-skip="1" style="margin:0.625rem 0 0;font-size:0.875rem;font-weight:700;color:var(--site-muted)">— ${attribution}</p>` : ""}
     </blockquote>\n\n`;
   });
 

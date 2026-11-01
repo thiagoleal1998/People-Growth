@@ -112,7 +112,7 @@ export function ArticleBody({
             <ChevronDown size={16} style={{ transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
           </button>
         )}
-        <TextToSpeechButton text={speechText} title={title} locale={locale} fill />
+        <TextToSpeechButton text={speechText} title={title} locale={locale} fill highlightRef={bodyRef} />
       </div>
 
       {videoEmbedUrl && (
@@ -239,6 +239,8 @@ export function ArticleBody({
       {lightbox}
 
       <style>{`
+        .tts-word { transition: background-color 0.1s ease, color 0.1s ease; border-radius: 0.2em; }
+        .tts-active-word { background-color: rgba(49, 94, 156, 0.18); color: var(--site-text); }
         @media (max-width: 640px) {
           .article-cover-figure { float: none !important; width: 100% !important; margin-left: 0 !important; }
           /* A width the author picked for a wide desktop column reads as

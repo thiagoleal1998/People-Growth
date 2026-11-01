@@ -74,22 +74,86 @@ function chunkText(text: string, maxLen = CHUNK_CHARS): string[] {
   return chunks;
 }
 
-async function synthesizeOnce(text: string, voice: string): Promise<Buffer> {
+type WordTiming = { text: string; offsetMs: number; durationMs: number };
+type Synthesis = { audio: Buffer; words: WordTiming[] };
+
+// AUDIO_24KHZ_48KBITRATE_MONO_MP3 is a constant 48kbit/s — a chunk's audio
+// duration can be read straight off its byte length instead of decoding the
+// MP3, which is all that's needed to offset each chunk's word timings by
+// how much audio came before it.
+const BYTES_PER_MS = 48 / 8;
+
+function parseWordBoundaries(chunks: Buffer[]): WordTiming[] {
+  const words: WordTiming[] = [];
+  for (const chunk of chunks) {
+    let parsed: { Metadata?: { Type?: string; Data?: { Offset?: number; Duration?: number; text?: { Text?: string } } }[] };
+    try {
+      parsed = JSON.parse(chunk.toString());
+    } catch {
+      continue;
+    }
+    for (const item of parsed.Metadata ?? []) {
+      if (item.Type !== "WordBoundary" || !item.Data?.text?.Text) continue;
+      // Offset/Duration arrive in 100-nanosecond ticks (standard Azure
+      // Speech protocol), relative to the start of this chunk's own
+      // synthesis — converted to ms here, offset by the caller once every
+      // chunk's audio duration is known.
+      words.push({
+        text: item.Data.text.Text,
+        offsetMs: (item.Data.Offset ?? 0) / 10000,
+        durationMs: (item.Data.Duration ?? 0) / 10000,
+      });
+    }
+  }
+  return words;
+}
+
+async function synthesizeOnce(text: string, voice: string): Promise<Synthesis> {
   const tts = new MsEdgeTTS();
-  await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3);
+  await tts.setMetadata(voice, OUTPUT_FORMAT.AUDIO_24KHZ_48KBITRATE_MONO_MP3, { wordBoundaryEnabled: true });
   try {
     // Chunks share one websocket connection but synthesize concurrently
     // (each gets its own request id) — order is preserved by Promise.all,
     // not by arrival.
-    const buffers = await Promise.all(
+    const chunkResults = await Promise.all(
       chunkText(text).map(async (chunk) => {
-        const { audioStream } = tts.toStream(escapeSsml(chunk));
-        const parts: Buffer[] = [];
-        for await (const data of audioStream) parts.push(data as Buffer);
-        return Buffer.concat(parts);
+        const { audioStream, metadataStream } = tts.toStream(escapeSsml(chunk));
+        const audioParts: Buffer[] = [];
+        const metadataParts: Buffer[] = [];
+        // Both streams share the same flaky websocket (see synthesize()'s
+        // own comment below) — when it drops, metadataStream errors too.
+        // Caught here so that rejection is never left unhandled; word
+        // timings are a bonus layer, so losing them just means this chunk's
+        // words won't be highlighted. The audioStream's own error (awaited
+        // in the `finally` below) is what actually fails this attempt.
+        const drainMetadata = metadataStream
+          ? (async () => {
+              try {
+                for await (const data of metadataStream) metadataParts.push(data as Buffer);
+              } catch {
+                // best-effort, see comment above
+              }
+            })()
+          : Promise.resolve();
+        try {
+          for await (const data of audioStream) audioParts.push(data as Buffer);
+        } finally {
+          await drainMetadata;
+        }
+        return { audio: Buffer.concat(audioParts), words: parseWordBoundaries(metadataParts) };
       })
     );
-    return Buffer.concat(buffers);
+
+    let cumulativeMs = 0;
+    const words: WordTiming[] = [];
+    for (const chunk of chunkResults) {
+      for (const word of chunk.words) {
+        words.push({ ...word, offsetMs: word.offsetMs + cumulativeMs });
+      }
+      cumulativeMs += chunk.audio.length / BYTES_PER_MS;
+    }
+
+    return { audio: Buffer.concat(chunkResults.map((c) => c.audio)), words };
   } finally {
     tts.close();
   }
@@ -106,7 +170,7 @@ async function synthesizeOnce(text: string, voice: string): Promise<Buffer> {
 // budget runs out: cheap for the common short-article case (each attempt
 // takes ~1s, so dozens fit easily), and still at least one retry for a
 // long article whose single synthesis pass eats most of the budget itself.
-async function synthesize(text: string, voice: string): Promise<Buffer> {
+async function synthesize(text: string, voice: string): Promise<Synthesis> {
   const deadline = Date.now() + SYNTHESIS_BUDGET_MS;
   let lastErr: unknown;
   do {
@@ -145,17 +209,26 @@ export async function POST(req: NextRequest) {
     // one cached file instead of re-synthesizing per visitor.
     const hash = crypto.createHash("sha256").update(`${voice}:${text}`).digest("hex").slice(0, 32);
     const path = `tts/${hash}.mp3`;
+    const timingsPath = `tts/${hash}.json`;
 
     const admin = await createAdminClient();
     const { data: publicUrlData } = admin.storage.from(BUCKET).getPublicUrl(path);
     const publicUrl = publicUrlData.publicUrl;
+    const { data: timingsUrlData } = admin.storage.from(BUCKET).getPublicUrl(timingsPath);
+    const timingsUrl = timingsUrlData.publicUrl;
 
     const head = await fetch(publicUrl, { method: "HEAD" }).catch(() => null);
     if (head?.ok) {
-      return NextResponse.json({ url: publicUrl });
+      // Word timings were added after this cache scheme already existed —
+      // audio synthesized before that ships has no sibling .json and isn't
+      // worth re-synthesizing just to backfill it. The read-along highlight
+      // simply doesn't appear until the article's content (and so its TTS
+      // cache key) next changes; the audio itself is unaffected.
+      const timingsHead = await fetch(timingsUrl, { method: "HEAD" }).catch(() => null);
+      return NextResponse.json({ url: publicUrl, timingsUrl: timingsHead?.ok ? timingsUrl : null });
     }
 
-    const audioBuffer = await synthesize(text, voice);
+    const { audio: audioBuffer, words } = await synthesize(text, voice);
 
     const { error: uploadError } = await admin.storage.from(BUCKET).upload(path, audioBuffer, {
       contentType: "audio/mpeg",
@@ -164,7 +237,16 @@ export async function POST(req: NextRequest) {
     });
     if (uploadError) throw uploadError;
 
-    return NextResponse.json({ url: publicUrl });
+    const { error: timingsUploadError } = await admin.storage.from(BUCKET).upload(timingsPath, JSON.stringify(words), {
+      contentType: "application/json",
+      cacheControl: "31536000",
+      upsert: true,
+    });
+    // Timings are a bonus layer on top of working audio — never fail the
+    // whole request over them.
+    if (timingsUploadError) console.error("TTS timings upload error:", timingsUploadError);
+
+    return NextResponse.json({ url: publicUrl, timingsUrl: timingsUploadError ? null : timingsUrl });
   } catch (err) {
     console.error("TTS synthesis error:", err);
     return NextResponse.json({ error: "Falha ao gerar áudio." }, { status: 500 });
