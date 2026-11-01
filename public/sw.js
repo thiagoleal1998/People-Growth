@@ -2,23 +2,23 @@
 // as the push payload (see sendPushToUser); this just has to turn that into
 // an OS-level notification and, on click, open the right page.
 self.addEventListener("push", (event) => {
-  console.log("[sw-debug] push event received, hasData:", !!event.data);
   let data = {};
   try {
     data = event.data ? event.data.json() : {};
-    console.log("[sw-debug] parsed data:", JSON.stringify(data));
-  } catch (err) {
-    console.log("[sw-debug] json parse failed:", err && err.message);
+  } catch {
     data = {};
   }
+  // No `icon` option: the site's favicon asset isn't sized for a
+  // notification icon (~190KB), and passing it made Chrome's
+  // showNotification() resolve without ever actually displaying anything —
+  // confirmed by hand. Safer to go without one than risk a silent no-op.
   event.waitUntil(
     self.registration
       .showNotification(data.title || "Grupo Festina", {
         body: data.body || "",
         data: { link: data.link || "/" },
       })
-      .then(() => console.log("[sw-debug] showNotification resolved OK"))
-      .catch((err) => console.log("[sw-debug] showNotification REJECTED:", err && err.message))
+      .catch((err) => console.error("showNotification failed:", err))
   );
 });
 

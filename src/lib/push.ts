@@ -25,13 +25,14 @@ export async function sendPushToUser(userId: string, payload: { title: string; b
   const admin = await createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = admin as any;
-  const [{ data: subs }, { data: config }] = await Promise.all([
-    client.from("push_subscriptions").select("id, endpoint, p256dh, auth").eq("user_id", userId),
-    client.from("site_config").select("value").eq("key", "favicon_url").single(),
-  ]);
+  const { data: subs } = await client.from("push_subscriptions").select("id, endpoint, p256dh, auth").eq("user_id", userId);
   if (!subs || subs.length === 0) return;
 
-  const body = JSON.stringify({ title: payload.title, body: payload.body, link: payload.link, icon: config?.value || undefined });
+  // No icon: the site's favicon asset (~190KB, not sized for this) made
+  // Chrome's notification silently never display at all — confirmed by
+  // hand (showNotification resolved, but nothing showed, and registration.
+  // getNotifications() came back empty) until the icon option was dropped.
+  const body = JSON.stringify({ title: payload.title, body: payload.body, link: payload.link });
 
   await Promise.all(
     subs.map(async (sub: { id: string; endpoint: string; p256dh: string; auth: string }) => {
@@ -59,14 +60,10 @@ export async function sendConfirmationPush(sub: { endpoint: string; p256dh: stri
   if (!process.env.VAPID_PRIVATE_KEY || !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) return;
   ensureVapidConfigured();
 
-  const admin = await createAdminClient();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: config } = await (admin as any).from("site_config").select("value").eq("key", "favicon_url").single();
   const body = JSON.stringify({
     title: "Notificações ativadas",
     body: "Você vai receber avisos aqui a partir de agora.",
     link,
-    icon: config?.value || undefined,
   });
 
   try {
