@@ -13,7 +13,11 @@ const COLLAPSED_COUNT = 6;
 // InstitutionalToc.tsx: smooth-scroll behavior varies a lot across
 // browsers and is often too quick to actually read as a glide.
 
-const NAVBAR_OFFSET = 96;
+// Matches the h2's own `scroll-margin-top: 7rem` (markdown-lite.ts) and
+// InstitutionalToc.tsx's identical offset — 96 (6rem) left the heading's
+// top edge still partly behind the fixed navbar (~6.43rem tall) after the
+// jump, same root cause as the sidebar's own top offset fix.
+const NAVBAR_OFFSET = 112;
 const DURATION_MS = 700;
 
 function easeInOutCubic(t: number) {
