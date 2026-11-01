@@ -22,12 +22,14 @@ export function UsuariosAutoresTabs({
   users,
   authors,
   resetRequests,
+  pushSubscriptionCounts,
   userError,
   initialTab,
 }: {
   users: UserProfile[];
   authors: Author[];
   resetRequests: PasswordResetRequest[];
+  pushSubscriptionCounts: Record<string, number>;
   userError?: string;
   initialTab?: string;
 }) {
@@ -97,7 +99,7 @@ export function UsuariosAutoresTabs({
               <SubmitButton>Criar acesso</SubmitButton>
             </form>
 
-            <UsersClient users={users} authors={authors} />
+            <UsersClient users={users} authors={authors} pushSubscriptionCounts={pushSubscriptionCounts} />
           </div>
         </div>
       ) : (

@@ -14,15 +14,24 @@ export default async function UsuariosPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = admin as any;
 
-  const [{ data: usersData }, { data: authorsData }, { data: resetRequestsData }] = await Promise.all([
+  const [{ data: usersData }, { data: authorsData }, { data: resetRequestsData }, { data: pushSubsData }] = await Promise.all([
     client.from("user_profiles").select("*").order("created_at"),
     client.from("authors").select("*").order("order"),
     client.from("password_reset_requests").select("*").eq("status", "pending").order("created_at", { ascending: false }),
+    client.from("push_subscriptions").select("user_id"),
   ]);
 
   const users = (usersData ?? []) as UserProfile[];
   const authors = (authorsData ?? []) as Author[];
   const resetRequests = (resetRequestsData ?? []) as PasswordResetRequest[];
+
+  // How many browsers/devices each user has push active on — shown as a
+  // badge per row (UsersClient.tsx) so an admin can tell who'll actually
+  // get a push, not just who's technically eligible.
+  const pushSubscriptionCounts: Record<string, number> = {};
+  for (const row of (pushSubsData ?? []) as { user_id: string }[]) {
+    pushSubscriptionCounts[row.user_id] = (pushSubscriptionCounts[row.user_id] ?? 0) + 1;
+  }
 
   return (
     <div>
@@ -36,6 +45,7 @@ export default async function UsuariosPage({
         users={users}
         authors={authors}
         resetRequests={resetRequests}
+        pushSubscriptionCounts={pushSubscriptionCounts}
         userError={userError}
         initialTab={tab}
       />

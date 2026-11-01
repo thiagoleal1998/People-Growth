@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { sendConfirmationPush } from "@/lib/push";
 
 // Session-bound client + RLS (migration 068) — a user only ever registers
 // or removes their own push subscriptions, never anyone else's. The send
@@ -23,17 +24,25 @@ export async function POST(req: NextRequest) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const { error } = await client.from("push_subscriptions").upsert(
-    {
-      user_id: user.id,
-      endpoint,
-      p256dh: keys.p256dh,
-      auth: keys.auth,
-      user_agent: req.headers.get("user-agent"),
-    },
-    { onConflict: "endpoint" }
-  );
+  const [{ error }, { data: profile }] = await Promise.all([
+    client.from("push_subscriptions").upsert(
+      {
+        user_id: user.id,
+        endpoint,
+        p256dh: keys.p256dh,
+        auth: keys.auth,
+        user_agent: req.headers.get("user-agent"),
+      },
+      { onConflict: "endpoint" }
+    ),
+    client.from("user_profiles").select("role").eq("id", user.id).single(),
+  ]);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  // Confirms, on this same device, that the opt-in actually worked — best-
+  // effort (failures are logged inside, never surfaced here); the
+  // subscription is already saved either way.
+  await sendConfirmationPush({ endpoint, p256dh: keys.p256dh, auth: keys.auth }, profile?.role === "admin" ? "/admin" : "/autor");
 
   return NextResponse.json({ success: true });
 }

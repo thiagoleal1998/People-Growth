@@ -1,13 +1,13 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Trash2, Mail, KeyRound } from "lucide-react";
+import { Trash2, Mail, KeyRound, BellRing, BellOff } from "lucide-react";
 import type { UserProfile, Author } from "@/types/database.types";
 import { formatUserId } from "@/lib/display-id";
 import { confirmDialog, promptDialog, alertDialog } from "@/components/admin/dialog-store";
 import { updateUserRole, updateUserAuthorLink, deleteUser, updateUserEmail, resetUserPassword } from "./actions";
 
-export function UsersClient({ users, authors }: { users: UserProfile[]; authors: Author[] }) {
+export function UsersClient({ users, authors, pushSubscriptionCounts }: { users: UserProfile[]; authors: Author[]; pushSubscriptionCounts: Record<string, number> }) {
   const [, startTransition] = useTransition();
   const [items, setItems] = useState(users);
   const authorById = new Map(authors.map((a) => [a.id, a]));
@@ -23,7 +23,7 @@ export function UsersClient({ users, authors }: { users: UserProfile[]; authors:
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                {["ID", "E-mail", "Papel", "Vinculado ao autor", "Ações"].map((h) => (
+                {["ID", "E-mail", "Papel", "Vinculado ao autor", "Notificações", "Ações"].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -74,6 +74,31 @@ export function UsersClient({ users, authors }: { users: UserProfile[]; authors:
                     {u.author_id && !authorById.has(u.author_id) && (
                       <span style={{ color: "#ef4444", fontSize: "0.75rem", marginLeft: "0.5rem" }}>autor não encontrado</span>
                     )}
+                  </td>
+                  <td style={{ padding: "0.875rem 1.25rem", whiteSpace: "nowrap" }}>
+                    {(() => {
+                      const count = pushSubscriptionCounts[u.id] ?? 0;
+                      const active = count > 0;
+                      return (
+                        <span
+                          title={active ? `Push ativo em ${count} navegador${count === 1 ? "" : "es"}/aparelho${count === 1 ? "" : "s"}` : "Ainda não ativou notificações push em nenhum navegador"}
+                          style={{
+                            display: "inline-flex",
+                            alignItems: "center",
+                            gap: "0.3125rem",
+                            fontSize: "0.75rem",
+                            fontWeight: 700,
+                            padding: "0.1875rem 0.5rem",
+                            borderRadius: "0.375rem",
+                            backgroundColor: active ? "rgba(21,128,61,0.1)" : "var(--admin-surface-alt)",
+                            color: active ? "#15803d" : "var(--admin-faint)",
+                          }}
+                        >
+                          {active ? <BellRing size={12} /> : <BellOff size={12} />}
+                          {active ? `Ativo (${count})` : "Não ativado"}
+                        </span>
+                      );
+                    })()}
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
