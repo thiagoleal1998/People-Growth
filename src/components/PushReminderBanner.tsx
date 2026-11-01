@@ -58,19 +58,20 @@ export function PushReminderBanner() {
         padding: "0.875rem 1.125rem",
         marginBottom: "1.25rem",
         borderRadius: "0.75rem",
-        backgroundColor: "#315E9C",
-        color: "white",
+        backgroundColor: "#C89A4A",
+        color: "#0d1b2a",
+        boxShadow: "0 4px 14px rgba(200,154,74,0.35)",
       }}
     >
       <BellRing size={18} style={{ flexShrink: 0 }} />
       <div style={{ flex: 1, minWidth: "16rem" }}>
-        <div style={{ fontWeight: 700, fontSize: "0.875rem" }}>Ative as notificações deste navegador</div>
-        <div style={{ fontSize: "0.8125rem", color: "rgba(255,255,255,0.8)", marginTop: "0.125rem" }}>
+        <div style={{ fontWeight: 800, fontSize: "0.875rem" }}>Ative as notificações deste navegador</div>
+        <div style={{ fontSize: "0.8125rem", color: "rgba(13,27,42,0.75)", marginTop: "0.125rem" }}>
           {support === "ios-needs-install"
             ? "No iPhone, adicione este site à Tela de Início (compartilhar → Adicionar à Tela de Início) e abra por esse ícone para poder ativar."
             : "Para saber na hora quando uma matéria for publicada, aprovada ou precisar de ajuste — mesmo com o painel fechado."}
         </div>
-        {error && <div style={{ fontSize: "0.75rem", color: "#ffd9d9", marginTop: "0.25rem" }}>{error}</div>}
+        {error && <div style={{ fontSize: "0.75rem", color: "#7a1f1f", marginTop: "0.25rem" }}>{error}</div>}
       </div>
       {support === "ready" && (
         <button
@@ -79,8 +80,8 @@ export function PushReminderBanner() {
           onClick={enable}
           style={{
             flexShrink: 0,
-            backgroundColor: "white",
-            color: "#315E9C",
+            backgroundColor: "#0d1b2a",
+            color: "white",
             border: "none",
             padding: "0.5rem 1rem",
             borderRadius: "0.5rem",
@@ -96,7 +97,7 @@ export function PushReminderBanner() {
       <button
         type="button"
         onClick={dismiss}
-        style={{ flexShrink: 0, background: "none", border: "none", color: "rgba(255,255,255,0.75)", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
+        style={{ flexShrink: 0, background: "none", border: "none", color: "rgba(13,27,42,0.65)", fontSize: "0.75rem", fontWeight: 600, cursor: "pointer", textDecoration: "underline" }}
       >
         Agora não
       </button>
