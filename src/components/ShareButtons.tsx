@@ -24,12 +24,15 @@ function XIcon({ size = 16 }: { size?: number }) {
   );
 }
 
-export function ShareButtons({ title }: { title: string }) {
+export function ShareButtons({ title, compact }: { title: string; compact?: boolean }) {
   const [url, setUrl] = useState("");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
-    setUrl(window.location.href);
+    // window only exists client-side; this runs during SSR too, so the read
+    // has to happen in an effect — the microtask just defers the setState
+    // call past the effect's own first synchronous line.
+    Promise.resolve().then(() => setUrl(window.location.href));
   }, []);
 
   async function copyLink() {
@@ -73,7 +76,7 @@ export function ShareButtons({ title }: { title: string }) {
   ];
 
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginTop: "2.5rem" }}>
+    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginTop: compact ? 0 : "2.5rem", marginBottom: compact ? "1.5rem" : 0 }}>
       <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--site-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>
         Compartilhar
       </span>

@@ -1,6 +1,10 @@
 import webpush from "web-push";
 import { createAdminClient } from "@/lib/supabase/server";
 
+// Relative — resolves against the service worker's own origin, same as any
+// other same-origin fetch from within it.
+const PUSH_ICON_PATH = "/api/push-icon";
+
 let vapidConfigured = false;
 function ensureVapidConfigured() {
   if (vapidConfigured) return;
@@ -28,11 +32,11 @@ export async function sendPushToUser(userId: string, payload: { title: string; b
   const { data: subs } = await client.from("push_subscriptions").select("id, endpoint, p256dh, auth").eq("user_id", userId);
   if (!subs || subs.length === 0) return;
 
-  // No icon: the site's favicon asset (~190KB, not sized for this) made
-  // Chrome's notification silently never display at all — confirmed by
-  // hand (showNotification resolved, but nothing showed, and registration.
-  // getNotifications() came back empty) until the icon option was dropped.
-  const body = JSON.stringify({ title: payload.title, body: payload.body, link: payload.link });
+  // /api/push-icon, not site_config.favicon_url directly — that raw file
+  // (whatever size an admin uploaded, ~190KB in the case that broke this)
+  // made Chrome's notification silently never display at all, confirmed by
+  // hand. The route always re-encodes a small, fixed-size copy instead.
+  const body = JSON.stringify({ title: payload.title, body: payload.body, link: payload.link, icon: PUSH_ICON_PATH });
 
   await Promise.all(
     subs.map(async (sub: { id: string; endpoint: string; p256dh: string; auth: string }) => {
@@ -64,6 +68,7 @@ export async function sendConfirmationPush(sub: { endpoint: string; p256dh: stri
     title: "Notificações ativadas",
     body: "Você vai receber avisos aqui a partir de agora.",
     link,
+    icon: PUSH_ICON_PATH,
   });
 
   try {

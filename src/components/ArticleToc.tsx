@@ -1,5 +1,8 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { ListTree } from "lucide-react";
+
 // Sidebar table of contents for long articles, letting a reader jump
 // straight to the section they care about instead of scrolling past
 // everything else. Only rendered when the article has more than one "## "
@@ -31,6 +34,29 @@ function glideTo(targetY: number) {
 }
 
 export function ArticleToc({ headings, label }: { headings: { id: string; title: string }[]; label: string }) {
+  const [activeId, setActiveId] = useState<string | null>(null);
+
+  // Highlights whichever section is currently in view while scrolling, not
+  // just on click — the list otherwise sits there static the whole read,
+  // which is what read as "muito morto" (lifeless).
+  useEffect(() => {
+    const targets = headings.map((h) => document.getElementById(h.id)).filter((el): el is HTMLElement => Boolean(el));
+    if (targets.length === 0) return;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) {
+            setActiveId(entry.target.id);
+            break;
+          }
+        }
+      },
+      { rootMargin: "-15% 0px -70% 0px" }
+    );
+    targets.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [headings]);
+
   function handleClick(event: React.MouseEvent<HTMLAnchorElement>, id: string) {
     const target = document.getElementById(id);
     if (!target) return;
@@ -44,15 +70,34 @@ export function ArticleToc({ headings, label }: { headings: { id: string; title:
     <nav
       className="article-toc"
       aria-label={label}
-      style={{ backgroundColor: "var(--site-surface-alt)", borderRadius: "0.875rem", padding: "1.125rem 1.125rem 0.75rem" }}
+      style={{
+        backgroundColor: "var(--site-surface)",
+        border: "1px solid var(--site-border)",
+        borderTop: "2.5px solid #315E9C",
+        borderRadius: "0.875rem",
+        padding: "1.125rem 1.125rem 0.75rem",
+        boxShadow: "0 1px 3px rgba(13,27,42,0.04)",
+        // Keeps the box from growing taller than the viewport minus the
+        // sticky offset above it — without this, a long chapter list on a
+        // short screen just gets cut by the bottom of the viewport while
+        // the sidebar is in its sticky phase, with no way to reach the
+        // rest of it (a real bug, not this scrollbar).
+        maxHeight: "calc(100vh - 7rem)",
+        overflowY: "auto",
+      }}
     >
-      <div style={{ fontSize: "0.6875rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: "var(--site-muted)", marginBottom: "0.625rem", padding: "0 0.25rem" }}>
+      <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.6875rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: "#315E9C", marginBottom: "0.75rem", padding: "0 0.25rem" }}>
+        <ListTree size={13} />
         {label}
       </div>
       <ul style={{ listStyle: "none", margin: 0, padding: "0 0.25rem 0.375rem 0" }}>
         {headings.map((heading, index) => (
           <li key={heading.id}>
-            <a href={`#${heading.id}`} onClick={(event) => handleClick(event, heading.id)}>
+            <a
+              href={`#${heading.id}`}
+              onClick={(event) => handleClick(event, heading.id)}
+              className={heading.id === activeId ? "article-toc-active" : undefined}
+            >
               <span className="article-toc-index">{index + 1}</span>
               <span className="article-toc-label">{heading.title}</span>
             </a>
@@ -100,6 +145,9 @@ export function ArticleToc({ headings, label }: { headings: { id: string; title:
           transition: color 0.15s;
         }
         .article-toc li a:hover .article-toc-label { color: #315E9C; }
+        .article-toc-active { background-color: rgba(49, 94, 156, 0.08); }
+        .article-toc-active .article-toc-index { background-color: #315E9C; color: white; }
+        .article-toc-active .article-toc-label { color: #315E9C; }
       `}</style>
     </nav>
   );

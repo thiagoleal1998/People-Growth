@@ -40,6 +40,21 @@ export function ArticleBody({
   // container.
   const { ref: bodyRef, lightbox } = useImageLightbox<HTMLDivElement>();
 
+  // The cover image is an external/Storage URL outside our control — a slow
+  // CDN hiccup or a transient 5xx shouldn't leave a broken-image icon
+  // sitting in a published article. One silent retry (cache-busted, so a
+  // flaky response isn't just replayed from a failed cache entry) catches
+  // the common transient case; if it still fails, a styled placeholder
+  // takes over instead of the browser's broken-image glyph.
+  const [coverImageStatus, setCoverImageStatus] = useState<"loading" | "retrying" | "ok" | "failed">("loading");
+  const [coverImageSrc, setCoverImageSrc] = useState(coverImage);
+  useEffect(() => {
+    Promise.resolve().then(() => {
+      setCoverImageStatus("loading");
+      setCoverImageSrc(coverImage);
+    });
+  }, [coverImage]);
+
   // Highlights draw in once they scroll into view. Done here (not in CSS
   // scroll-driven animations) so it works in every browser — those only
   // exist in some, and elsewhere the highlight just sat there static.
@@ -118,12 +133,33 @@ export function ArticleBody({
       <div>
         {showCoverImage && (
           <figure className="article-cover-figure" style={{ float: "right", width: "320px", margin: "0.25rem 0 1rem 1.75rem" }}>
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={coverImage!}
-              alt={coverImageCaption ?? title}
-              style={{ width: "100%", height: "auto", borderRadius: "0.625rem", display: "block" }}
-            />
+            {coverImageStatus === "failed" ? (
+              <div
+                style={{
+                  width: "100%",
+                  aspectRatio: "4 / 3",
+                  borderRadius: "0.625rem",
+                  background: "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                }}
+              />
+            ) : (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={coverImageSrc!}
+                alt={coverImageCaption ?? title}
+                style={{ width: "100%", height: "auto", borderRadius: "0.625rem", display: "block" }}
+                onLoad={() => setCoverImageStatus("ok")}
+                onError={() => {
+                  setCoverImageStatus((status) => {
+                    if (status === "retrying") return "failed";
+                    // Cache-busted re-request — a fresh network attempt, not
+                    // the same failed response served back from cache.
+                    setCoverImageSrc(`${coverImage}${coverImage!.includes("?") ? "&" : "?"}retry=${Date.now()}`);
+                    return "retrying";
+                  });
+                }}
+              />
+            )}
             {(coverImageCaption || coverImageCredit) && (
               <figcaption style={{ marginTop: "0.625rem", paddingLeft: "0.75rem", borderLeft: "2px solid #315E9C" }}>
                 {coverImageCaption && (

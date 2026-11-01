@@ -1,6 +1,6 @@
-// Web Push service worker — src/lib/push.ts sends { title, body, link } as
-// the push payload (see sendPushToUser); this just has to turn that into an
-// OS-level notification and, on click, open the right page.
+// Web Push service worker — src/lib/push.ts sends { title, body, link, icon }
+// as the push payload (see sendPushToUser); this just has to turn that into
+// an OS-level notification and, on click, open the right page.
 
 // Without these two, a new deploy's service worker sits "waiting" until
 // every open tab on the site is fully closed — in the meantime, push
@@ -22,14 +22,17 @@ self.addEventListener("push", (event) => {
   } catch {
     data = {};
   }
-  // No `icon` option: the site's favicon asset isn't sized for a
-  // notification icon (~190KB), and passing it made Chrome's
-  // showNotification() resolve without ever actually displaying anything —
-  // confirmed by hand. Safer to go without one than risk a silent no-op.
+  // data.icon is always /api/push-icon — a small, fixed-size (192x192)
+  // re-encoded copy of the site favicon, never the raw admin-uploaded file
+  // directly. That raw file (~190KB in the case that broke this) made
+  // showNotification() resolve without ever actually displaying anything,
+  // confirmed by hand — don't point this at site_config.favicon_url again.
   event.waitUntil(
     self.registration
       .showNotification(data.title || "Grupo Festina", {
         body: data.body || "",
+        icon: data.icon || undefined,
+        badge: data.icon || undefined,
         data: { link: data.link || "/" },
       })
       .catch((err) => console.error("showNotification failed:", err))

@@ -407,6 +407,8 @@ export default async function ArticlePage({
               </div>
             )}
 
+            <ShareButtons title={pickLocale(locale, article.title_pt, article.title_en)} compact />
+
             <ArticleBody
               title={pickLocale(locale, article.title_pt, article.title_en)}
               summary={pickLocale(locale, article.summary_pt, article.summary_en)}
