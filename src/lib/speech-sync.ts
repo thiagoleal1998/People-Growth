@@ -3,7 +3,7 @@
 // into the player's own state machine.
 
 export type WordTiming = { text: string; offsetMs: number; durationMs: number };
-export type AlignedWord = { offsetMs: number; span: HTMLElement };
+export type AlignedWord = { offsetMs: number; durationMs: number; span: HTMLElement };
 
 // Builds one <span class="tts-word"> per word inside `container` (the
 // rendered article body), skipping image/video captions (<figcaption>) and
@@ -70,25 +70,56 @@ function normalize(text: string): string {
 // for each TTS word, searches a short lookahead window for a text match; an
 // unmatched word is just skipped and the next one still re-syncs.
 export function alignWords(ttsWords: WordTiming[], domSpans: HTMLElement[]): AlignedWord[] {
-  const LOOKAHEAD = 6;
+  const LOOKAHEAD = 8;
+  // A handful of misses in a row is normal (a date read out as several
+  // spoken words against one DOM token — "1984" vs. "mil novecentos e
+  // oitenta e quatro" — or a hyphenated/linked word tokenized differently).
+  // But once that many land back to back, the narrow window alone can never
+  // recover: it's anchored at a cursor that's stuck before a genuinely
+  // bigger gap (several consecutive mismatched words, or a whole synthesis
+  // chunk whose metadata never arrived — see /api/tts's best-effort
+  // metadata draining). Without this, the highlight would freeze on its
+  // last successful match for the rest of the article while the audio kept
+  // playing normally — seen on a real article. Escalating to a much wider
+  // forward search only in that case keeps the common path cheap while
+  // still guaranteeing recovery.
+  const RESYNC_AFTER_MISSES = 3;
+  const RESYNC_WINDOW = 400;
+
+  function findMatch(target: string, cursor: number, window: number): number {
+    const end = Math.min(domSpans.length, cursor + window);
+    for (let i = cursor; i < end; i++) {
+      if (normalize(domSpans[i].textContent ?? "") === target) return i;
+    }
+    return -1;
+  }
+
   const aligned: AlignedWord[] = [];
   let cursor = 0;
+  let misses = 0;
   for (const word of ttsWords) {
     const target = normalize(word.text);
     if (!target) continue;
-    let matchIndex = -1;
-    for (let i = cursor; i < Math.min(domSpans.length, cursor + LOOKAHEAD); i++) {
-      if (normalize(domSpans[i].textContent ?? "") === target) {
-        matchIndex = i;
-        break;
-      }
+    let matchIndex = findMatch(target, cursor, LOOKAHEAD);
+    if (matchIndex === -1 && misses >= RESYNC_AFTER_MISSES) {
+      matchIndex = findMatch(target, cursor, RESYNC_WINDOW);
     }
-    if (matchIndex === -1) continue;
-    aligned.push({ offsetMs: word.offsetMs, span: domSpans[matchIndex] });
+    if (matchIndex === -1) {
+      misses++;
+      continue;
+    }
+    misses = 0;
+    aligned.push({ offsetMs: word.offsetMs, durationMs: word.durationMs, span: domSpans[matchIndex] });
     cursor = matchIndex + 1;
   }
   return aligned;
 }
+
+// How long past the end of the trailing aligned word a frozen highlight is
+// still shown before it's cleared instead. Covers a genuine untranscribable
+// tail (a sources section that's mostly bare URLs, nothing left to align)
+// without leaving the highlight visibly stuck on a stale word indefinitely.
+const STALE_AFTER_MS = 5000;
 
 // Last aligned word whose offset has already passed — the one currently
 // being spoken. `aligned` is already offset-sorted (ttsWords arrives in
@@ -102,5 +133,7 @@ export function findActiveWord(aligned: AlignedWord[], nowMs: number): AlignedWo
     if (aligned[mid].offsetMs <= nowMs) lo = mid;
     else hi = mid - 1;
   }
-  return aligned[lo];
+  const match = aligned[lo];
+  if (lo === aligned.length - 1 && nowMs - (match.offsetMs + match.durationMs) > STALE_AFTER_MS) return null;
+  return match;
 }
