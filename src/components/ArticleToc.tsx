@@ -1,7 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { ListTree } from "lucide-react";
+import { ListTree, ChevronDown } from "lucide-react";
+
+const COLLAPSED_COUNT = 6;
 
 // Sidebar table of contents for long articles, letting a reader jump
 // straight to the section they care about instead of scrolling past
@@ -35,6 +37,15 @@ function glideTo(targetY: number) {
 
 export function ArticleToc({ headings, label }: { headings: { id: string; title: string }[]; label: string }) {
   const [activeId, setActiveId] = useState<string | null>(null);
+  // A fixed/viewport-relative max-height with internal scroll was tried
+  // first, but a nested scrollable region inside a sticky sidebar isn't
+  // discoverable — it just reads as the box being cut off, not as
+  // "scroll here for more". Showing fewer items up front (never taller
+  // than the viewport can hold) and letting the reader explicitly ask for
+  // the rest avoids the whole problem instead of hiding it in a scrollbar.
+  const [expanded, setExpanded] = useState(false);
+  const visibleHeadings = expanded ? headings : headings.slice(0, COLLAPSED_COUNT);
+  const hiddenCount = headings.length - COLLAPSED_COUNT;
 
   // Highlights whichever section is currently in view while scrolling, not
   // just on click — the list otherwise sits there static the whole read,
@@ -77,13 +88,6 @@ export function ArticleToc({ headings, label }: { headings: { id: string; title:
         borderRadius: "0.875rem",
         padding: "1.125rem 1.125rem 0.75rem",
         boxShadow: "0 1px 3px rgba(13,27,42,0.04)",
-        // Keeps the box from growing taller than the viewport minus the
-        // sticky offset above it — without this, a long chapter list on a
-        // short screen just gets cut by the bottom of the viewport while
-        // the sidebar is in its sticky phase, with no way to reach the
-        // rest of it (a real bug, not this scrollbar).
-        maxHeight: "calc(100vh - 7rem)",
-        overflowY: "auto",
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", fontSize: "0.6875rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: "#315E9C", marginBottom: "0.75rem", padding: "0 0.25rem" }}>
@@ -91,7 +95,7 @@ export function ArticleToc({ headings, label }: { headings: { id: string; title:
         {label}
       </div>
       <ul style={{ listStyle: "none", margin: 0, padding: "0 0.25rem 0.375rem 0" }}>
-        {headings.map((heading, index) => (
+        {visibleHeadings.map((heading, index) => (
           <li key={heading.id}>
             <a
               href={`#${heading.id}`}
@@ -104,6 +108,30 @@ export function ArticleToc({ headings, label }: { headings: { id: string; title:
           </li>
         ))}
       </ul>
+      {hiddenCount > 0 && (
+        <button
+          type="button"
+          onClick={() => setExpanded((v) => !v)}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "0.3125rem",
+            width: "100%",
+            padding: "0.4375rem 0.375rem",
+            marginTop: "0.125rem",
+            background: "none",
+            border: "none",
+            borderTop: "1px solid var(--site-border)",
+            color: "#315E9C",
+            fontSize: "0.75rem",
+            fontWeight: 700,
+            cursor: "pointer",
+          }}
+        >
+          <ChevronDown size={13} style={{ transform: expanded ? "rotate(180deg)" : "none", transition: "transform 0.15s" }} />
+          {expanded ? "Ver menos" : `Ver todos os ${headings.length} capítulos`}
+        </button>
+      )}
       <style>{`
         .article-toc li + li { margin-top: 0.125rem; }
         .article-toc li a {
