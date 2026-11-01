@@ -2,18 +2,23 @@
 // as the push payload (see sendPushToUser); this just has to turn that into
 // an OS-level notification and, on click, open the right page.
 self.addEventListener("push", (event) => {
+  console.log("[sw-debug] push event received, hasData:", !!event.data);
   let data = {};
   try {
     data = event.data ? event.data.json() : {};
-  } catch {
+    console.log("[sw-debug] parsed data:", JSON.stringify(data));
+  } catch (err) {
+    console.log("[sw-debug] json parse failed:", err && err.message);
     data = {};
   }
   event.waitUntil(
-    self.registration.showNotification(data.title || "Grupo Festina", {
-      body: data.body || "",
-      icon: data.icon || undefined,
-      data: { link: data.link || "/" },
-    })
+    self.registration
+      .showNotification(data.title || "Grupo Festina", {
+        body: data.body || "",
+        data: { link: data.link || "/" },
+      })
+      .then(() => console.log("[sw-debug] showNotification resolved OK"))
+      .catch((err) => console.log("[sw-debug] showNotification REJECTED:", err && err.message))
   );
 });
 
