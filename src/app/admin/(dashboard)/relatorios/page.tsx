@@ -9,11 +9,6 @@ import { PlanosClient, type GoalWithProgress, type AccountWithHistory } from "./
 import { computeCurrentMetricValue } from "@/lib/goal-metrics";
 import type { Article, Ad, Columnist, Comment, ActivityLog, InternalTicket, ErrorReport, Goal, SocialAccount, SocialFollowerSnapshot } from "@/types/database.types";
 
-// The "Buscar agora" button on this page calls fetchAccountNow, which for
-// Instagram launches a real headless browser (see src/lib/social-followers.ts)
-// — slower than the default serverless timeout allows.
-export const maxDuration = 60;
-
 const PERIODS = [
   { key: "7", label: "7 dias" },
   { key: "30", label: "30 dias" },
