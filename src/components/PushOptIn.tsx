@@ -8,9 +8,13 @@ import { usePushSubscription } from "@/lib/use-push-subscription";
 // itself. The more insistent top-of-page nudge is PushReminderBanner.tsx;
 // this is the quiet, always-available toggle for turning it back off.
 export function PushOptIn() {
-  const { support, subscribed, busy, error, enable, disable } = usePushSubscription();
+  const { support, subscribed, subscriptionChecked, busy, error, enable, disable } = usePushSubscription();
 
   if (support === "checking" || support === "unsupported") return null;
+  // support flips to "ready" before the actual subscription lookup
+  // finishes — waiting here avoids flashing "Ativar" for someone who's
+  // already subscribed (see the comment on subscriptionChecked itself).
+  if (support === "ready" && !subscriptionChecked) return null;
 
   const wrapperStyle: React.CSSProperties = { padding: "0.625rem 1rem", borderTop: "1px solid var(--admin-border)" };
 

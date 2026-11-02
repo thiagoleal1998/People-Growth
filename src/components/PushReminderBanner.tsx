@@ -23,7 +23,7 @@ function dismissedThisSession(): boolean {
 // for this session) on this particular browser/device. It never blocks
 // the rest of the panel — see the "Só insistir, sem bloquear" decision.
 export function PushReminderBanner() {
-  const { support, subscribed, busy, error, enable } = usePushSubscription();
+  const { support, subscribed, subscriptionChecked, busy, error, enable } = usePushSubscription();
   const [dismissed, setDismissed] = useState(true);
 
   useEffect(() => {
@@ -45,7 +45,7 @@ export function PushReminderBanner() {
     }
   }
 
-  if (dismissed || subscribed) return null;
+  if (!subscriptionChecked || dismissed || subscribed) return null;
   if (support !== "ready" && support !== "ios-needs-install") return null;
 
   return (

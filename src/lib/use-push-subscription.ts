@@ -29,6 +29,16 @@ function isIosSafariNotInstalled(): boolean {
 export function usePushSubscription() {
   const [support, setSupport] = useState<PushSupport>("checking");
   const [subscribed, setSubscribed] = useState(false);
+  // Separate from `support === "ready"` on purpose: support flips to "ready"
+  // as soon as the platform/feature checks pass, but the actual
+  // getRegistration()/getSubscription() calls right after are real async
+  // browser I/O that takes noticeably longer. Gating the UI on support alone
+  // let both PushReminderBanner and PushOptIn render their "not subscribed
+  // yet, activate now" state for a brief window even for someone already
+  // subscribed, before `subscribed` caught up to `true` — a visible flash
+  // on every reload. Consumers should wait for this before rendering
+  // anything that depends on `subscribed`.
+  const [subscriptionChecked, setSubscriptionChecked] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -43,16 +53,19 @@ export function usePushSubscription() {
       await Promise.resolve();
       if (!("serviceWorker" in navigator) || !("PushManager" in window) || !process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY) {
         setSupport("unsupported");
+        setSubscriptionChecked(true);
         return;
       }
       if (isIosSafariNotInstalled()) {
         setSupport("ios-needs-install");
+        setSubscriptionChecked(true);
         return;
       }
       setSupport("ready");
       const reg = await navigator.serviceWorker.getRegistration("/sw.js");
       const sub = await reg?.pushManager.getSubscription();
       setSubscribed(Boolean(sub));
+      setSubscriptionChecked(true);
     }
     detect();
   }, []);
@@ -109,5 +122,5 @@ export function usePushSubscription() {
     }
   }
 
-  return { support, subscribed, busy, error, enable, disable };
+  return { support, subscribed, subscriptionChecked, busy, error, enable, disable };
 }
