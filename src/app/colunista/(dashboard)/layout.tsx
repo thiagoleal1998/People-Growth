@@ -60,6 +60,14 @@ export default async function ColumnistDashboardLayout({ children }: { children:
     unreadInstructions = Math.max(0, (totalCount ?? 0) - (readCount ?? 0));
   }
 
+  // Exact count, not a rough diff — each message already has its own
+  // read_at, no need for a separate "_reads" side table like the two above.
+  let unreadMessages = 0;
+  if (profile?.id) {
+    const { count } = await client.from("messages").select("id", { count: "exact", head: true }).eq("recipient_id", profile.id).is("read_at", null);
+    unreadMessages = count ?? 0;
+  }
+
   // Applies to any login linked to a columnists row, admin or not — a
   // founder writing columns is still a columnist for this purpose. This
   // only ever gates the columnist-panel self-service write path (see the
@@ -87,7 +95,7 @@ export default async function ColumnistDashboardLayout({ children }: { children:
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      <ColumnistSidebar menu={menu} logoUrl={logoUrl} pendingComments={pendingComments} unreadAnnouncements={unreadAnnouncements} unreadInstructions={unreadInstructions} />
+      <ColumnistSidebar menu={menu} logoUrl={logoUrl} pendingComments={pendingComments} unreadAnnouncements={unreadAnnouncements} unreadInstructions={unreadInstructions} unreadMessages={unreadMessages} />
       <main className="admin-scroll" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%" }}>
         {termsGate}
         <PushReminderBanner />

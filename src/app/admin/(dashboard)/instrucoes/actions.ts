@@ -41,7 +41,7 @@ export async function createInstructionItem(kind: InstructionItem["kind"], title
   const { data: maxRow } = await client.from("instruction_items").select("sort_order").eq("kind", kind).order("sort_order", { ascending: false }).limit(1).maybeSingle();
   const nextOrder = (maxRow?.sort_order ?? -1) + 1;
 
-  const { data, error } = await client.from("instruction_items").insert({ kind, title: cleanTitle, body: cleanBody, sort_order: nextOrder }).select("*").single();
+  const { data, error } = await client.from("instruction_items").insert({ kind, title: cleanTitle, body: cleanBody, sort_order: nextOrder, created_by: actor?.id ?? null }).select("*").single();
   if (error) throw new Error(error.message);
 
   if (actor) await logActivity({ userId: actor.id, userEmail: actor.email, action: "create", entityType: kind === "faq" ? "pergunta do FAQ" : "etapa de instrução", entityLabel: cleanTitle });

@@ -15,12 +15,14 @@ export function ColumnistSidebar({
   pendingComments = 0,
   unreadAnnouncements = 0,
   unreadInstructions = 0,
+  unreadMessages = 0,
 }: {
   menu: MenuLink[];
   logoUrl?: string;
   pendingComments?: number;
   unreadAnnouncements?: number;
   unreadInstructions?: number;
+  unreadMessages?: number;
 }) {
   const pathname = usePathname();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -83,7 +85,9 @@ export function ColumnistSidebar({
                 ? unreadAnnouncements
                 : href === "/colunista/instrucoes"
                   ? unreadInstructions
-                  : 0;
+                  : href === "/colunista/mensagens"
+                    ? unreadMessages
+                    : 0;
           return (
             <Link
               key={href}

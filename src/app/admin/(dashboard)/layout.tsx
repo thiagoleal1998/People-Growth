@@ -19,6 +19,12 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
     client.from("password_reset_requests").select("id", { count: "exact", head: true }).eq("status", "pending"),
     client.from("menu_items").select("id,label,sort_order").eq("panel", "admin"),
   ]);
+
+  let unreadMessages = 0;
+  if (profile?.id) {
+    const { count } = await client.from("messages").select("id", { count: "exact", head: true }).eq("recipient_id", profile.id).is("read_at", null);
+    unreadMessages = count ?? 0;
+  }
   const logoUrl = configData?.value as string | undefined;
   const menu = applyMenuOverrides(ADMIN_MENU_DEFAULTS, (menuOverridesData ?? []) as MenuOverride[]);
 
@@ -45,7 +51,7 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
         logoUrl={logoUrl}
         userName={userName ?? profile?.email}
         userPhoto={userPhoto}
-        counts={{ comentarios: pendingComments ?? 0, leads: newLeads ?? 0, chamados: (newErrors ?? 0) + (openTickets ?? 0), resetRequests: pendingResets ?? 0 }}
+        counts={{ comentarios: pendingComments ?? 0, leads: newLeads ?? 0, chamados: (newErrors ?? 0) + (openTickets ?? 0), resetRequests: pendingResets ?? 0, mensagens: unreadMessages }}
       />
       <main className="admin-scroll admin-main" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%", minWidth: 0 }}>
         <PushReminderBanner />

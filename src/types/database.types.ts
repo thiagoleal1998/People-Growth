@@ -481,6 +481,7 @@ type InstructionItemRow = {
   title: string;
   body: string;
   sort_order: number;
+  created_by: string | null;
   created_at: string;
   updated_at: string;
 };
@@ -495,6 +496,18 @@ type InstructionItemReadRow = {
   instruction_item_id: string;
   user_id: string;
   read_at: string;
+};
+
+type MessageRow = {
+  id: string;
+  sender_id: string;
+  recipient_id: string;
+  body: string;
+  context_type: string | null;
+  context_id: string | null;
+  context_title: string | null;
+  read_at: string | null;
+  created_at: string;
 };
 
 export type Database = {
@@ -541,6 +554,7 @@ export type Database = {
       announcement_reads: { Row: AnnouncementReadRow; Insert: Omit<AnnouncementReadRow, "read_at">; Update: Partial<AnnouncementReadRow>; Relationships: [] };
       instruction_items: { Row: InstructionItemRow; Insert: Omit<InstructionItemRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<InstructionItemRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       instruction_item_reads: { Row: InstructionItemReadRow; Insert: Omit<InstructionItemReadRow, "read_at">; Update: Partial<InstructionItemReadRow>; Relationships: [] };
+      messages: { Row: MessageRow; Insert: Omit<MessageRow, "id" | "created_at" | "read_at">; Update: Partial<Pick<MessageRow, "read_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -587,3 +601,4 @@ export type Announcement = AnnouncementRow;
 export type AnnouncementRead = AnnouncementReadRow;
 export type InstructionItem = InstructionItemRow;
 export type InstructionItemRead = InstructionItemReadRow;
+export type Message = MessageRow;

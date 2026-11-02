@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, MessageCircleQuestion } from "lucide-react";
+import Link from "next/link";
 
 // Click-to-expand row for the columnist-facing Canal de Instruções (both
 // "Etapas" and "FAQ" use this). Smooth open/close via the same
@@ -9,7 +10,19 @@ import { ChevronDown } from "lucide-react";
 // no JS height measuring, the shared .instr-expand-* CSS lives once in the
 // parent page (InstructionsClient-admin-side keeps its own always-expanded
 // list; this is only for the read-only columnist view).
-export function InstructionAccordionItem({ title, bodyHtml, badge }: { title: string; bodyHtml: string; badge?: React.ReactNode }) {
+export function InstructionAccordionItem({
+  title,
+  bodyHtml,
+  badge,
+  creator,
+  instructionItemId,
+}: {
+  title: string;
+  bodyHtml: string;
+  badge?: React.ReactNode;
+  creator?: { id: string; name: string; roleLabel: string };
+  instructionItemId?: string;
+}) {
   const [expanded, setExpanded] = useState(false);
 
   return (
@@ -43,6 +56,17 @@ export function InstructionAccordionItem({ title, bodyHtml, badge }: { title: st
             style={{ fontSize: "0.875rem", color: "var(--admin-text-secondary)", lineHeight: 1.6 }}
             dangerouslySetInnerHTML={{ __html: bodyHtml }}
           />
+          {creator && instructionItemId && (
+            <div style={{ padding: "0 1.25rem 1.125rem" }}>
+              <Link
+                href={`/colunista/mensagens?with=${creator.id}&about=${instructionItemId}`}
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", fontSize: "0.8125rem", fontWeight: 600, color: "#315E9C", textDecoration: "none" }}
+              >
+                <MessageCircleQuestion size={15} />
+                Dúvida? Fale com {creator.name} ({creator.roleLabel})
+              </Link>
+            </div>
+          )}
         </div>
       </div>
     </div>

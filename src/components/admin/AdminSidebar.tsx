@@ -25,7 +25,7 @@ export function AdminSidebar({
   logoUrl?: string;
   userName?: string;
   userPhoto?: string;
-  counts?: { comentarios: number; leads: number; chamados: number; resetRequests: number };
+  counts?: { comentarios: number; leads: number; chamados: number; resetRequests: number; mensagens: number };
 }) {
   const pathname = usePathname();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -256,7 +256,7 @@ function NavLinkItem({
 }: {
   link: MenuLink;
   pathname: string;
-  counts?: { comentarios: number; leads: number; chamados: number; resetRequests: number };
+  counts?: { comentarios: number; leads: number; chamados: number; resetRequests: number; mensagens: number };
   indent?: boolean;
 }) {
   const { href, label, icon, countKey, activeMatch } = link;

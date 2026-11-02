@@ -22,7 +22,7 @@ import {
   UserCircle,
 } from "lucide-react";
 
-export type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests";
+export type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests" | "mensagens";
 // icon is a pre-rendered element (<Home size={17} />), not a component
 // reference — a component type isn't a plain serializable value, so it
 // can't cross the server→client boundary into AdminSidebar/ColumnistSidebar
@@ -56,6 +56,7 @@ export const ADMIN_MENU_DEFAULTS: MenuEntry[] = [
   { id: "chamados", href: "/admin/chamados", label: "Chamados", icon: <LifeBuoy size={17} />, countKey: "chamados" },
   { id: "comunicados", href: "/admin/comunicados", label: "Comunicados", icon: <Megaphone size={17} /> },
   { id: "instrucoes", href: "/admin/instrucoes", label: "Canal de Instruções", icon: <ListChecks size={17} /> },
+  { id: "mensagens", href: "/admin/mensagens", label: "Mensagens", icon: <MessageSquare size={17} />, countKey: "mensagens" },
   {
     id: "marketing",
     label: "Marketing",
@@ -80,6 +81,7 @@ export const COLUMNIST_MENU_DEFAULTS: MenuLink[] = [
   { id: "comentarios", href: "/colunista/comentarios", label: "Comentários", icon: <MessageCircle size={17} /> },
   { id: "comunicados", href: "/colunista/comunicados", label: "Comunicados", icon: <Megaphone size={17} /> },
   { id: "instrucoes", href: "/colunista/instrucoes", label: "Canal de Instruções", icon: <ListChecks size={17} /> },
+  { id: "mensagens", href: "/colunista/mensagens", label: "Mensagens", icon: <MessageSquare size={17} /> },
   { id: "chamados", href: "/colunista/chamados", label: "Chamados", icon: <LifeBuoy size={17} /> },
   { id: "empresa", href: "/colunista/empresa", label: "A empresa", icon: <Building2 size={17} /> },
   { id: "perfil", href: "/colunista/perfil", label: "Meu perfil", icon: <UserCircle size={17} /> },

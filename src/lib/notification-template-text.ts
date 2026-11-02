@@ -10,7 +10,8 @@ export type NotificationTemplateKey =
   | "ticket_member_notified"
   | "article_submitted_for_approval"
   | "article_resubmitted_for_approval"
-  | "instruction_item_created";
+  | "instruction_item_created"
+  | "message_received";
 
 export function renderTemplateText(template: string, vars: Record<string, string>): string {
   return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_match, key: string) => vars[key] ?? "");
@@ -26,4 +27,5 @@ export const NOTIFICATION_TEMPLATE_PREVIEW_VARS: Record<NotificationTemplateKey,
   article_submitted_for_approval: { title: "Como a liderança remota mudou em 2026" },
   article_resubmitted_for_approval: { title: "Como a liderança remota mudou em 2026" },
   instruction_item_created: { title: "Como enviar uma pauta para aprovação" },
+  message_received: { sender: "Gustavo Monken", preview: "Oi, dúvida rápida sobre essa instrução..." },
 };

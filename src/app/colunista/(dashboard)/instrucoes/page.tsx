@@ -4,6 +4,7 @@ import { getCurrentProfile } from "@/lib/auth/profile";
 import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
 import { InstructionAccordionItem } from "@/components/InstructionAccordionItem";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
+import { resolveUsersByIds } from "@/lib/messages-data";
 import type { InstructionItem } from "@/types/database.types";
 
 export default async function InstrucoesColunistaPage() {
@@ -15,6 +16,9 @@ export default async function InstrucoesColunistaPage() {
   const items = (data ?? []) as InstructionItem[];
   const steps = items.filter((i) => i.kind === "step");
   const faqs = items.filter((i) => i.kind === "faq");
+
+  const creatorIds = [...new Set(items.map((i) => i.created_by).filter((id): id is string => !!id))];
+  const creators = await resolveUsersByIds(client, creatorIds);
 
   // Visiting this page counts as reading everything on it — same
   // "bulk-mark-on-visit" approach already used for Comunicados, not
@@ -48,6 +52,8 @@ export default async function InstrucoesColunistaPage() {
                     <InstructionAccordionItem
                       title={step.title}
                       bodyHtml={renderMarkdownLite(step.body)}
+                      instructionItemId={step.id}
+                      creator={step.created_by ? creators.get(step.created_by) : undefined}
                       badge={
                         <div style={{ flexShrink: 0, width: "1.75rem", height: "1.75rem", borderRadius: "50%", backgroundColor: "#315E9C", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.8125rem" }}>
                           {index + 1}
@@ -69,7 +75,12 @@ export default async function InstrucoesColunistaPage() {
               <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
                 {faqs.map((faq, index) => (
                   <div key={faq.id} style={{ borderTop: index === 0 ? undefined : "1px solid var(--admin-border)" }}>
-                    <InstructionAccordionItem title={faq.title} bodyHtml={renderMarkdownLite(faq.body)} />
+                    <InstructionAccordionItem
+                      title={faq.title}
+                      bodyHtml={renderMarkdownLite(faq.body)}
+                      instructionItemId={faq.id}
+                      creator={faq.created_by ? creators.get(faq.created_by) : undefined}
+                    />
                   </div>
                 ))}
               </div>
