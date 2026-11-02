@@ -29,11 +29,12 @@ export async function POST(req: NextRequest) {
     let articleId: string | null = null;
     if (articleMatch) {
       const slug = articleMatch[2];
-      const { data: article } = await client.from("articles").select("id, views").eq("slug", slug).single();
-      if (article) {
-        articleId = article.id;
-        await client.from("articles").update({ views: article.views + 1 }).eq("id", article.id);
-      }
+      // One atomic round trip instead of a select-then-update — see
+      // migration 069 for why (this runs on every article page view, so it
+      // was double-counting toward the Logs Ingest quota, and the old
+      // read-then-write was a lost-update race under concurrent requests).
+      const { data: articleId_ } = await client.rpc("increment_article_views", { article_slug: slug });
+      articleId = articleId_ ?? null;
     }
 
     const asStr = (v: unknown) => (typeof v === "string" && v ? v.slice(0, 300) : null);
