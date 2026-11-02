@@ -249,7 +249,7 @@ function AccountRow({ account, onLocalUpdate, onDeleted }: { account: AccountWit
         </div>
         <div style={{ textAlign: "right", flexShrink: 0 }}>
           <div style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--admin-text)" }}>
-            {account.currentCount != null ? account.currentCount.toLocaleString("pt-BR") : "—"}
+            {account.currentCount != null ? `${account.currentSource === "scrape" ? "~" : ""}${account.currentCount.toLocaleString("pt-BR")}` : "—"}
           </div>
           <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>
             {formatDelta(account.delta7d, "(7d)")} · {formatDelta(account.delta30d, "(30d)")}
@@ -333,7 +333,7 @@ function NewAccountForm({ onCreated }: { onCreated: () => void }) {
       <Field label="Handle" hint="Sem @ — ex: grupofestina">
         <Input value={handle} onChange={(e) => setHandle(e.target.value)} />
       </Field>
-      <Field label="ID externo (opcional)" hint={platform === "youtube" ? "Não precisa — o handle acima já basta. Só preencha se a busca pelo handle falhar (Channel ID, em YouTube Studio → Configurações → Canal → Avançado)." : platform === "instagram" ? "ID da conta Business do Instagram — pode deixar em branco se for a mesma conta configurada em INSTAGRAM_USER_ID." : "Não usado nesta rede."}>
+      <Field label="ID externo (opcional)" hint={platform === "youtube" ? "Não precisa — a busca já funciona só com o handle, sem chave nenhuma (número aproximado; pra número exato, Channel ID aqui + YOUTUBE_API_KEY)." : platform === "instagram" ? "Instagram bloqueia a leitura automática sem login — só funciona com a API oficial do Meta (ID da conta Business aqui) ou entrada manual." : platform === "tiktok" ? "TikTok bloqueia a leitura automática — use a entrada manual abaixo." : "X/Twitter bloqueia a leitura sem login — use a entrada manual abaixo."}>
         <Input value={externalId} onChange={(e) => setExternalId(e.target.value)} />
       </Field>
       {error && <div style={{ color: "#dc2626", fontSize: "0.8125rem", marginBottom: "0.75rem" }}>{error}</div>}
