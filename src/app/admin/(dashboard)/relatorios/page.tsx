@@ -174,19 +174,40 @@ export default async function RelatoriosPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  let viewsQuery = client.from("page_views").select("path, page_type, article_id, visitor_id, referrer, utm_source, utm_campaign, scroll_depth, visitor_city, visitor_country");
+  // PostgREST caps any unranged .select() at 1000 rows by default — silently,
+  // no error, so a month with >=1000 page views used to make every number on
+  // this tab (and the export) freeze at exactly 1000. `{ count: "exact" }`
+  // asks Postgres for the TRUE total regardless of the row range below, so
+  // totalViews/totalImpressions/totalClicks stay accurate forever; the
+  // explicit .range() just raises the ceiling for the numbers that do need
+  // the actual rows in JS (unique visitors, top pages/sources/locations,
+  // scroll-depth average) from 1000 to 20000 — comfortably above this site's
+  // current traffic. If traffic ever outgrows that too, the real fix is a
+  // Postgres aggregation function instead of fetching raw rows at all.
+  let viewsQuery = client
+    .from("page_views")
+    .select("path, page_type, article_id, visitor_id, referrer, utm_source, utm_campaign, scroll_depth, visitor_city, visitor_country", { count: "exact" })
+    .range(0, 19999);
   if (since) viewsQuery = viewsQuery.gte("created_at", since);
   if (until) viewsQuery = viewsQuery.lte("created_at", until);
-  let adEventsQuery = client.from("ad_events").select("ad_slot_key, ad_id, event_type");
+  let adEventsQuery = client.from("ad_events").select("ad_slot_key, ad_id, event_type").range(0, 19999);
   if (since) adEventsQuery = adEventsQuery.gte("created_at", since);
   if (until) adEventsQuery = adEventsQuery.lte("created_at", until);
+  let impressionsCountQuery = client.from("ad_events").select("*", { count: "exact", head: true }).eq("event_type", "impression");
+  if (since) impressionsCountQuery = impressionsCountQuery.gte("created_at", since);
+  if (until) impressionsCountQuery = impressionsCountQuery.lte("created_at", until);
+  let clicksCountQuery = client.from("ad_events").select("*", { count: "exact", head: true }).eq("event_type", "click");
+  if (since) clicksCountQuery = clicksCountQuery.gte("created_at", since);
+  if (until) clicksCountQuery = clicksCountQuery.lte("created_at", until);
 
-  const [{ data: viewsData }, { data: adEventsData }, { data: articlesData }, { data: adsData }] = await Promise.all([
-    viewsQuery,
-    adEventsQuery,
-    client.from("articles").select("id, title_pt"),
-    client.from("ads").select("id, title, slot_key"),
-  ]);
+  const [
+    { data: viewsData, count: viewsCount },
+    { data: adEventsData },
+    { data: articlesData },
+    { data: adsData },
+    { count: impressionsCount },
+    { count: clicksCount },
+  ] = await Promise.all([viewsQuery, adEventsQuery, client.from("articles").select("id, title_pt"), client.from("ads").select("id, title, slot_key"), impressionsCountQuery, clicksCountQuery]);
 
   const views = (viewsData ?? []) as {
     path: string;
@@ -207,10 +228,10 @@ export default async function RelatoriosPage({
     ((adsData ?? []) as Pick<Ad, "id" | "title" | "slot_key">[]).map((a) => [a.id, a])
   );
 
-  const totalViews = views.length;
+  const totalViews = viewsCount ?? views.length;
   const uniqueVisitors = new Set(views.map((v) => v.visitor_id)).size;
-  const totalImpressions = adEvents.filter((e) => e.event_type === "impression").length;
-  const totalClicks = adEvents.filter((e) => e.event_type === "click").length;
+  const totalImpressions = impressionsCount ?? 0;
+  const totalClicks = clicksCount ?? 0;
   const ctr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(1) : "0";
   const scrollSamples = views.map((v) => v.scroll_depth).filter((d): d is number => d != null);
   const avgScrollDepth = scrollSamples.length > 0 ? Math.round(scrollSamples.reduce((sum, d) => sum + d, 0) / scrollSamples.length) : null;
@@ -317,11 +338,18 @@ export default async function RelatoriosPage({
     avgScrollDepth: number | null;
   }[] = [];
   if (tab === "artigos") {
+    // Same missing-range anti-pattern as the Visão geral tab above (plus
+    // this one wasn't even scoped to the selected period at all) — scoped
+    // to since/until now, and ranged well past the implicit 1000-row cap.
+    let articleScrollQuery = client.from("page_views").select("article_id, scroll_depth").not("article_id", "is", null).not("scroll_depth", "is", null).range(0, 19999);
+    if (since) articleScrollQuery = articleScrollQuery.gte("created_at", since);
+    if (until) articleScrollQuery = articleScrollQuery.lte("created_at", until);
+
     const [{ data: articlesForStats }, { data: columnistsData }, { data: commentsData }, { data: scrollData }] = await Promise.all([
       client.from("articles").select("id, title_pt, columnist_id, views").eq("status", "published"),
       client.from("columnists").select("id, name"),
       client.from("comments").select("article_id, likes, reports"),
-      client.from("page_views").select("article_id, scroll_depth").not("article_id", "is", null).not("scroll_depth", "is", null),
+      articleScrollQuery,
     ]);
     const columnistNames = new Map(((columnistsData ?? []) as Pick<Columnist, "id" | "name">[]).map((a) => [a.id, a.name]));
     const byArticle = new Map<string, { comments: number; likes: number; reports: number }>();

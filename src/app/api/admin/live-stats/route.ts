@@ -2,7 +2,11 @@ import { NextResponse } from "next/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { createAdminClient } from "@/lib/supabase/server";
 
-const VISITOR_WINDOW_MINUTES = 5;
+// Tighter than before (was 5min off page_views.created_at, which only ever
+// got ONE row per page load — see migration 076/Analytics.tsx's heartbeat,
+// pinged every 60s, so 2 missed pings' worth of grace is enough now and
+// gives a more genuinely "live" number).
+const VISITOR_WINDOW_MINUTES = 2;
 const STAFF_WINDOW_MINUTES = 2;
 
 export async function GET() {
@@ -18,12 +22,10 @@ export async function GET() {
   const visitorSince = new Date(Date.now() - VISITOR_WINDOW_MINUTES * 60 * 1000).toISOString();
   const staffSince = new Date(Date.now() - STAFF_WINDOW_MINUTES * 60 * 1000).toISOString();
 
-  const [{ data: recentViews }, { data: onlineProfiles }] = await Promise.all([
-    client.from("page_views").select("visitor_id").gte("created_at", visitorSince),
+  const [{ count: visitorsOnline }, { data: onlineProfiles }] = await Promise.all([
+    client.from("visitor_heartbeats").select("*", { count: "exact", head: true }).gte("last_seen_at", visitorSince),
     client.from("user_profiles").select("id, email, role, columnist_id").gte("last_seen_at", staffSince),
   ]);
-
-  const visitorsOnline = new Set(((recentViews ?? []) as { visitor_id: string }[]).map((v) => v.visitor_id)).size;
 
   const profiles = (onlineProfiles ?? []) as { id: string; email: string; role: "admin" | "columnist"; columnist_id: string | null }[];
   const columnistIds = profiles.map((p) => p.columnist_id).filter((id): id is string => Boolean(id));
@@ -39,5 +41,5 @@ export async function GET() {
     role: p.role,
   }));
 
-  return NextResponse.json({ visitorsOnline, onlineStaff });
+  return NextResponse.json({ visitorsOnline: visitorsOnline ?? 0, onlineStaff });
 }

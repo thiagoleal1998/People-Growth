@@ -54,18 +54,38 @@ export async function GET(req: NextRequest) {
   const needsViews = requested.some((s) => ["resumo", "paginas", "origens", "localizacoes"].includes(s));
   const needsAdEvents = requested.some((s) => ["resumo", "anuncios"].includes(s));
 
-  let viewsQuery = client.from("page_views").select("path, article_id, visitor_id, referrer, utm_source, utm_campaign, scroll_depth, visitor_city, visitor_country");
+  // Same PostgREST default-1000-row cap fix as the Relatórios page itself
+  // (src/app/admin/(dashboard)/relatorios/page.tsx) — see the comment there.
+  let viewsQuery = client
+    .from("page_views")
+    .select("path, article_id, visitor_id, referrer, utm_source, utm_campaign, scroll_depth, visitor_city, visitor_country", { count: "exact" })
+    .range(0, 19999);
   if (since) viewsQuery = viewsQuery.gte("created_at", since);
   if (until) viewsQuery = viewsQuery.lte("created_at", until);
-  let adEventsQuery = client.from("ad_events").select("ad_slot_key, ad_id, event_type");
+  let adEventsQuery = client.from("ad_events").select("ad_slot_key, ad_id, event_type").range(0, 19999);
   if (since) adEventsQuery = adEventsQuery.gte("created_at", since);
   if (until) adEventsQuery = adEventsQuery.lte("created_at", until);
+  let impressionsCountQuery = client.from("ad_events").select("*", { count: "exact", head: true }).eq("event_type", "impression");
+  if (since) impressionsCountQuery = impressionsCountQuery.gte("created_at", since);
+  if (until) impressionsCountQuery = impressionsCountQuery.lte("created_at", until);
+  let clicksCountQuery = client.from("ad_events").select("*", { count: "exact", head: true }).eq("event_type", "click");
+  if (since) clicksCountQuery = clicksCountQuery.gte("created_at", since);
+  if (until) clicksCountQuery = clicksCountQuery.lte("created_at", until);
 
-  const [{ data: viewsData }, { data: adEventsData }, { data: articlesData }, { data: adsData }] = await Promise.all([
-    needsViews ? viewsQuery : Promise.resolve({ data: [] }),
+  const [
+    { data: viewsData, count: viewsCount },
+    { data: adEventsData },
+    { data: articlesData },
+    { data: adsData },
+    { count: impressionsCount },
+    { count: clicksCount },
+  ] = await Promise.all([
+    needsViews ? viewsQuery : Promise.resolve({ data: [], count: 0 }),
     needsAdEvents ? adEventsQuery : Promise.resolve({ data: [] }),
     client.from("articles").select("id, title_pt"),
     client.from("ads").select("id, title, slot_key"),
+    needsAdEvents ? impressionsCountQuery : Promise.resolve({ count: 0 }),
+    needsAdEvents ? clicksCountQuery : Promise.resolve({ count: 0 }),
   ]);
 
   const views = (viewsData ?? []) as {
@@ -106,10 +126,10 @@ export async function GET(req: NextRequest) {
   const sheets: { sheet: string; data: Row[] }[] = [];
 
   if (requested.includes("resumo")) {
-    const totalViews = views.length;
+    const totalViews = viewsCount ?? views.length;
     const uniqueVisitors = new Set(views.map((v) => v.visitor_id)).size;
-    const totalImpressions = adEvents.filter((e) => e.event_type === "impression").length;
-    const totalClicks = adEvents.filter((e) => e.event_type === "click").length;
+    const totalImpressions = impressionsCount ?? 0;
+    const totalClicks = clicksCount ?? 0;
     const ctr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;
     const scrollSamples = views.map((v) => v.scroll_depth).filter((d): d is number => d != null);
     const avgScrollDepth = scrollSamples.length > 0 ? Math.round(scrollSamples.reduce((sum, d) => sum + d, 0) / scrollSamples.length) : null;
@@ -223,11 +243,17 @@ export async function GET(req: NextRequest) {
   }
 
   if (requested.includes("artigos")) {
+    // Same fix as the Relatórios page's Artigos tab — scoped to since/until
+    // and ranged past the default 1000-row cap.
+    let articleScrollQuery = client.from("page_views").select("article_id, scroll_depth").not("article_id", "is", null).not("scroll_depth", "is", null).range(0, 19999);
+    if (since) articleScrollQuery = articleScrollQuery.gte("created_at", since);
+    if (until) articleScrollQuery = articleScrollQuery.lte("created_at", until);
+
     const [{ data: articlesForStats }, { data: columnistsData }, { data: commentsData }, { data: scrollData }] = await Promise.all([
       client.from("articles").select("id, title_pt, columnist_id, views").eq("status", "published"),
       client.from("columnists").select("id, name"),
       client.from("comments").select("article_id, likes, reports"),
-      client.from("page_views").select("article_id, scroll_depth").not("article_id", "is", null).not("scroll_depth", "is", null),
+      articleScrollQuery,
     ]);
     const columnistNames = new Map(((columnistsData ?? []) as Pick<Columnist, "id" | "name">[]).map((a) => [a.id, a.name]));
     const byArticle = new Map<string, { comments: number; likes: number; reports: number }>();

@@ -4,6 +4,11 @@ import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { getVisitorId } from "@/lib/visitor";
 
+// Keeps "Visitantes no site agora" (LiveStatsWidget) accurate for readers
+// who stay on one page a while — see migration 076's comment for why this
+// is a separate signal from the page-view insert above, not another one.
+const HEARTBEAT_INTERVAL_MS = 60000;
+
 function currentScrollPercent(): number {
   const doc = document.documentElement;
   const scrollable = doc.scrollHeight - doc.clientHeight;
@@ -70,6 +75,29 @@ export function Analytics() {
       window.removeEventListener("pagehide", sendScrollDepth);
     };
   }, [pathname]);
+
+  useEffect(() => {
+    const visitorId = getVisitorId();
+    if (!visitorId) return;
+
+    function ping() {
+      if (document.visibilityState !== "visible") return;
+      fetch("/api/track/heartbeat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ visitorId }),
+        keepalive: true,
+      }).catch(() => {});
+    }
+
+    ping();
+    const interval = setInterval(ping, HEARTBEAT_INTERVAL_MS);
+    document.addEventListener("visibilitychange", ping);
+    return () => {
+      clearInterval(interval);
+      document.removeEventListener("visibilitychange", ping);
+    };
+  }, []);
 
   return null;
 }
