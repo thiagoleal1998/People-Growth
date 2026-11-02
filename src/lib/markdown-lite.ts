@@ -332,6 +332,24 @@ export function stripMarkdownLite(text: string): string {
     .trim();
 }
 
+// A much smaller dialect for chat messages (Mensagens): just bold/italic,
+// no headings/lists/images/quotes — those would blow up a small chat
+// bubble, and nobody needs them for a one-line reply. Unlike article
+// bodies (written by vetted columnists through the CMS, never escaped),
+// message senders are a wider pool of day-to-day logins, so this escapes
+// HTML first and only then applies the markers, closing off any chance of
+// injecting markup through a chat message.
+export function renderChatText(text: string): string {
+  const escaped = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  return escaped
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/_(.+?)_/g, "<em>$1</em>")
+    .replace(/\n/g, "<br>");
+}
+
 // There's no UI field for this — it's always derived from the word count,
 // at a standard 200 words/minute silent-reading pace, same as most
 // newsrooms' CMSs use. Every save must recompute it (never carry over the

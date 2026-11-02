@@ -506,6 +506,7 @@ type MessageRow = {
   context_type: string | null;
   context_id: string | null;
   context_title: string | null;
+  audio_url: string | null;
   read_at: string | null;
   created_at: string;
 };

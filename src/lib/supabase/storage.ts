@@ -68,3 +68,34 @@ export async function uploadPublicImage(
   const { data } = admin.storage.from(BUCKET).getPublicUrl(path);
   return { url: data.publicUrl, error: null };
 }
+
+const MAX_AUDIO_BYTES = 10 * 1024 * 1024; // a few minutes of voice at typical webm/opus bitrates
+
+// Browser-recorded voice messages (MessagesClient's mic button) — no
+// conversion, just uploaded as the browser's MediaRecorder produced them
+// (webm/opus in Chrome/Edge, mp4/aac in Safari).
+export async function uploadPublicAudio(
+  file: FormDataEntryValue | null,
+  folder: string
+): Promise<{ url: string | null; error: string | null }> {
+  if (!(file instanceof File) || file.size === 0) return { url: null, error: null };
+  if (file.size > MAX_AUDIO_BYTES) return { url: null, error: "Áudio muito grande (máximo 10MB)." };
+
+  const admin = await createAdminClient();
+  const ext = file.name.split(".").pop()?.toLowerCase() || "webm";
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+  const { error } = await admin.storage.from(BUCKET).upload(path, file, {
+    cacheControl: "31536000",
+    upsert: false,
+    contentType: file.type || undefined,
+  });
+
+  if (error) {
+    console.error("Audio upload failed:", error.message);
+    return { url: null, error: error.message };
+  }
+
+  const { data } = admin.storage.from(BUCKET).getPublicUrl(path);
+  return { url: data.publicUrl, error: null };
+}

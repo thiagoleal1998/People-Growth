@@ -14,12 +14,13 @@ export async function sendMessage(input: {
   recipientId: string;
   recipientRole: "admin" | "columnist";
   body: string;
+  audioUrl?: string;
   contextType?: string;
   contextId?: string;
   contextTitle?: string;
 }): Promise<{ error?: string }> {
   const body = input.body.trim();
-  if (!body) return { error: "Mensagem vazia." };
+  if (!body && !input.audioUrl) return { error: "Mensagem vazia." };
 
   const profile = await getCurrentProfile();
   if (!profile) return { error: "Não autenticado." };
@@ -32,6 +33,7 @@ export async function sendMessage(input: {
     sender_id: profile.id,
     recipient_id: input.recipientId,
     body,
+    audio_url: input.audioUrl ?? null,
     context_type: input.contextType ?? null,
     context_id: input.contextId ?? null,
     context_title: input.contextTitle ?? null,
@@ -41,7 +43,8 @@ export async function sendMessage(input: {
   const senderName = await resolveActorName(profile);
   const adminClient = await createAdminClient();
   const link = (input.recipientRole === "admin" ? "/admin" : "/colunista") + `/mensagens?with=${profile.id}`;
-  await insertNotification(adminClient, input.recipientId, "message_received", { sender: senderName, preview: body.slice(0, 80) }, link);
+  const preview = body ? body.slice(0, 80) : "🎤 Mensagem de voz";
+  await insertNotification(adminClient, input.recipientId, "message_received", { sender: senderName, preview }, link);
 
   return {};
 }
