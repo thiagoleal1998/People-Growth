@@ -6,16 +6,49 @@ import { createClient } from "@/lib/supabase/client";
 import { sendMessage, markThreadRead } from "@/lib/messages-actions";
 import type { Message } from "@/types/database.types";
 
-export type MessageRecipient = { id: string; name: string; role: "admin" | "columnist"; roleLabel: string };
+export type MessageRecipient = { id: string; name: string; role: "admin" | "columnist"; roleLabel: string; photoUrl?: string };
 
 export type ConversationSummary = {
   otherId: string;
   otherName: string;
   otherRoleLabel: string;
+  otherPhotoUrl?: string;
   lastBody: string;
   lastAt: string;
   unread: number;
 };
+
+function Avatar({ name, photoUrl, size }: { name: string; photoUrl?: string; size: number }) {
+  const initials = name
+    .split(" ")
+    .filter(Boolean)
+    .slice(0, 2)
+    .map((w) => w[0]?.toUpperCase())
+    .join("");
+  if (photoUrl) {
+    // eslint-disable-next-line @next/next/no-img-element
+    return <img src={photoUrl} alt={name} width={size} height={size} style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", flexShrink: 0 }} />;
+  }
+  return (
+    <div
+      style={{
+        width: size,
+        height: size,
+        borderRadius: "50%",
+        backgroundColor: "#315E9C",
+        color: "white",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontSize: size * 0.4,
+        fontWeight: 700,
+        flexShrink: 0,
+      }}
+    >
+      {initials || "?"}
+    </div>
+  );
+}
 
 export function MessagesClient({
   currentUserId,
@@ -43,7 +76,12 @@ export function MessagesClient({
   const bottomRef = useRef<HTMLDivElement>(null);
 
   const recipientById = useMemo(() => new Map(recipients.map((r) => [r.id, r])), [recipients]);
-  const selected = selectedId ? recipientById.get(selectedId) ?? conversations.find((c) => c.otherId === selectedId) : null;
+  const selectedEntry = selectedId ? recipientById.get(selectedId) ?? conversations.find((c) => c.otherId === selectedId) : null;
+  const selected = selectedEntry
+    ? "name" in selectedEntry
+      ? { name: selectedEntry.name, roleLabel: selectedEntry.roleLabel, photoUrl: selectedEntry.photoUrl }
+      : { name: selectedEntry.otherName, roleLabel: selectedEntry.otherRoleLabel, photoUrl: selectedEntry.otherPhotoUrl }
+    : null;
 
   useEffect(() => {
     if (!selectedId) return;
@@ -104,7 +142,7 @@ export function MessagesClient({
       const exists = prev.some((c) => c.otherId === selectedId);
       const base = exists
         ? prev.map((c) => (c.otherId === selectedId ? { ...c, lastBody: body, lastAt: optimistic.created_at } : c))
-        : [{ otherId: selectedId, otherName: recipient.name, otherRoleLabel: recipient.roleLabel, lastBody: body, lastAt: optimistic.created_at, unread: 0 }, ...prev];
+        : [{ otherId: selectedId, otherName: recipient.name, otherRoleLabel: recipient.roleLabel, otherPhotoUrl: recipient.photoUrl, lastBody: body, lastAt: optimistic.created_at, unread: 0 }, ...prev];
       return [...base].sort((a, b) => (a.lastAt < b.lastAt ? 1 : -1));
     });
   }
@@ -149,9 +187,12 @@ export function MessagesClient({
                     setSelectedId(r.id);
                     setPickingRecipient(false);
                   }}
-                  style={{ display: "block", width: "100%", textAlign: "left", padding: "0.5rem 0.25rem", background: "none", border: "none", cursor: "pointer", fontSize: "0.875rem", color: "var(--admin-text)" }}
+                  style={{ display: "flex", alignItems: "center", gap: "0.5rem", width: "100%", textAlign: "left", padding: "0.5rem 0.25rem", background: "none", border: "none", cursor: "pointer", fontSize: "0.875rem", color: "var(--admin-text)" }}
                 >
-                  {r.name} <span style={{ color: "var(--admin-faint)", fontSize: "0.75rem" }}>({r.roleLabel})</span>
+                  <Avatar name={r.name} photoUrl={r.photoUrl} size={28} />
+                  <span>
+                    {r.name} <span style={{ color: "var(--admin-faint)", fontSize: "0.75rem" }}>({r.roleLabel})</span>
+                  </span>
                 </button>
               ))
             )}
@@ -177,16 +218,21 @@ export function MessagesClient({
                 cursor: "pointer",
               }}
             >
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.5rem" }}>
-                <span style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--admin-text)" }}>{c.otherName}</span>
-                {c.unread > 0 && (
-                  <span style={{ backgroundColor: "#dc2626", color: "white", fontSize: "0.6875rem", fontWeight: 800, minWidth: "1.125rem", height: "1.125rem", borderRadius: "9999px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-                    {c.unread > 99 ? "99+" : c.unread}
-                  </span>
-                )}
+              <div style={{ display: "flex", gap: "0.625rem" }}>
+                <Avatar name={c.otherName} photoUrl={c.otherPhotoUrl} size={36} />
+                <div style={{ minWidth: 0, flex: 1 }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "0.5rem" }}>
+                    <span style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--admin-text)" }}>{c.otherName}</span>
+                    {c.unread > 0 && (
+                      <span style={{ backgroundColor: "#dc2626", color: "white", fontSize: "0.6875rem", fontWeight: 800, minWidth: "1.125rem", height: "1.125rem", borderRadius: "9999px", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+                        {c.unread > 99 ? "99+" : c.unread}
+                      </span>
+                    )}
+                  </div>
+                  <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.125rem" }}>{c.otherRoleLabel}</div>
+                  <div style={{ fontSize: "0.8125rem", color: "var(--admin-text-secondary)", marginTop: "0.25rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.lastBody}</div>
+                </div>
               </div>
-              <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.125rem" }}>{c.otherRoleLabel}</div>
-              <div style={{ fontSize: "0.8125rem", color: "var(--admin-text-secondary)", marginTop: "0.25rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.lastBody}</div>
             </button>
           ))
         )}
@@ -212,9 +258,10 @@ export function MessagesClient({
               >
                 <ArrowLeft size={18} />
               </button>
+              <Avatar name={selected.name} photoUrl={selected.photoUrl} size={36} />
               <div>
-                <div style={{ fontWeight: 800, fontSize: "0.9375rem", color: "var(--admin-text)" }}>{"name" in selected ? selected.name : selected.otherName}</div>
-                <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>{"roleLabel" in selected ? selected.roleLabel : selected.otherRoleLabel}</div>
+                <div style={{ fontWeight: 800, fontSize: "0.9375rem", color: "var(--admin-text)" }}>{selected.name}</div>
+                <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>{selected.roleLabel}</div>
               </div>
             </div>
 

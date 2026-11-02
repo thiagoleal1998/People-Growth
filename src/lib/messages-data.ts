@@ -21,11 +21,11 @@ type ProfileLite = { id: string; email: string; role: string; columnist_id: stri
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function resolveProfiles(adminClient: any, profiles: ProfileLite[]): Promise<MessageRecipient[]> {
   const columnistIds = profiles.map((p) => p.columnist_id).filter((id): id is string => !!id);
-  const columnistMap = new Map<string, { name: string; role_pt: string | null }>();
+  const columnistMap = new Map<string, { name: string; role_pt: string | null; photo_url: string | null }>();
   if (columnistIds.length > 0) {
-    const { data } = await adminClient.from("columnists").select("id,name,role_pt").in("id", columnistIds);
-    for (const row of (data ?? []) as { id: string; name: string; role_pt: string | null }[]) {
-      columnistMap.set(row.id, { name: row.name, role_pt: row.role_pt });
+    const { data } = await adminClient.from("columnists").select("id,name,role_pt,photo_url").in("id", columnistIds);
+    for (const row of (data ?? []) as { id: string; name: string; role_pt: string | null; photo_url: string | null }[]) {
+      columnistMap.set(row.id, { name: row.name, role_pt: row.role_pt, photo_url: row.photo_url });
     }
   }
   return profiles.map((p) => {
@@ -37,6 +37,7 @@ async function resolveProfiles(adminClient: any, profiles: ProfileLite[]): Promi
       name: columnist?.name || p.email,
       role,
       roleLabel: columnist?.role_pt?.trim() || fallbackLabel,
+      photoUrl: columnist?.photo_url ?? undefined,
     };
   });
 }
@@ -96,6 +97,7 @@ export async function buildConversationSummaries(
         otherId: id,
         otherName: user?.name ?? "—",
         otherRoleLabel: user?.roleLabel ?? "",
+        otherPhotoUrl: user?.photoUrl,
         lastBody: entry.last.body,
         lastAt: entry.last.created_at,
         unread: entry.unread,
