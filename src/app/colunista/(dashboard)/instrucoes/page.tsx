@@ -1,5 +1,5 @@
 import { ListChecks, HelpCircle } from "lucide-react";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
 import { InstructionAccordionItem } from "@/components/InstructionAccordionItem";
@@ -17,8 +17,12 @@ export default async function InstrucoesColunistaPage() {
   const steps = items.filter((i) => i.kind === "step");
   const faqs = items.filter((i) => i.kind === "faq");
 
+  // Resolving the creator's name/role reads other people's user_profiles
+  // rows, which the session client can't see (RLS: "own row only") — same
+  // admin-client bypass as the rest of the messaging directory lookups.
   const creatorIds = [...new Set(items.map((i) => i.created_by).filter((id): id is string => !!id))];
-  const creators = await resolveUsersByIds(client, creatorIds);
+  const admin = await createAdminClient();
+  const creators = await resolveUsersByIds(admin as any, creatorIds); // eslint-disable-line @typescript-eslint/no-explicit-any
 
   // Visiting this page counts as reading everything on it — same
   // "bulk-mark-on-visit" approach already used for Comunicados, not

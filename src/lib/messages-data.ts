@@ -6,15 +6,24 @@ import type { ConversationSummary, MessageRecipient } from "@/components/Message
 // all three need the same "resolve a user_profiles row into a display
 // name + role label" logic (mirrors resolveActorName in auth/profile.ts,
 // batched for several ids at once instead of one).
+//
+// user_profiles' only SELECT policy is "auth.uid() = id" (migration 010) —
+// a session client can only ever see the caller's OWN row. Every lookup
+// here needs OTHER people's rows (the recipient list, a conversation
+// partner's name), so these all take the admin client, same bypass
+// reasoning CLAUDE.md documents for /admin/usuarios. This is directory
+// data only (name/role/email), never message content, and callers control
+// exactly which rows get queried (e.g. onlyRole below), so it can't be
+// used to leak anything beyond "who exists and what they're called".
 
 type ProfileLite = { id: string; email: string; role: string; columnist_id: string | null };
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function resolveProfiles(client: any, profiles: ProfileLite[]): Promise<MessageRecipient[]> {
+async function resolveProfiles(adminClient: any, profiles: ProfileLite[]): Promise<MessageRecipient[]> {
   const columnistIds = profiles.map((p) => p.columnist_id).filter((id): id is string => !!id);
   const columnistMap = new Map<string, { name: string; role_pt: string | null }>();
   if (columnistIds.length > 0) {
-    const { data } = await client.from("columnists").select("id,name,role_pt").in("id", columnistIds);
+    const { data } = await adminClient.from("columnists").select("id,name,role_pt").in("id", columnistIds);
     for (const row of (data ?? []) as { id: string; name: string; role_pt: string | null }[]) {
       columnistMap.set(row.id, { name: row.name, role_pt: row.role_pt });
     }
@@ -33,24 +42,31 @@ async function resolveProfiles(client: any, profiles: ProfileLite[]): Promise<Me
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function listMessageRecipients(client: any, selfId: string, onlyRole?: "admin"): Promise<MessageRecipient[]> {
-  let query = client.from("user_profiles").select("id,email,role,columnist_id").neq("id", selfId);
+export async function listMessageRecipients(adminClient: any, selfId: string, onlyRole?: "admin"): Promise<MessageRecipient[]> {
+  let query = adminClient.from("user_profiles").select("id,email,role,columnist_id").neq("id", selfId);
   if (onlyRole) query = query.eq("role", onlyRole);
   const { data } = await query;
-  return resolveProfiles(client, (data ?? []) as ProfileLite[]);
+  return resolveProfiles(adminClient, (data ?? []) as ProfileLite[]);
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function resolveUsersByIds(client: any, ids: string[]): Promise<Map<string, MessageRecipient>> {
+export async function resolveUsersByIds(adminClient: any, ids: string[]): Promise<Map<string, MessageRecipient>> {
   if (ids.length === 0) return new Map();
-  const { data } = await client.from("user_profiles").select("id,email,role,columnist_id").in("id", ids);
-  const resolved = await resolveProfiles(client, (data ?? []) as ProfileLite[]);
+  const { data } = await adminClient.from("user_profiles").select("id,email,role,columnist_id").in("id", ids);
+  const resolved = await resolveProfiles(adminClient, (data ?? []) as ProfileLite[]);
   return new Map(resolved.map((r) => [r.id, r]));
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export async function buildConversationSummaries(client: any, selfId: string): Promise<ConversationSummary[]> {
-  const { data } = await client
+// sessionClient reads `messages` (RLS-scoped to the caller's own rows, as
+// it should be); adminClient resolves the other-party names (see above).
+export async function buildConversationSummaries(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sessionClient: any,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  adminClient: any,
+  selfId: string
+): Promise<ConversationSummary[]> {
+  const { data } = await sessionClient
     .from("messages")
     .select("*")
     .or(`sender_id.eq.${selfId},recipient_id.eq.${selfId}`)
@@ -71,7 +87,7 @@ export async function buildConversationSummaries(client: any, selfId: string): P
   }
 
   const otherIds = [...byOther.keys()];
-  const resolved = await resolveUsersByIds(client, otherIds);
+  const resolved = await resolveUsersByIds(adminClient, otherIds);
   return otherIds
     .map((id) => {
       const entry = byOther.get(id)!;

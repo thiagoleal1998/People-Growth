@@ -1,4 +1,4 @@
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { listMessageRecipients, buildConversationSummaries } from "@/lib/messages-data";
 import { MessagesClient } from "@/components/MessagesClient";
@@ -9,12 +9,15 @@ export default async function AdminMensagensPage({ searchParams }: { searchParam
   const profile = await getCurrentProfile();
   if (!profile) return null;
   const supabase = await createClient();
+  const admin = await createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const adminClient = admin as any;
 
   const [recipients, conversations] = await Promise.all([
-    listMessageRecipients(client, profile.id),
-    buildConversationSummaries(client, profile.id),
+    listMessageRecipients(adminClient, profile.id),
+    buildConversationSummaries(client, adminClient, profile.id),
   ]);
 
   const validWith = withId && recipients.some((r) => r.id === withId) ? withId : undefined;
