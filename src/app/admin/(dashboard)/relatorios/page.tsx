@@ -6,7 +6,7 @@ import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
 import { AD_SLOT_DEFS } from "../publicidade/ad-slots";
 import { ExportReportButton } from "./ExportReportButton";
 import { PlanosClient, type GoalWithProgress, type AccountWithHistory } from "./PlanosClient";
-import { computeCurrentMetricValue } from "@/lib/goal-metrics";
+import { computeGoalProgress } from "@/lib/goal-metrics";
 import type { Article, Ad, Columnist, Comment, ActivityLog, InternalTicket, ErrorReport, Goal, SocialAccount, SocialFollowerSnapshot } from "@/types/database.types";
 
 const PERIODS = [
@@ -505,23 +505,9 @@ export default async function RelatoriosPage({
 
     goalsWithProgress = await Promise.all(
       goals.map(async (g) => {
-        const currentValue = await computeCurrentMetricValue(client, g.metric, g.starts_at, g.social_account_id);
-        // Server Component, computed fresh per request — no client re-render
-        // to worry about here (same reasoning as the public homepage's own
-        // suppression of this rule).
-        // eslint-disable-next-line react-hooks/purity
-        const now = Date.now();
-        const start = new Date(g.starts_at).getTime();
-        const end = new Date(`${g.target_date}T23:59:59`).getTime();
-        const daysTotal = Math.max(1, Math.round((end - start) / 86400000));
-        const daysElapsed = Math.max(0, Math.min(daysTotal, Math.round((now - start) / 86400000)));
-        const progressPct = Math.min(100, Math.round((currentValue / g.target_value) * 100));
-        const expectedFraction = daysElapsed / daysTotal;
-        const actualFraction = currentValue / g.target_value;
-        const onTrack: GoalWithProgress["onTrack"] =
-          currentValue >= g.target_value ? "achieved" : actualFraction >= expectedFraction * 0.9 ? "on_track" : "behind";
+        const progress = await computeGoalProgress(client, g);
         const account = g.social_account_id ? accountById.get(g.social_account_id) : undefined;
-        return { ...g, currentValue, progressPct, daysTotal, daysElapsed, onTrack, socialAccountLabel: account ? account.display_name || account.handle : null };
+        return { ...g, ...progress, socialAccountLabel: account ? account.display_name || account.handle : null };
       })
     );
 

@@ -41,3 +41,34 @@ export async function computeCurrentMetricValue(
     }
   }
 }
+
+export type GoalProgress = {
+  currentValue: number;
+  progressPct: number;
+  daysTotal: number;
+  daysElapsed: number;
+  onTrack: "achieved" | "on_track" | "behind";
+};
+
+// Shared by the Relatórios "Planos e Projeções" tab and the admin
+// dashboard's goals summary widget — "on track" compares how much of the
+// goal's time window has elapsed against how much of the target has been
+// reached (90% tolerance so a goal running slightly behind the straight-
+// line pace isn't flagged red the moment it dips under 100%).
+export async function computeGoalProgress(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  client: any,
+  goal: { metric: GoalMetric; starts_at: string; target_date: string; target_value: number; social_account_id: string | null }
+): Promise<GoalProgress> {
+  const currentValue = await computeCurrentMetricValue(client, goal.metric, goal.starts_at, goal.social_account_id);
+  const nowMs = Date.now();
+  const start = new Date(goal.starts_at).getTime();
+  const end = new Date(`${goal.target_date}T23:59:59`).getTime();
+  const daysTotal = Math.max(1, Math.round((end - start) / 86400000));
+  const daysElapsed = Math.max(0, Math.min(daysTotal, Math.round((nowMs - start) / 86400000)));
+  const progressPct = Math.min(100, Math.round((currentValue / goal.target_value) * 100));
+  const expectedFraction = daysElapsed / daysTotal;
+  const actualFraction = currentValue / goal.target_value;
+  const onTrack: GoalProgress["onTrack"] = currentValue >= goal.target_value ? "achieved" : actualFraction >= expectedFraction * 0.9 ? "on_track" : "behind";
+  return { currentValue, progressPct, daysTotal, daysElapsed, onTrack };
+}

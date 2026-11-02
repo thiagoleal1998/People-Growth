@@ -2,6 +2,7 @@ import Link from "next/link";
 import { FileText, Users, Mail, Download } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { LiveStatsWidget } from "@/components/admin/LiveStatsWidget";
+import { GoalsSummaryWidget } from "@/components/admin/GoalsSummaryWidget";
 import type { Lead } from "@/types/database.types";
 
 const statusLabels: Record<Lead["status"], { label: string; color: string; bg: string }> = {
@@ -46,6 +47,8 @@ export default async function AdminDashboard() {
       </div>
 
       <LiveStatsWidget />
+
+      <GoalsSummaryWidget />
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1.25rem", marginBottom: "2.5rem" }}>
         {stats.map(({ label, value, icon: Icon, color }) => (
