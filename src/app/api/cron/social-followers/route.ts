@@ -7,6 +7,11 @@ import { fetchAndRecordAccount } from "@/lib/social-followers";
 // account is fetched inside its own try/catch so one platform failing
 // (missing credentials, a down API, an unexpected response) never blocks
 // the others from being attempted.
+// Instagram accounts launch a real headless browser (see social-followers.ts),
+// which is slow (Chromium cold start + page render) — default serverless
+// timeouts aren't enough for a batch of several accounts.
+export const maxDuration = 120;
+
 export async function GET(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
   const authHeader = request.headers.get("authorization");

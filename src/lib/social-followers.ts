@@ -12,14 +12,15 @@
 //     is the zero-setup default below; YOUTUBE_API_KEY (optional) upgrades
 //     this to the exact figure via the official Data API.
 //   - Instagram: confirmed the public profile page's raw HTML does NOT
-//     contain the follower count at all for a plain unauthenticated fetch
-//     (verified: no og:description, no ld+json, no edge_followed_by — the
-//     page literally carries a "hide_ui_for_crawlers" flag). It only shows
-//     up once a browser runs Instagram's own JS. There's no honest "just
-//     scrape it" option here short of running a full headless browser,
-//     which isn't worth the weight/fragility for one number — the Graph
-//     API (if the admin finishes Meta's setup) or manual entry are the
-//     real options.
+//     contain the follower count for a plain unauthenticated fetch (no
+//     og:description, no ld+json, no edge_followed_by — the page carries a
+//     "hide_ui_for_crawlers" flag) — it's only populated client-side, after
+//     Instagram's own JS runs. A real headless browser (puppeteer-core +
+//     @sparticuz/chromium, Vercel-compatible) rendering the public page —
+//     same page a logged-out visitor sees, no spoofed internal API, no
+//     anti-bot-bypass proxy — gets it fine (confirmed live). The official
+//     Graph API (if the admin finishes Meta's setup) stays the preferred,
+//     exact-number path when configured; this is the zero-setup fallback.
 //   - TikTok: the very first request already gets a bot-check interstitial
 //     page instead of the profile — blocked before any content loads.
 //   - X: an unauthenticated profile request is refused outright (402).
@@ -118,18 +119,54 @@ async function fetchYouTube(account: SocialAccountForFetch): Promise<FollowerFet
   return scrapeYouTube(account.handle, account.profile_url);
 }
 
+// Headless Chromium via puppeteer-core + @sparticuz/chromium (the binary
+// Vercel serverless functions can actually run) — imported dynamically so
+// extracting/launching Chromium only happens for accounts that actually
+// need it (a batch run with only YouTube/other accounts never pays this
+// cost). Forcing an English locale/Accept-Language isn't just cosmetic:
+// Instagram's page otherwise renders "67 seguidores" (pt-BR, comma/period
+// swapped from English) for a visitor it geolocates to Brazil, which
+// parseAbbreviatedCount isn't built to read — confirmed English forces
+// "67 followers" reliably instead.
+async function scrapeInstagram(handle: string, profileUrl: string | null): Promise<FollowerFetchResult> {
+  const url = profileUrl || `https://www.instagram.com/${encodeURIComponent(handle)}/`;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let browser: any;
+  try {
+    const [{ default: puppeteer }, { default: chromium }] = await Promise.all([import("puppeteer-core"), import("@sparticuz/chromium")]);
+    browser = await puppeteer.launch({ args: chromium.args, executablePath: await chromium.executablePath(), headless: true });
+    const page = await browser.newPage();
+    await page.setUserAgent(BROWSER_HEADERS["User-Agent"]);
+    await page.setExtraHTTPHeaders({ "Accept-Language": "en-US,en;q=0.9" });
+    await page.goto(url, { waitUntil: "domcontentloaded", timeout: 20000 });
+    await page.waitForSelector("header", { timeout: 15000 }).catch(() => {});
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+    const bodyText: string = await page.evaluate(() => document.body.innerText);
+    const match = bodyText.match(/([\d,.]+[KMB]?)\s*followers/i);
+    if (!match) return { ok: false, error: "Não encontrei o número de seguidores na página — confira o handle/URL, ou o perfil pode estar privado." };
+    const count = parseAbbreviatedCount(match[1]);
+    if (count == null) return { ok: false, error: `Não consegui interpretar "${match[1]}".` };
+    return { ok: true, count, source: "scrape" };
+  } catch (err) {
+    return { ok: false, error: err instanceof Error ? err.message : String(err) };
+  } finally {
+    await browser?.close().catch(() => {});
+  }
+}
+
 async function fetchInstagram(account: SocialAccountForFetch): Promise<FollowerFetchResult> {
   const token = process.env.INSTAGRAM_ACCESS_TOKEN;
   const igUserId = account.external_id || process.env.INSTAGRAM_USER_ID;
-  if (!token || token === "your_instagram_access_token" || !igUserId || igUserId === "your_instagram_user_id") {
-    return { ok: false, error: "Credenciais do Instagram ainda não configuradas." };
+  if (token && token !== "your_instagram_access_token" && igUserId && igUserId !== "your_instagram_user_id") {
+    const res = await fetch(`https://graph.facebook.com/v21.0/${encodeURIComponent(igUserId)}?fields=followers_count&access_token=${token}`);
+    if (res.ok) {
+      const json = (await res.json()) as { followers_count?: number };
+      if (json.followers_count != null) return { ok: true, count: json.followers_count, source: "api" };
+    }
+    // Falls through to the browser scrape rather than failing outright —
+    // same reasoning as YouTube's key fallback above.
   }
-
-  const res = await fetch(`https://graph.facebook.com/v21.0/${encodeURIComponent(igUserId)}?fields=followers_count&access_token=${token}`);
-  if (!res.ok) return { ok: false, error: `Instagram Graph API respondeu ${res.status}.` };
-  const json = (await res.json()) as { followers_count?: number };
-  if (json.followers_count == null) return { ok: false, error: "Resposta sem followers_count." };
-  return { ok: true, count: json.followers_count, source: "api" };
+  return scrapeInstagram(account.handle, account.profile_url);
 }
 
 async function fetchTikTok(): Promise<FollowerFetchResult> {

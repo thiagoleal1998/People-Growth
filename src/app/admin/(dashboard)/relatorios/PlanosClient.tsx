@@ -469,7 +469,14 @@ function NewAccountForm({ onCreated }: { onCreated: () => void }) {
       <Field label="Handle" hint="Sem @ — ex: grupofestina">
         <Input value={handle} onChange={(e) => setHandle(e.target.value)} />
       </Field>
-      <Field label="URL do perfil (opcional)" hint={platform === "youtube" ? "Cole o link exato do canal se a busca pelo handle não achar (ex: canais com URL antiga /c/... ou /user/...)." : "Só pra referência — não usado na busca automática."}>
+      <Field
+        label="URL do perfil (opcional)"
+        hint={
+          platform === "youtube" || platform === "instagram"
+            ? "Cole o link exato do perfil se a busca pelo handle não achar (ex: canal com URL antiga /c/..., ou handle que não bate com a página)."
+            : "Só pra referência — não usado na busca automática."
+        }
+      >
         <Input value={profileUrl} onChange={(e) => setProfileUrl(e.target.value)} placeholder="https://..." />
       </Field>
       <Field
@@ -478,7 +485,7 @@ function NewAccountForm({ onCreated }: { onCreated: () => void }) {
           platform === "youtube"
             ? "Não precisa — a busca já funciona só com o handle, sem chave nenhuma (número aproximado; pra número exato, Channel ID aqui + YOUTUBE_API_KEY)."
             : platform === "instagram"
-              ? "Instagram bloqueia a leitura automática sem login — só funciona com a API oficial do Meta (ID da conta Business aqui) ou entrada manual."
+              ? "Não precisa — a busca já funciona sem login nem chave (abre a página pública). Só preencha pra usar a API oficial do Meta em vez disso (ID da conta Business)."
               : "Sem leitura automática pra essa rede — use a entrada manual abaixo."
         }
       >
