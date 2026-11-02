@@ -52,18 +52,47 @@ function parseAbbreviatedCount(text: string): number | null {
   return Math.round(num * mult);
 }
 
+// YouTube serves (at least) two different channel page templates — which
+// one a given channel gets seems to depend on the channel itself (newer/
+// smaller channels got a redesigned header in testing here), not something
+// this scraper controls, so both are tried:
+//   - older template: subscriberCountText as a nested object on the main
+//     channel page — {"accessibility":{"accessibilityData":{"label":"..."}},
+//     "simpleText":"1.17M subscribers"}.
+//   - newer template: the main page's header doesn't expose it at all, but
+//     the channel's own /about tab still has it, as a flat string —
+//     "subscriberCountText":"23 subscribers" (confirmed live on a small,
+//     recently-renamed channel that had neither the old nested object NOR
+//     any subscriber text on its main page).
+const OLD_TEMPLATE_RE = /"subscriberCountText":\{"accessibility":\{"accessibilityData":\{"label":"[^"]*"\}\},"simpleText":"([^"]+)"/;
+const NEW_TEMPLATE_RE = /"subscriberCountText":"([^"]+)"/;
+
+async function fetchAndParse(url: string): Promise<{ text: string } | { error: string }> {
+  const res = await fetch(url, { headers: BROWSER_HEADERS });
+  if (!res.ok) return { error: `YouTube respondeu ${res.status}.` };
+  const html = await res.text();
+  const match = html.match(OLD_TEMPLATE_RE) ?? html.match(NEW_TEMPLATE_RE);
+  if (!match) return { error: "not_found" };
+  return { text: match[1] };
+}
+
 // Prefers the admin's own pasted profile_url when given (handles legacy
 // /c/ and /user/ channel URLs, or just a handle guessed wrong) — only
 // falls back to guessing a "/@handle" URL when no URL was provided.
 async function scrapeYouTube(handle: string, profileUrl: string | null): Promise<FollowerFetchResult> {
-  const url = profileUrl || `https://www.youtube.com/${encodeURIComponent(handle.startsWith("@") ? handle : `@${handle}`)}`;
-  const res = await fetch(url, { headers: BROWSER_HEADERS });
-  if (!res.ok) return { ok: false, error: `YouTube respondeu ${res.status} ao abrir ${profileUrl ? "a URL do perfil" : "o canal pelo handle"} — confira.` };
-  const html = await res.text();
-  const match = html.match(/"subscriberCountText":\{"accessibility":\{"accessibilityData":\{"label":"[^"]*"\}\},"simpleText":"([^"]+)"/);
-  if (!match) return { ok: false, error: "Não encontrei o número de inscritos na página do canal — handle errado ou o YouTube mudou a página." };
-  const count = parseAbbreviatedCount(match[1]);
-  if (count == null) return { ok: false, error: `Não consegui interpretar "${match[1]}".` };
+  const baseUrl = (profileUrl || `https://www.youtube.com/${encodeURIComponent(handle.startsWith("@") ? handle : `@${handle}`)}`).replace(/\/+$/, "");
+
+  let result = await fetchAndParse(baseUrl);
+  if ("error" in result && result.error !== "not_found") return { ok: false, error: `${result.error} (${profileUrl ? "URL do perfil" : "handle"})` };
+  if ("error" in result) {
+    // Not on the main page — try the channel's /about tab, which some of
+    // YouTube's newer page templates use instead (see comment above).
+    result = await fetchAndParse(baseUrl.endsWith("/about") ? baseUrl : `${baseUrl}/about`);
+  }
+  if ("error" in result) return { ok: false, error: "Não encontrei o número de inscritos (tentei a página do canal e a aba Sobre) — confira o handle/URL." };
+
+  const count = parseAbbreviatedCount(result.text);
+  if (count == null) return { ok: false, error: `Não consegui interpretar "${result.text}".` };
   return { ok: true, count, source: "scrape" };
 }
 
