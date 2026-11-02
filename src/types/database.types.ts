@@ -511,6 +511,45 @@ type MessageRow = {
   created_at: string;
 };
 
+type SocialAccountRow = {
+  id: string;
+  platform: "instagram" | "youtube" | "tiktok" | "x";
+  handle: string;
+  display_name: string | null;
+  external_id: string | null;
+  profile_url: string | null;
+  is_active: boolean;
+  last_fetch_attempted_at: string | null;
+  last_fetch_error: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type SocialFollowerSnapshotRow = {
+  id: string;
+  account_id: string;
+  follower_count: number;
+  source: "api" | "scrape" | "manual";
+  fetched_at: string;
+  created_by: string | null;
+  created_at: string;
+};
+
+type GoalRow = {
+  id: string;
+  title: string;
+  metric: "page_views" | "unique_visitors" | "leads" | "newsletter_subs" | "social_followers";
+  social_account_id: string | null;
+  target_value: number;
+  starts_at: string;
+  target_date: string;
+  notes: string | null;
+  status: "active" | "achieved" | "archived";
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -556,6 +595,9 @@ export type Database = {
       instruction_items: { Row: InstructionItemRow; Insert: Omit<InstructionItemRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<InstructionItemRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       instruction_item_reads: { Row: InstructionItemReadRow; Insert: Omit<InstructionItemReadRow, "read_at">; Update: Partial<InstructionItemReadRow>; Relationships: [] };
       messages: { Row: MessageRow; Insert: Omit<MessageRow, "id" | "created_at" | "read_at">; Update: Partial<Pick<MessageRow, "read_at">>; Relationships: [] };
+      social_accounts: { Row: SocialAccountRow; Insert: Omit<SocialAccountRow, "id" | "created_at" | "updated_at" | "last_fetch_attempted_at" | "last_fetch_error">; Update: Partial<Omit<SocialAccountRow, "id" | "created_at">>; Relationships: [] };
+      social_follower_snapshots: { Row: SocialFollowerSnapshotRow; Insert: Omit<SocialFollowerSnapshotRow, "id" | "created_at">; Update: Partial<Omit<SocialFollowerSnapshotRow, "id" | "created_at">>; Relationships: [] };
+      goals: { Row: GoalRow; Insert: Omit<GoalRow, "id" | "created_at" | "updated_at" | "status">; Update: Partial<Omit<GoalRow, "id" | "created_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -603,3 +645,6 @@ export type AnnouncementRead = AnnouncementReadRow;
 export type InstructionItem = InstructionItemRow;
 export type InstructionItemRead = InstructionItemReadRow;
 export type Message = MessageRow;
+export type SocialAccount = SocialAccountRow;
+export type SocialFollowerSnapshot = SocialFollowerSnapshotRow;
+export type Goal = GoalRow;

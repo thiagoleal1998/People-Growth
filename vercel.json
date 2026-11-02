@@ -1,3 +1,6 @@
 {
-  "crons": [{ "path": "/api/cron/find-deals", "schedule": "0 12 * * *" }]
+  "crons": [
+    { "path": "/api/cron/find-deals", "schedule": "0 12 * * *" },
+    { "path": "/api/cron/social-followers", "schedule": "0 13 * * *" }
+  ]
 }
