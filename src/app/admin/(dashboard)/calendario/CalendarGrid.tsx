@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus } from "lucide-react";
+import { Plus, Instagram, Linkedin, MessageCircle, Radio, Share2 } from "lucide-react";
 import { WEEKDAYS_PT, type CalendarCell } from "@/lib/calendar-grid";
 import type { Article, ContentCalendarItem } from "@/types/database.types";
 
@@ -11,6 +11,16 @@ const PLATFORM_LABEL: Record<NonNullable<ContentCalendarItem["platform"]>, strin
   whatsapp: "WhatsApp",
   live: "Live",
   other: "Outro",
+};
+
+// Lucide doesn't ship a WhatsApp mark, so that one falls back to a generic
+// chat bubble — every other platform here has its real brand icon.
+const PLATFORM_ICON: Record<NonNullable<ContentCalendarItem["platform"]>, typeof Instagram> = {
+  instagram: Instagram,
+  linkedin: Linkedin,
+  whatsapp: MessageCircle,
+  live: Radio,
+  other: Share2,
 };
 
 export function CalendarGrid({
@@ -43,6 +53,7 @@ export function CalendarGrid({
               key={cell.dateKey}
               style={{
                 minHeight: "7.5rem",
+                minWidth: 0,
                 padding: "0.5rem",
                 borderRight: "1px solid var(--admin-border)",
                 borderBottom: "1px solid var(--admin-border)",
@@ -94,26 +105,27 @@ export function CalendarGrid({
                   })}
                   {items.map((item) => {
                     const isSocial = item.type === "social_post";
+                    const PlatformIcon = isSocial ? PLATFORM_ICON[item.platform ?? "other"] : null;
                     return (
                       <Link
                         key={`i-${item.id}`}
                         href={`/admin/calendario/${item.id}?month=${monthKey}`}
-                        title={item.title}
+                        title={`${isSocial && item.platform ? `${PLATFORM_LABEL[item.platform]}: ` : ""}${item.title}`}
                         style={{
-                          display: "block",
+                          display: "flex",
+                          alignItems: "center",
+                          gap: "0.1875rem",
                           padding: "0.125rem 0.375rem",
                           borderRadius: "0.25rem",
                           fontSize: "0.6875rem",
                           fontWeight: 700,
-                          whiteSpace: "nowrap",
-                          overflow: "hidden",
-                          textOverflow: "ellipsis",
+                          minWidth: 0,
                           backgroundColor: isSocial ? "rgba(49, 94, 156,0.12)" : "rgba(148,163,184,0.18)",
                           color: isSocial ? "#315E9C" : "var(--admin-text-secondary)",
                         }}
                       >
-                        {isSocial ? `📱 ${item.platform ? PLATFORM_LABEL[item.platform] + ": " : ""}` : "📝 "}
-                        {item.title}
+                        {PlatformIcon ? <PlatformIcon size={11} style={{ flexShrink: 0 }} /> : <span style={{ flexShrink: 0 }}>📝</span>}
+                        <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title}</span>
                       </Link>
                     );
                   })}
