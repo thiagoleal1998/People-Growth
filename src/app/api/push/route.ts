@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { sendConfirmationPush } from "@/lib/push";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // Session-bound client + RLS (migration 068) — a user only ever registers
 // or removes their own push subscriptions, never anyone else's. The send
@@ -14,6 +15,9 @@ export async function POST(req: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+
+  const { limited } = await checkRateLimit(user.id, "push-subscribe", { maxAttempts: 20, windowMinutes: 60 });
+  if (limited) return NextResponse.json({ error: "Muitas tentativas — aguarde um pouco." }, { status: 429 });
 
   const body = await req.json().catch(() => null);
   const endpoint = body?.endpoint as string | undefined;

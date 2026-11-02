@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse, after } from "next/server";
 import { createAdminClient } from "@/lib/supabase/server";
 import { getClientIp, checkRateLimit } from "@/lib/rate-limit";
 import { sendAdminNotification } from "@/lib/email";
@@ -24,21 +24,26 @@ export async function POST(req: NextRequest) {
 
     // Always return the same generic success message regardless of whether
     // the email matches an account, so this endpoint can't be used to probe
-    // which addresses have a login here. Only insert + notify when it does.
+    // which addresses have a login here. The insert + notify work (only for
+    // a real match) runs via after() — AFTER the response is already sent —
+    // so an existing-email request can't be distinguished from a
+    // nonexistent one by response time either, not just by response body.
     const { data: existing } = await client.from("user_profiles").select("id").eq("email", email).maybeSingle();
 
     if (existing) {
-      await client.from("password_reset_requests").insert({ email });
+      after(async () => {
+        await client.from("password_reset_requests").insert({ email });
 
-      const { data: config } = await client.from("site_config").select("value").eq("key", "contact_email").maybeSingle();
-      const adminEmail = config?.value;
-      if (adminEmail) {
-        await sendAdminNotification(
-          adminEmail,
-          `Pedido de redefinição de senha — ${email}`,
-          `<p><strong>${email}</strong> pediu para redefinir a senha de acesso ao painel.</p><p>Defina uma nova senha para essa pessoa em Admin → Usuários.</p>`
-        );
-      }
+        const { data: config } = await client.from("site_config").select("value").eq("key", "contact_email").maybeSingle();
+        const adminEmail = config?.value;
+        if (adminEmail) {
+          await sendAdminNotification(
+            adminEmail,
+            `Pedido de redefinição de senha — ${email}`,
+            `<p><strong>${email}</strong> pediu para redefinir a senha de acesso ao painel.</p><p>Defina uma nova senha para essa pessoa em Admin → Usuários.</p>`
+          );
+        }
+      });
     }
 
     return NextResponse.json({ success: true });

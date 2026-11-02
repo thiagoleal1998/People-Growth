@@ -1,14 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { translateArticleToEnglish } from "@/lib/translate";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // Used by both the admin and columnist article editors — any logged-in user
 // with a profile can translate their own draft, same access level as
 // uploading a content image (see /api/admin/upload-content-image).
+// Rate-limited per logged-in user — this calls a paid external AI API with
+// no other cap.
 export async function POST(req: NextRequest) {
   const profile = await getCurrentProfile();
   if (!profile) {
     return NextResponse.json({ error: "Não autenticado." }, { status: 401 });
+  }
+
+  const { limited } = await checkRateLimit(profile.id, "translate-article", { maxAttempts: 30, windowMinutes: 60 });
+  if (limited) {
+    return NextResponse.json({ error: "Muitas traduções em pouco tempo — aguarde um pouco e tente de novo." }, { status: 429 });
   }
 
   const body = await req.json();

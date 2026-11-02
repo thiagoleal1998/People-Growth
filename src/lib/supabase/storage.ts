@@ -71,6 +71,20 @@ export async function uploadPublicImage(
 
 const MAX_AUDIO_BYTES = 10 * 1024 * 1024; // a few minutes of voice at typical webm/opus bitrates
 
+// Identifies the container from its actual bytes rather than trusting the
+// client-declared File.type — a spoofed Content-Type (e.g. a real
+// text/html payload sent as "audio/webm") would otherwise get stored and
+// served from this bucket's public, trusted URL with that lying header,
+// which browser MIME-sniffing could render as HTML on a direct visit.
+function sniffAudioContentType(bytes: Buffer): string | null {
+  if (bytes.length < 12) return null;
+  if (bytes[0] === 0x1a && bytes[1] === 0x45 && bytes[2] === 0xdf && bytes[3] === 0xa3) return "audio/webm"; // EBML/Matroska
+  if (bytes[0] === 0x4f && bytes[1] === 0x67 && bytes[2] === 0x67 && bytes[3] === 0x53) return "audio/ogg"; // "OggS"
+  if (bytes[0] === 0x52 && bytes[1] === 0x49 && bytes[2] === 0x46 && bytes[3] === 0x46 && bytes[8] === 0x57 && bytes[9] === 0x41 && bytes[10] === 0x56 && bytes[11] === 0x45) return "audio/wav"; // RIFF....WAVE
+  if (bytes[4] === 0x66 && bytes[5] === 0x74 && bytes[6] === 0x79 && bytes[7] === 0x70) return "audio/mp4"; // ISO base media "ftyp"
+  return null;
+}
+
 // Browser-recorded voice messages (MessagesClient's mic button) — no
 // conversion, just uploaded as the browser's MediaRecorder produced them
 // (webm/opus in Chrome/Edge, mp4/aac in Safari).
@@ -81,14 +95,18 @@ export async function uploadPublicAudio(
   if (!(file instanceof File) || file.size === 0) return { url: null, error: null };
   if (file.size > MAX_AUDIO_BYTES) return { url: null, error: "Áudio muito grande (máximo 10MB)." };
 
-  const admin = await createAdminClient();
-  const ext = file.name.split(".").pop()?.toLowerCase() || "webm";
-  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const detectedType = sniffAudioContentType(buffer);
+  if (!detectedType) return { url: null, error: "Arquivo não reconhecido como áudio válido." };
 
-  const { error } = await admin.storage.from(BUCKET).upload(path, file, {
+  const admin = await createAdminClient();
+  const extByType: Record<string, string> = { "audio/webm": "webm", "audio/ogg": "ogg", "audio/wav": "wav", "audio/mp4": "mp4" };
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${extByType[detectedType]}`;
+
+  const { error } = await admin.storage.from(BUCKET).upload(path, buffer, {
     cacheControl: "31536000",
     upsert: false,
-    contentType: file.type || undefined,
+    contentType: detectedType,
   });
 
   if (error) {

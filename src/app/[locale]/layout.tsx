@@ -8,6 +8,7 @@ import { Analytics } from "@/components/Analytics";
 import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import { getFaqEntriesFromConfig } from "@/lib/faq";
+import { jsonLdString } from "@/lib/json-ld";
 import "../globals.css";
 
 type SiteConfigRow = { key: string; value: string | null };
@@ -126,12 +127,12 @@ export default async function LocaleLayout({
       <body>
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationSchema) }}
+          dangerouslySetInnerHTML={{ __html: jsonLdString(organizationSchema) }}
         />
         {faqSchema && (
           <script
             type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
+            dangerouslySetInnerHTML={{ __html: jsonLdString(faqSchema) }}
           />
         )}
         {config.ga4_measurement_id && (

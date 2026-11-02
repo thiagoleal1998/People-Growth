@@ -3,7 +3,19 @@ import { createAdminClient } from "@/lib/supabase/server";
 
 export function getClientIp(req: NextRequest): string {
   const forwarded = req.headers.get("x-forwarded-for");
-  if (forwarded) return forwarded.split(",")[0].trim();
+  if (forwarded) {
+    // X-Forwarded-For is a comma-separated chain where each hop APPENDS the
+    // peer it saw — so the first entry is whatever the original client
+    // claimed (fully attacker-controlled: anyone can send their own
+    // "X-Forwarded-For: 1.2.3.4" and get a fresh rate-limit bucket every
+    // request), while the LAST entry is what Vercel's own edge — the one
+    // hop between the client and this function — actually observed. In the
+    // normal case (no upstream proxy chain, single clean value from
+    // Vercel) first and last are the same value, so this only changes
+    // behavior for a header a caller tried to forge.
+    const parts = forwarded.split(",").map((p) => p.trim()).filter(Boolean);
+    if (parts.length > 0) return parts[parts.length - 1];
+  }
   return req.headers.get("x-real-ip") ?? "unknown";
 }
 

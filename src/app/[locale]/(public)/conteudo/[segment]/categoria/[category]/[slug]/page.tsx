@@ -19,6 +19,7 @@ import { ArticleToc } from "@/components/ArticleToc";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import { articleHref, articlePath, FORMAT_SEGMENT, UNCATEGORIZED_SEGMENT } from "@/lib/article-url";
 import { ogImageUrl } from "@/lib/og-image";
+import { jsonLdString } from "@/lib/json-ld";
 import { pickLocale } from "@/lib/locale-content";
 import { aiDisclosureText } from "@/lib/ai-disclosure";
 import { aboutColumnistLabel, isColumnistPubliclyVisible, joinColumnistNames } from "@/lib/founder-data";
@@ -234,7 +235,7 @@ export default async function ArticlePage({
       <HideSideRails />
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdString(articleSchema) }}
       />
       <ReadingProgress />
 
