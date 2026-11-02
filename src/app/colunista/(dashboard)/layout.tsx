@@ -52,6 +52,14 @@ export default async function ColumnistDashboardLayout({ children }: { children:
     unreadAnnouncements = Math.max(0, (totalCount ?? 0) - (readCount ?? 0));
   }
 
+  // Same rough-diff approach as unreadAnnouncements above.
+  let unreadInstructions = 0;
+  if (profile?.id) {
+    const { count: totalCount } = await client.from("instruction_items").select("id", { count: "exact", head: true });
+    const { count: readCount } = await client.from("instruction_item_reads").select("instruction_item_id", { count: "exact", head: true }).eq("user_id", profile.id);
+    unreadInstructions = Math.max(0, (totalCount ?? 0) - (readCount ?? 0));
+  }
+
   // Applies to any login linked to a columnists row, admin or not — a
   // founder writing columns is still a columnist for this purpose. This
   // only ever gates the columnist-panel self-service write path (see the
@@ -79,7 +87,7 @@ export default async function ColumnistDashboardLayout({ children }: { children:
 
   return (
     <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      <ColumnistSidebar menu={menu} logoUrl={logoUrl} pendingComments={pendingComments} unreadAnnouncements={unreadAnnouncements} />
+      <ColumnistSidebar menu={menu} logoUrl={logoUrl} pendingComments={pendingComments} unreadAnnouncements={unreadAnnouncements} unreadInstructions={unreadInstructions} />
       <main className="admin-scroll" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%" }}>
         {termsGate}
         <PushReminderBanner />

@@ -14,11 +14,13 @@ export function ColumnistSidebar({
   logoUrl,
   pendingComments = 0,
   unreadAnnouncements = 0,
+  unreadInstructions = 0,
 }: {
   menu: MenuLink[];
   logoUrl?: string;
   pendingComments?: number;
   unreadAnnouncements?: number;
+  unreadInstructions?: number;
 }) {
   const pathname = usePathname();
   const [loggingOut, setLoggingOut] = useState(false);
@@ -74,7 +76,14 @@ export function ColumnistSidebar({
       <nav className="admin-sidebar-scroll" style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
         {menu.map(({ href, label, icon }) => {
           const isActive = pathname === href || (href !== "/colunista" && pathname.startsWith(href));
-          const badge = href === "/colunista/comentarios" ? pendingComments : href === "/colunista/comunicados" ? unreadAnnouncements : 0;
+          const badge =
+            href === "/colunista/comentarios"
+              ? pendingComments
+              : href === "/colunista/comunicados"
+                ? unreadAnnouncements
+                : href === "/colunista/instrucoes"
+                  ? unreadInstructions
+                  : 0;
           return (
             <Link
               key={href}

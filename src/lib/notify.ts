@@ -14,6 +14,7 @@ export const DEFAULT_TEMPLATES: Record<NotificationTemplateKey, { title: string;
   ticket_member_notified: { title: "Você foi notificado no chamado {{ticket_code}}", body: "{{ticket_title}}" },
   article_submitted_for_approval: { title: '"{{title}}" foi enviado para aprovação', body: null },
   article_resubmitted_for_approval: { title: '"{{title}}" foi revisado e reenviado para aprovação', body: null },
+  instruction_item_created: { title: 'Nova instrução: "{{title}}"', body: "Confira no Canal de Instruções." },
 };
 
 export async function renderNotificationTemplate(

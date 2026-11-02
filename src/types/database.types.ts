@@ -491,6 +491,12 @@ type AnnouncementReadRow = {
   read_at: string;
 };
 
+type InstructionItemReadRow = {
+  instruction_item_id: string;
+  user_id: string;
+  read_at: string;
+};
+
 export type Database = {
   public: {
     Tables: {
@@ -534,6 +540,7 @@ export type Database = {
       announcements: { Row: AnnouncementRow; Insert: Omit<AnnouncementRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AnnouncementRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       announcement_reads: { Row: AnnouncementReadRow; Insert: Omit<AnnouncementReadRow, "read_at">; Update: Partial<AnnouncementReadRow>; Relationships: [] };
       instruction_items: { Row: InstructionItemRow; Insert: Omit<InstructionItemRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<InstructionItemRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      instruction_item_reads: { Row: InstructionItemReadRow; Insert: Omit<InstructionItemReadRow, "read_at">; Update: Partial<InstructionItemReadRow>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -579,3 +586,4 @@ export type ContentCalendarItem = ContentCalendarItemRow;
 export type Announcement = AnnouncementRow;
 export type AnnouncementRead = AnnouncementReadRow;
 export type InstructionItem = InstructionItemRow;
+export type InstructionItemRead = InstructionItemReadRow;

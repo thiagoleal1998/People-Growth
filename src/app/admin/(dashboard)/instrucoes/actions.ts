@@ -1,14 +1,30 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { logActivity } from "@/lib/activity-log";
+import { insertNotification } from "@/lib/notify";
 import type { InstructionItem } from "@/types/database.types";
 
 function revalidateInstructions() {
   revalidatePath("/admin/instrucoes");
   revalidatePath("/colunista/instrucoes");
+  // The sidebar badge is read on every dashboard layout render.
+  revalidatePath("/colunista", "layout");
+}
+
+// Only called from createInstructionItem — a brand-new instruction is worth
+// a bell/push ping, an edit to an existing one isn't (same "only notify on
+// a meaningful transition" reasoning as the article workflow notifications).
+async function notifyAllColumnists(title: string) {
+  const admin = await createAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: columnists } = await (admin as any).from("user_profiles").select("id").eq("role", "columnist");
+  if (!columnists || columnists.length === 0) return;
+  await Promise.all(
+    columnists.map((c: { id: string }) => insertNotification(admin, c.id, "instruction_item_created", { title }, "/colunista/instrucoes"))
+  );
 }
 
 export async function createInstructionItem(kind: InstructionItem["kind"], title: string, body: string): Promise<InstructionItem> {
@@ -30,6 +46,7 @@ export async function createInstructionItem(kind: InstructionItem["kind"], title
 
   if (actor) await logActivity({ userId: actor.id, userEmail: actor.email, action: "create", entityType: kind === "faq" ? "pergunta do FAQ" : "etapa de instrução", entityLabel: cleanTitle });
 
+  await notifyAllColumnists(cleanTitle);
   revalidateInstructions();
   return data as InstructionItem;
 }

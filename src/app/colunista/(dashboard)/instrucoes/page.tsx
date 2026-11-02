@@ -1,14 +1,30 @@
-import { ListChecks, HelpCircle, ChevronDown } from "lucide-react";
+import { ListChecks, HelpCircle } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/profile";
 import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
+import { InstructionAccordionItem } from "@/components/InstructionAccordionItem";
+import { renderMarkdownLite } from "@/lib/markdown-lite";
 import type { InstructionItem } from "@/types/database.types";
 
-export default async function InstrucoesAutorPage() {
+export default async function InstrucoesColunistaPage() {
+  const profile = await getCurrentProfile();
   const supabase = await createClient();
-  const { data } = await (supabase as any).from("instruction_items").select("*").order("sort_order", { ascending: true });
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { data } = await client.from("instruction_items").select("*").order("sort_order", { ascending: true });
   const items = (data ?? []) as InstructionItem[];
   const steps = items.filter((i) => i.kind === "step");
   const faqs = items.filter((i) => i.kind === "faq");
+
+  // Visiting this page counts as reading everything on it — same
+  // "bulk-mark-on-visit" approach already used for Comunicados, not
+  // per-item (expanding an item isn't required to clear the badge).
+  if (profile?.id && items.length > 0) {
+    const { data: alreadyRead } = await client.from("instruction_item_reads").select("instruction_item_id").eq("user_id", profile.id);
+    const readIds = new Set(((alreadyRead ?? []) as { instruction_item_id: string }[]).map((r) => r.instruction_item_id));
+    const toMark = items.filter((i) => !readIds.has(i.id)).map((i) => ({ instruction_item_id: i.id, user_id: profile.id }));
+    if (toMark.length > 0) await client.from("instruction_item_reads").insert(toMark);
+  }
 
   return (
     <div>
@@ -26,18 +42,18 @@ export default async function InstrucoesAutorPage() {
                 <ListChecks size={18} color="#315E9C" />
                 <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)" }}>Passo a passo</h2>
               </div>
-              <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "0.5rem 1.5rem" }}>
+              <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
                 {steps.map((step, index) => (
-                  <div key={step.id} style={{ display: "flex", gap: "1rem", padding: "1.125rem 0", borderTop: index === 0 ? undefined : "1px solid var(--admin-border)" }}>
-                    <div style={{ flexShrink: 0, display: "flex", flexDirection: "column", alignItems: "center" }}>
-                      <div style={{ width: "1.875rem", height: "1.875rem", borderRadius: "50%", backgroundColor: "#315E9C", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.8125rem" }}>
-                        {index + 1}
-                      </div>
-                    </div>
-                    <div style={{ minWidth: 0 }}>
-                      <div style={{ fontWeight: 800, fontSize: "0.9375rem", color: "var(--admin-text)" }}>{step.title}</div>
-                      <p style={{ fontSize: "0.875rem", color: "var(--admin-text-secondary)", marginTop: "0.375rem", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{step.body}</p>
-                    </div>
+                  <div key={step.id} style={{ borderTop: index === 0 ? undefined : "1px solid var(--admin-border)" }}>
+                    <InstructionAccordionItem
+                      title={step.title}
+                      bodyHtml={renderMarkdownLite(step.body)}
+                      badge={
+                        <div style={{ flexShrink: 0, width: "1.75rem", height: "1.75rem", borderRadius: "50%", backgroundColor: "#315E9C", color: "white", display: "flex", alignItems: "center", justifyContent: "center", fontWeight: 800, fontSize: "0.8125rem" }}>
+                          {index + 1}
+                        </div>
+                      }
+                    />
                   </div>
                 ))}
               </div>
@@ -52,26 +68,9 @@ export default async function InstrucoesAutorPage() {
               </div>
               <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
                 {faqs.map((faq, index) => (
-                  <details key={faq.id} style={{ borderTop: index === 0 ? undefined : "1px solid var(--admin-border)" }}>
-                    <summary
-                      style={{
-                        listStyle: "none",
-                        cursor: "pointer",
-                        padding: "1.125rem 1.25rem",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "space-between",
-                        gap: "1rem",
-                        fontWeight: 700,
-                        fontSize: "0.9375rem",
-                        color: "var(--admin-text)",
-                      }}
-                    >
-                      {faq.title}
-                      <ChevronDown size={16} className="instrucoes-faq-chevron" style={{ flexShrink: 0, color: "var(--admin-faint)" }} />
-                    </summary>
-                    <p style={{ margin: 0, padding: "0 1.25rem 1.125rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{faq.body}</p>
-                  </details>
+                  <div key={faq.id} style={{ borderTop: index === 0 ? undefined : "1px solid var(--admin-border)" }}>
+                    <InstructionAccordionItem title={faq.title} bodyHtml={renderMarkdownLite(faq.body)} />
+                  </div>
                 ))}
               </div>
             </div>
@@ -80,9 +79,14 @@ export default async function InstrucoesAutorPage() {
       )}
 
       <style>{`
-        details[open] .instrucoes-faq-chevron { transform: rotate(180deg); }
-        .instrucoes-faq-chevron { transition: transform 0.2s ease; }
-        summary::-webkit-details-marker { display: none; }
+        .instr-expand {
+          display: grid;
+          grid-template-rows: 0fr;
+          transition: grid-template-rows 0.3s ease;
+        }
+        .instr-expand-open { grid-template-rows: 1fr; }
+        .instr-expand-clip { overflow: hidden; min-height: 0; }
+        .instr-expand-content { padding: 0 1.25rem 1.125rem; }
       `}</style>
     </div>
   );

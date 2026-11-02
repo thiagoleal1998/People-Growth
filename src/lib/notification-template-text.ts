@@ -9,7 +9,8 @@ export type NotificationTemplateKey =
   | "article_changes_requested"
   | "ticket_member_notified"
   | "article_submitted_for_approval"
-  | "article_resubmitted_for_approval";
+  | "article_resubmitted_for_approval"
+  | "instruction_item_created";
 
 export function renderTemplateText(template: string, vars: Record<string, string>): string {
   return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_match, key: string) => vars[key] ?? "");
@@ -24,4 +25,5 @@ export const NOTIFICATION_TEMPLATE_PREVIEW_VARS: Record<NotificationTemplateKey,
   ticket_member_notified: { ticket_code: "CPG-0023", ticket_title: "Erro ao salvar matéria" },
   article_submitted_for_approval: { title: "Como a liderança remota mudou em 2026" },
   article_resubmitted_for_approval: { title: "Como a liderança remota mudou em 2026" },
+  instruction_item_created: { title: "Como enviar uma pauta para aprovação" },
 };

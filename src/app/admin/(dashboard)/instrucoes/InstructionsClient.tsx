@@ -1,8 +1,10 @@
 "use client";
 
-import { useMemo, useState, useTransition } from "react";
+import { useMemo, useRef, useState, useTransition } from "react";
 import { Plus, ArrowUp, ArrowDown } from "lucide-react";
 import { ConfirmDeleteButton } from "@/components/admin/ui";
+import { MarkdownEditor, type MarkdownEditorHandle } from "@/components/admin/MarkdownEditor";
+import { renderMarkdownLite } from "@/lib/markdown-lite";
 import { createInstructionItem, updateInstructionItem, deleteInstructionItem, moveInstructionItem } from "./actions";
 import type { InstructionItem } from "@/types/database.types";
 
@@ -30,7 +32,7 @@ function InstructionRow({
 }) {
   const [editing, setEditing] = useState(false);
   const [title, setTitle] = useState(item.title);
-  const [body, setBody] = useState(item.body);
+  const editorRef = useRef<MarkdownEditorHandle>(null);
   const [pending, startTransition] = useTransition();
   const [movePending, startMove] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -47,7 +49,7 @@ function InstructionRow({
             )}
             <div style={{ minWidth: 0 }}>
               <div style={{ fontWeight: 800, fontSize: "0.9375rem", color: "var(--admin-text)" }}>{item.title}</div>
-              <p style={{ fontSize: "0.875rem", color: "var(--admin-text-secondary)", marginTop: "0.375rem", whiteSpace: "pre-wrap", lineHeight: 1.6 }}>{item.body}</p>
+              <div style={{ fontSize: "0.875rem", color: "var(--admin-text-secondary)", marginTop: "0.375rem", lineHeight: 1.6 }} dangerouslySetInnerHTML={{ __html: renderMarkdownLite(item.body) }} />
             </div>
           </div>
           <div style={{ display: "flex", gap: "0.375rem", flexShrink: 0 }}>
@@ -70,7 +72,7 @@ function InstructionRow({
   return (
     <div style={{ padding: "1.125rem 1.25rem", borderTop: "1px solid var(--admin-border)" }}>
       <input value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.875rem", fontWeight: 700, backgroundColor: "var(--admin-surface)", color: "var(--admin-text)", marginBottom: "0.625rem" }} />
-      <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={3} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.875rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)", resize: "vertical" }} />
+      <MarkdownEditor ref={editorRef} name="body" defaultValue={item.body} minHeight={140} />
       {error && <div style={{ color: "#dc2626", fontSize: "0.8125rem", marginTop: "0.5rem" }}>{error}</div>}
       <div style={{ display: "flex", gap: "0.5rem", marginTop: "0.625rem" }}>
         <button
@@ -78,6 +80,7 @@ function InstructionRow({
           disabled={pending}
           onClick={() => {
             setError(null);
+            const body = editorRef.current?.getContent() ?? "";
             startTransition(async () => {
               try {
                 await updateInstructionItem(item.id, title, body);
@@ -92,7 +95,7 @@ function InstructionRow({
         >
           {pending ? "Salvando..." : "Salvar"}
         </button>
-        <button type="button" onClick={() => { setEditing(false); setTitle(item.title); setBody(item.body); setError(null); }} style={{ backgroundColor: "var(--admin-surface-alt)", color: "var(--admin-text)", padding: "0.4rem 0.875rem", borderRadius: "0.375rem", fontWeight: 700, fontSize: "0.8125rem", border: "1px solid var(--admin-border-strong)", cursor: "pointer" }}>
+        <button type="button" onClick={() => { setEditing(false); setTitle(item.title); editorRef.current?.setContent(item.body); setError(null); }} style={{ backgroundColor: "var(--admin-surface-alt)", color: "var(--admin-text)", padding: "0.4rem 0.875rem", borderRadius: "0.375rem", fontWeight: 700, fontSize: "0.8125rem", border: "1px solid var(--admin-border-strong)", cursor: "pointer" }}>
           Cancelar
         </button>
       </div>
@@ -104,7 +107,7 @@ export function InstructionsClient({ items: initialItems }: { items: Instruction
   const [items, setItems] = useState(initialItems);
   const [tab, setTab] = useState<InstructionItem["kind"]>("step");
   const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const newEditorRef = useRef<MarkdownEditorHandle>(null);
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -113,12 +116,13 @@ export function InstructionsClient({ items: initialItems }: { items: Instruction
 
   function send() {
     setError(null);
+    const body = newEditorRef.current?.getContent() ?? "";
     startTransition(async () => {
       try {
         const created = await createInstructionItem(tab, title, body);
         setItems((prev) => [...prev, created]);
         setTitle("");
-        setBody("");
+        newEditorRef.current?.setContent("");
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erro ao salvar.");
       }
@@ -175,13 +179,15 @@ export function InstructionsClient({ items: initialItems }: { items: Instruction
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text-secondary)", marginBottom: "0.375rem" }}>{tabConfig.titleLabel}</label>
           <input value={title} onChange={(e) => setTitle(e.target.value)} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.875rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)", marginBottom: "1rem" }} />
           <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text-secondary)", marginBottom: "0.375rem" }}>{tabConfig.bodyLabel}</label>
-          <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={5} style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.875rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)", resize: "vertical", marginBottom: "1rem" }} />
+          <div style={{ marginBottom: "1rem" }}>
+            <MarkdownEditor ref={newEditorRef} name="body" defaultValue="" minHeight={140} />
+          </div>
           {error && <div style={{ color: "#dc2626", fontSize: "0.8125rem", marginBottom: "0.75rem" }}>{error}</div>}
           <button
             type="button"
-            disabled={pending || !title.trim() || !body.trim()}
+            disabled={pending || !title.trim()}
             onClick={send}
-            style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", padding: "0.625rem 1.25rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.875rem", border: "none", cursor: pending || !title.trim() || !body.trim() ? "default" : "pointer", opacity: pending || !title.trim() || !body.trim() ? 0.6 : 1 }}
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", padding: "0.625rem 1.25rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.875rem", border: "none", cursor: pending || !title.trim() ? "default" : "pointer", opacity: pending || !title.trim() ? 0.6 : 1 }}
           >
             <Plus size={15} /> {pending ? "Salvando..." : `Adicionar ${tabConfig.itemLabel}`}
           </button>
