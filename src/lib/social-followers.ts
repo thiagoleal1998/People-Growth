@@ -23,13 +23,19 @@ export type SocialAccountForFetch = {
 async function fetchYouTube(account: SocialAccountForFetch): Promise<FollowerFetchResult> {
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey) return { ok: false, error: "YOUTUBE_API_KEY não configurada." };
-  if (!account.external_id) return { ok: false, error: "Falta o Channel ID (ID externo) nesta conta." };
 
-  const res = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&id=${encodeURIComponent(account.external_id)}&key=${apiKey}`);
+  // Channel ID (external_id) if the admin gave one — otherwise the API can
+  // look the channel up directly by its @handle (forHandle), no need to
+  // dig up the internal ID first.
+  const lookupParam = account.external_id
+    ? `id=${encodeURIComponent(account.external_id)}`
+    : `forHandle=${encodeURIComponent(account.handle.startsWith("@") ? account.handle : `@${account.handle}`)}`;
+
+  const res = await fetch(`https://www.googleapis.com/youtube/v3/channels?part=statistics&${lookupParam}&key=${apiKey}`);
   if (!res.ok) return { ok: false, error: `YouTube API respondeu ${res.status}.` };
   const json = (await res.json()) as { items?: { statistics?: { subscriberCount?: string } }[] };
   const raw = json.items?.[0]?.statistics?.subscriberCount;
-  if (!raw) return { ok: false, error: "Canal não encontrado ou sem estatística pública." };
+  if (!raw) return { ok: false, error: "Canal não encontrado pelo handle — confira o handle ou informe o Channel ID no campo \"ID externo\"." };
   return { ok: true, count: Number(raw), source: "api" };
 }
 

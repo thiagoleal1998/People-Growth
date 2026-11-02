@@ -333,7 +333,7 @@ function NewAccountForm({ onCreated }: { onCreated: () => void }) {
       <Field label="Handle" hint="Sem @ — ex: grupofestina">
         <Input value={handle} onChange={(e) => setHandle(e.target.value)} />
       </Field>
-      <Field label="ID externo (opcional)" hint={platform === "youtube" ? "Channel ID (YouTube Studio → Configurações → Canal → Avançado)." : platform === "instagram" ? "ID da conta Business do Instagram." : "Só necessário pra YouTube/Instagram."}>
+      <Field label="ID externo (opcional)" hint={platform === "youtube" ? "Não precisa — o handle acima já basta. Só preencha se a busca pelo handle falhar (Channel ID, em YouTube Studio → Configurações → Canal → Avançado)." : platform === "instagram" ? "ID da conta Business do Instagram — pode deixar em branco se for a mesma conta configurada em INSTAGRAM_USER_ID." : "Não usado nesta rede."}>
         <Input value={externalId} onChange={(e) => setExternalId(e.target.value)} />
       </Field>
       {error && <div style={{ color: "#dc2626", fontSize: "0.8125rem", marginBottom: "0.75rem" }}>{error}</div>}
