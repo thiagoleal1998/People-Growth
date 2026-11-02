@@ -457,7 +457,7 @@ type ContentCalendarItemRow = {
   type: "social_post" | "article_topic";
   title: string;
   notes: string | null;
-  platform: "instagram" | "linkedin" | "whatsapp" | "live" | "other" | null;
+  platform: "instagram" | "linkedin" | "whatsapp" | "tiktok" | "youtube" | "x" | "live" | "other" | null;
   responsible: string | null;
   scheduled_date: string;
   status: "planned" | "in_progress" | "done";

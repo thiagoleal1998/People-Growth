@@ -9,6 +9,9 @@ const platforms: { value: NonNullable<ContentCalendarItem["platform"]>; label: s
   { value: "instagram", label: "Instagram" },
   { value: "linkedin", label: "LinkedIn" },
   { value: "whatsapp", label: "WhatsApp" },
+  { value: "tiktok", label: "TikTok" },
+  { value: "youtube", label: "YouTube" },
+  { value: "x", label: "X" },
   { value: "live", label: "Live" },
   { value: "other", label: "Outro" },
 ];

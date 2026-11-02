@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Plus, Instagram, Linkedin, MessageCircle, Radio, Share2 } from "lucide-react";
+import { Plus, Instagram, Linkedin, MessageCircle, Music2, Youtube, X as XIcon, Radio, Share2 } from "lucide-react";
 import { WEEKDAYS_PT, type CalendarCell } from "@/lib/calendar-grid";
 import type { Article, ContentCalendarItem } from "@/types/database.types";
 
@@ -9,16 +9,23 @@ const PLATFORM_LABEL: Record<NonNullable<ContentCalendarItem["platform"]>, strin
   instagram: "Instagram",
   linkedin: "LinkedIn",
   whatsapp: "WhatsApp",
+  tiktok: "TikTok",
+  youtube: "YouTube",
+  x: "X",
   live: "Live",
   other: "Outro",
 };
 
-// Lucide doesn't ship a WhatsApp mark, so that one falls back to a generic
-// chat bubble — every other platform here has its real brand icon.
+// Lucide doesn't ship WhatsApp or TikTok marks, so those fall back to a
+// generic chat bubble / music note — every other platform here has its
+// real brand icon.
 const PLATFORM_ICON: Record<NonNullable<ContentCalendarItem["platform"]>, typeof Instagram> = {
   instagram: Instagram,
   linkedin: Linkedin,
   whatsapp: MessageCircle,
+  tiktok: Music2,
+  youtube: Youtube,
+  x: XIcon,
   live: Radio,
   other: Share2,
 };
