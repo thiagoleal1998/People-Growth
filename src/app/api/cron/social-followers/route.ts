@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: accountsError.message }, { status: 500 });
   }
 
-  const accounts = (accountsData ?? []) as { id: string; platform: "instagram" | "youtube" | "tiktok" | "x"; handle: string; external_id: string | null; profile_url: string | null }[];
+  const accounts = (accountsData ?? []) as { id: string; platform: "instagram" | "youtube" | "tiktok" | "x" | "linkedin" | "whatsapp"; handle: string; external_id: string | null; profile_url: string | null }[];
   let updated = 0;
   const errors: string[] = [];
 

@@ -513,7 +513,7 @@ type MessageRow = {
 
 type SocialAccountRow = {
   id: string;
-  platform: "instagram" | "youtube" | "tiktok" | "x";
+  platform: "instagram" | "youtube" | "tiktok" | "x" | "linkedin" | "whatsapp";
   handle: string;
   display_name: string | null;
   external_id: string | null;

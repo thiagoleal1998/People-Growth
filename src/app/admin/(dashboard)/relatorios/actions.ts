@@ -14,7 +14,7 @@ function revalidatePlanos() {
 // ===== Contas monitoradas =====
 
 export async function createSocialAccount(input: {
-  platform: "instagram" | "youtube" | "tiktok" | "x";
+  platform: "instagram" | "youtube" | "tiktok" | "x" | "linkedin" | "whatsapp";
   handle: string;
   displayName?: string;
   externalId?: string;

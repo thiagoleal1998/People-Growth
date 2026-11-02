@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { Instagram, Youtube, Music2, X as XIcon, Plus, RefreshCw } from "lucide-react";
+import { Instagram, Youtube, Music2, X as XIcon, Linkedin, MessageCircle, Plus, RefreshCw } from "lucide-react";
 import { SectionCard, Field, Input, Select, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
 import { createGoal, updateGoal, deleteGoal, updateGoalStatus, createSocialAccount, updateSocialAccount, deleteSocialAccount, fetchAccountNow, setManualFollowerCount } from "./actions";
 import type { Goal, SocialAccount } from "@/types/database.types";
@@ -36,6 +36,8 @@ const PLATFORM_LABELS: Record<SocialAccount["platform"], string> = {
   youtube: "YouTube",
   tiktok: "TikTok",
   x: "X",
+  linkedin: "LinkedIn",
+  whatsapp: "Canal do WhatsApp",
 };
 
 // Same icon choices already used for these platforms in CalendarGrid.tsx —
@@ -45,6 +47,8 @@ const PLATFORM_ICON: Record<SocialAccount["platform"], typeof Instagram> = {
   youtube: Youtube,
   tiktok: Music2,
   x: XIcon,
+  linkedin: Linkedin,
+  whatsapp: MessageCircle,
 };
 
 const SOURCE_LABELS: Record<"api" | "scrape" | "manual", string> = { api: "via API", scrape: "via scrape", manual: "manual" };
@@ -468,7 +472,16 @@ function NewAccountForm({ onCreated }: { onCreated: () => void }) {
       <Field label="URL do perfil (opcional)" hint={platform === "youtube" ? "Cole o link exato do canal se a busca pelo handle não achar (ex: canais com URL antiga /c/... ou /user/...)." : "Só pra referência — não usado na busca automática."}>
         <Input value={profileUrl} onChange={(e) => setProfileUrl(e.target.value)} placeholder="https://..." />
       </Field>
-      <Field label="ID externo (opcional)" hint={platform === "youtube" ? "Não precisa — a busca já funciona só com o handle, sem chave nenhuma (número aproximado; pra número exato, Channel ID aqui + YOUTUBE_API_KEY)." : platform === "instagram" ? "Instagram bloqueia a leitura automática sem login — só funciona com a API oficial do Meta (ID da conta Business aqui) ou entrada manual." : platform === "tiktok" ? "TikTok bloqueia a leitura automática — use a entrada manual abaixo." : "X/Twitter bloqueia a leitura sem login — use a entrada manual abaixo."}>
+      <Field
+        label="ID externo (opcional)"
+        hint={
+          platform === "youtube"
+            ? "Não precisa — a busca já funciona só com o handle, sem chave nenhuma (número aproximado; pra número exato, Channel ID aqui + YOUTUBE_API_KEY)."
+            : platform === "instagram"
+              ? "Instagram bloqueia a leitura automática sem login — só funciona com a API oficial do Meta (ID da conta Business aqui) ou entrada manual."
+              : "Sem leitura automática pra essa rede — use a entrada manual abaixo."
+        }
+      >
         <Input value={externalId} onChange={(e) => setExternalId(e.target.value)} />
       </Field>
       {error && <div style={{ color: "#dc2626", fontSize: "0.8125rem", marginBottom: "0.75rem" }}>{error}</div>}

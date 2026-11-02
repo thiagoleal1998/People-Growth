@@ -30,7 +30,7 @@
 export type FollowerFetchResult = { ok: true; count: number; source: "api" | "scrape" } | { ok: false; error: string };
 
 export type SocialAccountForFetch = {
-  platform: "instagram" | "youtube" | "tiktok" | "x";
+  platform: "instagram" | "youtube" | "tiktok" | "x" | "linkedin" | "whatsapp";
   handle: string;
   external_id: string | null;
   profile_url: string | null;
@@ -111,11 +111,21 @@ async function fetchX(): Promise<FollowerFetchResult> {
   return { ok: false, error: "X/Twitter recusa a leitura sem login (e a API exige plano pago) — use a entrada manual." };
 }
 
+async function fetchLinkedIn(): Promise<FollowerFetchResult> {
+  return { ok: false, error: "LinkedIn exige um app aprovado pela própria LinkedIn pra ler seguidores de página — use a entrada manual." };
+}
+
+async function fetchWhatsApp(): Promise<FollowerFetchResult> {
+  return { ok: false, error: "Canal do WhatsApp não tem API pública de inscritos — use a entrada manual." };
+}
+
 const FETCHERS: Record<SocialAccountForFetch["platform"], (account: SocialAccountForFetch) => Promise<FollowerFetchResult>> = {
   youtube: fetchYouTube,
   instagram: fetchInstagram,
   tiktok: fetchTikTok,
   x: fetchX,
+  linkedin: fetchLinkedIn,
+  whatsapp: fetchWhatsApp,
 };
 
 export async function fetchFollowerCount(account: SocialAccountForFetch): Promise<FollowerFetchResult> {
