@@ -285,6 +285,7 @@ function AccountRow({ account, onLocalUpdate, onDeleted, onChanged }: { account:
   const [handle, setHandle] = useState(account.handle);
   const [displayName, setDisplayName] = useState(account.display_name ?? "");
   const [externalId, setExternalId] = useState(account.external_id ?? "");
+  const [profileUrl, setProfileUrl] = useState(account.profile_url ?? "");
   const [savingEdit, startSavingEdit] = useTransition();
   const [editError, setEditError] = useState<string | null>(null);
   const Icon = PLATFORM_ICON[account.platform];
@@ -293,7 +294,7 @@ function AccountRow({ account, onLocalUpdate, onDeleted, onChanged }: { account:
     setEditError(null);
     startSavingEdit(async () => {
       try {
-        await updateSocialAccount(account.id, { handle, displayName, externalId, isActive: account.is_active });
+        await updateSocialAccount(account.id, { handle, displayName, externalId, profileUrl, isActive: account.is_active });
         onChanged();
       } catch (err) {
         setEditError(err instanceof Error ? err.message : "Erro ao salvar.");
@@ -344,6 +345,10 @@ function AccountRow({ account, onLocalUpdate, onDeleted, onChanged }: { account:
           <div style={{ minWidth: "140px" }}>
             <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-text-secondary)", marginBottom: "0.25rem" }}>ID externo</label>
             <Input value={externalId} onChange={(e) => setExternalId(e.target.value)} style={{ padding: "0.375rem 0.625rem", fontSize: "0.8125rem" }} />
+          </div>
+          <div style={{ minWidth: "220px", flex: 1 }}>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-text-secondary)", marginBottom: "0.25rem" }}>URL do perfil</label>
+            <Input value={profileUrl} onChange={(e) => setProfileUrl(e.target.value)} placeholder="https://..." style={{ padding: "0.375rem 0.625rem", fontSize: "0.8125rem" }} />
           </div>
           <button type="button" disabled={savingEdit} onClick={handleSaveEdit} style={{ backgroundColor: "#315E9C", color: "white", padding: "0.4rem 0.875rem", borderRadius: "0.375rem", fontWeight: 700, fontSize: "0.8125rem", border: "none", cursor: savingEdit ? "default" : "pointer", opacity: savingEdit ? 0.6 : 1 }}>
             {savingEdit ? "Salvando..." : "Salvar"}
@@ -429,6 +434,7 @@ function NewAccountForm({ onCreated }: { onCreated: () => void }) {
   const [platform, setPlatform] = useState<SocialAccount["platform"]>("instagram");
   const [handle, setHandle] = useState("");
   const [externalId, setExternalId] = useState("");
+  const [profileUrl, setProfileUrl] = useState("");
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
 
@@ -436,9 +442,10 @@ function NewAccountForm({ onCreated }: { onCreated: () => void }) {
     setError(null);
     startTransition(async () => {
       try {
-        await createSocialAccount({ platform, handle, externalId: externalId || undefined });
+        await createSocialAccount({ platform, handle, externalId: externalId || undefined, profileUrl: profileUrl || undefined });
         setHandle("");
         setExternalId("");
+        setProfileUrl("");
         onCreated();
       } catch (err) {
         setError(err instanceof Error ? err.message : "Erro ao salvar.");
@@ -457,6 +464,9 @@ function NewAccountForm({ onCreated }: { onCreated: () => void }) {
       </Field>
       <Field label="Handle" hint="Sem @ — ex: grupofestina">
         <Input value={handle} onChange={(e) => setHandle(e.target.value)} />
+      </Field>
+      <Field label="URL do perfil (opcional)" hint={platform === "youtube" ? "Cole o link exato do canal se a busca pelo handle não achar (ex: canais com URL antiga /c/... ou /user/...)." : "Só pra referência — não usado na busca automática."}>
+        <Input value={profileUrl} onChange={(e) => setProfileUrl(e.target.value)} placeholder="https://..." />
       </Field>
       <Field label="ID externo (opcional)" hint={platform === "youtube" ? "Não precisa — a busca já funciona só com o handle, sem chave nenhuma (número aproximado; pra número exato, Channel ID aqui + YOUTUBE_API_KEY)." : platform === "instagram" ? "Instagram bloqueia a leitura automática sem login — só funciona com a API oficial do Meta (ID da conta Business aqui) ou entrada manual." : platform === "tiktok" ? "TikTok bloqueia a leitura automática — use a entrada manual abaixo." : "X/Twitter bloqueia a leitura sem login — use a entrada manual abaixo."}>
         <Input value={externalId} onChange={(e) => setExternalId(e.target.value)} />

@@ -80,7 +80,7 @@ export async function fetchAccountNow(accountId: string): Promise<FollowerFetchR
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const { data: account } = await client.from("social_accounts").select("id, platform, handle, external_id").eq("id", accountId).single();
+  const { data: account } = await client.from("social_accounts").select("id, platform, handle, external_id, profile_url").eq("id", accountId).single();
   if (!account) return { ok: false, error: "Conta não encontrada." };
 
   const result = await fetchAndRecordAccount(client, account);

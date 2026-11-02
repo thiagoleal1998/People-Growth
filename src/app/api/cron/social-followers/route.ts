@@ -18,13 +18,13 @@ export async function GET(request: NextRequest) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = admin as any;
 
-  const { data: accountsData, error: accountsError } = await client.from("social_accounts").select("id, platform, handle, external_id").eq("is_active", true);
+  const { data: accountsData, error: accountsError } = await client.from("social_accounts").select("id, platform, handle, external_id, profile_url").eq("is_active", true);
   if (accountsError) {
     console.error("[social-followers] failed to load accounts:", accountsError.message);
     return NextResponse.json({ error: accountsError.message }, { status: 500 });
   }
 
-  const accounts = (accountsData ?? []) as { id: string; platform: "instagram" | "youtube" | "tiktok" | "x"; handle: string; external_id: string | null }[];
+  const accounts = (accountsData ?? []) as { id: string; platform: "instagram" | "youtube" | "tiktok" | "x"; handle: string; external_id: string | null; profile_url: string | null }[];
   let updated = 0;
   const errors: string[] = [];
 

@@ -33,6 +33,7 @@ export type SocialAccountForFetch = {
   platform: "instagram" | "youtube" | "tiktok" | "x";
   handle: string;
   external_id: string | null;
+  profile_url: string | null;
 };
 
 const BROWSER_HEADERS = {
@@ -51,10 +52,13 @@ function parseAbbreviatedCount(text: string): number | null {
   return Math.round(num * mult);
 }
 
-async function scrapeYouTube(handle: string): Promise<FollowerFetchResult> {
-  const h = handle.startsWith("@") ? handle : `@${handle}`;
-  const res = await fetch(`https://www.youtube.com/${encodeURIComponent(h)}`, { headers: BROWSER_HEADERS });
-  if (!res.ok) return { ok: false, error: `YouTube respondeu ${res.status} ao abrir o canal — confira o handle.` };
+// Prefers the admin's own pasted profile_url when given (handles legacy
+// /c/ and /user/ channel URLs, or just a handle guessed wrong) — only
+// falls back to guessing a "/@handle" URL when no URL was provided.
+async function scrapeYouTube(handle: string, profileUrl: string | null): Promise<FollowerFetchResult> {
+  const url = profileUrl || `https://www.youtube.com/${encodeURIComponent(handle.startsWith("@") ? handle : `@${handle}`)}`;
+  const res = await fetch(url, { headers: BROWSER_HEADERS });
+  if (!res.ok) return { ok: false, error: `YouTube respondeu ${res.status} ao abrir ${profileUrl ? "a URL do perfil" : "o canal pelo handle"} — confira.` };
   const html = await res.text();
   const match = html.match(/"subscriberCountText":\{"accessibility":\{"accessibilityData":\{"label":"[^"]*"\}\},"simpleText":"([^"]+)"/);
   if (!match) return { ok: false, error: "Não encontrei o número de inscritos na página do canal — handle errado ou o YouTube mudou a página." };
@@ -82,7 +86,7 @@ async function fetchYouTube(account: SocialAccountForFetch): Promise<FollowerFet
     // bad/over-quota key shouldn't lose the reading entirely when the
     // free scrape path can still get an approximate one.
   }
-  return scrapeYouTube(account.handle);
+  return scrapeYouTube(account.handle, account.profile_url);
 }
 
 async function fetchInstagram(account: SocialAccountForFetch): Promise<FollowerFetchResult> {
