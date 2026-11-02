@@ -220,7 +220,7 @@ export default async function ArticlePage({
     image: article.cover_image ? [article.cover_image] : undefined,
     datePublished: article.published_at ?? article.created_at,
     dateModified: article.updated_at ?? article.published_at ?? article.created_at,
-    columnist: allColumnists.length > 0 ? allColumnists.map((a) => ({ "@type": "Person", name: a.name, url: `${siteUrl}/conteudo/colunista/${a.slug}` })) : undefined,
+    author: allColumnists.length > 0 ? allColumnists.map((a) => ({ "@type": "Person", name: a.name, url: `${siteUrl}/conteudo/colunista/${a.slug}` })) : undefined,
     publisher: {
       "@type": "Organization",
       name: "Festina",
