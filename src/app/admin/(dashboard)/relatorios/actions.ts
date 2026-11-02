@@ -146,6 +146,37 @@ export async function createGoal(input: {
   revalidatePlanos();
 }
 
+export async function updateGoal(
+  id: string,
+  input: { title: string; metric: Goal["metric"]; socialAccountId?: string; targetValue: number; targetDate: string; notes?: string }
+): Promise<void> {
+  if (!input.title.trim()) throw new Error("Preencha o título.");
+  if (!Number.isFinite(input.targetValue) || input.targetValue <= 0) throw new Error("Valor alvo inválido.");
+  if (input.metric === "social_followers" && !input.socialAccountId) throw new Error("Selecione a conta de rede social.");
+
+  const actor = await getCurrentProfile();
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+
+  const { error } = await client
+    .from("goals")
+    .update({
+      title: input.title.trim(),
+      metric: input.metric,
+      social_account_id: input.metric === "social_followers" ? input.socialAccountId : null,
+      target_value: input.targetValue,
+      target_date: input.targetDate,
+      notes: input.notes?.trim() || null,
+      updated_at: new Date().toISOString(),
+    })
+    .eq("id", id);
+  if (error) throw new Error(error.message);
+
+  if (actor) await logActivity({ userId: actor.id, userEmail: actor.email, action: "update", entityType: "meta", entityLabel: input.title });
+  revalidatePlanos();
+}
+
 export async function updateGoalStatus(id: string, status: Goal["status"], title: string): Promise<void> {
   const actor = await getCurrentProfile();
   const supabase = await createClient();

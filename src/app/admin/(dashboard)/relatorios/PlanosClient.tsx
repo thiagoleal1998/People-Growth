@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { Instagram, Youtube, Music2, X as XIcon, Plus, RefreshCw } from "lucide-react";
 import { SectionCard, Field, Input, Select, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
-import { createGoal, deleteGoal, updateGoalStatus, createSocialAccount, deleteSocialAccount, fetchAccountNow, setManualFollowerCount } from "./actions";
+import { createGoal, updateGoal, deleteGoal, updateGoalStatus, createSocialAccount, updateSocialAccount, deleteSocialAccount, fetchAccountNow, setManualFollowerCount } from "./actions";
 import type { Goal, SocialAccount } from "@/types/database.types";
 
 export type GoalWithProgress = Goal & {
@@ -71,14 +71,87 @@ function formatDelta(delta: number | null, label: string): string {
   return `${sign}${delta.toLocaleString("pt-BR")} ${label}`;
 }
 
-function GoalCard({ goal, onChanged }: { goal: GoalWithProgress; onChanged: () => void }) {
+function GoalCard({ goal, accounts, onChanged }: { goal: GoalWithProgress; accounts: AccountWithHistory[]; onChanged: () => void }) {
   const [pending, startTransition] = useTransition();
+  const [editing, setEditing] = useState(false);
+  const [title, setTitle] = useState(goal.title);
+  const [metric, setMetric] = useState(goal.metric);
+  const [socialAccountId, setSocialAccountId] = useState(goal.social_account_id ?? accounts[0]?.id ?? "");
+  const [targetValue, setTargetValue] = useState(String(goal.target_value));
+  const [targetDate, setTargetDate] = useState(goal.target_date);
+  const [notes, setNotes] = useState(goal.notes ?? "");
+  const [saving, startSaving] = useTransition();
+  const [error, setError] = useState<string | null>(null);
+
   const badge =
     goal.onTrack === "achieved"
       ? { tone: "success" as const, label: "Atingida" }
       : goal.onTrack === "on_track"
         ? { tone: "neutral" as const, label: "No caminho" }
         : { tone: "warning" as const, label: "Atrás do previsto" };
+
+  function handleSave() {
+    setError(null);
+    startSaving(async () => {
+      try {
+        await updateGoal(goal.id, {
+          title,
+          metric,
+          socialAccountId: metric === "social_followers" ? socialAccountId : undefined,
+          targetValue: Number(targetValue),
+          targetDate,
+          notes,
+        });
+        onChanged();
+      } catch (err) {
+        setError(err instanceof Error ? err.message : "Erro ao salvar.");
+      }
+    });
+  }
+
+  if (editing) {
+    return (
+      <div style={{ border: "1px solid var(--admin-border)", borderRadius: "0.75rem", padding: "1.25rem" }}>
+        <Field label="Título">
+          <Input value={title} onChange={(e) => setTitle(e.target.value)} />
+        </Field>
+        <Field label="Métrica">
+          <Select value={metric} onChange={(e) => setMetric(e.target.value as Goal["metric"])}>
+            {Object.entries(METRIC_LABELS).map(([key, label]) => (
+              <option key={key} value={key}>{label}</option>
+            ))}
+          </Select>
+        </Field>
+        {metric === "social_followers" && (
+          <Field label="Conta">
+            <Select value={socialAccountId} onChange={(e) => setSocialAccountId(e.target.value)}>
+              {accounts.map((a) => (
+                <option key={a.id} value={a.id}>{PLATFORM_LABELS[a.platform]} · {a.display_name || a.handle}</option>
+              ))}
+            </Select>
+          </Field>
+        )}
+        <Field label="Valor alvo">
+          <Input type="number" min={1} value={targetValue} onChange={(e) => setTargetValue(e.target.value)} />
+        </Field>
+        <Field label="Prazo">
+          <Input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)} />
+        </Field>
+        <Field label="Notas (opcional)">
+          <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
+        </Field>
+        {error && <div style={{ color: "#dc2626", fontSize: "0.8125rem", marginBottom: "0.75rem" }}>{error}</div>}
+        <div style={{ display: "flex", gap: "0.5rem" }}>
+          <button type="button" disabled={saving} onClick={handleSave} style={{ backgroundColor: "#315E9C", color: "white", padding: "0.4rem 0.875rem", borderRadius: "0.375rem", fontWeight: 700, fontSize: "0.8125rem", border: "none", cursor: saving ? "default" : "pointer", opacity: saving ? 0.6 : 1 }}>
+            {saving ? "Salvando..." : "Salvar"}
+          </button>
+          <button type="button" onClick={() => setEditing(false)} style={{ backgroundColor: "var(--admin-surface-alt)", color: "var(--admin-text)", padding: "0.4rem 0.875rem", borderRadius: "0.375rem", fontWeight: 700, fontSize: "0.8125rem", border: "1px solid var(--admin-border-strong)", cursor: "pointer" }}>
+            Cancelar
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ border: "1px solid var(--admin-border)", borderRadius: "0.75rem", padding: "1.25rem" }}>
@@ -92,6 +165,9 @@ function GoalCard({ goal, onChanged }: { goal: GoalWithProgress; onChanged: () =
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexShrink: 0 }}>
           <Badge tone={badge.tone}>{badge.label}</Badge>
+          <button type="button" onClick={() => setEditing(true)} style={{ padding: "0.25rem", background: "none", border: "none", color: "var(--admin-muted)", cursor: "pointer", fontSize: "0.8125rem", fontWeight: 700 }}>
+            Editar
+          </button>
           <ConfirmDeleteButton confirmText={`Excluir a meta "${goal.title}"?`} onDelete={() => deleteGoal(goal.id, goal.title).then(onChanged)} />
         </div>
       </div>
@@ -200,12 +276,30 @@ function NewGoalForm({ accounts, onCreated }: { accounts: AccountWithHistory[]; 
   );
 }
 
-function AccountRow({ account, onLocalUpdate, onDeleted }: { account: AccountWithHistory; onLocalUpdate: (next: Partial<AccountWithHistory>) => void; onDeleted: () => void }) {
+function AccountRow({ account, onLocalUpdate, onDeleted, onChanged }: { account: AccountWithHistory; onLocalUpdate: (next: Partial<AccountWithHistory>) => void; onDeleted: () => void; onChanged: () => void }) {
   const [fetching, startFetching] = useTransition();
   const [manualValue, setManualValue] = useState("");
   const [savingManual, startManual] = useTransition();
   const [rowError, setRowError] = useState<string | null>(null);
+  const [editing, setEditing] = useState(false);
+  const [handle, setHandle] = useState(account.handle);
+  const [displayName, setDisplayName] = useState(account.display_name ?? "");
+  const [externalId, setExternalId] = useState(account.external_id ?? "");
+  const [savingEdit, startSavingEdit] = useTransition();
+  const [editError, setEditError] = useState<string | null>(null);
   const Icon = PLATFORM_ICON[account.platform];
+
+  function handleSaveEdit() {
+    setEditError(null);
+    startSavingEdit(async () => {
+      try {
+        await updateSocialAccount(account.id, { handle, displayName, externalId, isActive: account.is_active });
+        onChanged();
+      } catch (err) {
+        setEditError(err instanceof Error ? err.message : "Erro ao salvar.");
+      }
+    });
+  }
 
   function handleFetchNow() {
     setRowError(null);
@@ -233,6 +327,34 @@ function AccountRow({ account, onLocalUpdate, onDeleted }: { account: AccountWit
         setRowError(err instanceof Error ? err.message : "Erro ao salvar.");
       }
     });
+  }
+
+  if (editing) {
+    return (
+      <div style={{ padding: "1rem 1.25rem", borderTop: "1px solid var(--admin-border)" }}>
+        <div style={{ display: "flex", gap: "0.625rem", flexWrap: "wrap", alignItems: "flex-end" }}>
+          <div style={{ minWidth: "140px" }}>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-text-secondary)", marginBottom: "0.25rem" }}>Handle</label>
+            <Input value={handle} onChange={(e) => setHandle(e.target.value)} style={{ padding: "0.375rem 0.625rem", fontSize: "0.8125rem" }} />
+          </div>
+          <div style={{ minWidth: "160px" }}>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-text-secondary)", marginBottom: "0.25rem" }}>Nome de exibição</label>
+            <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} style={{ padding: "0.375rem 0.625rem", fontSize: "0.8125rem" }} />
+          </div>
+          <div style={{ minWidth: "140px" }}>
+            <label style={{ display: "block", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-text-secondary)", marginBottom: "0.25rem" }}>ID externo</label>
+            <Input value={externalId} onChange={(e) => setExternalId(e.target.value)} style={{ padding: "0.375rem 0.625rem", fontSize: "0.8125rem" }} />
+          </div>
+          <button type="button" disabled={savingEdit} onClick={handleSaveEdit} style={{ backgroundColor: "#315E9C", color: "white", padding: "0.4rem 0.875rem", borderRadius: "0.375rem", fontWeight: 700, fontSize: "0.8125rem", border: "none", cursor: savingEdit ? "default" : "pointer", opacity: savingEdit ? 0.6 : 1 }}>
+            {savingEdit ? "Salvando..." : "Salvar"}
+          </button>
+          <button type="button" onClick={() => setEditing(false)} style={{ backgroundColor: "var(--admin-surface-alt)", color: "var(--admin-text)", padding: "0.4rem 0.875rem", borderRadius: "0.375rem", fontWeight: 700, fontSize: "0.8125rem", border: "1px solid var(--admin-border-strong)", cursor: "pointer" }}>
+            Cancelar
+          </button>
+        </div>
+        {editError && <div style={{ color: "#dc2626", fontSize: "0.75rem", marginTop: "0.5rem" }}>{editError}</div>}
+      </div>
+    );
   }
 
   return (
@@ -268,6 +390,9 @@ function AccountRow({ account, onLocalUpdate, onDeleted }: { account: AccountWit
           style={{ display: "flex", alignItems: "center", gap: "0.375rem", padding: "0.4rem 0.75rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border-strong)", backgroundColor: "var(--admin-surface-alt)", color: "var(--admin-text)", fontSize: "0.8125rem", fontWeight: 700, cursor: fetching ? "default" : "pointer", flexShrink: 0 }}
         >
           <RefreshCw size={13} className={fetching ? "admin-spin" : undefined} /> Buscar agora
+        </button>
+        <button type="button" onClick={() => setEditing(true)} style={{ padding: "0.4rem 0.75rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border-strong)", backgroundColor: "var(--admin-surface-alt)", color: "var(--admin-text)", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer", flexShrink: 0 }}>
+          Editar
         </button>
         <ConfirmDeleteButton confirmText={`Remover a conta "${account.handle}"?`} onDelete={() => deleteSocialAccount(account.id, account.handle).then(onDeleted)} />
       </div>
@@ -377,7 +502,7 @@ export function PlanosClient({ goals: initialGoals, accounts: initialAccounts }:
             {goals.length === 0 ? (
               <div style={{ padding: "2rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.875rem", border: "1px dashed var(--admin-border)", borderRadius: "0.75rem" }}>Nenhuma meta cadastrada ainda.</div>
             ) : (
-              goals.map((g) => <GoalCard key={g.id} goal={g} onChanged={reloadFromServer} />)
+              goals.map((g) => <GoalCard key={g.id} goal={g} accounts={accounts} onChanged={reloadFromServer} />)
             )}
           </div>
         </div>
@@ -397,6 +522,7 @@ export function PlanosClient({ goals: initialGoals, accounts: initialAccounts }:
                   account={a}
                   onLocalUpdate={(patch) => updateAccountLocal(a.id, patch)}
                   onDeleted={() => setAccounts((prev) => prev.filter((x) => x.id !== a.id))}
+                  onChanged={reloadFromServer}
                 />
               ))
             )}
