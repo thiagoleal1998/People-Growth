@@ -51,7 +51,7 @@ export async function GoalsSummaryWidget() {
             <div key={g.id} style={{ border: "1px solid var(--admin-border)", borderRadius: "0.75rem", padding: "1rem" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.5rem", marginBottom: "0.5rem" }}>
                 <div style={{ minWidth: 0 }}>
-                  <div style={{ fontWeight: 800, fontSize: "0.875rem", color: "var(--admin-text)", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{g.title}</div>
+                  <div style={{ fontWeight: 800, fontSize: "0.875rem", color: "var(--admin-text)", overflowWrap: "anywhere" }}>{g.title}</div>
                   <div style={{ fontSize: "0.6875rem", color: "var(--admin-faint)" }}>{METRIC_LABELS[g.metric]}</div>
                 </div>
                 <Badge tone={badge.tone}>{badge.label}</Badge>
