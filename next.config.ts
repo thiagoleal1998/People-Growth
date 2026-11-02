@@ -17,6 +17,15 @@ const nextConfig: NextConfig = {
       bodySizeLimit: "6mb",
     },
   },
+  // @sparticuz/chromium ships its actual Chromium binary as a brotli-
+  // compressed file under bin/, extracted at runtime by its own
+  // executablePath() — Vercel's build-time file tracer doesn't follow that
+  // dynamic path on its own, so without this the bin/ folder silently
+  // doesn't make it into the deployed function and every Instagram fetch
+  // fails with "input directory .../bin does not exist" (confirmed live).
+  outputFileTracingIncludes: {
+    "/*": ["node_modules/@sparticuz/chromium/bin/**/*"],
+  },
   async redirects() {
     // The old "Mea Sententia" content section (news + opinion mixed together)
     // moved from /mea-sententia to /conteudo — categories and author archives
