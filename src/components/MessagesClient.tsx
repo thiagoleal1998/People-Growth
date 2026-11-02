@@ -1,12 +1,38 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Send, ArrowLeft, MessageSquarePlus, MessageSquare, Bold, Italic, Mic, Square, X } from "lucide-react";
+import { Send, ArrowLeft, MessageSquarePlus, MessageSquare, Bold, Italic, Mic, Square, X, Check, CheckCheck } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { sendMessage, markThreadRead } from "@/lib/messages-actions";
 import { renderChatText } from "@/lib/markdown-lite";
 import { alertDialog } from "@/components/admin/dialog-store";
 import type { Message } from "@/types/database.types";
+
+// Polling interval for the OPEN thread only (new messages + read receipts)
+// — this codebase has no realtime subscriptions set up anywhere yet, so
+// polling matches the one existing precedent (NotificationBell) instead of
+// introducing postgres_changes/replication as a first use case here.
+const THREAD_POLL_MS = 5000;
+// Typing indicator uses a Supabase Realtime Broadcast channel instead —
+// ephemeral pub/sub, no table/publication involved, so it doesn't add any
+// extra database load (a concern this project is already watching).
+const TYPING_CLEAR_MS = 3000;
+const TYPING_SEND_THROTTLE_MS = 1500;
+
+function formatMessageTime(iso: string): string {
+  return new Date(iso).toLocaleTimeString("pt-BR", { hour: "2-digit", minute: "2-digit" });
+}
+
+function formatDayLabel(iso: string): string {
+  const date = new Date(iso);
+  const today = new Date();
+  const yesterday = new Date();
+  yesterday.setDate(today.getDate() - 1);
+  const sameDay = (a: Date, b: Date) => a.toDateString() === b.toDateString();
+  if (sameDay(date, today)) return "Hoje";
+  if (sameDay(date, yesterday)) return "Ontem";
+  return date.toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
+}
 
 export type MessageRecipient = { id: string; name: string; role: "admin" | "columnist"; roleLabel: string; photoUrl?: string };
 
@@ -77,12 +103,17 @@ export function MessagesClient({
   const [recording, setRecording] = useState(false);
   const [recordSeconds, setRecordSeconds] = useState(0);
   const [uploadingAudio, setUploadingAudio] = useState(false);
+  const [otherTyping, setOtherTyping] = useState(false);
   const pendingContext = useRef(initialContext ?? null);
   const bottomRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const recordTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const typingChannelRef = useRef<any>(null);
+  const typingClearTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const typingSendAtRef = useRef(0);
 
   const recipientById = useMemo(() => new Map(recipients.map((r) => [r.id, r])), [recipients]);
   const selectedEntry = selectedId ? recipientById.get(selectedId) ?? conversations.find((c) => c.otherId === selectedId) : null;
@@ -95,22 +126,63 @@ export function MessagesClient({
   useEffect(() => {
     if (!selectedId) return;
     const supabase = createClient();
-    (async () => {
-      setLoadingThread(true);
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const client = supabase as any;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const client = supabase as any;
+    let cancelled = false;
+
+    async function load(first: boolean) {
+      if (first) setLoadingThread(true);
       const { data } = await client
         .from("messages")
         .select("*")
         .or(`and(sender_id.eq.${currentUserId},recipient_id.eq.${selectedId}),and(sender_id.eq.${selectedId},recipient_id.eq.${currentUserId})`)
         .order("created_at", { ascending: true })
         .limit(500);
+      if (cancelled) return;
       setThread((data ?? []) as Message[]);
-      setLoadingThread(false);
-      await markThreadRead(selectedId);
+      if (first) setLoadingThread(false);
+      await markThreadRead(selectedId!);
+      if (cancelled) return;
       setConversations((prev) => prev.map((c) => (c.otherId === selectedId ? { ...c, unread: 0 } : c)));
-    })();
+    }
+
+    load(true);
+    const interval = setInterval(() => load(false), THREAD_POLL_MS);
+    return () => {
+      cancelled = true;
+      clearInterval(interval);
+    };
   }, [selectedId, currentUserId]);
+
+  useEffect(() => {
+    if (!selectedId) return;
+    const supabase = createClient();
+    const pairKey = [currentUserId, selectedId].sort().join("-");
+    const channel = supabase.channel(`typing-${pairKey}`);
+    channel
+      .on("broadcast", { event: "typing" }, ({ payload }: { payload: { from: string } }) => {
+        if (payload?.from !== selectedId) return;
+        setOtherTyping(true);
+        if (typingClearTimeoutRef.current) clearTimeout(typingClearTimeoutRef.current);
+        typingClearTimeoutRef.current = setTimeout(() => setOtherTyping(false), TYPING_CLEAR_MS);
+      })
+      .subscribe();
+    typingChannelRef.current = channel;
+
+    return () => {
+      supabase.removeChannel(channel);
+      typingChannelRef.current = null;
+      setOtherTyping(false);
+      if (typingClearTimeoutRef.current) clearTimeout(typingClearTimeoutRef.current);
+    };
+  }, [selectedId, currentUserId]);
+
+  function notifyTyping() {
+    const now = Date.now();
+    if (now - typingSendAtRef.current < TYPING_SEND_THROTTLE_MS) return;
+    typingSendAtRef.current = now;
+    typingChannelRef.current?.send({ type: "broadcast", event: "typing", payload: { from: currentUserId } });
+  }
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ block: "end" });
@@ -357,7 +429,6 @@ export function MessagesClient({
                       </span>
                     )}
                   </div>
-                  <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.125rem" }}>{c.otherRoleLabel}</div>
                   <div style={{ fontSize: "0.8125rem", color: "var(--admin-text-secondary)", marginTop: "0.25rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{c.lastBody}</div>
                 </div>
               </div>
@@ -395,35 +466,53 @@ export function MessagesClient({
 
             <div style={{ flex: 1, overflowY: "auto", padding: "1rem", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
               {loadingThread ? null : (
-                thread.map((m) => {
+                thread.map((m, idx) => {
                   const mine = m.sender_id === currentUserId;
+                  const prev = thread[idx - 1];
+                  const showDateDivider = !prev || new Date(prev.created_at).toDateString() !== new Date(m.created_at).toDateString();
                   return (
-                    <div key={m.id} style={{ display: "flex", justifyContent: mine ? "flex-end" : "flex-start" }}>
-                      <div
-                        style={{
-                          maxWidth: "70%",
-                          backgroundColor: mine ? "#315E9C" : "var(--admin-border)",
-                          color: mine ? "white" : "var(--admin-text)",
-                          borderRadius: "0.75rem",
-                          padding: "0.625rem 0.875rem",
-                        }}
-                      >
-                        {m.context_title && (
-                          <div style={{ fontSize: "0.6875rem", fontWeight: 700, opacity: 0.8, marginBottom: "0.25rem" }}>
-                            Sobre: &ldquo;{m.context_title}&rdquo;
+                    <div key={m.id}>
+                      {showDateDivider && (
+                        <div style={{ textAlign: "center", margin: "0.25rem 0 0.75rem" }}>
+                          <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: "var(--admin-faint)", backgroundColor: "var(--admin-border)", padding: "0.25rem 0.75rem", borderRadius: "9999px" }}>
+                            {formatDayLabel(m.created_at)}
+                          </span>
+                        </div>
+                      )}
+                      <div style={{ display: "flex", justifyContent: mine ? "flex-end" : "flex-start" }}>
+                        <div
+                          style={{
+                            maxWidth: "70%",
+                            backgroundColor: mine ? "#315E9C" : "var(--admin-border)",
+                            color: mine ? "white" : "var(--admin-text)",
+                            borderRadius: "0.75rem",
+                            padding: "0.625rem 0.875rem",
+                          }}
+                        >
+                          {m.context_title && (
+                            <div style={{ fontSize: "0.6875rem", fontWeight: 700, opacity: 0.8, marginBottom: "0.25rem" }}>
+                              Sobre: &ldquo;{m.context_title}&rdquo;
+                            </div>
+                          )}
+                          {m.audio_url && <audio controls src={m.audio_url} style={{ maxWidth: "220px", height: "2.25rem" }} />}
+                          {m.body && (
+                            <div
+                              style={{ fontSize: "0.875rem", wordBreak: "break-word", marginTop: m.audio_url ? "0.375rem" : 0 }}
+                              dangerouslySetInnerHTML={{ __html: renderChatText(m.body) }}
+                            />
+                          )}
+                          <div style={{ display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "0.25rem", marginTop: "0.25rem", opacity: 0.75 }}>
+                            <span style={{ fontSize: "0.6875rem" }}>{formatMessageTime(m.created_at)}</span>
+                            {mine && (m.read_at ? <CheckCheck size={13} /> : <Check size={13} />)}
                           </div>
-                        )}
-                        {m.audio_url && <audio controls src={m.audio_url} style={{ maxWidth: "220px", height: "2.25rem" }} />}
-                        {m.body && (
-                          <div
-                            style={{ fontSize: "0.875rem", wordBreak: "break-word", marginTop: m.audio_url ? "0.375rem" : 0 }}
-                            dangerouslySetInnerHTML={{ __html: renderChatText(m.body) }}
-                          />
-                        )}
+                        </div>
                       </div>
                     </div>
                   );
                 })
+              )}
+              {otherTyping && (
+                <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", fontStyle: "italic", padding: "0 0.25rem" }}>{selected?.name} está digitando...</div>
               )}
               <div ref={bottomRef} />
             </div>
@@ -461,7 +550,10 @@ export function MessagesClient({
                     <textarea
                       ref={textareaRef}
                       value={text}
-                      onChange={(e) => setText(e.target.value)}
+                      onChange={(e) => {
+                        setText(e.target.value);
+                        notifyTyping();
+                      }}
                       onKeyDown={(e) => {
                         if (e.key === "Enter" && !e.shiftKey) {
                           e.preventDefault();
