@@ -43,13 +43,40 @@ const BROWSER_HEADERS = {
 };
 
 // "1.17M subscribers" / "30.5K subscribers" / "523 subscribers" — the exact
-// format YouTube's own page shows a logged-out visitor (confirmed live).
+// format YouTube's own page shows a logged-out visitor (confirmed live,
+// and consistently English regardless of request origin).
 function parseAbbreviatedCount(text: string): number | null {
   const match = text.match(/^([\d,.]+)\s*([KMB])?/i);
   if (!match) return null;
   const num = Number(match[1].replace(/,/g, ""));
   if (!Number.isFinite(num)) return null;
   const mult = { K: 1e3, M: 1e6, B: 1e9 }[match[2]?.toUpperCase() as "K" | "M" | "B"] ?? 1;
+  return Math.round(num * mult);
+}
+
+// Instagram's forced-English Accept-Language header isn't reliably honored
+// by a headless Chromium launched server-side the way it was in local
+// browser testing — confirmed live: the deployed scraper got back "65
+// seguidores" (pt-BR) even with the header set, because Instagram's
+// client-side React app can also read the browser's own locale instead of
+// just the request header. Rather than fight that, this parses both
+// languages directly. pt-BR and en-US swap which punctuation mark is the
+// decimal point vs. the thousands separator ("1.234" vs "1,234" for an
+// exact count; "1,2 mil" vs "1.2K" once abbreviated) — handled by only
+// ever reading separator-before-a-unit-word as a decimal point, and
+// stripping every separator otherwise (an exact follower count is always
+// a whole number, so any punctuation in it is a thousands grouping mark
+// no matter which locale rendered it).
+function parseSocialCount(text: string): number | null {
+  const match = text
+    .trim()
+    .match(/^([\d.,]+)\s*(mil|milh(?:[aã]o|oes|ões)|mi|k|m|b)?$/i);
+  if (!match) return null;
+  const unit = match[2]?.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "") ?? "";
+  const mult = unit === "k" ? 1e3 : unit === "m" || unit === "mi" ? 1e6 : unit === "b" ? 1e9 : unit === "mil" ? 1e3 : unit.startsWith("milh") ? 1e6 : 1;
+  const digits = mult > 1 ? match[1].replace(/[.,]/, ".") : match[1].replace(/[.,]/g, "");
+  const num = Number(digits);
+  if (!Number.isFinite(num)) return null;
   return Math.round(num * mult);
 }
 
@@ -123,11 +150,12 @@ async function fetchYouTube(account: SocialAccountForFetch): Promise<FollowerFet
 // Vercel serverless functions can actually run) — imported dynamically so
 // extracting/launching Chromium only happens for accounts that actually
 // need it (a batch run with only YouTube/other accounts never pays this
-// cost). Forcing an English locale/Accept-Language isn't just cosmetic:
-// Instagram's page otherwise renders "67 seguidores" (pt-BR, comma/period
-// swapped from English) for a visitor it geolocates to Brazil, which
-// parseAbbreviatedCount isn't built to read — confirmed English forces
-// "67 followers" reliably instead.
+// cost). The Accept-Language header is set as a best effort, but
+// confirmed live NOT reliably honored by headless Chromium here — the
+// deployed scraper still got "65 seguidores" (pt-BR) back — so the match
+// below accepts either language instead of depending on it working.
+const SOCIAL_COUNT_RE = /([\d.,]+\s*(?:mil|milh(?:[aã]o|oes|ões)|mi|[KMB])?)\s*(?:seguidores|followers)/i;
+
 async function scrapeInstagram(handle: string, profileUrl: string | null): Promise<FollowerFetchResult> {
   const url = profileUrl || `https://www.instagram.com/${encodeURIComponent(handle)}/`;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -142,9 +170,9 @@ async function scrapeInstagram(handle: string, profileUrl: string | null): Promi
     await page.waitForSelector("header", { timeout: 15000 }).catch(() => {});
     await new Promise((resolve) => setTimeout(resolve, 2000));
     const bodyText: string = await page.evaluate(() => document.body.innerText);
-    const match = bodyText.match(/([\d,.]+[KMB]?)\s*followers/i);
+    const match = bodyText.match(SOCIAL_COUNT_RE);
     if (!match) return { ok: false, error: "Não encontrei o número de seguidores na página — confira o handle/URL, ou o perfil pode estar privado." };
-    const count = parseAbbreviatedCount(match[1]);
+    const count = parseSocialCount(match[1]);
     if (count == null) return { ok: false, error: `Não consegui interpretar "${match[1]}".` };
     return { ok: true, count, source: "scrape" };
   } catch (err) {
