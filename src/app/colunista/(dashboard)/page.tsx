@@ -1,0 +1,305 @@
+import Link from "next/link";
+import { FileText, Eye, Clock, MessageCircle, Megaphone, Newspaper, Share2, Video, Instagram, Linkedin, Youtube } from "lucide-react";
+import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
+import { XIcon } from "@/components/icons/XIcon";
+import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/profile";
+import { toYouTubeEmbedUrl } from "@/lib/youtube";
+import { articlePath } from "@/lib/article-url";
+import type { Announcement, Article, Columnist, Category } from "@/types/database.types";
+
+function formatDate(iso: string) {
+  return new Date(iso).toLocaleDateString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit" });
+}
+
+const cardStyle = { backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", borderTop: "3px solid #315E9C", overflow: "hidden" } as const;
+const cardHeaderStyle = { padding: "1.25rem 1.5rem", borderBottom: "1px solid var(--admin-border-strong)", display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" } as const;
+
+export default async function ColumnistHomePage() {
+  const profile = await getCurrentProfile();
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+
+  const [{ data: ownArticlesData }, { data: announcementsData }, { data: newsData }, { data: columnistsData }, { data: categoriesData }, { data: configData }] = await Promise.all([
+    profile?.columnist_id ? client.from("articles").select("*").eq("columnist_id", profile.columnist_id) : Promise.resolve({ data: [] }),
+    client.from("announcements").select("*").order("created_at", { ascending: false }).limit(3),
+    client.from("articles").select("*").eq("status", "published").order("published_at", { ascending: false }).limit(6),
+    client.from("columnists").select("id, name"),
+    client.from("categories").select("id, slug"),
+    client.from("site_config").select("*"),
+  ]);
+
+  const ownArticles = (ownArticlesData ?? []) as Article[];
+  const announcements = (announcementsData ?? []) as Announcement[];
+  const news = (newsData ?? []) as Article[];
+
+  // Marking as read happens on the dedicated /colunista/comunicados page (see
+  // that page's own query) — this is read-only, just to know which of the
+  // 3 shown here are new so the card can stand out instead of blending in
+  // with "Nossas redes" next to it.
+  let unreadIds = new Set<string>();
+  if (profile?.id && announcements.length > 0) {
+    const { data: readRows } = await client
+      .from("announcement_reads")
+      .select("announcement_id")
+      .eq("user_id", profile.id)
+      .in("announcement_id", announcements.map((a) => a.id));
+    const readIds = new Set(((readRows ?? []) as { announcement_id: string }[]).map((r) => r.announcement_id));
+    unreadIds = new Set(announcements.filter((a) => !readIds.has(a.id)).map((a) => a.id));
+  }
+  const hasUnreadAnnouncements = unreadIds.size > 0;
+  const columnistNameById = new Map(((columnistsData ?? []) as Pick<Columnist, "id" | "name">[]).map((a) => [a.id, a.name]));
+  const categorySlugById = new Map(((categoriesData ?? []) as Pick<Category, "id" | "slug">[]).map((c) => [c.id, c.slug]));
+  const ownName = profile?.columnist_id ? columnistNameById.get(profile.columnist_id) : undefined;
+  const config = Object.fromEntries(((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""]));
+
+  let pendingComments = 0;
+  if (ownArticles.length > 0) {
+    const { count } = await client
+      .from("comments")
+      .select("id", { count: "exact", head: true })
+      .in("article_id", ownArticles.map((a) => a.id))
+      .eq("status", "pending");
+    pendingComments = count ?? 0;
+  }
+
+  const published = ownArticles.filter((a) => a.status === "published");
+  const totalViews = ownArticles.reduce((sum, a) => sum + a.views, 0);
+  const drafting = ownArticles.filter((a) => a.status === "draft" || a.status === "pending").length;
+
+  const stats = [
+    { label: "Artigos publicados", value: published.length, icon: FileText, color: "#315E9C" },
+    { label: "Visualizações totais", value: totalViews, icon: Eye, color: "#C89A4A" },
+    { label: "Rascunhos e pendentes", value: drafting, icon: Clock, color: "#FFB703" },
+    { label: "Comentários a revisar", value: pendingComments, icon: MessageCircle, color: "#315E9C" },
+  ];
+
+  // Only the channels actually configured in Configurações — no fabricated
+  // links for accounts that don't exist, same rule as the public SocialSidebar.
+  const socials = [
+    config.instagram && { label: "Instagram", href: config.instagram, Icon: Instagram, color: "#E1306C" },
+    config.linkedin && { label: "LinkedIn", href: config.linkedin, Icon: Linkedin, color: "#0A66C2" },
+    config.whatsapp && { label: "WhatsApp", href: `https://wa.me/${config.whatsapp.replace(/\D/g, "")}`, Icon: WhatsAppIcon, color: "#25D366" },
+    config.youtube && { label: "YouTube", href: config.youtube, Icon: Youtube, color: "#FF0000" },
+    config.x && { label: "X", href: config.x, Icon: XIcon, color: "#0d1b2a" },
+  ].filter((s): s is { label: string; href: string; Icon: typeof Instagram; color: string } => Boolean(s));
+
+  const featuredVideoUrl = config.featured_video_url ? toYouTubeEmbedUrl(config.featured_video_url) : "";
+  const shortsVideoUrl = config.shorts_video_url ? toYouTubeEmbedUrl(config.shorts_video_url) : "";
+
+  return (
+    <div>
+      <div
+        style={{
+          background: "linear-gradient(135deg, #315E9C 0%, #2f49c7 100%)",
+          borderRadius: "1.25rem",
+          padding: "2rem 2.25rem",
+          marginBottom: "1.5rem",
+          boxShadow: "0 12px 30px -12px rgba(49, 94, 156,0.5)",
+        }}
+      >
+        <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "white", marginBottom: "0.375rem" }}>
+          {ownName ? `Olá, ${ownName.split(" ")[0]}!` : "Painel do colunista"}
+        </h1>
+        <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.9375rem" }}>O resumo do seu trabalho e as novidades do Festina.</p>
+      </div>
+
+      {profile?.columnist_id && (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1.25rem", marginBottom: "1.5rem" }}>
+          {stats.map(({ label, value, icon: Icon, color }) => (
+            <div key={label} style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--admin-border)", boxShadow: "0 1px 3px rgba(0,0,0,0.04)" }}>
+              <div style={{ width: "2.5rem", height: "2.5rem", borderRadius: "0.75rem", backgroundColor: `${color}15`, display: "flex", alignItems: "center", justifyContent: "center", marginBottom: "1rem" }}>
+                <Icon size={18} color={color} />
+              </div>
+              <div style={{ fontWeight: 900, fontSize: "2rem", color: "var(--admin-text)", lineHeight: 1, marginBottom: "0.25rem" }}>{value.toLocaleString("pt-BR")}</div>
+              <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", fontWeight: 600 }}>{label}</div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", marginBottom: "1.5rem" }} className="colunista-home-grid">
+        {/* Comunicados — a thicker gold border, tinted header and a count
+            pill set it apart from the other cards while anything here is
+            unread; it quietly reverts to the plain look once everything's
+            been seen (on /colunista/comunicados) with nothing left to flag. */}
+        <div
+          style={
+            hasUnreadAnnouncements
+              ? { ...cardStyle, borderTop: "3px solid #C89A4A", boxShadow: "0 8px 24px -14px rgba(200, 154, 74, 0.6)" }
+              : cardStyle
+          }
+        >
+          <div style={hasUnreadAnnouncements ? { ...cardHeaderStyle, backgroundColor: "rgba(200, 154, 74, 0.08)" } : cardHeaderStyle}>
+            <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Megaphone size={17} color={hasUnreadAnnouncements ? "#C89A4A" : "#315E9C"} /> Comunicados
+              {hasUnreadAnnouncements && (
+                <span
+                  style={{
+                    fontSize: "0.6875rem",
+                    fontWeight: 800,
+                    color: "white",
+                    backgroundColor: "#C89A4A",
+                    padding: "0.125rem 0.5rem",
+                    borderRadius: "9999px",
+                  }}
+                >
+                  {unreadIds.size} {unreadIds.size === 1 ? "novo" : "novos"}
+                </span>
+              )}
+            </h2>
+            <Link href="/colunista/comunicados" style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Ver todos →</Link>
+          </div>
+          {announcements.length === 0 ? (
+            <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum comunicado por enquanto.</div>
+          ) : (
+            <div>
+              {announcements.map((item) => {
+                const isUnread = unreadIds.has(item.id);
+                return (
+                  <div
+                    key={item.id}
+                    style={{
+                      padding: "1rem 1.5rem",
+                      borderTop: "1px solid var(--admin-border)",
+                      backgroundColor: isUnread ? "rgba(200, 154, 74, 0.06)" : undefined,
+                    }}
+                  >
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--admin-text)" }}>{item.title}</div>
+                      {isUnread && (
+                        <span style={{ width: "0.5rem", height: "0.5rem", borderRadius: "9999px", backgroundColor: "#C89A4A", flexShrink: 0 }} />
+                      )}
+                    </div>
+                    <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "0.25rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>{item.body}</div>
+                    <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.375rem" }}>{formatDate(item.created_at)}</div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* Nossas redes */}
+        <div style={cardStyle}>
+          <div style={cardHeaderStyle}>
+            <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <Share2 size={17} color="#C89A4A" /> Nossas redes
+            </h2>
+          </div>
+          {socials.length === 0 ? (
+            <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhuma rede cadastrada em Configurações.</div>
+          ) : (
+            <div style={{ padding: "1.25rem 1.5rem", display: "flex", flexWrap: "wrap", gap: "0.75rem" }}>
+              {socials.map(({ label, href, Icon, color }) => (
+                <a
+                  key={label}
+                  href={href}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="colunista-social-link"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    padding: "0.5rem 0.875rem",
+                    borderRadius: "9999px",
+                    border: "1px solid var(--admin-border-strong)",
+                    color: "var(--admin-text)",
+                    fontSize: "0.8125rem",
+                    fontWeight: 700,
+                    textDecoration: "none",
+                  }}
+                >
+                  <Icon size={16} color={color} /> {label}
+                </a>
+              ))}
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Últimos vídeos */}
+      <div style={{ ...cardStyle, marginBottom: "1.5rem" }}>
+        <div style={cardHeaderStyle}>
+          <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Video size={17} color="#315E9C" /> Últimos vídeos
+          </h2>
+        </div>
+        <div style={{ padding: "1.5rem", display: "grid", gridTemplateColumns: "minmax(0, 480px) 220px", gap: "1.25rem" }} className="colunista-videos-grid">
+          <div>
+            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "0.625rem" }}>Vídeo em destaque</div>
+            {featuredVideoUrl ? (
+              <div style={{ position: "relative", paddingTop: "56.25%", borderRadius: "0.75rem", overflow: "hidden", backgroundColor: "#000" }}>
+                <iframe src={featuredVideoUrl} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+              </div>
+            ) : (
+              <div style={{ aspectRatio: "16/9", borderRadius: "0.75rem", backgroundColor: "var(--admin-surface-alt)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--admin-faint)", fontSize: "0.875rem", fontWeight: 600 }}>
+                Em breve
+              </div>
+            )}
+          </div>
+          <div>
+            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "0.625rem" }}>Shorts</div>
+            {shortsVideoUrl ? (
+              <div style={{ position: "relative", width: "100%", aspectRatio: "9/16", borderRadius: "0.75rem", overflow: "hidden", backgroundColor: "#000" }}>
+                <iframe src={shortsVideoUrl} style={{ position: "absolute", inset: 0, width: "100%", height: "100%", border: "none" }} allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen />
+              </div>
+            ) : (
+              <div style={{ aspectRatio: "9/16", borderRadius: "0.75rem", backgroundColor: "var(--admin-surface-alt)", display: "flex", alignItems: "center", justifyContent: "center", color: "var(--admin-faint)", fontSize: "0.8125rem", fontWeight: 600, textAlign: "center", padding: "1rem" }}>
+                Em breve
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Últimos posts */}
+      <div style={cardStyle}>
+        <div style={cardHeaderStyle}>
+          <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--admin-text)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Newspaper size={17} color="#C89A4A" /> Últimos posts
+          </h2>
+          <Link href="/conteudo" target="_blank" style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Ver no site →</Link>
+        </div>
+        {news.length === 0 ? (
+          <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum artigo publicado ainda.</div>
+        ) : (
+          <div style={{ padding: "1.25rem 1.5rem", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "1.25rem" }}>
+            {news.map((item) => (
+              <a
+                key={item.id}
+                href={articlePath(item, item.category_id ? categorySlugById.get(item.category_id) : undefined, "pt")}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="colunista-post-card"
+                style={{ display: "block", textDecoration: "none", borderRadius: "0.875rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}
+              >
+                <div style={{ height: "120px", background: item.cover_image ? `url("${item.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)" }} />
+                <div style={{ padding: "0.875rem 1rem" }}>
+                  <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--admin-text)", lineHeight: 1.35, display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden", marginBottom: "0.375rem" }}>
+                    {item.title_pt}
+                  </div>
+                  <div style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+                    {item.columnist_id && columnistNameById.get(item.columnist_id) ? `${columnistNameById.get(item.columnist_id)} · ` : ""}
+                    {item.published_at && formatDate(item.published_at)}
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+
+      <style>{`
+        @media (max-width: 860px) {
+          .colunista-home-grid { grid-template-columns: 1fr !important; }
+          .colunista-videos-grid { grid-template-columns: 1fr !important; }
+        }
+        .colunista-social-link:hover { border-color: #315E9C !important; color: #315E9C !important; }
+        .colunista-post-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.08); transform: translateY(-2px); transition: all 0.15s; }
+      `}</style>
+    </div>
+  );
+}

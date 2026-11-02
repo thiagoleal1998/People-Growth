@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
     // redirected here — only sub-paths that belonged to the old mixed page.
     return [
       { source: "/pt/mea-sententia/:path+", destination: "/pt/conteudo/:path+", permanent: true },
-      { source: "/en/mea-sententia/autor/:slug", destination: "/en/content/author/:slug", permanent: true },
+      { source: "/en/mea-sententia/autor/:slug", destination: "/en/content/columnist/:slug", permanent: true },
       { source: "/en/mea-sententia/colunistas", destination: "/en/content/columnists", permanent: true },
       { source: "/en/mea-sententia/categoria/:slug", destination: "/en/content/category/:slug", permanent: true },
       { source: "/en/mea-sententia/:slug", destination: "/en/content/:slug", permanent: true },
@@ -37,6 +37,10 @@ const nextConfig: NextConfig = {
       // Growth origin story and philosophy as the rest of it.
       { source: "/pt/sobre/o-que-e-people-and-growth", destination: "/pt/sobre/o-que-e-o-grupo-festina", permanent: true },
       { source: "/en/about/what-is-people-and-growth", destination: "/en/about/what-is-grupo-festina", permanent: true },
+      // "Autor"/"author" terminology renamed to "colunista"/"columnist"
+      // site-wide — keeps old shared/indexed profile links working.
+      { source: "/pt/conteudo/autor/:slug", destination: "/pt/conteudo/colunista/:slug", permanent: true },
+      { source: "/en/content/author/:slug", destination: "/en/content/columnist/:slug", permanent: true },
     ];
   },
   async headers() {

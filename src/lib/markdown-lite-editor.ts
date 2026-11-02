@@ -1,6 +1,6 @@
 // Bridges the WYSIWYG editor (TipTap) and the markdown-lite text format
 // actually stored in the database and rendered by markdown-lite.ts. Content
-// never leaves the DB as HTML — the editor just gives authors a visual way
+// never leaves the DB as HTML — the editor just gives columnists a visual way
 // to produce/edit the exact same **bold**/++underline++/## subtitle text
 // every other part of the pipeline (public rendering, TTS stripping,
 // existing drafts) already understands.

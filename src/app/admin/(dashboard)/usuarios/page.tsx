@@ -1,8 +1,8 @@
 import { createAdminClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
-import { UsuariosAutoresTabs } from "./UsuariosAutoresTabs";
-import type { UserProfile, Author, PasswordResetRequest } from "@/types/database.types";
+import { UsuariosColunistasTabs } from "./UsuariosColunistasTabs";
+import type { UserProfile, Columnist, PasswordResetRequest } from "@/types/database.types";
 
 export default async function UsuariosPage({
   searchParams,
@@ -14,15 +14,15 @@ export default async function UsuariosPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = admin as any;
 
-  const [{ data: usersData }, { data: authorsData }, { data: resetRequestsData }, { data: pushSubsData }] = await Promise.all([
+  const [{ data: usersData }, { data: columnistsData }, { data: resetRequestsData }, { data: pushSubsData }] = await Promise.all([
     client.from("user_profiles").select("*").order("created_at"),
-    client.from("authors").select("*").order("order"),
+    client.from("columnists").select("*").order("order"),
     client.from("password_reset_requests").select("*").eq("status", "pending").order("created_at", { ascending: false }),
     client.from("push_subscriptions").select("user_id"),
   ]);
 
   const users = (usersData ?? []) as UserProfile[];
-  const authors = (authorsData ?? []) as Author[];
+  const columnists = (columnistsData ?? []) as Columnist[];
   const resetRequests = (resetRequestsData ?? []) as PasswordResetRequest[];
 
   // How many browsers/devices each user has push active on — shown as a
@@ -38,12 +38,12 @@ export default async function UsuariosPage({
       <SavedToast show={saved === "1"} />
       <PageHeader
         title="Usuários"
-        subtitle="Cada pessoa tem seu próprio login. Admins têm acesso total; autores só escrevem e editam o próprio perfil."
+        subtitle="Cada pessoa tem seu próprio login. Admins têm acesso total; colunistas só escrevem e editam o próprio perfil."
       />
 
-      <UsuariosAutoresTabs
+      <UsuariosColunistasTabs
         users={users}
-        authors={authors}
+        columnists={columnists}
         resetRequests={resetRequests}
         pushSubscriptionCounts={pushSubscriptionCounts}
         userError={userError}

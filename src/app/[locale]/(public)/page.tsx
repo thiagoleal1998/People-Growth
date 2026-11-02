@@ -50,8 +50,8 @@ import { ColumnistCarousel } from "@/components/ColumnistCarousel";
 import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
 import { articleHref, articlePath } from "@/lib/article-url";
 import { ClampedNewsList } from "@/components/home/ClampedNewsList";
-import { isAuthorPubliclyVisible } from "@/lib/founder-data";
-import type { Article, Author, Testimonial, MediaItem, Category } from "@/types/database.types";
+import { isColumnistPubliclyVisible } from "@/lib/founder-data";
+import type { Article, Columnist, Testimonial, MediaItem, Category } from "@/types/database.types";
 
 // Fisher-Yates — used so the home's columnist strip shows a different 4
 // each time the page re-renders (this page's `revalidate = 300` means
@@ -68,7 +68,7 @@ function shuffled<T>(items: T[]): T[] {
 
 export type ArticleWithCategory = Article & { categories: Pick<Category, "slug" | "is_people_growth" | "is_ponto_de_replica"> | null };
 
-function FounderEntry({ author, locale }: { author: Author; locale: string }) {
+function FounderEntry({ columnist, locale }: { columnist: Columnist; locale: string }) {
   return (
     <div style={{ display: "flex", gap: "0.875rem", alignItems: "flex-start" }}>
       <div
@@ -77,14 +77,14 @@ function FounderEntry({ author, locale }: { author: Author; locale: string }) {
           height: "3.25rem",
           borderRadius: "50%",
           flexShrink: 0,
-          background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+          background: columnist.photo_url ? `url("${columnist.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
         }}
       />
       <div>
-        <div style={{ color: "white", fontWeight: 800, fontSize: "0.9375rem" }}>{author.name}</div>
-        {author.role_pt && (
+        <div style={{ color: "white", fontWeight: 800, fontSize: "0.9375rem" }}>{columnist.name}</div>
+        {columnist.role_pt && (
           <div style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8125rem", lineHeight: 1.4, marginTop: "0.125rem" }}>
-            {pickLocale(locale, author.role_pt, author.role_en)}
+            {pickLocale(locale, columnist.role_pt, columnist.role_en)}
           </div>
         )}
       </div>
@@ -157,23 +157,23 @@ export default async function HomePage() {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data: articlesData }, { data: authorsData }, { data: configData }, { data: testimonialsData }, { data: mediaData }] = await Promise.all([
+  const [{ data: articlesData }, { data: columnistsData }, { data: configData }, { data: testimonialsData }, { data: mediaData }] = await Promise.all([
     // "categories!category_id" disambiguates the embed now that articles has a second
     // FK path to categories through the article_categories join table (multi-category).
     client.from("articles").select("*, categories!category_id(slug, is_people_growth, is_ponto_de_replica)").eq("status", "published").order("published_at", { ascending: false }),
-    client.from("authors").select("*").eq("status", "active").order("order"),
+    client.from("columnists").select("*").eq("status", "active").order("order"),
     client.from("site_config").select("*"),
     client.from("testimonials").select("*").eq("status", "active").order("order"),
     client.from("media_items").select("*").order("order").limit(5),
   ]);
 
   const allArticles = (articlesData ?? []) as ArticleWithCategory[];
-  const authors = (authorsData ?? []) as Author[];
-  const authorById = new Map(authors.map((a) => [a.id, a]));
+  const columnists = (columnistsData ?? []) as Columnist[];
+  const columnistById = new Map(columnists.map((a) => [a.id, a]));
   // "Founders" sections (the hero's "Quem está por trás" box, and the
   // "fale direto com..." CTA) are specifically about the 3 founders, not
-  // every active columnist — authors.is_founder distinguishes them.
-  const founders = authors.filter((a) => a.is_founder);
+  // every active columnist — columnists.is_founder distinguishes them.
+  const founders = columnists.filter((a) => a.is_founder);
   // The founders box is a 1-top-2-bottom pyramid (the CEO centered above
   // the other two, rather than a plain grid) — identified by role text
   // ("CEO") rather than name, so it keeps working if the CEO ever changes.
@@ -184,30 +184,30 @@ export default async function HomePage() {
   // Shown in the white strip below — a different random 4 each time this
   // page reshuffles (see `shuffled` above), and only profiles finished
   // enough to actually show (photo + name + tagline).
-  const completeColumnists = authors.filter(isAuthorPubliclyVisible);
-  // One author's most recent published article, used as a blurb fallback
+  const completeColumnists = columnists.filter(isColumnistPubliclyVisible);
+  // One columnist's most recent published article, used as a blurb fallback
   // below when a profile has no tagline of its own — needed here (rather
   // than down where allArticles is otherwise consumed) because the
   // columnist strip's card data is built right after this.
-  const latestArticleByAuthor = new Map<string, Article>();
+  const latestArticleByColumnist = new Map<string, Article>();
   for (const a of allArticles) {
-    if (a.author_id && !latestArticleByAuthor.has(a.author_id)) latestArticleByAuthor.set(a.author_id, a);
+    if (a.columnist_id && !latestArticleByColumnist.has(a.columnist_id)) latestArticleByColumnist.set(a.columnist_id, a);
   }
   // Shuffled once per render (see `shuffled` above — effectively every 5min,
   // this page's revalidate window) rather than fixed to a random 4: the
   // strip is now a client-side carousel (ColumnistCarousel) that pages
   // through everyone instead of hard-capping at 4 with no way to see the
   // rest, so the full set is sent down, just in a different order each time.
-  const columnistCards = shuffled(completeColumnists).map((author) => ({
-    id: author.id,
-    slug: author.slug,
-    name: author.name,
-    photoUrl: author.photo_url,
+  const columnistCards = shuffled(completeColumnists).map((columnist) => ({
+    id: columnist.id,
+    slug: columnist.slug,
+    name: columnist.name,
+    photoUrl: columnist.photo_url,
     blurb:
-      pickLocale(locale, author.tagline_pt, author.tagline_en)?.trim() ||
+      pickLocale(locale, columnist.tagline_pt, columnist.tagline_en)?.trim() ||
       (() => {
-        const latest = latestArticleByAuthor.get(author.id);
-        return latest ? pickLocale(locale, latest.title_pt, latest.title_en) : pickLocale(locale, author.role_pt, author.role_en);
+        const latest = latestArticleByColumnist.get(columnist.id);
+        return latest ? pickLocale(locale, latest.title_pt, latest.title_en) : pickLocale(locale, columnist.role_pt, columnist.role_en);
       })(),
   }));
   const founderFirstNames = founders.map((a) => a.name.split(" ")[0]);
@@ -521,9 +521,9 @@ export default async function HomePage() {
                             {pickLocale(locale, featured.excerpt_pt, featured.excerpt_en)}
                           </p>
                         )}
-                        {featured.author_id && authorById.get(featured.author_id) && (
+                        {featured.columnist_id && columnistById.get(featured.columnist_id) && (
                           <span style={{ display: "block", marginTop: "0.5rem", fontSize: "0.875rem", color: "var(--site-faint)" }}>
-                            {tc("by")} {authorById.get(featured.author_id)!.name}
+                            {tc("by")} {columnistById.get(featured.columnist_id)!.name}
                           </span>
                         )}
                       </div>
@@ -572,9 +572,9 @@ export default async function HomePage() {
                         <h4 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", lineHeight: 1.4 }}>
                           {pickLocale(locale, article.title_pt, article.title_en)}
                         </h4>
-                        {article.author_id && authorById.get(article.author_id) && (
+                        {article.columnist_id && columnistById.get(article.columnist_id) && (
                           <span style={{ display: "block", marginTop: "0.25rem", fontSize: "0.75rem", color: "var(--site-faint)" }}>
-                            {tc("by")} {authorById.get(article.author_id)!.name}
+                            {tc("by")} {columnistById.get(article.columnist_id)!.name}
                           </span>
                         )}
                       </Link>
@@ -606,7 +606,7 @@ export default async function HomePage() {
                 {moreNews.length > 0 && (
                   <ClampedNewsList
                     articles={moreNews}
-                    authorNames={Object.fromEntries([...authorById].map(([id, a]) => [id, a.name]))}
+                    columnistNames={Object.fromEntries([...columnistById].map(([id, a]) => [id, a.name]))}
                     locale={locale}
                     byLabel={tc("by")}
                     sidebarId="home-sidebar-videos"
@@ -1013,13 +1013,13 @@ export default async function HomePage() {
                       as the other two, just centered on its own line above
                       them. */}
                   <div style={{ flex: "0 1 calc(50% - 1rem)", minWidth: "min(240px, 100%)" }}>
-                    <FounderEntry author={ceoFounder} locale={locale} />
+                    <FounderEntry columnist={ceoFounder} locale={locale} />
                   </div>
                 </div>
               )}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "2rem" }}>
-                {(ceoFounder ? otherFounders : founders).map((author) => (
-                  <FounderEntry key={author.id} author={author} locale={locale} />
+                {(ceoFounder ? otherFounders : founders).map((columnist) => (
+                  <FounderEntry key={columnist.id} columnist={columnist} locale={locale} />
                 ))}
               </div>
             </div>
@@ -1321,9 +1321,9 @@ export default async function HomePage() {
           {founders.length > 0 && (
             <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.75rem", marginTop: "2.5rem" }}>
               <div style={{ display: "flex" }}>
-                {founders.slice(0, 4).map((author, i) => (
+                {founders.slice(0, 4).map((columnist, i) => (
                   <div
-                    key={author.id}
+                    key={columnist.id}
                     style={{
                       width: "2.5rem",
                       height: "2.5rem",
@@ -1331,7 +1331,7 @@ export default async function HomePage() {
                       border: "2px solid var(--site-surface-alt)",
                       marginLeft: i === 0 ? 0 : "-0.625rem",
                       flexShrink: 0,
-                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+                      background: columnist.photo_url ? `url("${columnist.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                     }}
                   />
                 ))}

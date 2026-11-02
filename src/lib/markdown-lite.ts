@@ -43,7 +43,7 @@ function stripHeadingEmphasis(text: string): string {
     .replace(/==(.+?)==/g, "$1");
 }
 
-// Authors often number chapter headings ("1. ", "1- ", "1) ") for the
+// Columnists often number chapter headings ("1. ", "1- ", "1) ") for the
 // reading flow of the article itself — left in the heading as rendered in
 // the article body, but stripped from what a table of contents displays,
 // since those already show their own position (a numbered badge, or just
@@ -86,7 +86,7 @@ export function renderMarkdownLite(text: string, options: { anchorHeadings?: boo
   // markdown emphasis markers that were never meant as such, mangling the
   // URL. Each image/link is rendered immediately but stashed behind an
   // opaque placeholder token (built from a NUL character, which can never
-  // occur in authored text) so later regexes have nothing to misread, then
+  // occur in text columnists write) so later regexes have nothing to misread, then
   // swapped back in at the very end.
   const NUL = String.fromCharCode(0);
   const blocks: string[] = [];
@@ -161,7 +161,7 @@ export function renderMarkdownLite(text: string, options: { anchorHeadings?: boo
       const figcaption = alt || credit || source ? `<figcaption style="margin-top:0.625rem;font-size:0.8125rem;color:var(--site-muted);text-align:center">${captionLine}${creditLine}${sourceLine}</figcaption>` : "";
       const width = widthPct ? Math.min(100, Math.max(10, Number(widthPct))) : 100;
       // class (not just the inline width above) so a mobile media query can
-      // force full width regardless of what the author picked for desktop —
+      // force full width regardless of what the columnist picked for desktop —
       // a modest percentage of an already-narrow phone column reads as tiny.
       return protect("FIG", `<figure class="article-img-figure" style="margin:2rem auto;width:${width}%"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block;cursor:zoom-in" />${figcaption}</figure>`);
     })
@@ -171,7 +171,7 @@ export function renderMarkdownLite(text: string, options: { anchorHeadings?: boo
     )
     .replace(/\*\*(.+?)\*\*/g, '<strong style="font-weight:700;color:var(--site-text)">$1</strong>')
     // "==texto==" — a brand-tinted highlighter mark, for passages the
-    // author wants to stand out inside the body.
+    // columnist wants to stand out inside the body.
     .replace(/==(.+?)==/g, `<mark class="${HIGHLIGHT_CLASS}">$1</mark>`)
     // Underline has no standard markdown syntax, so it uses its own marker.
     // Both this and italic run after bold, so a lone "_" or "+" left over
@@ -272,7 +272,7 @@ function groupSourceSections(renderedBlocks: string[], protectedBlocks: string[]
 
   for (let i = 0; i < renderedBlocks.length; i++) {
     const headingMatch = renderedBlocks[i].match(/^<h[23][^>]*>([\s\S]*?)<\/h[23]>$/);
-    // Authors don't reliably use "## Fontes" — plenty just bold the word
+    // Columnists don't reliably use "## Fontes" — plenty just bold the word
     // ("**Fontes**" or "**FONTES**") as a paragraph of its own instead of a
     // real heading. Treat a paragraph that's nothing but a single bold run
     // the same way, so the design applies regardless of which one they used.

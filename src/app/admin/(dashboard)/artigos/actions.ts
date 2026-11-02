@@ -12,17 +12,17 @@ import { insertNotification, type NotificationTemplateKey } from "@/lib/notify";
 import type { Article, ArticleSource } from "@/types/database.types";
 
 // Shared by publishArticle/approveAndSchedule/requestChanges — resolves
-// which login is linked to an author (user_profiles' own RLS only allows
+// which login is linked to a columnist (user_profiles' own RLS only allows
 // reading your own row, hence the admin client) and drops a notification
 // in their bell (text comes from notification_templates, see src/lib/notify.ts).
-async function notifyAuthor(authorId: string | null, key: NotificationTemplateKey, vars: Record<string, string>, link: string) {
-  if (!authorId) return;
+async function notifyColumnist(columnistId: string | null, key: NotificationTemplateKey, vars: Record<string, string>, link: string) {
+  if (!columnistId) return;
   const admin = await createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: authorProfile } = await (admin as any).from("user_profiles").select("id").eq("author_id", authorId).single();
-  if (!authorProfile) return;
+  const { data: columnistProfile } = await (admin as any).from("user_profiles").select("id").eq("columnist_id", columnistId).single();
+  if (!columnistProfile) return;
   const supabase = await createClient();
-  await insertNotification(supabase, authorProfile.id, key, vars, link);
+  await insertNotification(supabase, columnistProfile.id, key, vars, link);
 }
 
 // Rows come in as parallel source_label / source_url fields; rows without a label are dropped.
@@ -69,7 +69,7 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
   // dropdown is set to — a quick way to stash work without touching status.
   const status = (intent === "draft" ? "draft" : String(formData.get("status") ?? "draft")) as Article["status"];
   const categoryId = String(formData.get("category_id") ?? "");
-  const authorId = String(formData.get("author_id") ?? "");
+  const columnistId = String(formData.get("columnist_id") ?? "");
   const format = (String(formData.get("format") ?? "noticia")) as Article["format"];
   const scheduledFor = String(formData.get("scheduled_for") ?? "").trim() || null;
 
@@ -105,7 +105,7 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     status,
     published_at: status === "published" ? new Date().toISOString() : null,
     scheduled_for: scheduledFor,
-    author_id: authorId || null,
+    columnist_id: columnistId || null,
     read_time: calculateReadTime(contentPt),
     seo_title_pt: String(formData.get("seo_title_pt") ?? "") || null,
     seo_title_en: String(formData.get("seo_title_en") ?? "") || null,
@@ -163,13 +163,13 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
     }
   }
 
-  // Co-authors (collaborative pieces): same replace-the-whole-set approach,
-  // excluding the primary author even if somehow submitted as a co-author too.
+  // Co-columnists (collaborative pieces): same replace-the-whole-set approach,
+  // excluding the primary columnist even if somehow submitted as a co-columnist too.
   if (!saveError && articleId) {
-    const coauthorIds = [...new Set(formData.getAll("coauthor_ids").map((value) => String(value)).filter((aid) => aid && aid !== authorId))];
+    const coauthorIds = [...new Set(formData.getAll("coauthor_ids").map((value) => String(value)).filter((aid) => aid && aid !== columnistId))];
     await client.from("article_coauthors").delete().eq("article_id", articleId);
     if (coauthorIds.length > 0) {
-      await client.from("article_coauthors").insert(coauthorIds.map((author_id) => ({ article_id: articleId, author_id })));
+      await client.from("article_coauthors").insert(coauthorIds.map((columnist_id) => ({ article_id: articleId, columnist_id })));
     }
   }
 
@@ -227,14 +227,14 @@ export async function publishArticle(id: string) {
   const profile = await getCurrentProfile();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const { data: article } = await client.from("articles").select("title_pt, author_id, published_at").eq("id", id).single();
+  const { data: article } = await client.from("articles").select("title_pt, columnist_id, published_at").eq("id", id).single();
   // The publish date is set once, on the first publication. An article sent back
   // for approval after an edit keeps its original date, so it does not jump to the top.
   await client.from("articles").update({ status: "published", published_at: article?.published_at ?? new Date().toISOString() }).eq("id", id);
   if (profile) {
     await logActivity({ userId: profile.id, userEmail: profile.email, action: "publish", entityType: "artigo", entityLabel: article?.title_pt });
   }
-  await notifyAuthor(article?.author_id ?? null, "article_published", { title: article?.title_pt ?? "" }, `/autor/artigos/${id}`);
+  await notifyColumnist(article?.columnist_id ?? null, "article_published", { title: article?.title_pt ?? "" }, `/colunista/artigos/${id}`);
   revalidatePath("/admin/artigos");
   revalidatePath("/[locale]", "page");
 }
@@ -244,27 +244,27 @@ export async function approveAndSchedule(id: string) {
   const profile = await getCurrentProfile();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const { data: article } = await client.from("articles").select("title_pt, author_id, scheduled_for").eq("id", id).single();
+  const { data: article } = await client.from("articles").select("title_pt, columnist_id, scheduled_for").eq("id", id).single();
   if (!article?.scheduled_for) return;
   await client.from("articles").update({ status: "scheduled" }).eq("id", id);
   if (profile) {
     await logActivity({ userId: profile.id, userEmail: profile.email, action: "publish", entityType: "artigo", entityLabel: `${article.title_pt} (agendado)` });
   }
-  await notifyAuthor(
-    article.author_id,
+  await notifyColumnist(
+    article.columnist_id,
     "article_approved_scheduled",
     {
       title: article.title_pt,
       scheduled_for: new Date(article.scheduled_for).toLocaleString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric", hour: "2-digit", minute: "2-digit", timeZone: "America/Sao_Paulo" }),
     },
-    `/autor/artigos/${id}`
+    `/colunista/artigos/${id}`
   );
   revalidatePath("/admin/artigos");
   revalidatePath(`/admin/artigos/${id}`);
 }
 
 // Sends a pending article back to draft with written feedback instead of
-// approving it outright — the author sees the note on their edit form and
+// approving it outright — the columnist sees the note on their edit form and
 // gets a notification (reusing the same bell used by the ticket system).
 export async function requestChanges(id: string, feedback: string) {
   const supabase = await createClient();
@@ -274,15 +274,15 @@ export async function requestChanges(id: string, feedback: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const { data: article } = await client.from("articles").select("title_pt, author_id").eq("id", id).single();
+  const { data: article } = await client.from("articles").select("title_pt, columnist_id").eq("id", id).single();
   if (!article) return;
 
   await client.from("articles").update({ status: "draft", review_feedback: feedback }).eq("id", id);
 
-  await notifyAuthor(article.author_id, "article_changes_requested", { title: article.title_pt, feedback }, `/autor/artigos/${id}`);
+  await notifyColumnist(article.columnist_id, "article_changes_requested", { title: article.title_pt, feedback }, `/colunista/artigos/${id}`);
 
   // The article's own review_feedback column only ever holds the CURRENT
-  // note — it's nulled out once the author acts on it (see upsertOwnArticle
+  // note — it's nulled out once the columnist acts on it (see upsertOwnArticle
   // /upsertArticle). Passing it as a field change here is what actually
   // preserves the full text in "Relatório de atividade" once that happens.
   await logActivity({

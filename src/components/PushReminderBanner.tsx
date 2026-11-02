@@ -17,7 +17,7 @@ function dismissedThisSession(): boolean {
   }
 }
 
-// Mounted at the top of both the admin and author dashboard layouts —
+// Mounted at the top of both the admin and columnist dashboard layouts —
 // unlike the quiet toggle in NotificationBell's dropdown (PushOptIn.tsx),
 // this one is meant to be hard to miss until the person opts in (or out,
 // for this session) on this particular browser/device. It never blocks

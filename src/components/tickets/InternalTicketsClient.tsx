@@ -236,7 +236,7 @@ export function InternalTicketsClient({
                       {ticket.title}
                     </div>
                     <div style={{ fontSize: "0.8rem", color: "var(--admin-muted)" }}>
-                      {ticket.created_by_name} ({ticket.created_by_role === "admin" ? "admin" : "autor"}) · {formatDate(ticket.created_at)}
+                      {ticket.created_by_name} ({ticket.created_by_role === "admin" ? "admin" : "colunista"}) · {formatDate(ticket.created_at)}
                     </div>
                   </div>
                   <span style={{ backgroundColor: s.bg, color: s.color, padding: "0.2rem 0.625rem", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: 700, flexShrink: 0 }}>

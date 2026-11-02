@@ -1,0 +1,49 @@
+import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/profile";
+import { PageHeader } from "@/components/admin/ui";
+import { SavedToast } from "@/components/admin/SavedToast";
+import { MeuPerfilForm } from "./MeuPerfilForm";
+import { ChangePasswordCard } from "./ChangePasswordCard";
+import type { Columnist } from "@/types/database.types";
+
+export default async function MeuPerfilPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ saved?: string; error?: string; photoError?: string }>;
+}) {
+  const { saved, error, photoError } = await searchParams;
+  const profile = await getCurrentProfile();
+
+  if (!profile?.columnist_id) {
+    return (
+      <div>
+        <PageHeader title="Meu perfil" />
+        <div style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#dc2626", padding: "0.75rem 1rem", borderRadius: "0.625rem", fontSize: "0.875rem", marginBottom: "1.5rem" }}>
+          Seu login ainda não está vinculado a um perfil de colunista. Peça a um admin para vincular em Admin → Usuários.
+        </div>
+        {/* Changing your own password needs only a session, not a columnist link. */}
+        <ChangePasswordCard />
+      </div>
+    );
+  }
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data } = await (supabase as any).from("columnists").select("*").eq("id", profile.columnist_id).single();
+  const columnist = data as Columnist | null;
+
+  return (
+    <div>
+      <SavedToast show={saved === "1"} />
+      <PageHeader title="Meu perfil" subtitle="Como você aparece no site — na tira de colunistas e na página Sobre." />
+
+      {error && (
+        <div style={{ backgroundColor: "rgba(239,68,68,0.1)", color: "#dc2626", padding: "0.75rem 1rem", borderRadius: "0.625rem", fontSize: "0.875rem", marginBottom: "1.25rem" }}>
+          {error}
+        </div>
+      )}
+
+      <MeuPerfilForm columnist={columnist} photoError={photoError} />
+    </div>
+  );
+}

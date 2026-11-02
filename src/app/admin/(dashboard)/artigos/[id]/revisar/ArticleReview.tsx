@@ -7,7 +7,7 @@ import { ArrowLeft, Check, MessageSquareWarning, Edit, X, Loader2 } from "lucide
 import { ArticlePreviewFrame } from "@/components/ArticlePreviewFrame";
 import { alertDialog, confirmDialog } from "@/components/admin/dialog-store";
 import { publishArticle, approveAndSchedule, requestChanges } from "../../actions";
-import type { Article, Author, Category } from "@/types/database.types";
+import type { Article, Columnist, Category } from "@/types/database.types";
 
 type Annotation = { id: string; quote: string; note: string };
 type Popover = { id: string; x: number; y: number; quote: string };
@@ -22,9 +22,9 @@ const cardStyle: React.CSSProperties = {
 /** A single page to actually review a pending article: read it rendered
  * exactly as it'll ship (same ArticlePreviewFrame the public preview
  * uses), select any passage to attach a note about it, and either approve
- * or send the compiled notes back to the author — no bouncing between the
+ * or send the compiled notes back to the columnist — no bouncing between the
  * list, a separate preview tab, and a bare prompt() for feedback. */
-export function ArticleReview({ article, author, coauthors, category }: { article: Article; author: Author | null; coauthors?: Author[]; category: Category | null }) {
+export function ArticleReview({ article, columnist, coauthors, category }: { article: Article; columnist: Columnist | null; coauthors?: Columnist[]; category: Category | null }) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const [annotations, setAnnotations] = useState<Annotation[]>([]);
@@ -117,7 +117,7 @@ export function ArticleReview({ article, author, coauthors, category }: { articl
   async function handleApprove() {
     const willSchedule = Boolean(article.scheduled_for);
     const ok = await confirmDialog(
-      willSchedule ? "Aprovar e agendar este artigo para a data pedida pelo autor?" : "Aprovar e publicar este artigo agora?",
+      willSchedule ? "Aprovar e agendar este artigo para a data pedida pelo colunista?" : "Aprovar e publicar este artigo agora?",
       { confirmText: "Aprovar" }
     );
     if (!ok) return;
@@ -142,7 +142,7 @@ export function ArticleReview({ article, author, coauthors, category }: { articl
           <ArrowLeft size={14} /> Voltar para a lista
         </Link>
         <div ref={containerRef} onMouseUp={handleMouseUp}>
-          <ArticlePreviewFrame article={article} author={author} coauthors={coauthors} category={category} />
+          <ArticlePreviewFrame article={article} columnist={columnist} coauthors={coauthors} category={category} />
         </div>
       </div>
 
@@ -150,7 +150,7 @@ export function ArticleReview({ article, author, coauthors, category }: { articl
         <div style={cardStyle}>
           <p style={{ margin: 0, fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text)", marginBottom: "0.375rem" }}>Como revisar</p>
           <p style={{ margin: 0, fontSize: "0.8125rem", color: "var(--admin-muted)", lineHeight: 1.5 }}>
-            Selecione um trecho do texto ao lado para comentar sobre ele. As anotações viram a lista de pedidos de alteração enviada ao autor.
+            Selecione um trecho do texto ao lado para comentar sobre ele. As anotações viram a lista de pedidos de alteração enviada ao colunista.
           </p>
         </div>
 

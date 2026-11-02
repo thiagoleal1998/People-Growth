@@ -1,18 +1,18 @@
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/admin/ui";
 import { OrganogramaCard } from "@/components/OrganogramaCard";
-import type { Author } from "@/types/database.types";
+import type { Columnist } from "@/types/database.types";
 
 export default async function EmpresaAdminPage() {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any).from("authors").select("*").order("order");
-  const authors = (data ?? []) as Author[];
+  const { data } = await (supabase as any).from("columnists").select("*").order("order");
+  const columnists = (data ?? []) as Columnist[];
 
   return (
     <div>
       <PageHeader title="A empresa" subtitle="Como o Grupo Festina é organizado." />
-      <OrganogramaCard authors={authors} />
+      <OrganogramaCard columnists={columnists} />
     </div>
   );
 }

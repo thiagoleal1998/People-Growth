@@ -3,7 +3,7 @@ import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { ArticlePreviewFrame } from "@/components/ArticlePreviewFrame";
-import type { Article, Author, Category } from "@/types/database.types";
+import type { Article, Columnist, Category } from "@/types/database.types";
 
 export default async function AdminArticlePreviewPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -14,19 +14,19 @@ export default async function AdminArticlePreviewPage({ params }: { params: Prom
   const { data: article } = await client.from("articles").select("*").eq("id", id).single();
   if (!article) notFound();
 
-  const [{ data: author }, { data: category }, { data: coauthorRows }] = await Promise.all([
-    article.author_id ? client.from("authors").select("*").eq("id", article.author_id).single() : Promise.resolve({ data: null }),
+  const [{ data: columnist }, { data: category }, { data: coauthorRows }] = await Promise.all([
+    article.columnist_id ? client.from("columnists").select("*").eq("id", article.columnist_id).single() : Promise.resolve({ data: null }),
     article.category_id ? client.from("categories").select("*").eq("id", article.category_id).single() : Promise.resolve({ data: null }),
-    client.from("article_coauthors").select("author_id, authors(*)").eq("article_id", id),
+    client.from("article_coauthors").select("columnist_id, columnists(*)").eq("article_id", id),
   ]);
-  const coauthors = ((coauthorRows ?? []) as { authors: Author | null }[]).map((row) => row.authors).filter((a): a is Author => Boolean(a));
+  const coauthors = ((coauthorRows ?? []) as { columnists: Columnist | null }[]).map((row) => row.columnists).filter((a): a is Columnist => Boolean(a));
 
   return (
     <div style={{ maxWidth: "900px" }}>
       <Link href={`/admin/artigos/${id}`} style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.375rem", marginBottom: "1.25rem" }}>
         <ArrowLeft size={14} /> Voltar para edição
       </Link>
-      <ArticlePreviewFrame article={article as Article} author={(author as Author) ?? null} coauthors={coauthors} category={(category as Category) ?? null} />
+      <ArticlePreviewFrame article={article as Article} columnist={(columnist as Columnist) ?? null} coauthors={coauthors} category={(category as Category) ?? null} />
     </div>
   );
 }

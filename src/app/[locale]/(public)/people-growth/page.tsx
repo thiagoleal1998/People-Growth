@@ -7,7 +7,7 @@ import { PEOPLE_GROWTH_LOGO_URL } from "@/lib/brand-logos";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
-import type { Article, Author, Category } from "@/types/database.types";
+import type { Article, Columnist, Category } from "@/types/database.types";
 
 export const revalidate = 300;
 
@@ -25,10 +25,10 @@ async function getPeopleGrowthData() {
   const pgCategoryIds = pgCategories.map((c) => c.id);
 
   if (pgCategoryIds.length === 0) {
-    return { categories: [], articles: [], authorById: new Map<string, Author>(), categoryById: new Map<string, Category>() };
+    return { categories: [], articles: [], columnistById: new Map<string, Columnist>(), categoryById: new Map<string, Category>() };
   }
 
-  const [{ data: primaryData }, { data: extraRows }, { data: authorsData }] = await Promise.all([
+  const [{ data: primaryData }, { data: extraRows }, { data: columnistsData }] = await Promise.all([
     client
       .from("articles")
       .select("*")
@@ -36,7 +36,7 @@ async function getPeopleGrowthData() {
       .eq("status", "published")
       .order("published_at", { ascending: false }),
     client.from("article_categories").select("article_id").in("category_id", pgCategoryIds),
-    client.from("authors").select("*"),
+    client.from("columnists").select("*"),
   ]);
 
   const extraIds = ((extraRows ?? []) as { article_id: string }[]).map((row) => row.article_id);
@@ -50,7 +50,7 @@ async function getPeopleGrowthData() {
   return {
     categories: pgCategories,
     articles,
-    authorById: new Map(((authorsData ?? []) as Author[]).map((a) => [a.id, a])),
+    columnistById: new Map(((columnistsData ?? []) as Columnist[]).map((a) => [a.id, a])),
     categoryById: new Map(allCategories.map((c) => [c.id, c])),
   };
 }
@@ -68,7 +68,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function PeopleGrowthPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const { articles, authorById, categoryById } = await getPeopleGrowthData();
+  const { articles, columnistById, categoryById } = await getPeopleGrowthData();
   const tc = await getTranslations({ locale, namespace: "common" });
 
   return (
@@ -196,9 +196,9 @@ export default async function PeopleGrowthPage({ params }: { params: Promise<{ l
                           {pickLocale(locale, article.excerpt_pt, article.excerpt_en)}
                         </p>
                       )}
-                      {(article.author_id || article.published_at) && (
+                      {(article.columnist_id || article.published_at) && (
                         <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
-                          {article.author_id && authorById.get(article.author_id) && <>{tc("by")} {authorById.get(article.author_id)!.name} · </>}
+                          {article.columnist_id && columnistById.get(article.columnist_id) && <>{tc("by")} {columnistById.get(article.columnist_id)!.name} · </>}
                           {article.published_at && new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                         </span>
                       )}

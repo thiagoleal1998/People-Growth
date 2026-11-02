@@ -24,7 +24,7 @@ import { PontoDeReplicaBadge } from "@/components/PontoDeReplicaBadge";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
-import type { Article, Author, Category } from "@/types/database.types";
+import type { Article, Columnist, Category } from "@/types/database.types";
 
 export const revalidate = 180;
 
@@ -314,12 +314,12 @@ async function getSportsArticles() {
   const client = supabase as any;
 
   const { data: category } = await client.from("categories").select("*").eq("slug", "esporte").maybeSingle();
-  if (!category) return { category: null, articles: [], authorById: new Map(), categoryById: new Map() };
+  if (!category) return { category: null, articles: [], columnistById: new Map(), categoryById: new Map() };
 
-  const [{ data: primaryData }, { data: extraRows }, { data: authorsData }, { data: allCategoriesData }] = await Promise.all([
+  const [{ data: primaryData }, { data: extraRows }, { data: columnistsData }, { data: allCategoriesData }] = await Promise.all([
     client.from("articles").select("*").eq("category_id", category.id).eq("status", "published").order("published_at", { ascending: false }),
     client.from("article_categories").select("article_id").eq("category_id", category.id),
-    client.from("authors").select("*"),
+    client.from("columnists").select("*"),
     client.from("categories").select("*"),
   ]);
 
@@ -333,7 +333,7 @@ async function getSportsArticles() {
   return {
     category: category as Category,
     articles,
-    authorById: new Map(((authorsData ?? []) as Author[]).map((a: Author) => [a.id, a])),
+    columnistById: new Map(((columnistsData ?? []) as Columnist[]).map((a: Columnist) => [a.id, a])),
     categoryById: new Map(((allCategoriesData ?? []) as Category[]).map((c: Category) => [c.id, c])),
   };
 }
@@ -379,7 +379,7 @@ export default async function EsportesPage({
   );
 
   async function ArticlesTab() {
-    const { category, articles, authorById, categoryById } = await getSportsArticles();
+    const { category, articles, columnistById, categoryById } = await getSportsArticles();
     return (
       <div>
         <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem" }}>
@@ -415,9 +415,9 @@ export default async function EsportesPage({
                         {pickLocale("pt", article.excerpt_pt, article.excerpt_en)}
                       </p>
                     )}
-                    {(article.author_id || article.published_at) && (
+                    {(article.columnist_id || article.published_at) && (
                       <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
-                        {article.author_id && authorById.get(article.author_id) && <>{tc("by")} {authorById.get(article.author_id)!.name} · </>}
+                        {article.columnist_id && columnistById.get(article.columnist_id) && <>{tc("by")} {columnistById.get(article.columnist_id)!.name} · </>}
                         {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                       </span>
                     )}

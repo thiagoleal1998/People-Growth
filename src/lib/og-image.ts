@@ -1,6 +1,6 @@
 // Routes a cover image through /api/og-image so social crawlers always get
 // a real 1200x630 file under the size social platforms expect, instead of
-// the raw cover image (arbitrary aspect ratio/size as uploaded by an author).
+// the raw cover image (arbitrary aspect ratio/size as uploaded by a columnist).
 //
 // Only our own Storage bucket gets proxied — the route itself only accepts
 // that prefix too (see src/app/api/og-image/route.ts), so this is just

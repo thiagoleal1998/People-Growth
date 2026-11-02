@@ -25,7 +25,7 @@ import {
 export type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests";
 // icon is a pre-rendered element (<Home size={17} />), not a component
 // reference — a component type isn't a plain serializable value, so it
-// can't cross the server→client boundary into AdminSidebar/AuthorSidebar
+// can't cross the server→client boundary into AdminSidebar/ColumnistSidebar
 // (both "use client"), while an already-rendered element can.
 export type MenuLink = { id: string; href: string; label: string; icon: ReactNode; countKey?: CountKey; activeMatch?: string[] };
 export type MenuGroup = { id: string; label: string; icon: ReactNode; children: MenuLink[] };
@@ -68,21 +68,21 @@ export const ADMIN_MENU_DEFAULTS: MenuEntry[] = [
       { id: "marketing-midia", href: "/admin/midia", label: "Na Mídia", icon: <Monitor size={17} /> },
     ],
   },
-  { id: "usuarios", href: "/admin/usuarios", label: "Usuários", icon: <KeyRound size={17} />, countKey: "resetRequests", activeMatch: ["/admin/autores"] },
+  { id: "usuarios", href: "/admin/usuarios", label: "Usuários", icon: <KeyRound size={17} />, countKey: "resetRequests", activeMatch: ["/admin/colunistas"] },
   { id: "empresa", href: "/admin/empresa", label: "A empresa", icon: <Building2 size={17} /> },
   { id: "paginas", href: "/admin/paginas", label: "Páginas Institucionais", icon: <ScrollText size={17} /> },
   { id: "configuracoes", href: "/admin/configuracoes", label: "Configurações", icon: <Settings size={17} />, activeMatch: ["/admin/seo"] },
 ];
 
-export const AUTHOR_MENU_DEFAULTS: MenuLink[] = [
-  { id: "inicio", href: "/autor", label: "Início", icon: <Home size={17} /> },
-  { id: "artigos", href: "/autor/artigos", label: "Meus artigos", icon: <FileText size={17} /> },
-  { id: "comentarios", href: "/autor/comentarios", label: "Comentários", icon: <MessageCircle size={17} /> },
-  { id: "comunicados", href: "/autor/comunicados", label: "Comunicados", icon: <Megaphone size={17} /> },
-  { id: "instrucoes", href: "/autor/instrucoes", label: "Canal de Instruções", icon: <ListChecks size={17} /> },
-  { id: "chamados", href: "/autor/chamados", label: "Chamados", icon: <LifeBuoy size={17} /> },
-  { id: "empresa", href: "/autor/empresa", label: "A empresa", icon: <Building2 size={17} /> },
-  { id: "perfil", href: "/autor/perfil", label: "Meu perfil", icon: <UserCircle size={17} /> },
+export const COLUMNIST_MENU_DEFAULTS: MenuLink[] = [
+  { id: "inicio", href: "/colunista", label: "Início", icon: <Home size={17} /> },
+  { id: "artigos", href: "/colunista/artigos", label: "Meus artigos", icon: <FileText size={17} /> },
+  { id: "comentarios", href: "/colunista/comentarios", label: "Comentários", icon: <MessageCircle size={17} /> },
+  { id: "comunicados", href: "/colunista/comunicados", label: "Comunicados", icon: <Megaphone size={17} /> },
+  { id: "instrucoes", href: "/colunista/instrucoes", label: "Canal de Instruções", icon: <ListChecks size={17} /> },
+  { id: "chamados", href: "/colunista/chamados", label: "Chamados", icon: <LifeBuoy size={17} /> },
+  { id: "empresa", href: "/colunista/empresa", label: "A empresa", icon: <Building2 size={17} /> },
+  { id: "perfil", href: "/colunista/perfil", label: "Meu perfil", icon: <UserCircle size={17} /> },
 ];
 
 export type MenuOverride = { id: string; label: string; sort_order: number };

@@ -3,7 +3,7 @@ import { Plugin, PluginKey } from "@tiptap/pm/state";
 import { Decoration, DecorationSet } from "@tiptap/pm/view";
 import type { Node as ProseMirrorNode } from "@tiptap/pm/model";
 
-// Lets the author's edit form show, directly inside the content they're
+// Lets the columnist's edit form show, directly inside the content they're
 // editing, exactly which passage an admin flagged when requesting changes —
 // not just the quoted excerpt sitting in a sidebar card disconnected from
 // its actual location in a (possibly long) article. Pure decorations: never

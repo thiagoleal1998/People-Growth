@@ -11,7 +11,7 @@ export default async function ComunicadosPage() {
 
   return (
     <div>
-      <PageHeader title="Comunicados" subtitle="Mensagens enviadas a todos os autores e admins. Aparecem na home do painel do autor." />
+      <PageHeader title="Comunicados" subtitle="Mensagens enviadas a todos os colunistas e admins. Aparecem na home do painel do colunista." />
       <AnnouncementsClient announcements={announcements} />
     </div>
   );

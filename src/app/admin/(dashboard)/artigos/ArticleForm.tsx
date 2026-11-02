@@ -11,7 +11,7 @@ import { SavedToast } from "@/components/admin/SavedToast";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { alertDialog } from "@/components/admin/dialog-store";
 import { upsertArticle, approveAndSchedule } from "./actions";
-import type { Article, ArticleSource, Category, Author } from "@/types/database.types";
+import type { Article, ArticleSource, Category, Columnist } from "@/types/database.types";
 import { AI_USAGE_OPTIONS, aiDisclosureText } from "@/lib/ai-disclosure";
 import { FORMAT_SEGMENT } from "@/lib/article-url";
 import { isEphemeralCoverImageUrl } from "@/lib/cover-image";
@@ -38,7 +38,7 @@ function slugifyPreview(text: string): string {
 export function ArticleForm({
   item,
   categories,
-  authors,
+  columnists,
   extraCategoryIds,
   coauthorIds,
   imageError,
@@ -47,7 +47,7 @@ export function ArticleForm({
 }: {
   item?: Article;
   categories: Category[];
-  authors: Author[];
+  columnists: Columnist[];
   extraCategoryIds?: string[];
   coauthorIds?: string[];
   imageError?: string;
@@ -86,7 +86,7 @@ export function ArticleForm({
   function toggleExtraCategory(id: string) {
     setExtraCategories((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
   }
-  const [authorId, setAuthorId] = useState(item?.author_id ?? "");
+  const [columnistId, setColumnistId] = useState(item?.columnist_id ?? "");
   const [coauthors, setCoauthors] = useState<string[]>(coauthorIds ?? []);
   function toggleCoauthor(id: string) {
     setCoauthors((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
@@ -258,7 +258,7 @@ export function ArticleForm({
 
             <Field
               label="Conteúdo (PT)"
-              hint='Use a barra de ferramentas para negrito, itálico, sublinhado, subtítulos, listas, citação, link e imagem — ou digite direto: **negrito**, _itálico_, ++sublinhado++, [link](url), ## subtítulo, ### subtítulo pequeno, "- " para lista, "> texto" para citação (com "> — Autor" numa linha própria, opcional).'
+              hint='Use a barra de ferramentas para negrito, itálico, sublinhado, subtítulos, listas, citação, link e imagem — ou digite direto: **negrito**, _itálico_, ++sublinhado++, [link](url), ## subtítulo, ### subtítulo pequeno, "- " para lista, "> texto" para citação (com "> — Colunista" numa linha própria, opcional).'
             >
               <MarkdownEditor ref={contentPtRef} name="content_pt" defaultValue={item?.content_pt ?? ""} />
             </Field>
@@ -376,7 +376,7 @@ export function ArticleForm({
               </Field>
               <Field
                 label="Status"
-                hint={item?.status === "pending" ? 'Para agendar a data pedida pelo autor, use o botão "Aprovar e agendar" abaixo — ou escolha "Agendado" aqui para definir a data você mesmo.' : undefined}
+                hint={item?.status === "pending" ? 'Para agendar a data pedida pelo colunista, use o botão "Aprovar e agendar" abaixo — ou escolha "Agendado" aqui para definir a data você mesmo.' : undefined}
               >
                 <Select name="status" defaultValue={item?.status ?? "draft"}>
                   <option value="draft">Rascunho</option>
@@ -406,7 +406,7 @@ export function ArticleForm({
                   Marcar como em atualização
                 </label>
               </Field>
-              <Field label="Tipo de conteúdo" hint="Notícia: fatos, de forma clara e verificável. Análise: interpreta e contextualiza os fatos. Opinião: ponto de vista do autor, aparece com a tag Mea Sententia.">
+              <Field label="Tipo de conteúdo" hint="Notícia: fatos, de forma clara e verificável. Análise: interpreta e contextualiza os fatos. Opinião: ponto de vista do colunista, aparece com a tag Mea Sententia.">
                 <Select name="format" value={format} onChange={(e) => setFormat(e.target.value as Article["format"])}>
                   <option value="noticia">Notícia</option>
                   <option value="analise">Análise</option>
@@ -444,24 +444,24 @@ export function ArticleForm({
                   ))}
                 </div>
               </Field>
-              <Field label="Autor principal">
+              <Field label="Colunista principal">
                 <Select
-                  name="author_id"
-                  value={authorId}
+                  name="columnist_id"
+                  value={columnistId}
                   onChange={(e) => {
-                    setAuthorId(e.target.value);
+                    setColumnistId(e.target.value);
                     setCoauthors((prev) => prev.filter((id) => id !== e.target.value));
                   }}
                 >
-                  <option value="">Sem autor definido</option>
-                  {authors.map((a) => (
+                  <option value="">Sem colunista definido</option>
+                  {columnists.map((a) => (
                     <option key={a.id} value={a.id}>{a.name}</option>
                   ))}
                 </Select>
               </Field>
-              <Field full label="Coautores" hint="Para textos colaborativos — aparecem junto do autor principal na assinatura do artigo.">
+              <Field full label="Coautores" hint="Para textos colaborativos — aparecem junto do colunista principal na assinatura do artigo.">
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.625rem 1.75rem" }}>
-                  {authors.filter((a) => a.id !== authorId).map((a) => (
+                  {columnists.filter((a) => a.id !== columnistId).map((a) => (
                     <label key={a.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
                       <input
                         type="checkbox"
@@ -479,7 +479,7 @@ export function ArticleForm({
                 label="Data de publicação agendada"
                 hint={
                   item?.status === "pending"
-                    ? "Data pedida pelo autor. Salvar aqui só atualiza a data — o artigo continua Pendente até você aprovar."
+                    ? "Data pedida pelo colunista. Salvar aqui só atualiza a data — o artigo continua Pendente até você aprovar."
                     : 'Usada enquanto o status é "Agendado" — o artigo vai ao ar sozinho a partir dessa data.'
                 }
               >

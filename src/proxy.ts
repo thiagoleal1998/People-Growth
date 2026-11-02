@@ -7,7 +7,16 @@ import type { Database } from "@/types/database.types";
 const intlMiddleware = createMiddleware(routing);
 
 export async function proxy(request: NextRequest) {
-  if (request.nextUrl.pathname.startsWith("/admin") || request.nextUrl.pathname.startsWith("/autor")) {
+  // The columnist panel used to live at /autor — old bookmarks/links still
+  // point there. Handled here (not next.config.ts's redirects()) because
+  // this proxy runs before Next's own redirect handling for every request
+  // under /autor anyway, so a redirects() entry would never be reached.
+  if (request.nextUrl.pathname.startsWith("/autor")) {
+    const url = request.nextUrl.clone();
+    url.pathname = url.pathname.replace(/^\/autor/, "/colunista");
+    return NextResponse.redirect(url, 308);
+  }
+  if (request.nextUrl.pathname.startsWith("/admin") || request.nextUrl.pathname.startsWith("/colunista")) {
     return handlePanelAuth(request);
   }
   return intlMiddleware(request);
@@ -55,7 +64,7 @@ async function handlePanelAuth(request: NextRequest) {
     .select("role")
     .eq("id", user.id)
     .single();
-  const role = profile?.role as "admin" | "author" | undefined;
+  const role = profile?.role as "admin" | "columnist" | undefined;
 
   // Authenticated but no profile row at all (shouldn't happen in normal
   // operation) — sign out instead of bouncing between routes forever.
@@ -67,7 +76,7 @@ async function handlePanelAuth(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  const home = role === "admin" ? "/admin" : "/autor";
+  const home = role === "admin" ? "/admin" : "/colunista";
 
   if (isLoginPage) {
     const url = request.nextUrl.clone();

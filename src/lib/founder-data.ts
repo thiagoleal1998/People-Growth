@@ -1,4 +1,4 @@
-import type { Author } from "@/types/database.types";
+import type { Columnist } from "@/types/database.types";
 
 export type Milestone = { year: string; label: string };
 
@@ -9,21 +9,21 @@ export type Milestone = { year: string; label: string };
 // columnist acceptance terms also hides the profile (their already-published
 // articles stay up — this only affects the profile page and the links to
 // it, see every call site of this function).
-export function isAuthorPubliclyVisible(author: Pick<Author, "photo_url" | "name" | "tagline_pt" | "terms_declined_at">): boolean {
-  return Boolean(author.photo_url?.trim() && author.name?.trim() && author.tagline_pt?.trim() && !author.terms_declined_at);
+export function isColumnistPubliclyVisible(columnist: Pick<Columnist, "photo_url" | "name" | "tagline_pt" | "terms_declined_at">): boolean {
+  return Boolean(columnist.photo_url?.trim() && columnist.name?.trim() && columnist.tagline_pt?.trim() && !columnist.terms_declined_at);
 }
 
-// "Sobre o autor"/"Sobre a autora" only works for the binary genders this
-// field started with — for every other option, dropping the noun
-// ("Sobre") sidesteps needing a gendered word at all, which is the
-// simplest respectful option in Portuguese (there's no single standard
-// neutral form in widespread formal use). The author's name is always
-// shown right next to this label already, so repeating it here would be
-// redundant rather than clarifying.
-export function aboutAuthorLabel(gender: Author["gender"], locale: string): string {
-  if (locale === "en") return "About the author";
-  if (gender === "masculino") return "Sobre o autor";
-  if (gender === "feminino") return "Sobre a autora";
+// "Colunista" itself doesn't flex by gender in Portuguese, but the article
+// before it ("o"/"a") still does — for every other gender option, dropping
+// the noun ("Sobre") sidesteps needing a gendered article at all, which is
+// the simplest respectful option (there's no single standard neutral form
+// in widespread formal use). The columnist's name is always shown right
+// next to this label already, so repeating it here would be redundant
+// rather than clarifying.
+export function aboutColumnistLabel(gender: Columnist["gender"], locale: string): string {
+  if (locale === "en") return "About the columnist";
+  if (gender === "masculino") return "Sobre o colunista";
+  if (gender === "feminino") return "Sobre a colunista";
   return "Sobre";
 }
 
@@ -39,7 +39,7 @@ export function parseMilestones(text: string | null): Milestone[] {
 
 // "A, B e C" (or "A, B and C" in English) for a collaborative piece's byline —
 // falls back to "" for an empty list so callers can just check truthiness.
-export function joinAuthorNames(names: string[], locale: string): string {
+export function joinColumnistNames(names: string[], locale: string): string {
   if (names.length === 0) return "";
   if (names.length === 1) return names[0];
   const and = locale === "en" ? "and" : "e";

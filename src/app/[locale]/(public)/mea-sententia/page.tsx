@@ -5,7 +5,7 @@ import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
 import { MEA_SENTENTIA_LOGO_URL } from "@/lib/brand-logos";
-import type { Article, Author, Category } from "@/types/database.types";
+import type { Article, Columnist, Category } from "@/types/database.types";
 
 export const revalidate = 300;
 
@@ -19,16 +19,16 @@ async function getMeaSententiaData() {
   const supabase = await createClient();
   const client = supabase as any;
 
-  const [{ data: articlesData }, { data: categoriesData }, { data: authorsData }] = await Promise.all([
+  const [{ data: articlesData }, { data: categoriesData }, { data: columnistsData }] = await Promise.all([
     client.from("articles").select("*").eq("format", "opiniao").eq("status", "published").order("published_at", { ascending: false }),
     client.from("categories").select("*"),
-    client.from("authors").select("*"),
+    client.from("columnists").select("*"),
   ]);
 
   return {
     articles: (articlesData ?? []) as Article[],
     categoryById: new Map(((categoriesData ?? []) as Category[]).map((c) => [c.id, c])),
-    authorById: new Map(((authorsData ?? []) as Author[]).map((a) => [a.id, a])),
+    columnistById: new Map(((columnistsData ?? []) as Columnist[]).map((a) => [a.id, a])),
   };
 }
 
@@ -45,7 +45,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function MeaSententiaPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const { articles, categoryById, authorById } = await getMeaSententiaData();
+  const { articles, categoryById, columnistById } = await getMeaSententiaData();
   const tc = await getTranslations({ locale, namespace: "common" });
 
   return (
@@ -145,9 +145,9 @@ export default async function MeaSententiaPage({ params }: { params: Promise<{ l
                           {pickLocale(locale, article.excerpt_pt, article.excerpt_en)}
                         </p>
                       )}
-                      {(article.author_id || article.published_at) && (
+                      {(article.columnist_id || article.published_at) && (
                         <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
-                          {article.author_id && authorById.get(article.author_id) && <>{tc("by")} {authorById.get(article.author_id)!.name} · </>}
+                          {article.columnist_id && columnistById.get(article.columnist_id) && <>{tc("by")} {columnistById.get(article.columnist_id)!.name} · </>}
                           {article.published_at && new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                         </span>
                       )}

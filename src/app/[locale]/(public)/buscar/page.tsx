@@ -5,7 +5,7 @@ import { Search, Calendar } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
-import type { Article, Author, Category } from "@/types/database.types";
+import type { Article, Columnist, Category } from "@/types/database.types";
 
 type ArticleWithCategory = Article & { categories: Pick<Category, "slug"> | null };
 
@@ -21,12 +21,12 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
   const tc = await getTranslations("common");
 
   let results: ArticleWithCategory[] = [];
-  let authorById = new Map<string, Author>();
+  let columnistById = new Map<string, Columnist>();
   if (query) {
     const supabase = await createClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const client = supabase as any;
-    const [{ data }, { data: authorsData }] = await Promise.all([
+    const [{ data }, { data: columnistsData }] = await Promise.all([
       client
         .from("articles")
         // "categories!category_id" disambiguates the embed now that articles has a
@@ -36,10 +36,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
         .or(`title_pt.ilike.%${query}%,excerpt_pt.ilike.%${query}%,content_pt.ilike.%${query}%,title_en.ilike.%${query}%,excerpt_en.ilike.%${query}%,content_en.ilike.%${query}%`)
         .order("published_at", { ascending: false })
         .limit(30),
-      client.from("authors").select("*"),
+      client.from("columnists").select("*"),
     ]);
     results = (data ?? []) as ArticleWithCategory[];
-    authorById = new Map(((authorsData ?? []) as Author[]).map((a) => [a.id, a]));
+    columnistById = new Map(((columnistsData ?? []) as Columnist[]).map((a) => [a.id, a]));
   }
 
   return (
@@ -105,10 +105,10 @@ export default async function SearchPage({ searchParams }: { searchParams: Promi
                     {pickLocale(locale, article.excerpt_pt, article.excerpt_en)}
                   </p>
                 )}
-                {(article.author_id || article.published_at) && (
+                {(article.columnist_id || article.published_at) && (
                   <span style={{ display: "flex", alignItems: "center", gap: "0.3125rem", fontSize: "0.75rem", color: "var(--site-faint)" }}>
                     <Calendar size={12} />
-                    {article.author_id && authorById.get(article.author_id) && <>{tc("by")} {authorById.get(article.author_id)!.name} · </>}
+                    {article.columnist_id && columnistById.get(article.columnist_id) && <>{tc("by")} {columnistById.get(article.columnist_id)!.name} · </>}
                     {article.published_at && new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                   </span>
                 )}

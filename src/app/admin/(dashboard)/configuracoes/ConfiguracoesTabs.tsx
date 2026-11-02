@@ -75,7 +75,7 @@ export function ConfiguracoesTabs({
   updateSeoConfigAction,
   siteUrl,
   adminMenuItems,
-  authorMenuItems,
+  columnistMenuItems,
   electionsStatus,
 }: {
   values: Record<string, string>;
@@ -88,7 +88,7 @@ export function ConfiguracoesTabs({
   updateSeoConfigAction: (formData: FormData) => void;
   siteUrl: string;
   adminMenuItems: MenuEditorItem[];
-  authorMenuItems: MenuEditorItem[];
+  columnistMenuItems: MenuEditorItem[];
   electionsStatus: ElectionStatusRow[];
 }) {
   const [active, setActive] = useState<TabId>(tabs.some((t) => t.id === initialTab) ? (initialTab as TabId) : "identidade");
@@ -128,10 +128,10 @@ export function ConfiguracoesTabs({
       ) : active === "menus" ? (
         <div style={panelStyle}>
           <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginBottom: "1.5rem" }}>
-            Ordem e nomes dos links nas sidebars do admin e do autor. Os caminhos (URLs) ficam fixos — só o texto exibido e a posição mudam.
+            Ordem e nomes dos links nas sidebars do admin e do colunista. Os caminhos (URLs) ficam fixos — só o texto exibido e a posição mudam.
           </p>
           <MenuEditor panel="admin" title="Menu do admin" items={adminMenuItems} />
-          <MenuEditor panel="autor" title="Menu do autor" items={authorMenuItems} />
+          <MenuEditor panel="colunista" title="Menu do colunista" items={columnistMenuItems} />
         </div>
       ) : (
       <form action={updateSiteConfig} style={{ maxWidth: "1400px" }}>
@@ -313,7 +313,7 @@ export function ConfiguracoesTabs({
         <div style={{ display: active === "notificacoes" ? "block" : "none" }}>
           <div style={panelStyle}>
             <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginBottom: "1.125rem" }}>
-              Texto das notificações (sino do painel, e futuramente push) enviadas a autores e admins. Mudanças aqui salvam na hora, sem precisar clicar em &quot;Salvar alterações&quot; no fim da página.
+              Texto das notificações (sino do painel, e futuramente push) enviadas a colunistas e admins. Mudanças aqui salvam na hora, sem precisar clicar em &quot;Salvar alterações&quot; no fim da página.
             </p>
             <NotificationTemplatesManager templates={notificationTemplates} />
           </div>

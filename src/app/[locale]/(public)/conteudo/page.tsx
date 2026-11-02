@@ -4,9 +4,9 @@ import { Link } from "@/i18n/navigation";
 import { NewsletterForm } from "@/components/NewsletterForm";
 import { createClient } from "@/lib/supabase/server";
 import { pickLocale } from "@/lib/locale-content";
-import { isAuthorPubliclyVisible } from "@/lib/founder-data";
+import { isColumnistPubliclyVisible } from "@/lib/founder-data";
 import { ArticlesExplorer } from "./ArticlesExplorer";
-import type { Article, Category, Tag, Author } from "@/types/database.types";
+import type { Article, Category, Tag, Columnist } from "@/types/database.types";
 
 export const revalidate = 300;
 
@@ -30,18 +30,18 @@ export default async function MeaSententiePage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const [articlesRes, categoriesRes, tagsRes, authorsRes, extraCategoriesRes] = await Promise.all([
+  const [articlesRes, categoriesRes, tagsRes, columnistsRes, extraCategoriesRes] = await Promise.all([
     client.from("articles").select("*").eq("status", "published").order("published_at", { ascending: false }),
     client.from("categories").select("*"),
     client.from("tags").select("*"),
-    client.from("authors").select("*").eq("status", "active").order("order"),
+    client.from("columnists").select("*").eq("status", "active").order("order"),
     client.from("article_categories").select("article_id, category_id"),
   ]);
 
   const articles = (articlesRes.data ?? []) as Article[];
   const categories = (categoriesRes.data ?? []) as Category[];
   const tags = (tagsRes.data ?? []) as Tag[];
-  const authors = ((authorsRes.data ?? []) as Author[]).filter(isAuthorPubliclyVisible);
+  const columnists = ((columnistsRes.data ?? []) as Columnist[]).filter(isColumnistPubliclyVisible);
 
   // Categories shown in the sidebar: same "must have a published article" rule as the
   // home bar and /conteudo/categorias — counting both an article's primary category
@@ -57,9 +57,9 @@ export default async function MeaSententiePage() {
 
   const mostRead = [...articles].sort((a, b) => b.views - a.views).slice(0, 4);
 
-  const latestByAuthor = new Map<string, Article>();
+  const latestByColumnist = new Map<string, Article>();
   for (const a of articles) {
-    if (a.author_id && !latestByAuthor.has(a.author_id)) latestByAuthor.set(a.author_id, a);
+    if (a.columnist_id && !latestByColumnist.has(a.columnist_id)) latestByColumnist.set(a.columnist_id, a);
   }
 
   return (
@@ -111,18 +111,18 @@ export default async function MeaSententiePage() {
       </section>
 
       {/* Columnists strip */}
-      {authors.length > 0 && (
+      {columnists.length > 0 && (
         <section style={{ backgroundColor: "var(--site-bg)", borderTop: "2px solid #315E9C", borderBottom: "1px solid var(--site-border)" }}>
           <div
             className="container-xl"
             style={{ display: "flex", justifyContent: "center", gap: "2rem", padding: "1.5rem 0", flexWrap: "wrap", overflowX: "auto" }}
           >
-            {authors.map((author) => {
-              const latest = latestByAuthor.get(author.id);
+            {columnists.map((columnist) => {
+              const latest = latestByColumnist.get(columnist.id);
               return (
                 <Link
-                  key={author.id}
-                  href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
+                  key={columnist.id}
+                  href={{ pathname: "/conteudo/colunista/[slug]", params: { slug: columnist.slug } }}
                   style={{ display: "flex", alignItems: "flex-start", gap: "0.75rem", textDecoration: "none", width: "260px" }}
                 >
                   <div
@@ -131,11 +131,11 @@ export default async function MeaSententiePage() {
                       height: "3.5rem",
                       borderRadius: "0.375rem",
                       flexShrink: 0,
-                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+                      background: columnist.photo_url ? `url("${columnist.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                     }}
                   />
                   <div>
-                    <div style={{ fontWeight: 800, fontSize: "0.875rem", color: "#315E9C", marginBottom: "0.25rem" }}>{author.name}</div>
+                    <div style={{ fontWeight: 800, fontSize: "0.875rem", color: "#315E9C", marginBottom: "0.25rem" }}>{columnist.name}</div>
                     <div
                       style={{
                         color: "var(--site-text-secondary)",
@@ -147,8 +147,8 @@ export default async function MeaSententiePage() {
                         overflow: "hidden",
                       }}
                     >
-                      {pickLocale(locale, author.tagline_pt, author.tagline_en)?.trim() ||
-                        (latest ? pickLocale(locale, latest.title_pt, latest.title_en) : pickLocale(locale, author.role_pt, author.role_en))}
+                      {pickLocale(locale, columnist.tagline_pt, columnist.tagline_en)?.trim() ||
+                        (latest ? pickLocale(locale, latest.title_pt, latest.title_en) : pickLocale(locale, columnist.role_pt, columnist.role_en))}
                     </div>
                   </div>
                 </Link>
@@ -170,7 +170,7 @@ export default async function MeaSententiePage() {
               categories={categories}
               categoriesWithArticles={categoriesWithArticles}
               tags={tags}
-              authors={authors}
+              columnists={columnists}
               mostRead={mostRead}
               searchPlaceholder={t("search")}
               noResultsText={t("noResults")}

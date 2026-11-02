@@ -14,13 +14,13 @@ type OuterTabId = (typeof outerTabs)[number]["id"];
 
 export function ArtigosComentariosTabs({
   articles,
-  currentAuthorId,
+  currentColumnistId,
   comments,
   articleTitles,
   initialTab,
 }: {
   articles: Article[];
-  currentAuthorId: string | null;
+  currentColumnistId: string | null;
   comments: Comment[];
   articleTitles: Record<string, string>;
   initialTab?: string;
@@ -76,7 +76,7 @@ export function ArtigosComentariosTabs({
       </div>
 
       {active === "artigos" ? (
-        <ArticlesTabs articles={articles} currentAuthorId={currentAuthorId} />
+        <ArticlesTabs articles={articles} currentColumnistId={currentColumnistId} />
       ) : (
         <CommentsClient comments={comments} articleTitles={articleTitles} />
       )}

@@ -3,7 +3,7 @@ import { Plus, Instagram, Linkedin, MessageCircle, Music2, Youtube, X as XIcon, 
 import { WEEKDAYS_PT, type CalendarCell } from "@/lib/calendar-grid";
 import type { Article, ContentCalendarItem } from "@/types/database.types";
 
-type ArticlePill = Pick<Article, "id" | "title_pt" | "status" | "scheduled_for" | "author_id"> & { authorName: string | null };
+type ArticlePill = Pick<Article, "id" | "title_pt" | "status" | "scheduled_for" | "columnist_id"> & { columnistName: string | null };
 
 const PLATFORM_LABEL: Record<NonNullable<ContentCalendarItem["platform"]>, string> = {
   instagram: "Instagram",
@@ -91,7 +91,7 @@ export function CalendarGrid({
                       <Link
                         key={`a-${a.id}`}
                         href={pending ? `/admin/artigos/${a.id}/revisar` : `/admin/artigos/${a.id}`}
-                        title={`${a.title_pt}${a.authorName ? ` — ${a.authorName}` : ""}`}
+                        title={`${a.title_pt}${a.columnistName ? ` — ${a.columnistName}` : ""}`}
                         style={{
                           display: "block",
                           padding: "0.125rem 0.375rem",

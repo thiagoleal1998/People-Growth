@@ -4,7 +4,7 @@ import { BellRing, BellOff } from "lucide-react";
 import { usePushSubscription } from "@/lib/use-push-subscription";
 
 // Mounted in NotificationBell's dropdown footer — the one place both the
-// admin and author sidebars pick it up for free, same as NotificationBell
+// admin and columnist sidebars pick it up for free, same as NotificationBell
 // itself. The more insistent top-of-page nudge is PushReminderBanner.tsx;
 // this is the quiet, always-available toggle for turning it back off.
 export function PushOptIn() {

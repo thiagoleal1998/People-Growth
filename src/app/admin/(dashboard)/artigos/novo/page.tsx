@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/server";
 import { ArticleForm } from "../ArticleForm";
-import type { Category, Author } from "@/types/database.types";
+import type { Category, Columnist } from "@/types/database.types";
 
 export default async function NovoArtigoPage({
   searchParams,
@@ -11,10 +11,10 @@ export default async function NovoArtigoPage({
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data: categoriesData }, { data: authorsData }] = await Promise.all([
+  const [{ data: categoriesData }, { data: columnistsData }] = await Promise.all([
     client.from("categories").select("*").order("name_pt"),
-    client.from("authors").select("*").order("name"),
+    client.from("columnists").select("*").order("name"),
   ]);
 
-  return <ArticleForm categories={(categoriesData ?? []) as Category[]} authors={(authorsData ?? []) as Author[]} saveError={saveError} />;
+  return <ArticleForm categories={(categoriesData ?? []) as Category[]} columnists={(columnistsData ?? []) as Columnist[]} saveError={saveError} />;
 }

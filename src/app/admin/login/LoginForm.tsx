@@ -4,9 +4,9 @@ import { useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, Loader2, Sparkles, ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { APP_VERSION } from "@/lib/version";
-import type { Author } from "@/types/database.types";
+import type { Columnist } from "@/types/database.types";
 
-export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Author[] }) {
+export function LoginForm({ logoUrl, columnists }: { logoUrl?: string; columnists: Columnist[] }) {
   const [mode, setMode] = useState<"login" | "forgot">("login");
 
   return (
@@ -59,28 +59,28 @@ export function LoginForm({ logoUrl, authors }: { logoUrl?: string; authors: Aut
             <br />
             Vamos construir <span style={{ background: "linear-gradient(135deg, #315E9C, #C89A4A)", WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent" }}>juntos</span>.
           </h1>
-          <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1rem", lineHeight: 1.6, marginBottom: authors.length > 0 ? "2.5rem" : 0 }}>
+          <p style={{ color: "rgba(255,255,255,0.6)", fontSize: "1rem", lineHeight: 1.6, marginBottom: columnists.length > 0 ? "2.5rem" : 0 }}>
             Publique artigos, acompanhe métricas e mantenha o Grupo Festina sempre atualizado — tudo em um só lugar.
           </p>
 
-          {authors.length > 0 && (
+          {columnists.length > 0 && (
             <div style={{ paddingTop: "2rem", borderTop: "1px solid rgba(255,255,255,0.08)" }}>
               <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#C89A4A", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "1rem" }}>
                 Quem está por trás do Grupo Festina
               </div>
               <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
-              {authors.slice(0, 4).map((author) => (
-                <div key={author.id} style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
+              {columnists.slice(0, 4).map((columnist) => (
+                <div key={columnist.id} style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
                   <div
                     style={{
                       width: "2.25rem",
                       height: "2.25rem",
                       borderRadius: "50%",
                       flexShrink: 0,
-                      background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+                      background: columnist.photo_url ? `url("${columnist.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                     }}
                   />
-                  <span style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8125rem", fontWeight: 600 }}>{author.name}</span>
+                  <span style={{ color: "rgba(255,255,255,0.55)", fontSize: "0.8125rem", fontWeight: 600 }}>{columnist.name}</span>
                 </div>
               ))}
               </div>
@@ -169,7 +169,7 @@ function LoginFields({ onForgotPassword }: { onForgotPassword: () => void }) {
     // Hard navigation, and loading stays true: a client-side router.push
     // here can visually flip the button back to "Entrar" for a moment
     // before the redirect lands, making it look stuck (same root cause
-    // fixed for the admin/author logout buttons).
+    // fixed for the admin/columnist logout buttons).
     window.location.href = "/admin";
   }
 

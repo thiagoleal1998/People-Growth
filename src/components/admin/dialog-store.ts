@@ -2,10 +2,10 @@
 
 // Imperative in-app replacements for window.confirm/prompt/alert — those
 // native browser dialogs can't be styled or themed and look out of place
-// next to the rest of the admin/author UI. Any client component can call
+// next to the rest of the admin/columnist UI. Any client component can call
 // confirmDialog()/promptDialog()/alertDialog() from anywhere (event handlers,
 // no provider wiring needed) and DialogHost — mounted once in the admin and
-// author root layouts — renders the actual modal and resolves the promise.
+// columnist root layouts — renders the actual modal and resolves the promise.
 
 type ConfirmRequest = {
   kind: "confirm";

@@ -5,8 +5,8 @@ import { ArrowLeft, ArrowRight, Award, Linkedin, Instagram, Mail, Globe } from "
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { createClient } from "@/lib/supabase/server";
 import { pickLocale } from "@/lib/locale-content";
-import type { Author } from "@/types/database.types";
-import { parseMilestones, bioParagraphs, isAuthorPubliclyVisible } from "@/lib/founder-data";
+import type { Columnist } from "@/types/database.types";
+import { parseMilestones, bioParagraphs, isColumnistPubliclyVisible } from "@/lib/founder-data";
 
 export const revalidate = 300;
 
@@ -15,16 +15,16 @@ async function getFounder(slug: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const { data: author } = await client.from("authors").select("*").eq("slug", slug).eq("status", "active").single();
-  if (!author || !isAuthorPubliclyVisible(author)) return null;
+  const { data: columnist } = await client.from("columnists").select("*").eq("slug", slug).eq("status", "active").single();
+  if (!columnist || !isColumnistPubliclyVisible(columnist)) return null;
 
   const { count } = await client
     .from("articles")
     .select("id", { count: "exact", head: true })
-    .eq("author_id", author.id)
+    .eq("columnist_id", columnist.id)
     .eq("status", "published");
 
-  return { author: author as Author, articleCount: count ?? 0 };
+  return { columnist: columnist as Columnist, articleCount: count ?? 0 };
 }
 
 export async function generateMetadata({
@@ -36,8 +36,8 @@ export async function generateMetadata({
   const result = await getFounder(slug);
   if (!result) return { title: "Não encontrado" };
   return {
-    title: result.author.name,
-    description: pickLocale(locale, result.author.tagline_pt, result.author.tagline_en) ?? pickLocale(locale, result.author.role_pt, result.author.role_en) ?? undefined,
+    title: result.columnist.name,
+    description: pickLocale(locale, result.columnist.tagline_pt, result.columnist.tagline_en) ?? pickLocale(locale, result.columnist.role_pt, result.columnist.role_en) ?? undefined,
   };
 }
 
@@ -53,9 +53,9 @@ export default async function FounderPage({
   const result = await getFounder(slug);
   if (!result) notFound();
 
-  const { author, articleCount } = result;
-  const milestones = parseMilestones(pickLocale(locale, author.milestones_pt, author.milestones_en));
-  const paragraphs = bioParagraphs(pickLocale(locale, author.bio_pt, author.bio_en));
+  const { columnist, articleCount } = result;
+  const milestones = parseMilestones(pickLocale(locale, columnist.milestones_pt, columnist.milestones_en));
+  const paragraphs = bioParagraphs(pickLocale(locale, columnist.bio_pt, columnist.bio_en));
   // Reached from the founders grid on /sobre, the columnist cards on
   // /conteudo/colunistas (tagged with ?from=colunistas), or a direct
   // link/search result with no ?from= at all — in every one of those except
@@ -64,10 +64,10 @@ export default async function FounderPage({
   const cameFromColunistas = from === "colunistas";
   const backHref = cameFromColunistas
     ? "/conteudo/colunistas"
-    : { pathname: "/conteudo/autor/[slug]" as const, params: { slug: author.slug } };
+    : { pathname: "/conteudo/colunista/[slug]" as const, params: { slug: columnist.slug } };
   const backLabel = cameFromColunistas
     ? (locale === "en" ? "Columnists" : "Colunistas")
-    : (locale === "en" ? "Author's content" : "Conteúdos do autor");
+    : (locale === "en" ? "Columnist's content" : "Conteúdos do colunista");
 
   return (
     <>
@@ -102,46 +102,46 @@ export default async function FounderPage({
                 height: "6rem",
                 borderRadius: "50%",
                 flexShrink: 0,
-                background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+                background: columnist.photo_url ? `url("${columnist.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
               }}
             />
             <div style={{ flex: 1, minWidth: "240px" }}>
               <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, marginBottom: "0.375rem" }}>
-                {author.name}
+                {columnist.name}
               </h1>
-              {author.role_pt && (
+              {columnist.role_pt && (
                 <p style={{ color: "#C89A4A", fontWeight: 600, fontSize: "1rem", marginBottom: "0.875rem" }}>
-                  {pickLocale(locale, author.role_pt, author.role_en)}
+                  {pickLocale(locale, columnist.role_pt, columnist.role_en)}
                 </p>
               )}
-              {author.tagline_pt && (
+              {columnist.tagline_pt && (
                 <p style={{ color: "rgba(255,255,255,0.7)", lineHeight: 1.7, marginBottom: "1rem", maxWidth: "560px", fontStyle: "italic" }}>
-                  &ldquo;{pickLocale(locale, author.tagline_pt, author.tagline_en)}&rdquo;
+                  &ldquo;{pickLocale(locale, columnist.tagline_pt, columnist.tagline_en)}&rdquo;
                 </p>
               )}
               <div style={{ display: "flex", gap: "0.875rem" }}>
-                {author.linkedin_url && (
-                  <a href={author.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={{ color: "rgba(255,255,255,0.6)" }}>
+                {columnist.linkedin_url && (
+                  <a href={columnist.linkedin_url} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" style={{ color: "rgba(255,255,255,0.6)" }}>
                     <Linkedin size={19} />
                   </a>
                 )}
-                {author.instagram_url && (
-                  <a href={author.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "rgba(255,255,255,0.6)" }}>
+                {columnist.instagram_url && (
+                  <a href={columnist.instagram_url} target="_blank" rel="noopener noreferrer" aria-label="Instagram" style={{ color: "rgba(255,255,255,0.6)" }}>
                     <Instagram size={19} />
                   </a>
                 )}
-                {author.whatsapp_url && (
-                  <a href={author.whatsapp_url} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" style={{ color: "rgba(255,255,255,0.6)" }}>
+                {columnist.whatsapp_url && (
+                  <a href={columnist.whatsapp_url} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" style={{ color: "rgba(255,255,255,0.6)" }}>
                     <WhatsAppIcon size={19} />
                   </a>
                 )}
-                {author.website_url && (
-                  <a href={author.website_url} target="_blank" rel="noopener noreferrer" aria-label="Site" style={{ color: "rgba(255,255,255,0.6)" }}>
+                {columnist.website_url && (
+                  <a href={columnist.website_url} target="_blank" rel="noopener noreferrer" aria-label="Site" style={{ color: "rgba(255,255,255,0.6)" }}>
                     <Globe size={19} />
                   </a>
                 )}
-                {author.email && (
-                  <a href={`mailto:${author.email}`} aria-label="E-mail" style={{ color: "rgba(255,255,255,0.6)" }}>
+                {columnist.email && (
+                  <a href={`mailto:${columnist.email}`} aria-label="E-mail" style={{ color: "rgba(255,255,255,0.6)" }}>
                     <Mail size={19} />
                   </a>
                 )}
@@ -166,7 +166,7 @@ export default async function FounderPage({
             {paragraphs.length > 0 && (
               <div style={{ marginBottom: "2.5rem" }}>
                 <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "1rem" }}>
-                  {locale === "en" ? `About ${author.name.split(" ")[0]}` : `Sobre ${author.name.split(" ")[0]}`}
+                  {locale === "en" ? `About ${columnist.name.split(" ")[0]}` : `Sobre ${columnist.name.split(" ")[0]}`}
                 </h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                   {paragraphs.map((p, i) => (
@@ -180,7 +180,7 @@ export default async function FounderPage({
 
             {articleCount > 0 && (
               <Link
-                href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug } }}
+                href={{ pathname: "/conteudo/colunista/[slug]", params: { slug: columnist.slug } }}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",
@@ -193,7 +193,7 @@ export default async function FounderPage({
                   fontSize: "0.9375rem",
                 }}
               >
-                {locale === "en" ? `View ${author.name.split(" ")[0]}'s articles` : `Ver artigos de ${author.name.split(" ")[0]}`} <ArrowRight size={18} />
+                {locale === "en" ? `View ${columnist.name.split(" ")[0]}'s articles` : `Ver artigos de ${columnist.name.split(" ")[0]}`} <ArrowRight size={18} />
               </Link>
             )}
           </div>

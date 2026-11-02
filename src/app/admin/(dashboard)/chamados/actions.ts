@@ -66,7 +66,7 @@ export async function createInternalTicket(data: { type: InternalTicket["type"];
   await logActivity({ userId: profile.id, userEmail: profile.email, action: "create", entityType: "chamado interno", entityLabel: data.title });
 
   revalidatePath("/admin/chamados");
-  revalidatePath("/autor/chamados");
+  revalidatePath("/colunista/chamados");
   return created as InternalTicket;
 }
 
@@ -94,7 +94,7 @@ export async function updateTicketStatus(id: string, status: InternalTicket["sta
 
   await logActivity({ userId: actor.id, userEmail: actor.email, action: "update", entityType: "chamado interno", entityLabel: `${ticket.title} → ${status}` });
   revalidatePath("/admin/chamados");
-  revalidatePath("/autor/chamados");
+  revalidatePath("/colunista/chamados");
 }
 
 export async function assignTicket(id: string, userId: string | null) {
@@ -148,7 +148,7 @@ export async function assignTicket(id: string, userId: string | null) {
   }
 
   revalidatePath("/admin/chamados");
-  revalidatePath("/autor/chamados");
+  revalidatePath("/colunista/chamados");
 }
 
 export async function notifyTicketMember(id: string) {
@@ -175,7 +175,7 @@ export async function notifyTicketMember(id: string) {
     ticket.assigned_to,
     "ticket_member_notified",
     { ticket_code: ticketCode, ticket_title: ticket.title },
-    assigneeProfile.role === "admin" ? "/admin/chamados" : "/autor/chamados"
+    assigneeProfile.role === "admin" ? "/admin/chamados" : "/colunista/chamados"
   );
   await client.from("ticket_events").insert({
     ticket_id: id,
@@ -185,23 +185,23 @@ export async function notifyTicketMember(id: string) {
   });
 
   revalidatePath("/admin/chamados");
-  revalidatePath("/autor/chamados");
+  revalidatePath("/colunista/chamados");
 }
 
 export async function addTicketComment(id: string, body: string) {
   const profile = await getCurrentProfile();
   if (!profile) throw new Error("Não autenticado");
-  const authorName = await resolveActorName(profile);
+  const commenterName = await resolveActorName(profile);
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   await (supabase as any).from("ticket_comments").insert({
     ticket_id: id,
     author_id: profile.id,
-    author_name: authorName,
+    author_name: commenterName,
     body,
   });
   revalidatePath("/admin/chamados");
-  revalidatePath("/autor/chamados");
+  revalidatePath("/colunista/chamados");
 }
 
 export async function deleteInternalTicket(id: string) {

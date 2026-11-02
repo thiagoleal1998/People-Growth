@@ -22,9 +22,9 @@ export const routing = defineRouting({
       pt: "/conteudo/[format]/categoria/[category]/[slug]",
       en: "/content/[format]/category/[category]/[slug]",
     },
-    "/conteudo/autor/[slug]": {
-      pt: "/conteudo/autor/[slug]",
-      en: "/content/author/[slug]",
+    "/conteudo/colunista/[slug]": {
+      pt: "/conteudo/colunista/[slug]",
+      en: "/content/columnist/[slug]",
     },
     "/conteudo/colunistas": {
       pt: "/conteudo/colunistas",

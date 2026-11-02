@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { generateExcerptAndSummary } from "@/lib/summarize";
 
-// Used by both the admin and author article editors — same access level as
+// Used by both the admin and columnist article editors — same access level as
 // translate-article and upload-content-image.
 export async function POST(req: NextRequest) {
   const profile = await getCurrentProfile();

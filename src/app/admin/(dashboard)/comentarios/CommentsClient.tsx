@@ -49,7 +49,7 @@ export function CommentsClient({
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                {["Artigo", "Comentário", "Autor", "Denúncias", "Status", "Data", ""].map((h) => (
+                {["Artigo", "Comentário", "Colunista", "Denúncias", "Status", "Data", ""].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>

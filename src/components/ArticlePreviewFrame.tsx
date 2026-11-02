@@ -4,8 +4,8 @@ import { ArticleBody } from "@/components/ArticleBody";
 import { renderMarkdownLite, stripMarkdownLite } from "@/lib/markdown-lite";
 import { aiDisclosureText } from "@/lib/ai-disclosure";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
-import { aboutAuthorLabel, joinAuthorNames } from "@/lib/founder-data";
-import type { Article, Category, Author } from "@/types/database.types";
+import { aboutColumnistLabel, joinColumnistNames } from "@/lib/founder-data";
+import type { Article, Category, Columnist } from "@/types/database.types";
 
 const statusLabel: Record<Article["status"], string> = {
   draft: "Rascunho",
@@ -16,11 +16,11 @@ const statusLabel: Record<Article["status"], string> = {
 
 /** Renders a draft/pending article exactly the way it'll look on the
  * public site, reusing the same ArticleBody component — so what the
- * author/admin sees here is what actually ships, not an approximation. */
-export function ArticlePreviewFrame({ article, author, coauthors, category }: { article: Article; author: Author | null; coauthors?: Author[]; category: Category | null }) {
+ * columnist/admin sees here is what actually ships, not an approximation. */
+export function ArticlePreviewFrame({ article, columnist, coauthors, category }: { article: Article; columnist: Columnist | null; coauthors?: Columnist[]; category: Category | null }) {
   const previewAiText = aiDisclosureText(article.ai_usage, "pt");
   const previewAiDisclosure = previewAiText ? { title: "Declaração sobre o uso de inteligência artificial", text: previewAiText } : null;
-  const allAuthors = [author, ...(coauthors ?? [])].filter((a): a is Author => Boolean(a));
+  const allColumnists = [columnist, ...(coauthors ?? [])].filter((a): a is Columnist => Boolean(a));
   return (
     <div>
       <div
@@ -75,12 +75,12 @@ export function ArticlePreviewFrame({ article, author, coauthors, category }: { 
               <Clock size={14} /> {article.read_time} min de leitura
             </span>
           )}
-          {allAuthors.length > 0 && <span>Por {joinAuthorNames(allAuthors.map((a) => a.name), "pt")}</span>}
+          {allColumnists.length > 0 && <span>Por {joinColumnistNames(allColumnists.map((a) => a.name), "pt")}</span>}
         </div>
       </div>
 
       <div style={{ backgroundColor: "var(--site-bg)", borderRadius: "0 0 1rem 1rem", padding: "2.5rem", border: "1px solid var(--site-border)", borderTop: "none" }}>
-        {allAuthors.length > 0 && (
+        {allColumnists.length > 0 && (
           <div
             style={{
               display: "flex",
@@ -93,7 +93,7 @@ export function ArticlePreviewFrame({ article, author, coauthors, category }: { 
               borderBottom: "1px solid var(--site-border)",
             }}
           >
-            {allAuthors.map((a) => (
+            {allColumnists.map((a) => (
               <div key={a.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                 <div
                   style={{
@@ -107,7 +107,7 @@ export function ArticlePreviewFrame({ article, author, coauthors, category }: { 
                 <div>
                   <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "0.9375rem" }}>{a.name}</div>
                   <div style={{ color: "#315E9C", fontWeight: 700, fontSize: "0.8125rem" }}>
-                    {aboutAuthorLabel(a.gender, "pt")}
+                    {aboutColumnistLabel(a.gender, "pt")}
                   </div>
                 </div>
               </div>

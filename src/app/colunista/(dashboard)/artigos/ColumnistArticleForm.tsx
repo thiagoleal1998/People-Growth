@@ -1,0 +1,580 @@
+"use client";
+
+import { useRef, useState } from "react";
+import Link from "next/link";
+import { Eye, Languages, Sparkles, Loader2, TriangleAlert } from "lucide-react";
+import { Field, Input, Textarea, Select, SubmitButton, Badge } from "@/components/admin/ui";
+import { MarkdownEditor, type MarkdownEditorHandle } from "@/components/admin/MarkdownEditor";
+import { DateTimePicker } from "@/components/admin/DateTimePicker";
+import { SeoPreview } from "@/components/admin/SeoPreview";
+import { SavedToast } from "@/components/admin/SavedToast";
+import { ErrorBanner } from "@/components/admin/ErrorBanner";
+import { alertDialog } from "@/components/admin/dialog-store";
+import { upsertOwnArticle } from "./actions";
+import type { Article, Columnist, Category, ArticleSource } from "@/types/database.types";
+import { FORMAT_SEGMENT } from "@/lib/article-url";
+import { AI_USAGE_OPTIONS, aiDisclosureText } from "@/lib/ai-disclosure";
+import { isEphemeralCoverImageUrl } from "@/lib/cover-image";
+
+const tabs = [
+  { id: "conteudo", label: "Conteúdo" },
+  { id: "fontes", label: "Fontes" },
+  { id: "detalhes", label: "Detalhes" },
+  { id: "seo", label: "SEO" },
+] as const;
+
+type TabId = (typeof tabs)[number]["id"];
+
+const statusDisplay: Record<Article["status"], { label: string; tone: "success" | "warning" | "neutral" }> = {
+  draft: { label: "Rascunho", tone: "neutral" },
+  // Shown here (in the editor) as "Enviado para Aprovação"; the same
+  // underlying status shows as "Aguardando Aprovação" in the "Meus
+  // artigos" list — same state, worded for where it's read.
+  pending: { label: "Enviado para Aprovação", tone: "warning" },
+  scheduled: { label: "Agendado", tone: "warning" },
+  published: { label: "Publicado", tone: "success" },
+};
+
+// requestChanges (admin side) joins each annotation as "Trecho: "quote"\n→ note"
+// blocks separated by a blank line — parsed back here so the columnist sees the
+// exact passage the admin highlighted, not just a wall of text. Feedback saved
+// before this format existed (plain free text) falls through with no matches
+// and is shown as-is by the caller.
+function parseFeedbackBlocks(feedback: string): { quote: string; note: string }[] {
+  return feedback
+    .split(/\n\n+/)
+    .map((block) => {
+      const match = block.match(/^Trecho: "([\s\S]*)"\n→ ([\s\S]*)$/);
+      return match ? { quote: match[1], note: match[2] } : null;
+    })
+    .filter((b): b is { quote: string; note: string } => b !== null);
+}
+
+function slugifyPreview(text: string): string {
+  return text
+    .trim()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/(^-|-$)/g, "");
+}
+
+export function ColumnistArticleForm({ item, categories, otherColumnists, extraCategoryIds, coauthorIds, imageError, saveError, saved }: { item?: Article; categories: Category[]; otherColumnists?: Columnist[]; extraCategoryIds?: string[]; coauthorIds?: string[]; imageError?: string; saveError?: string; saved?: boolean }) {
+  const action = upsertOwnArticle.bind(null, item?.id ?? null);
+  const [active, setActive] = useState<TabId>("conteudo");
+  const [coverImageUrl, setCoverImageUrl] = useState("");
+  const [titlePt, setTitlePt] = useState(item?.title_pt ?? "");
+  const [excerptPt, setExcerptPt] = useState(item?.excerpt_pt ?? "");
+  const [summaryPt, setSummaryPt] = useState(item?.summary_pt ?? "");
+  const [titleEn, setTitleEn] = useState(item?.title_en ?? "");
+  const [excerptEn, setExcerptEn] = useState(item?.excerpt_en ?? "");
+  const [summaryEn, setSummaryEn] = useState(item?.summary_en ?? "");
+  const [seoTitlePt, setSeoTitlePt] = useState(item?.seo_title_pt ?? "");
+  const [seoDescPt, setSeoDescPt] = useState(item?.seo_desc_pt ?? "");
+  const [slug, setSlug] = useState(item?.slug ?? "");
+  const [format, setFormat] = useState<Article["format"]>(item?.format ?? "opiniao");
+  const [categoryId, setCategoryId] = useState(item?.category_id ?? "");
+  const [extraCategories, setExtraCategories] = useState<string[]>(extraCategoryIds ?? []);
+  function toggleExtraCategory(id: string) {
+    setExtraCategories((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
+  }
+  const [coauthors, setCoauthors] = useState<string[]>(coauthorIds ?? []);
+  function toggleCoauthor(id: string) {
+    setCoauthors((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
+  }
+  const [sources, setSources] = useState<ArticleSource[]>(item?.sources ?? []);
+  function updateSource(index: number, patch: Partial<ArticleSource>) {
+    setSources((prev) => prev.map((source, i) => (i === index ? { ...source, ...patch } : source)));
+  }
+  function removeSource(index: number) {
+    setSources((prev) => prev.filter((_, i) => i !== index));
+  }
+  // null = not answered yet — only a brand-new article starts this way, so
+  // the columnist is forced to make an explicit choice instead of silently
+  // publishing under a default. An article that was already saved before
+  // (even with an empty ai_usage) already has an answer on record ("Não").
+  const [aiUsed, setAiUsed] = useState<"yes" | "no" | null>(item ? ((item.ai_usage ?? []).length > 0 ? "yes" : "no") : null);
+  const [aiUsage, setAiUsage] = useState<string[]>(item?.ai_usage ?? []);
+  function toggleAiUsage(value: string) {
+    setAiUsage((prev) => (prev.includes(value) ? prev.filter((v) => v !== value) : [...prev, value]));
+  }
+  const [translating, setTranslating] = useState(false);
+  const [generatingExcerpt, setGeneratingExcerpt] = useState(false);
+  const contentPtRef = useRef<MarkdownEditorHandle>(null);
+  const contentEnRef = useRef<MarkdownEditorHandle>(null);
+
+  async function handleGenerateExcerpt() {
+    const content = contentPtRef.current?.getContent() ?? "";
+    if (!content.trim()) {
+      await alertDialog("Escreva o conteúdo em português antes de gerar a linha fina e o resumo.");
+      return;
+    }
+    setGeneratingExcerpt(true);
+    try {
+      const res = await fetch("/api/admin/generate-excerpt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ title_pt: titlePt, content_pt: content }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Falha ao gerar a linha fina e o resumo.");
+      setExcerptPt(data.excerpt_pt);
+      setSummaryPt(data.summary_pt);
+    } catch (err) {
+      await alertDialog(err instanceof Error ? err.message : "Erro ao gerar a linha fina e o resumo.");
+    } finally {
+      setGeneratingExcerpt(false);
+    }
+  }
+
+  async function handleTranslate() {
+    if (!titlePt.trim() && !contentPtRef.current?.getContent().trim()) {
+      await alertDialog("Preencha o título ou o conteúdo em português antes de traduzir.");
+      return;
+    }
+    setTranslating(true);
+    try {
+      const res = await fetch("/api/admin/translate-article", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title_pt: titlePt,
+          excerpt_pt: excerptPt,
+          summary_pt: summaryPt,
+          content_pt: contentPtRef.current?.getContent() ?? "",
+        }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error ?? "Falha ao traduzir o artigo.");
+      setTitleEn(data.title_en);
+      setExcerptEn(data.excerpt_en);
+      setSummaryEn(data.summary_en);
+      contentEnRef.current?.setContent(data.content_en);
+    } catch (err) {
+      await alertDialog(err instanceof Error ? err.message : "Erro ao traduzir o artigo.");
+    } finally {
+      setTranslating(false);
+    }
+  }
+
+  const formatSegment = FORMAT_SEGMENT[format];
+  const categorySlug = categories.find((c) => c.id === categoryId)?.slug || "geral";
+  const previewUrl = `grupofestina.com.br › conteudo › ${formatSegment} › categoria › ${categorySlug} › ${slug || slugifyPreview(titlePt) || "..."}`;
+  const status = item?.status ?? "draft";
+  const feedbackBlocks = item?.review_feedback ? parseFeedbackBlocks(item.review_feedback) : [];
+  // The three action buttons live in the sidebar (see below) — this only
+  // changes their wording so a resubmission after requested changes reads
+  // as "reenviar", not the generic first-submission copy.
+  const isResubmission = Boolean(item?.review_feedback);
+
+  const sidebarCardStyle: React.CSSProperties = {
+    backgroundColor: "var(--admin-surface)",
+    border: "1px solid var(--admin-border)",
+    borderRadius: "1rem",
+    padding: "1.25rem",
+  };
+
+  return (
+    <div style={{ maxWidth: "1200px" }}>
+      <SavedToast show={Boolean(saved)} />
+      <div style={{ marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
+        <div>
+          <Link href="/colunista/artigos" style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>
+            &larr; Voltar
+          </Link>
+          <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--admin-text)", marginTop: "0.5rem" }}>
+            {item ? "Editar artigo" : "Novo artigo"}
+          </h1>
+        </div>
+        {item && (
+          <Link
+            href={`/colunista/artigos/${item.id}/preview`}
+            target="_blank"
+            style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border-strong)", color: "var(--admin-text)", padding: "0.625rem 1.125rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none", flexShrink: 0 }}
+          >
+            <Eye size={16} /> Visualizar
+          </Link>
+        )}
+      </div>
+
+      <form action={action} className="columnist-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "1.5rem", alignItems: "start" }}>
+        <div>
+          <div style={{ display: "flex", gap: "0.25rem", borderBottom: "1px solid var(--admin-border)", marginBottom: "1.75rem" }}>
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                type="button"
+                onClick={() => setActive(tab.id)}
+                style={{
+                  padding: "0.75rem 1.25rem",
+                  fontSize: "0.875rem",
+                  fontWeight: 700,
+                  color: active === tab.id ? "#315E9C" : "var(--admin-muted)",
+                  background: "none",
+                  border: "none",
+                  borderBottom: active === tab.id ? "2px solid #315E9C" : "2px solid transparent",
+                  cursor: "pointer",
+                  marginBottom: "-1px",
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+
+          <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
+          <div style={{ display: active === "conteudo" ? "block" : "none" }}>
+            <Field label="Título (PT)">
+              <Input name="title_pt" value={titlePt} onChange={(e) => setTitlePt(e.target.value)} required />
+            </Field>
+            <Field label="Título (EN)">
+              <Input name="title_en" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} />
+            </Field>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "0 0 1.25rem" }}>
+              <button
+                type="button"
+                onClick={handleGenerateExcerpt}
+                disabled={generatingExcerpt}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  backgroundColor: "var(--admin-surface-alt)",
+                  border: "1px solid var(--admin-border-strong)",
+                  color: "var(--admin-text)",
+                  padding: "0.625rem 1.125rem",
+                  borderRadius: "0.625rem",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  cursor: generatingExcerpt ? "default" : "pointer",
+                  opacity: generatingExcerpt ? 0.7 : 1,
+                }}
+              >
+                {generatingExcerpt ? <Loader2 size={16} className="admin-spin" /> : <Sparkles size={16} />}
+                {generatingExcerpt ? "Gerando..." : "Gerar linha fina e resumo (PT)"}
+              </button>
+              <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+                Usa o Conteúdo (PT) escrito abaixo para preencher os dois campos PT a seguir — sobrescreve o que já estiver neles.
+              </span>
+            </div>
+
+            <Field label="Linha fina / subtítulo (PT)" hint="Aparece nas listagens e cards de artigos — não é o Resumo em destaque abaixo.">
+              <Textarea name="excerpt_pt" rows={2} value={excerptPt} onChange={(e) => setExcerptPt(e.target.value)} />
+            </Field>
+            <Field label="Linha fina / subtítulo (EN)">
+              <Textarea name="excerpt_en" rows={2} value={excerptEn} onChange={(e) => setExcerptEn(e.target.value)} />
+            </Field>
+            <Field label="Resumo em destaque (PT)" hint='Opcional. Aparece numa caixa "Resumo" expansível, no início do artigo. Deixe em branco para não mostrar essa caixa.'>
+              <Textarea name="summary_pt" rows={3} value={summaryPt} onChange={(e) => setSummaryPt(e.target.value)} />
+            </Field>
+            <Field label="Resumo em destaque (EN)">
+              <Textarea name="summary_en" rows={3} value={summaryEn} onChange={(e) => setSummaryEn(e.target.value)} />
+            </Field>
+            <Field
+              label="Conteúdo (PT)"
+              hint='Use a barra de ferramentas para negrito, itálico, sublinhado, subtítulos, listas, citação, link e imagem — ou digite direto: **negrito**, _itálico_, ++sublinhado++, [link](url), ## subtítulo, ### subtítulo pequeno, "- " para lista, "> texto" para citação (com "> — Colunista" numa linha própria, opcional).'
+            >
+              <MarkdownEditor
+                ref={contentPtRef}
+                name="content_pt"
+                defaultValue={item?.content_pt ?? ""}
+                highlightQuotes={feedbackBlocks.map((b) => b.quote)}
+              />
+            </Field>
+
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "1.25rem 0" }}>
+              <button
+                type="button"
+                onClick={handleTranslate}
+                disabled={translating}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                  backgroundColor: "var(--admin-surface-alt)",
+                  border: "1px solid var(--admin-border-strong)",
+                  color: "var(--admin-text)",
+                  padding: "0.625rem 1.125rem",
+                  borderRadius: "0.625rem",
+                  fontWeight: 700,
+                  fontSize: "0.875rem",
+                  cursor: translating ? "default" : "pointer",
+                  opacity: translating ? 0.7 : 1,
+                }}
+              >
+                {translating ? <Loader2 size={16} className="admin-spin" /> : <Languages size={16} />}
+                {translating ? "Traduzindo..." : "Traduzir para inglês (PT → EN)"}
+              </button>
+              <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+                Preenche título, linha fina, resumo e conteúdo em inglês a partir do texto em PT acima — sobrescreve o que já estiver nos campos EN.
+              </span>
+            </div>
+
+            <Field label="Conteúdo (EN)">
+              <MarkdownEditor ref={contentEnRef} name="content_en" defaultValue={item?.content_en ?? ""} minHeight={280} />
+            </Field>
+            <Field label="Vídeo (URL do YouTube)" hint="Opcional — vira o visual principal do artigo, no lugar da imagem de capa. Mesmo assim, cadastre uma imagem de capa na aba Detalhes: ela é usada como miniatura ao compartilhar o link.">
+              <Input name="video_url" defaultValue={item?.video_url ?? ""} placeholder="https://www.youtube.com/watch?v=..." />
+            </Field>
+          </div>
+
+          <div style={{ display: active === "fontes" ? "block" : "none" }}>
+            <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "1rem", lineHeight: 1.6 }}>
+              Onde você pesquisou para escrever este texto. Elas aparecem no fim do artigo, para o leitor conferir a origem das informações — não cole links/fontes direto no Conteúdo, use esta aba.
+            </p>
+            {sources.map((source, index) => (
+              <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "0.625rem", alignItems: "center", marginBottom: "0.625rem" }}>
+                <Input name="source_label" value={source.label} placeholder="Ex: IBGE, Folha de S.Paulo, Google Trends" onChange={(e) => updateSource(index, { label: e.target.value })} />
+                <Input name="source_url" value={source.url ?? ""} placeholder="https://... (opcional)" onChange={(e) => updateSource(index, { url: e.target.value })} />
+                <button
+                  type="button"
+                  onClick={() => removeSource(index)}
+                  title="Remover fonte"
+                  style={{ padding: "0.5rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", background: "var(--admin-surface)", color: "#ef4444", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer" }}
+                >
+                  Remover
+                </button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => setSources((prev) => [...prev, { label: "", url: null }])}
+              style={{ padding: "0.5rem 0.875rem", borderRadius: "0.5rem", border: "1px dashed #315E9C", background: "transparent", color: "#315E9C", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+            >
+              + Adicionar fonte
+            </button>
+          </div>
+
+          <div style={{ display: active === "seo" ? "block" : "none" }}>
+            <Field label="SEO — título (PT)" hint="Deixe em branco para usar o título do artigo.">
+              <Input name="seo_title_pt" value={seoTitlePt} onChange={(e) => setSeoTitlePt(e.target.value)} maxLength={70} />
+            </Field>
+            <Field label="SEO — descrição (PT)" hint="Deixe em branco para usar a linha fina / subtítulo.">
+              <Textarea name="seo_desc_pt" rows={2} value={seoDescPt} onChange={(e) => setSeoDescPt(e.target.value)} maxLength={170} />
+            </Field>
+            <div style={{ marginTop: "1.5rem" }}>
+              <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--admin-text-secondary)", marginBottom: "0.625rem" }}>
+                Como aparece no Google
+              </div>
+              <SeoPreview url={previewUrl} title={seoTitlePt || titlePt} description={seoDescPt || excerptPt} />
+            </div>
+          </div>
+
+          <div style={{ display: active === "detalhes" ? "block" : "none" }}>
+            <Field label="Slug" hint="Deixe em branco para gerar automaticamente">
+              <Input name="slug" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={slugifyPreview(titlePt)} />
+            </Field>
+            <Field label="Tipo de conteúdo" hint="Notícia: fatos, de forma clara e verificável. Análise: interpreta e contextualiza os fatos. Opinião: ponto de vista do colunista, aparece com a tag Mea Sententia.">
+              <Select name="format" value={format} onChange={(e) => setFormat(e.target.value as Article["format"])}>
+                <option value="opiniao">Opinião (Mea Sententia)</option>
+                <option value="analise">Análise</option>
+                <option value="noticia">Notícia</option>
+              </Select>
+            </Field>
+            <Field label="Categoria principal">
+              <Select
+                name="category_id"
+                value={categoryId}
+                onChange={(e) => {
+                  setCategoryId(e.target.value);
+                  setExtraCategories((prev) => prev.filter((id) => id !== e.target.value));
+                }}
+              >
+                <option value="">Sem categoria</option>
+                {categories.map((c) => (
+                  <option key={c.id} value={c.id}>{c.name_pt}</option>
+                ))}
+              </Select>
+            </Field>
+            <Field label="Categorias adicionais" hint="O artigo também aparece listado nelas, além da principal — útil quando o tema cruza mais de uma área.">
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
+                {categories.filter((c) => c.id !== categoryId).map((c) => (
+                  <label key={c.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                    <input
+                      type="checkbox"
+                      name="extra_category_ids"
+                      value={c.id}
+                      checked={extraCategories.includes(c.id)}
+                      onChange={() => toggleExtraCategory(c.id)}
+                    />
+                    {c.name_pt}
+                  </label>
+                ))}
+              </div>
+            </Field>
+            {otherColumnists && otherColumnists.length > 0 && (
+              <Field label="Colaboradores" hint="Para textos escritos em conjunto — aparecem junto com você na assinatura do artigo.">
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
+                  {otherColumnists.map((a) => (
+                    <label key={a.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                      <input
+                        type="checkbox"
+                        name="coauthor_ids"
+                        value={a.id}
+                        checked={coauthors.includes(a.id)}
+                        onChange={() => toggleCoauthor(a.id)}
+                      />
+                      {a.name}
+                    </label>
+                  ))}
+                </div>
+              </Field>
+            )}
+            <Field label="Imagem de capa" hint="PNG, JPG ou WEBP — convertida automaticamente para WebP e comprimida para menos de 1MB.">
+              {item?.cover_image && (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={item.cover_image}
+                  alt="Capa atual"
+                  style={{ maxHeight: "6rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border)" }}
+                />
+              )}
+              <input className="admin-file-input" type="file" name="cover_image_file" accept="image/png,image/jpeg,image/webp" />
+              <input type="hidden" name="current_cover_image" value={item?.cover_image ?? ""} />
+              <ErrorBanner message={imageError} />
+            </Field>
+            <Field label="...ou URL da imagem" hint="Alternativa ao envio de arquivo acima — cole o link de uma imagem já publicada em outro lugar, para não usar espaço de armazenamento do site. Se os dois campos forem preenchidos, o arquivo enviado tem prioridade.">
+              <Input name="cover_image_url" placeholder="https://..." value={coverImageUrl} onChange={(e) => setCoverImageUrl(e.target.value)} />
+              {isEphemeralCoverImageUrl(coverImageUrl) && (
+                <p style={{ display: "flex", alignItems: "flex-start", gap: "0.375rem", marginTop: "0.5rem", padding: "0.625rem 0.75rem", borderRadius: "0.5rem", backgroundColor: "rgba(200,154,74,0.12)", border: "1px solid rgba(200,154,74,0.3)", color: "#8a6523", fontSize: "0.8125rem", lineHeight: 1.45 }}>
+                  <TriangleAlert size={15} style={{ flexShrink: 0, marginTop: "0.125rem" }} />
+                  Esse link é de uma imagem gerada por IA (OpenAI/ChatGPT) — esses links costumam expirar (às vezes em menos de 1 hora) e a foto pode parar de aparecer, inclusive na própria matéria. Baixe a imagem e envie o arquivo no campo acima pra ela ficar permanente.
+                </p>
+              )}
+            </Field>
+            <Field label="Legenda da imagem" hint="Descrição curta exibida junto da foto no início do artigo.">
+              <Input name="cover_image_caption" defaultValue={item?.cover_image_caption ?? ""} />
+            </Field>
+            <Field label="Crédito da imagem" hint="Fotógrafo ou fonte da imagem.">
+              <Input name="cover_image_credit" defaultValue={item?.cover_image_credit ?? ""} />
+            </Field>
+            <Field
+              label="Data desejada de publicação"
+              hint="Usada se você escolher 'Agendar' na barra lateral. A aprovação de um admin pode levar até 72h — escolha a data considerando essa margem."
+            >
+              <DateTimePicker name="scheduled_for" defaultValue={item?.scheduled_for} />
+            </Field>
+
+            <div style={{ marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid var(--admin-border)" }}>
+              <div style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--admin-text)", marginBottom: "0.5rem" }}>
+                Inteligência artificial utilizada neste artigo? *
+              </div>
+              <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "0.75rem", lineHeight: 1.6 }}>
+                Se sim, o artigo recebe uma declaração de transparência ao final do texto, antes das fontes. Resposta obrigatória.
+              </p>
+              <div style={{ display: "flex", gap: "1.25rem", marginBottom: "1rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.375rem", cursor: "pointer" }}>
+                  <input type="radio" name="ai_used" value="no" checked={aiUsed === "no"} onChange={() => setAiUsed("no")} required />
+                  Não
+                </label>
+                <label style={{ display: "flex", alignItems: "center", gap: "0.375rem", cursor: "pointer" }}>
+                  <input type="radio" name="ai_used" value="yes" checked={aiUsed === "yes"} onChange={() => setAiUsed("yes")} required />
+                  Sim
+                </label>
+              </div>
+              {aiUsed === "yes" && (
+                <div>
+                  <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--admin-text-secondary)", marginBottom: "0.5rem" }}>
+                    Como a inteligência artificial foi utilizada?
+                  </div>
+                  <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "0.5rem 1rem", marginBottom: "1rem" }}>
+                    {AI_USAGE_OPTIONS.map((option) => (
+                      <label key={option.value} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)", cursor: "pointer" }}>
+                        <input type="checkbox" name="ai_usage" value={option.value} checked={aiUsage.includes(option.value)} onChange={() => toggleAiUsage(option.value)} />
+                        {option.label}
+                      </label>
+                    ))}
+                  </div>
+                  <div style={{ padding: "0.875rem 1rem", borderRadius: "0.625rem", backgroundColor: "rgba(49, 94, 156,0.05)", border: "1px solid rgba(49, 94, 156,0.15)" }}>
+                    <div style={{ fontSize: "0.7rem", fontWeight: 700, color: "var(--admin-faint)", textTransform: "uppercase", letterSpacing: "0.05em", marginBottom: "0.375rem" }}>
+                      Declaração que aparecerá no artigo
+                    </div>
+                    <div style={{ fontSize: "0.875rem", fontStyle: "italic", color: "var(--admin-text-secondary)", lineHeight: 1.6 }}>
+                      {aiDisclosureText(aiUsage, "pt") ?? "Escolha pelo menos uma forma de uso."}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          </div>
+          </div>
+        </div>
+
+        <div className="columnist-sidebar" style={{ position: "sticky", top: "1.5rem", display: "flex", flexDirection: "column", gap: "1rem" }}>
+          <div style={sidebarCardStyle}>
+            <p style={{ margin: "0 0 0.5rem", fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text)" }}>Status</p>
+            <Badge tone={statusDisplay[status].tone}>{statusDisplay[status].label}</Badge>
+          </div>
+
+          {feedbackBlocks.length > 0 && (
+            <div style={{ ...sidebarCardStyle, backgroundColor: "rgba(220,38,38,0.08)", border: "1px solid rgba(220,38,38,0.3)" }}>
+              <p style={{ margin: "0 0 0.75rem", fontSize: "0.8125rem", fontWeight: 700, color: "#b91c1c" }}>Alterações solicitadas pelo admin</p>
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+                {feedbackBlocks.map((b, i) => (
+                  <div key={i}>
+                    <p
+                      style={{
+                        margin: "0 0 0.25rem",
+                        fontSize: "0.8125rem",
+                        fontStyle: "italic",
+                        color: "var(--admin-text)",
+                        backgroundColor: "rgba(255,183,3,0.3)",
+                        borderRadius: "0.25rem",
+                        padding: "0.25rem 0.5rem",
+                        display: "inline-block",
+                      }}
+                    >
+                      &ldquo;{b.quote}&rdquo;
+                    </p>
+                    <p style={{ margin: 0, color: "var(--admin-text)", fontSize: "0.8125rem", lineHeight: 1.5 }}>{b.note}</p>
+                  </div>
+                ))}
+              </div>
+              <p style={{ margin: "0.875rem 0 0", fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+                Os trechos marcados também aparecem destacados no Conteúdo (PT), na aba Conteúdo.
+              </p>
+            </div>
+          )}
+
+          <div style={sidebarCardStyle}>
+            <p style={{ margin: "0 0 0.875rem", fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text)" }}>Ações</p>
+            <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+              <div>
+                <SubmitButton name="intent" value="draft" variant="secondary" pendingText="Salvando...">
+                  Manter como rascunho
+                </SubmitButton>
+                <p style={{ margin: "0.375rem 0 0", fontSize: "0.75rem", color: "var(--admin-faint)" }}>Fica só com você, sem entrar na fila de aprovação.</p>
+              </div>
+              <div>
+                <SubmitButton name="intent" value="schedule" variant="secondary" pendingText="Enviando...">
+                  {isResubmission ? "Reagendar" : "Agendar"}
+                </SubmitButton>
+                <p style={{ margin: "0.375rem 0 0", fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+                  Será agendado para a data escolhida na aba Detalhes assim que um admin aprovar (até 72h).
+                </p>
+              </div>
+              <div>
+                <SubmitButton name="intent" value="send" pendingText="Enviando...">
+                  {isResubmission ? "Reenviar para aprovação" : "Enviar para Aprovação"}
+                </SubmitButton>
+                <p style={{ margin: "0.375rem 0 0", fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+                  Será publicado automaticamente assim que um admin aprovar, sem data marcada.
+                </p>
+              </div>
+            </div>
+            <ErrorBanner message={saveError} label="Não foi possível salvar o artigo" />
+          </div>
+        </div>
+      </form>
+
+      <style>{`
+        @media (max-width: 900px) {
+          .columnist-form-grid { grid-template-columns: 1fr !important; }
+          .columnist-sidebar { position: static !important; order: -1; }
+        }
+      `}</style>
+    </div>
+  );
+}

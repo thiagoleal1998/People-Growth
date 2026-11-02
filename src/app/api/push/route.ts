@@ -42,7 +42,7 @@ export async function POST(req: NextRequest) {
   // Confirms, on this same device, that the opt-in actually worked — best-
   // effort (failures are logged inside, never surfaced here); the
   // subscription is already saved either way.
-  await sendConfirmationPush({ endpoint, p256dh: keys.p256dh, auth: keys.auth }, profile?.role === "admin" ? "/admin" : "/autor");
+  await sendConfirmationPush({ endpoint, p256dh: keys.p256dh, auth: keys.auth }, profile?.role === "admin" ? "/admin" : "/colunista");
 
   return NextResponse.json({ success: true });
 }

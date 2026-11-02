@@ -2,15 +2,15 @@
 
 import { useState, useTransition } from "react";
 import { Trash2, Mail, KeyRound, BellRing, BellOff } from "lucide-react";
-import type { UserProfile, Author } from "@/types/database.types";
+import type { UserProfile, Columnist } from "@/types/database.types";
 import { formatUserId } from "@/lib/display-id";
 import { confirmDialog, promptDialog, alertDialog } from "@/components/admin/dialog-store";
-import { updateUserRole, updateUserAuthorLink, deleteUser, updateUserEmail, resetUserPassword } from "./actions";
+import { updateUserRole, updateUserColumnistLink, deleteUser, updateUserEmail, resetUserPassword } from "./actions";
 
-export function UsersClient({ users, authors, pushSubscriptionCounts }: { users: UserProfile[]; authors: Author[]; pushSubscriptionCounts: Record<string, number> }) {
+export function UsersClient({ users, columnists, pushSubscriptionCounts }: { users: UserProfile[]; columnists: Columnist[]; pushSubscriptionCounts: Record<string, number> }) {
   const [, startTransition] = useTransition();
   const [items, setItems] = useState(users);
-  const authorById = new Map(authors.map((a) => [a.id, a]));
+  const columnistById = new Map(columnists.map((a) => [a.id, a]));
 
   return (
     <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
@@ -23,7 +23,7 @@ export function UsersClient({ users, authors, pushSubscriptionCounts }: { users:
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                {["ID", "E-mail", "Papel", "Vinculado ao autor", "Notificações", "Ações"].map((h) => (
+                {["ID", "E-mail", "Papel", "Vinculado ao colunista", "Notificações", "Ações"].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" }}>{h}</th>
                 ))}
               </tr>
@@ -53,26 +53,26 @@ export function UsersClient({ users, authors, pushSubscriptionCounts }: { users:
                       }}
                     >
                       <option value="admin">Admin</option>
-                      <option value="author">Autor</option>
+                      <option value="columnist">Colunista</option>
                     </select>
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <select
-                      defaultValue={u.author_id ?? ""}
+                      defaultValue={u.columnist_id ?? ""}
                       onChange={(e) => {
-                        const authorId = e.target.value || null;
-                        setItems((prev) => prev.map((i) => (i.id === u.id ? { ...i, author_id: authorId } : i)));
-                        startTransition(() => updateUserAuthorLink(u.id, authorId));
+                        const columnistId = e.target.value || null;
+                        setItems((prev) => prev.map((i) => (i.id === u.id ? { ...i, columnist_id: columnistId } : i)));
+                        startTransition(() => updateUserColumnistLink(u.id, columnistId));
                       }}
                       style={{ padding: "0.375rem 0.5rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.8125rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" }}
                     >
                       <option value="">— nenhum —</option>
-                      {authors.map((a) => (
+                      {columnists.map((a) => (
                         <option key={a.id} value={a.id}>{a.name}</option>
                       ))}
                     </select>
-                    {u.author_id && !authorById.has(u.author_id) && (
-                      <span style={{ color: "#ef4444", fontSize: "0.75rem", marginLeft: "0.5rem" }}>autor não encontrado</span>
+                    {u.columnist_id && !columnistById.has(u.columnist_id) && (
+                      <span style={{ color: "#ef4444", fontSize: "0.75rem", marginLeft: "0.5rem" }}>colunista não encontrado</span>
                     )}
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem", whiteSpace: "nowrap" }}>

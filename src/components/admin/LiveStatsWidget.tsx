@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Eye, Users } from "lucide-react";
 
-type Staff = { name: string; role: "admin" | "author" };
+type Staff = { name: string; role: "admin" | "columnist" };
 type LiveStats = { visitorsOnline: number; onlineStaff: Staff[] };
 
 const POLL_MS = 15000;
@@ -34,7 +34,7 @@ export function LiveStatsWidget() {
   }, []);
 
   const admins = stats?.onlineStaff.filter((s) => s.role === "admin") ?? [];
-  const authors = stats?.onlineStaff.filter((s) => s.role === "author") ?? [];
+  const columnists = stats?.onlineStaff.filter((s) => s.role === "columnist") ?? [];
 
   return (
     <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.5rem", marginBottom: "1.5rem" }}>
@@ -61,7 +61,7 @@ export function LiveStatsWidget() {
           <div>
             <div style={{ fontWeight: 900, fontSize: "1.75rem", color: "var(--admin-text)", lineHeight: 1 }}>{stats?.onlineStaff.length ?? "—"}</div>
             <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", fontWeight: 600 }}>
-              Equipe online {admins.length > 0 || authors.length > 0 ? `(${admins.length} admin${admins.length === 1 ? "" : "s"}, ${authors.length} autor${authors.length === 1 ? "" : "es"})` : ""}
+              Equipe online {admins.length > 0 || columnists.length > 0 ? `(${admins.length} admin${admins.length === 1 ? "" : "s"}, ${columnists.length} colunista${columnists.length === 1 ? "" : "s"})` : ""}
             </div>
           </div>
         </div>

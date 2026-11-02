@@ -32,10 +32,10 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
 
   let userName: string | undefined;
   let userPhoto: string | undefined;
-  if (profile?.author_id) {
-    const { data: author } = await client.from("authors").select("name,photo_url").eq("id", profile.author_id).single();
-    userName = author?.name;
-    userPhoto = author?.photo_url ?? undefined;
+  if (profile?.columnist_id) {
+    const { data: columnist } = await client.from("columnists").select("name,photo_url").eq("id", profile.columnist_id).single();
+    userName = columnist?.name;
+    userPhoto = columnist?.photo_url ?? undefined;
   }
 
   return (

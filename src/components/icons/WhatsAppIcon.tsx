@@ -1,5 +1,5 @@
 // Lucide has no WhatsApp brand icon. Shared by every place a WhatsApp link
-// renders (SocialSidebar, Footer, author profile pages) instead of each
+// renders (SocialSidebar, Footer, columnist profile pages) instead of each
 // duplicating the inline SVG.
 export function WhatsAppIcon({ size = 18 }: { size?: number }) {
   return (

@@ -3,7 +3,7 @@ import { getCurrentProfile } from "@/lib/auth/profile";
 import { uploadPublicImage } from "@/lib/supabase/storage";
 
 // Inline images inserted mid-article from the content editor's toolbar.
-// Gated to admins/authors (not public) since every upload consumes storage.
+// Gated to admins/columnists (not public) since every upload consumes storage.
 export async function POST(req: NextRequest) {
   const profile = await getCurrentProfile();
   if (!profile) {

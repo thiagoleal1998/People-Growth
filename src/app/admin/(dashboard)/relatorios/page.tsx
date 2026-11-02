@@ -5,7 +5,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
 import { AD_SLOT_DEFS } from "../publicidade/ad-slots";
 import { ExportReportButton } from "./ExportReportButton";
-import type { Article, Ad, Author, Comment, ActivityLog, InternalTicket, ErrorReport } from "@/types/database.types";
+import type { Article, Ad, Columnist, Comment, ActivityLog, InternalTicket, ErrorReport } from "@/types/database.types";
 
 const PERIODS = [
   { key: "7", label: "7 dias" },
@@ -309,7 +309,7 @@ export default async function RelatoriosPage({
   let articleStats: {
     id: string;
     title: string;
-    author: string;
+    columnist: string;
     views: number;
     comments: number;
     likes: number;
@@ -317,13 +317,13 @@ export default async function RelatoriosPage({
     avgScrollDepth: number | null;
   }[] = [];
   if (tab === "artigos") {
-    const [{ data: articlesForStats }, { data: authorsData }, { data: commentsData }, { data: scrollData }] = await Promise.all([
-      client.from("articles").select("id, title_pt, author_id, views").eq("status", "published"),
-      client.from("authors").select("id, name"),
+    const [{ data: articlesForStats }, { data: columnistsData }, { data: commentsData }, { data: scrollData }] = await Promise.all([
+      client.from("articles").select("id, title_pt, columnist_id, views").eq("status", "published"),
+      client.from("columnists").select("id, name"),
       client.from("comments").select("article_id, likes, reports"),
       client.from("page_views").select("article_id, scroll_depth").not("article_id", "is", null).not("scroll_depth", "is", null),
     ]);
-    const authorNames = new Map(((authorsData ?? []) as Pick<Author, "id" | "name">[]).map((a) => [a.id, a.name]));
+    const columnistNames = new Map(((columnistsData ?? []) as Pick<Columnist, "id" | "name">[]).map((a) => [a.id, a.name]));
     const byArticle = new Map<string, { comments: number; likes: number; reports: number }>();
     for (const c of (commentsData ?? []) as Pick<Comment, "article_id" | "likes" | "reports">[]) {
       const entry = byArticle.get(c.article_id) ?? { comments: 0, likes: 0, reports: 0 };
@@ -338,7 +338,7 @@ export default async function RelatoriosPage({
       arr.push(v.scroll_depth);
       scrollByArticle.set(v.article_id, arr);
     }
-    articleStats = ((articlesForStats ?? []) as Pick<Article, "id" | "title_pt" | "author_id" | "views">[])
+    articleStats = ((articlesForStats ?? []) as Pick<Article, "id" | "title_pt" | "columnist_id" | "views">[])
       .map((a) => {
         const s = byArticle.get(a.id) ?? { comments: 0, likes: 0, reports: 0 };
         const scrollSamplesForArticle = scrollByArticle.get(a.id);
@@ -348,7 +348,7 @@ export default async function RelatoriosPage({
         return {
           id: a.id,
           title: a.title_pt,
-          author: a.author_id ? (authorNames.get(a.author_id) ?? "—") : "—",
+          columnist: a.columnist_id ? (columnistNames.get(a.columnist_id) ?? "—") : "—",
           views: a.views,
           comments: s.comments,
           likes: s.likes,
@@ -362,7 +362,7 @@ export default async function RelatoriosPage({
   let activityLogs: ActivityLog[] = [];
   let activityUsers: { email: string; name: string }[] = [];
   let activityNameByEmail = new Map<string, string>();
-  let lastAccessRows: { email: string; name: string; role: "admin" | "author"; lastSeenAt: string | null }[] = [];
+  let lastAccessRows: { email: string; name: string; role: "admin" | "columnist"; lastSeenAt: string | null }[] = [];
   if (tab === "atividade") {
     let activityQuery = client.from("activity_log").select("*").order("created_at", { ascending: false }).limit(150);
     if (since) activityQuery = activityQuery.gte("created_at", since);
@@ -370,7 +370,7 @@ export default async function RelatoriosPage({
     if (userFilter) activityQuery = activityQuery.eq("user_email", userFilter);
 
     // user_profiles only lets a session see its own row (RLS) — this list
-    // needs every admin/author, so it goes through the service role, same
+    // needs every admin/columnist, so it goes through the service role, same
     // as the Usuários page does.
     const admin = await createAdminClient();
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -378,21 +378,21 @@ export default async function RelatoriosPage({
 
     const [{ data: activityData }, { data: allUsersData }] = await Promise.all([
       activityQuery,
-      adminClient.from("user_profiles").select("email, author_id, role, last_seen_at").order("email"),
+      adminClient.from("user_profiles").select("email, columnist_id, role, last_seen_at").order("email"),
     ]);
     activityLogs = (activityData ?? []) as ActivityLog[];
 
-    const profiles = (allUsersData ?? []) as { email: string; author_id: string | null; role: "admin" | "author"; last_seen_at: string | null }[];
-    const authorIds = profiles.map((p) => p.author_id).filter((id): id is string => Boolean(id));
-    let authorNamesById = new Map<string, string>();
-    if (authorIds.length > 0) {
-      const { data: authorsData } = await adminClient.from("authors").select("id, name").in("id", authorIds);
-      authorNamesById = new Map(((authorsData ?? []) as { id: string; name: string }[]).map((a) => [a.id, a.name]));
+    const profiles = (allUsersData ?? []) as { email: string; columnist_id: string | null; role: "admin" | "columnist"; last_seen_at: string | null }[];
+    const columnistIds = profiles.map((p) => p.columnist_id).filter((id): id is string => Boolean(id));
+    let columnistNamesById = new Map<string, string>();
+    if (columnistIds.length > 0) {
+      const { data: columnistsData } = await adminClient.from("columnists").select("id, name").in("id", columnistIds);
+      columnistNamesById = new Map(((columnistsData ?? []) as { id: string; name: string }[]).map((a) => [a.id, a.name]));
     }
 
     activityUsers = profiles.map((p) => ({
       email: p.email,
-      name: (p.author_id && authorNamesById.get(p.author_id)) || p.email,
+      name: (p.columnist_id && columnistNamesById.get(p.columnist_id)) || p.email,
     }));
     activityNameByEmail = new Map(activityUsers.map((u) => [u.email, u.name]));
 
@@ -401,7 +401,7 @@ export default async function RelatoriosPage({
     lastAccessRows = profiles
       .map((p) => ({
         email: p.email,
-        name: (p.author_id && authorNamesById.get(p.author_id)) || p.email,
+        name: (p.columnist_id && columnistNamesById.get(p.columnist_id)) || p.email,
         role: p.role,
         lastSeenAt: p.last_seen_at,
       }))
@@ -500,7 +500,7 @@ export default async function RelatoriosPage({
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                  {["Artigo", "Autor", "Visualizações", "Leitura média", "Comentários", "Curtidas", "Denúncias"].map((h) => (
+                  {["Artigo", "Colunista", "Visualizações", "Leitura média", "Comentários", "Curtidas", "Denúncias"].map((h) => (
                     <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
                   ))}
                 </tr>
@@ -511,7 +511,7 @@ export default async function RelatoriosPage({
                     <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.875rem", maxWidth: "320px" }}>
                       <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{a.title}</div>
                     </td>
-                    <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem" }}>{a.author}</td>
+                    <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem" }}>{a.columnist}</td>
                     <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.875rem" }}>
                       <span style={{ display: "flex", alignItems: "center", gap: "0.375rem" }}><Eye size={13} /> {a.views.toLocaleString("pt-BR")}</span>
                     </td>
@@ -729,7 +729,7 @@ export default async function RelatoriosPage({
                         <td style={{ padding: "0.75rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.8125rem" }}>{u.name}</td>
                         <td style={{ padding: "0.75rem 1.25rem" }}>
                           <span style={{ fontSize: "0.75rem", fontWeight: 700, color: u.role === "admin" ? "#315E9C" : "#A07B3B", backgroundColor: u.role === "admin" ? "rgba(49, 94, 156,0.1)" : "rgba(200, 154, 74,0.1)", padding: "0.1875rem 0.5rem", borderRadius: "0.375rem" }}>
-                            {u.role === "admin" ? "Admin" : "Autor"}
+                            {u.role === "admin" ? "Admin" : "Colunista"}
                           </span>
                         </td>
                         <td style={{ padding: "0.75rem 1.25rem", color: "var(--admin-text-secondary)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>

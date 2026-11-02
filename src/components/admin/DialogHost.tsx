@@ -6,7 +6,7 @@ import { registerDialogListener, type DialogRequest } from "./dialog-store";
 import { fieldControlStyle } from "./ui";
 
 /** Renders whatever confirmDialog()/promptDialog()/alertDialog() last asked
- * for — mount once near the root (admin/author layouts) so it's available
+ * for — mount once near the root (admin/columnist layouts) so it's available
  * from any client component without prop drilling or per-page state. */
 export function DialogHost() {
   const [request, setRequest] = useState<DialogRequest | null>(null);

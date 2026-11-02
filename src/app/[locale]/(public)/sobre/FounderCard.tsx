@@ -2,13 +2,13 @@ import { ChevronRight } from "lucide-react";
 import { getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { pickLocale } from "@/lib/locale-content";
-import type { Author } from "@/types/database.types";
+import type { Columnist } from "@/types/database.types";
 
-export async function FounderCard({ author }: { author: Author }) {
+export async function FounderCard({ columnist }: { columnist: Columnist }) {
   const locale = await getLocale();
   return (
     <Link
-      href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
+      href={{ pathname: "/sobre/[slug]", params: { slug: columnist.slug } }}
       className="hover-card"
       style={{
         display: "block",
@@ -27,22 +27,22 @@ export async function FounderCard({ author }: { author: Author }) {
             height: "3.5rem",
             borderRadius: "50%",
             flexShrink: 0,
-            background: author.photo_url
-              ? `url("${author.photo_url}") center/cover`
+            background: columnist.photo_url
+              ? `url("${columnist.photo_url}") center/cover`
               : "linear-gradient(135deg, #315E9C, #C89A4A)",
           }}
         />
         <div>
-          <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--site-text)" }}>{author.name}</h3>
-          {author.role_pt && (
+          <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--site-text)" }}>{columnist.name}</h3>
+          {columnist.role_pt && (
             <div style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.8125rem", marginTop: "0.125rem" }}>
-              {pickLocale(locale, author.role_pt, author.role_en)}
+              {pickLocale(locale, columnist.role_pt, columnist.role_en)}
             </div>
           )}
         </div>
       </div>
 
-      {author.tagline_pt && (
+      {columnist.tagline_pt && (
         <p
           style={{
             color: "var(--site-text-secondary)",
@@ -55,7 +55,7 @@ export async function FounderCard({ author }: { author: Author }) {
             overflow: "hidden",
           }}
         >
-          {pickLocale(locale, author.tagline_pt, author.tagline_en)}
+          {pickLocale(locale, columnist.tagline_pt, columnist.tagline_en)}
         </p>
       )}
 

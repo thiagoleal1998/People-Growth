@@ -28,8 +28,8 @@ export async function createAnnouncement(title: string, body: string): Promise<A
   if (actor) await logActivity({ userId: actor.id, userEmail: actor.email, action: "create", entityType: "comunicado", entityLabel: cleanTitle });
 
   revalidatePath("/admin/comunicados");
-  revalidatePath("/autor");
-  revalidatePath("/autor/comunicados");
+  revalidatePath("/colunista");
+  revalidatePath("/colunista/comunicados");
   return data as Announcement;
 }
 
@@ -48,8 +48,8 @@ export async function updateAnnouncement(id: string, title: string, body: string
   if (actor) await logActivity({ userId: actor.id, userEmail: actor.email, action: "update", entityType: "comunicado", entityLabel: cleanTitle });
 
   revalidatePath("/admin/comunicados");
-  revalidatePath("/autor");
-  revalidatePath("/autor/comunicados");
+  revalidatePath("/colunista");
+  revalidatePath("/colunista/comunicados");
 }
 
 export async function deleteAnnouncement(id: string, title: string): Promise<void> {
@@ -62,6 +62,6 @@ export async function deleteAnnouncement(id: string, title: string): Promise<voi
   if (actor) await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "comunicado", entityLabel: title });
 
   revalidatePath("/admin/comunicados");
-  revalidatePath("/autor");
-  revalidatePath("/autor/comunicados");
+  revalidatePath("/colunista");
+  revalidatePath("/colunista/comunicados");
 }

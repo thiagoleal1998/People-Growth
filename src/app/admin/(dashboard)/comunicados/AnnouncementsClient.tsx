@@ -99,7 +99,7 @@ export function AnnouncementsClient({ announcements }: { announcements: Announce
         <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text-secondary)", marginBottom: "0.375rem" }}>Título</label>
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Ex: Mudança no prazo de pauta" style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.875rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)", marginBottom: "1rem" }} />
         <label style={{ display: "block", fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text-secondary)", marginBottom: "0.375rem" }}>Mensagem</label>
-        <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={6} placeholder="O que os autores precisam saber." style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.875rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)", resize: "vertical", marginBottom: "1rem" }} />
+        <textarea value={body} onChange={(e) => setBody(e.target.value)} rows={6} placeholder="O que os colunistas precisam saber." style={{ width: "100%", padding: "0.5rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.875rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)", resize: "vertical", marginBottom: "1rem" }} />
         {error && <div style={{ color: "#dc2626", fontSize: "0.8125rem", marginBottom: "0.75rem" }}>{error}</div>}
         <button
           type="button"
@@ -107,7 +107,7 @@ export function AnnouncementsClient({ announcements }: { announcements: Announce
           onClick={send}
           style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "#315E9C", color: "white", padding: "0.625rem 1.25rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.875rem", border: "none", cursor: pending || !title.trim() || !body.trim() ? "default" : "pointer", opacity: pending || !title.trim() || !body.trim() ? 0.6 : 1 }}
         >
-          <Send size={15} /> {pending ? "Enviando..." : "Enviar a todos os autores"}
+          <Send size={15} /> {pending ? "Enviando..." : "Enviar a todos os colunistas"}
         </button>
       </div>
 

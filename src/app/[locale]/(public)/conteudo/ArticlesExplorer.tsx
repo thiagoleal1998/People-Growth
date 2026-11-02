@@ -10,7 +10,7 @@ import { PeopleGrowthBadge } from "@/components/PeopleGrowthBadge";
 import { PontoDeReplicaBadge } from "@/components/PontoDeReplicaBadge";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
-import type { Article, Category, Tag, Author } from "@/types/database.types";
+import type { Article, Category, Tag, Columnist } from "@/types/database.types";
 
 function matches(article: Article, query: string) {
   const q = query.toLowerCase();
@@ -22,7 +22,7 @@ function matches(article: Article, query: string) {
   );
 }
 
-function ArticleRow({ article, category, author }: { article: Article; category: Category | undefined; author: Author | undefined }) {
+function ArticleRow({ article, category, columnist }: { article: Article; category: Category | undefined; columnist: Columnist | undefined }) {
   const locale = useLocale();
   const t = useTranslations("common");
   return (
@@ -86,7 +86,7 @@ function ArticleRow({ article, category, author }: { article: Article; category:
             </p>
           )}
           <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
-            {author && <>{t("by")} {author.name} · </>}
+            {columnist && <>{t("by")} {columnist.name} · </>}
             {/* This is a Client Component — Next.js server-renders it once
                 for the initial HTML, then hydrates it in the browser.
                 toLocaleDateString() with no timeZone falls back to the
@@ -111,7 +111,7 @@ export function ArticlesExplorer({
   categories,
   categoriesWithArticles,
   tags,
-  authors,
+  columnists,
   mostRead,
   searchPlaceholder,
   noResultsText,
@@ -122,7 +122,7 @@ export function ArticlesExplorer({
   categories: Category[];
   categoriesWithArticles: Category[];
   tags: Tag[];
-  authors: Author[];
+  columnists: Columnist[];
   mostRead: Article[];
   searchPlaceholder: string;
   noResultsText: string;
@@ -134,9 +134,9 @@ export function ArticlesExplorer({
   const tc = useTranslations("common");
   const [query, setQuery] = useState("");
   const categoryById = useMemo(() => new Map(categories.map((c) => [c.id, c])), [categories]);
-  const authorById = useMemo(() => new Map(authors.map((a) => [a.id, a])), [authors]);
+  const columnistById = useMemo(() => new Map(columnists.map((a) => [a.id, a])), [columnists]);
   const [featured, ...rest] = articles;
-  const featuredAuthor = featured?.author_id ? authorById.get(featured.author_id) : undefined;
+  const featuredColumnist = featured?.columnist_id ? columnistById.get(featured.columnist_id) : undefined;
 
   const results = useMemo(() => {
     if (!query.trim()) return null;
@@ -157,7 +157,7 @@ export function ArticlesExplorer({
             ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                 {results.map((article) => (
-                  <ArticleRow key={article.id} article={article} category={article.category_id ? categoryById.get(article.category_id) : undefined} author={article.author_id ? authorById.get(article.author_id) : undefined} />
+                  <ArticleRow key={article.id} article={article} category={article.category_id ? categoryById.get(article.category_id) : undefined} columnist={article.columnist_id ? columnistById.get(article.columnist_id) : undefined} />
                 ))}
               </div>
             )}
@@ -231,7 +231,7 @@ export function ArticlesExplorer({
                       )}
                       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                         <span style={{ fontSize: "0.875rem", color: "var(--site-faint)" }}>
-                          {featuredAuthor && <>{tc("by")} {featuredAuthor.name} · </>}
+                          {featuredColumnist && <>{tc("by")} {featuredColumnist.name} · </>}
                           {/* timeZone pinned for the same hydration-mismatch reason as ArticleRow above */}
                           {featured.published_at && new Date(featured.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric", timeZone: "America/Sao_Paulo" })}
                           {featured.read_time ? ` · ${featured.read_time} ${tc("minutes")}` : ""}
@@ -254,7 +254,7 @@ export function ArticlesExplorer({
                 </h2>
                 <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
                   {rest.map((article) => (
-                    <ArticleRow key={article.id} article={article} category={article.category_id ? categoryById.get(article.category_id) : undefined} author={article.author_id ? authorById.get(article.author_id) : undefined} />
+                    <ArticleRow key={article.id} article={article} category={article.category_id ? categoryById.get(article.category_id) : undefined} columnist={article.columnist_id ? columnistById.get(article.columnist_id) : undefined} />
                   ))}
                 </div>
               </>

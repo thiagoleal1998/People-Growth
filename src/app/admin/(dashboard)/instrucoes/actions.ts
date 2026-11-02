@@ -8,7 +8,7 @@ import type { InstructionItem } from "@/types/database.types";
 
 function revalidateInstructions() {
   revalidatePath("/admin/instrucoes");
-  revalidatePath("/autor/instrucoes");
+  revalidatePath("/colunista/instrucoes");
 }
 
 export async function createInstructionItem(kind: InstructionItem["kind"], title: string, body: string): Promise<InstructionItem> {

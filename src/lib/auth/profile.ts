@@ -14,11 +14,11 @@ export async function getCurrentProfile(): Promise<UserProfile | null> {
 }
 
 // The name shown for a user across tickets/comments/activity: their public
-// author name when linked, falling back to their login email otherwise.
+// columnist name when linked, falling back to their login email otherwise.
 export async function resolveActorName(profile: UserProfile): Promise<string> {
-  if (!profile.author_id) return profile.email;
+  if (!profile.columnist_id) return profile.email;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: author } = await (supabase as any).from("authors").select("name").eq("id", profile.author_id).single();
-  return author?.name || profile.email;
+  const { data: columnist } = await (supabase as any).from("columnists").select("name").eq("id", profile.columnist_id).single();
+  return columnist?.name || profile.email;
 }

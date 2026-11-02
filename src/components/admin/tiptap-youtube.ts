@@ -1,7 +1,7 @@
 import { Node, mergeAttributes } from "@tiptap/core";
 import { getYouTubeThumbnail } from "@/lib/youtube";
 
-// Lets an author paste a YouTube link directly into the body and get a
+// Lets a columnist paste a YouTube link directly into the body and get a
 // clickable thumbnail right there in the flow of the article — the same
 // click-to-play facade used for the homepage hero/featured video
 // (VideoFacade.tsx) — instead of only being able to set one video for the

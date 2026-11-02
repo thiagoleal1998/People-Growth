@@ -9,7 +9,7 @@ import { PontoDeReplicaBadge } from "@/components/PontoDeReplicaBadge";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
-import type { Article, Author, Category } from "@/types/database.types";
+import type { Article, Columnist, Category } from "@/types/database.types";
 
 export const revalidate = 300;
 
@@ -24,7 +24,7 @@ async function getCategoryData(slug: string) {
   // An article lists here either because this is its primary category, or because
   // it was additionally tagged with it (article_categories) — merged and de-duped
   // below, since the same article could in principle match both.
-  const [{ data: primaryData }, { data: extraRows }, { data: authorsData }, { data: allCategoriesData }] = await Promise.all([
+  const [{ data: primaryData }, { data: extraRows }, { data: columnistsData }, { data: allCategoriesData }] = await Promise.all([
     client
       .from("articles")
       .select("*")
@@ -32,7 +32,7 @@ async function getCategoryData(slug: string) {
       .eq("status", "published")
       .order("published_at", { ascending: false }),
     client.from("article_categories").select("article_id").eq("category_id", category.id),
-    client.from("authors").select("*"),
+    client.from("columnists").select("*"),
     client.from("categories").select("*"),
   ]);
 
@@ -47,7 +47,7 @@ async function getCategoryData(slug: string) {
   return {
     category: category as Category,
     articles,
-    authorById: new Map(((authorsData ?? []) as Author[]).map((a) => [a.id, a])),
+    columnistById: new Map(((columnistsData ?? []) as Columnist[]).map((a) => [a.id, a])),
     categoryById: new Map(((allCategoriesData ?? []) as Category[]).map((c) => [c.id, c])),
   };
 }
@@ -73,7 +73,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
 
   if (!result) notFound();
 
-  const { category, articles, authorById, categoryById } = result;
+  const { category, articles, columnistById, categoryById } = result;
   const tNav = await getTranslations({ locale, namespace: "nav" });
   const tc = await getTranslations({ locale, namespace: "common" });
 
@@ -143,9 +143,9 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                           {pickLocale(locale, article.excerpt_pt, article.excerpt_en)}
                         </p>
                       )}
-                      {(article.author_id || article.published_at) && (
+                      {(article.columnist_id || article.published_at) && (
                         <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
-                          {article.author_id && authorById.get(article.author_id) && <>{tc("by")} {authorById.get(article.author_id)!.name} · </>}
+                          {article.columnist_id && columnistById.get(article.columnist_id) && <>{tc("by")} {columnistById.get(article.columnist_id)!.name} · </>}
                           {article.published_at && new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                         </span>
                       )}

@@ -33,7 +33,7 @@ type ArticleRow = {
   format: "noticia" | "analise" | "opiniao";
   published_at: string | null;
   scheduled_for: string | null;
-  author_id: string | null;
+  columnist_id: string | null;
   views: number;
   read_time: number | null;
   seo_title_pt: string | null;
@@ -71,7 +71,7 @@ type ArticleTagRow = { article_id: string; tag_id: string };
 // articles.category_id (which still decides the article's URL and main badge).
 type ArticleCategoryRow = { article_id: string; category_id: string };
 
-type ArticleCoauthorRow = { article_id: string; author_id: string };
+type ArticleCoauthorRow = { article_id: string; columnist_id: string };
 
 type PortfolioCaseRow = {
   id: string;
@@ -208,8 +208,8 @@ type ErrorReportRow = {
 type UserProfileRow = {
   id: string;
   email: string;
-  role: "admin" | "author";
-  author_id: string | null;
+  role: "admin" | "columnist";
+  columnist_id: string | null;
   last_seen_at: string | null;
   display_id: number;
   created_at: string;
@@ -239,7 +239,7 @@ type InternalTicketRow = {
   ticket_number: number;
   created_by: string | null;
   created_by_name: string;
-  created_by_role: "admin" | "author";
+  created_by_role: "admin" | "columnist";
   type: "bug" | "suggestion";
   title: string;
   description: string;
@@ -321,7 +321,7 @@ type InstitutionalPageRow = {
   updated_at: string;
 };
 
-type AuthorRow = {
+type ColumnistRow = {
   id: string;
   name: string;
   slug: string;
@@ -509,7 +509,7 @@ export type Database = {
       resources: { Row: ResourceRow; Insert: Omit<ResourceRow, "id" | "created_at" | "updated_at" | "download_count">; Update: Partial<Omit<ResourceRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       media_items: { Row: MediaItemRow; Insert: Omit<MediaItemRow, "id" | "created_at">; Update: Partial<Omit<MediaItemRow, "id" | "created_at">>; Relationships: [] };
       site_config: { Row: SiteConfigRow; Insert: Omit<SiteConfigRow, "updated_at">; Update: Partial<Omit<SiteConfigRow, "updated_at">>; Relationships: [] };
-      authors: { Row: AuthorRow; Insert: Omit<AuthorRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AuthorRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      columnists: { Row: ColumnistRow; Insert: Omit<ColumnistRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<ColumnistRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       error_reports: { Row: ErrorReportRow; Insert: Omit<ErrorReportRow, "id" | "created_at">; Update: Partial<Omit<ErrorReportRow, "id" | "created_at">>; Relationships: [] };
       user_profiles: { Row: UserProfileRow; Insert: Omit<UserProfileRow, "created_at" | "display_id">; Update: Partial<Omit<UserProfileRow, "id" | "created_at" | "display_id">>; Relationships: [] };
       internal_tickets: { Row: InternalTicketRow; Insert: Omit<InternalTicketRow, "id" | "ticket_number" | "created_at" | "updated_at" | "status" | "admin_response" | "assigned_to" | "assigned_to_name">; Update: Partial<Omit<InternalTicketRow, "id" | "ticket_number" | "created_at">>; Relationships: [] };
@@ -554,7 +554,7 @@ export type NewsletterSub = NewsletterSubRow;
 export type Course = CourseRow;
 export type Resource = ResourceRow;
 export type MediaItem = MediaItemRow;
-export type Author = AuthorRow;
+export type Columnist = ColumnistRow;
 export type ErrorReport = ErrorReportRow;
 export type UserProfile = UserProfileRow;
 export type InternalTicket = InternalTicketRow;

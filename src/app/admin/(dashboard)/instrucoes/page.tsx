@@ -10,7 +10,7 @@ export default async function InstrucoesAdminPage() {
 
   return (
     <div>
-      <PageHeader title="Canal de Instruções" subtitle="FAQ e passo a passo para o colunista — aparece no painel do autor." />
+      <PageHeader title="Canal de Instruções" subtitle="FAQ e passo a passo para o colunista — aparece no painel do colunista." />
       <InstructionsClient items={items} />
     </div>
   );

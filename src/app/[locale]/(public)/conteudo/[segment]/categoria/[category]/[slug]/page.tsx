@@ -21,8 +21,8 @@ import { articleHref, articlePath, FORMAT_SEGMENT, UNCATEGORIZED_SEGMENT } from 
 import { ogImageUrl } from "@/lib/og-image";
 import { pickLocale } from "@/lib/locale-content";
 import { aiDisclosureText } from "@/lib/ai-disclosure";
-import { aboutAuthorLabel, isAuthorPubliclyVisible, joinAuthorNames } from "@/lib/founder-data";
-import type { Article, Category, Author, Comment } from "@/types/database.types";
+import { aboutColumnistLabel, isColumnistPubliclyVisible, joinColumnistNames } from "@/lib/founder-data";
+import type { Article, Category, Columnist, Comment } from "@/types/database.types";
 import { HideSideRails } from "@/components/HideSideRails";
 
 export const revalidate = 300;
@@ -50,22 +50,22 @@ async function getArticle(slug: string) {
     .single();
   if (!article) return null;
 
-  const [categoryRes, authorRes, commentsRes, allAuthorsRes, coauthorsRes] = await Promise.all([
+  const [categoryRes, columnistRes, commentsRes, allColumnistsRes, coauthorsRes] = await Promise.all([
     article.category_id ? client.from("categories").select("*").eq("id", article.category_id).single() : Promise.resolve({ data: null }),
-    article.author_id ? client.from("authors").select("*").eq("id", article.author_id).single() : Promise.resolve({ data: null }),
+    article.columnist_id ? client.from("columnists").select("*").eq("id", article.columnist_id).single() : Promise.resolve({ data: null }),
     client.from("comments").select("*").eq("article_id", article.id).eq("status", "approved").order("created_at", { ascending: false }),
-    client.from("authors").select("*"),
-    client.from("article_coauthors").select("author_id").eq("article_id", article.id),
+    client.from("columnists").select("*"),
+    client.from("article_coauthors").select("columnist_id").eq("article_id", article.id),
   ]);
-  // Used to show "Por {autor}" on each "Leia também" card below — a
-  // separate fetch of every author rather than a join, matching the same
+  // Used to show "Por {colunista}" on each "Leia também" card below — a
+  // separate fetch of every columnist rather than a join, matching the same
   // pattern already used on the homepage/category/search listings.
-  const authorById = new Map(((allAuthorsRes.data ?? []) as Author[]).map((a) => [a.id, a]));
-  // Collaborative pieces: primary author plus any co-authors, resolved
-  // through the same authorById map rather than a second roundtrip.
-  const coauthors = ((coauthorsRes.data ?? []) as { author_id: string }[])
-    .map((row) => authorById.get(row.author_id))
-    .filter((a): a is Author => Boolean(a));
+  const columnistById = new Map(((allColumnistsRes.data ?? []) as Columnist[]).map((a) => [a.id, a]));
+  // Collaborative pieces: primary columnist plus any co-columnists, resolved
+  // through the same columnistById map rather than a second roundtrip.
+  const coauthors = ((coauthorsRes.data ?? []) as { columnist_id: string }[])
+    .map((row) => columnistById.get(row.columnist_id))
+    .filter((a): a is Columnist => Boolean(a));
 
   let related: ArticleWithCategory[] = [];
   if (article.category_id) {
@@ -94,11 +94,11 @@ async function getArticle(slug: string) {
   return {
     article: article as ArticleWithCategory,
     category: categoryRes.data as Category | null,
-    author: authorRes.data as Author | null,
+    columnist: columnistRes.data as Columnist | null,
     coauthors,
     comments: (commentsRes.data ?? []) as Comment[],
     related,
-    authorById,
+    columnistById,
   };
 }
 
@@ -119,7 +119,7 @@ export async function generateMetadata({
 
   const title = pickLocale(locale, result.article.seo_title_pt, result.article.seo_title_en) || pickLocale(locale, result.article.title_pt, result.article.title_en);
   const description = pickLocale(locale, result.article.seo_desc_pt, result.article.seo_desc_en) || pickLocale(locale, result.article.excerpt_pt, result.article.excerpt_en) || undefined;
-  const allAuthorNames = [result.author, ...result.coauthors].filter((a): a is Author => Boolean(a)).map((a) => a.name);
+  const allColumnistNames = [result.columnist, ...result.coauthors].filter((a): a is Columnist => Boolean(a)).map((a) => a.name);
 
   // Falls back to the site-wide default OG image (admin-configurable, same
   // one the homepage uses) when the article itself has no cover — a share
@@ -147,7 +147,7 @@ export async function generateMetadata({
       siteName: "Festina",
       locale: locale === "pt" ? "pt_BR" : "en_US",
       publishedTime: result.article.published_at ?? undefined,
-      authors: allAuthorNames.length > 0 ? allAuthorNames : undefined,
+      authors: allColumnistNames.length > 0 ? allColumnistNames : undefined,
     },
     twitter: {
       card: "summary_large_image",
@@ -171,11 +171,11 @@ export default async function ArticlePage({
   const tc = await getTranslations({ locale, namespace: "common" });
   const tNav = await getTranslations({ locale, namespace: "nav" });
 
-  const { article, category: categoryRow, author, coauthors, comments, related, authorById } = result;
-  // Primary author plus any co-authors, in that order, de-duplicated —
+  const { article, category: categoryRow, columnist, coauthors, comments, related, columnistById } = result;
+  // Primary columnist plus any co-columnists, in that order, de-duplicated —
   // used everywhere the article's byline/credits are shown.
-  const allAuthors = [author, ...coauthors]
-    .filter((a): a is Author => Boolean(a))
+  const allColumnists = [columnist, ...coauthors]
+    .filter((a): a is Columnist => Boolean(a))
     .filter((a, i, arr) => arr.findIndex((b) => b.id === a.id) === i);
 
   // A sidebar table of contents only earns its place on a long article —
@@ -220,7 +220,7 @@ export default async function ArticlePage({
     image: article.cover_image ? [article.cover_image] : undefined,
     datePublished: article.published_at ?? article.created_at,
     dateModified: article.updated_at ?? article.published_at ?? article.created_at,
-    author: allAuthors.length > 0 ? allAuthors.map((a) => ({ "@type": "Person", name: a.name, url: `${siteUrl}/conteudo/autor/${a.slug}` })) : undefined,
+    columnist: allColumnists.length > 0 ? allColumnists.map((a) => ({ "@type": "Person", name: a.name, url: `${siteUrl}/conteudo/colunista/${a.slug}` })) : undefined,
     publisher: {
       "@type": "Organization",
       name: "Festina",
@@ -326,7 +326,7 @@ export default async function ArticlePage({
                 <Clock size={14} /> {article.read_time} {tc("minutes")}
               </span>
             )}
-            {allAuthors.length > 0 && <span>{tc("by")} {joinAuthorNames(allAuthors.map((a) => a.name), locale)}</span>}
+            {allColumnists.length > 0 && <span>{tc("by")} {joinColumnistNames(allColumnists.map((a) => a.name), locale)}</span>}
           </div>
         </div>
       </section>
@@ -345,7 +345,7 @@ export default async function ArticlePage({
         >
           {/* Article body */}
           <article>
-            {allAuthors.length > 0 && (
+            {allColumnists.length > 0 && (
               <div
                 style={{
                   display: "flex",
@@ -358,7 +358,7 @@ export default async function ArticlePage({
                   borderBottom: "1px solid var(--site-border)",
                 }}
               >
-                {allAuthors.map((a) => (
+                {allColumnists.map((a) => (
                   <div key={a.id} style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
                     <div
                       style={{
@@ -372,12 +372,12 @@ export default async function ArticlePage({
                     <div>
                       <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "0.9375rem" }}>{a.name}</div>
                       <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
-                        {isAuthorPubliclyVisible(a) && (
+                        {isColumnistPubliclyVisible(a) && (
                           <Link
                             href={{ pathname: "/sobre/[slug]", params: { slug: a.slug } }}
                             style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#315E9C", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
                           >
-                            {aboutAuthorLabel(a.gender, locale)} <ChevronRight size={14} />
+                            {aboutColumnistLabel(a.gender, locale)} <ChevronRight size={14} />
                           </Link>
                         )}
                         {a.linkedin_url && (
@@ -429,10 +429,10 @@ export default async function ArticlePage({
               <AdBanner slotKey="article-instream" articleId={article.id} />
             </div>
 
-            {/* Author */}
-            {author && isAuthorPubliclyVisible(author) && (
+            {/* Columnist */}
+            {columnist && isColumnistPubliclyVisible(columnist) && (
               <Link
-                href={{ pathname: "/sobre/[slug]", params: { slug: author.slug } }}
+                href={{ pathname: "/sobre/[slug]", params: { slug: columnist.slug } }}
                 className="hover-card"
                 style={{
                   marginTop: "2.5rem",
@@ -451,25 +451,25 @@ export default async function ArticlePage({
                     height: "4rem",
                     borderRadius: "50%",
                     flexShrink: 0,
-                    background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+                    background: columnist.photo_url ? `url("${columnist.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
                   }}
                 />
                 <div>
                   <div style={{ fontWeight: 800, color: "var(--site-text)", fontSize: "1rem", marginBottom: "0.25rem" }}>
-                    {author.name}
+                    {columnist.name}
                   </div>
-                  {author.role_pt && (
+                  {columnist.role_pt && (
                     <div style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.875rem", marginBottom: "0.5rem" }}>
-                      {pickLocale(locale, author.role_pt, author.role_en)}
+                      {pickLocale(locale, columnist.role_pt, columnist.role_en)}
                     </div>
                   )}
-                  {author.bio_pt && (
+                  {columnist.bio_pt && (
                     <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6, marginBottom: "0.625rem", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
-                      {pickLocale(locale, author.bio_pt, author.bio_en)}
+                      {pickLocale(locale, columnist.bio_pt, columnist.bio_en)}
                     </p>
                   )}
                   <span style={{ display: "inline-flex", alignItems: "center", gap: "0.125rem", color: "#315E9C", fontWeight: 700, fontSize: "0.8125rem" }}>
-                    {aboutAuthorLabel(author.gender, locale)} <ChevronRight size={14} />
+                    {aboutColumnistLabel(columnist.gender, locale)} <ChevronRight size={14} />
                   </span>
                 </div>
               </Link>
@@ -503,9 +503,9 @@ export default async function ArticlePage({
                       <h3 style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", lineHeight: 1.4 }}>
                         {pickLocale(locale, r.title_pt, r.title_en)}
                       </h3>
-                      {r.author_id && authorById.get(r.author_id) && (
+                      {r.columnist_id && columnistById.get(r.columnist_id) && (
                         <span style={{ display: "block", marginTop: "0.375rem", fontSize: "0.75rem", color: "var(--site-faint)" }}>
-                          {tc("by")} {authorById.get(r.author_id)!.name}
+                          {tc("by")} {columnistById.get(r.columnist_id)!.name}
                         </span>
                       )}
                     </Link>
@@ -522,7 +522,7 @@ export default async function ArticlePage({
               <p style={{ color: "var(--site-muted)", fontSize: "0.8125rem", lineHeight: 1.6, marginBottom: "2rem" }}>
                 {locale === "en" ? (
                   <>
-                    The author of the message, not Festina, is responsible for the comment. Read the{" "}
+                    The columnist of the message, not Festina, is responsible for the comment. Read the{" "}
                     <Link href="/comentarios" style={{ color: "#315E9C", fontWeight: 600, textDecoration: "underline" }}>
                       Comment Guidelines
                     </Link>

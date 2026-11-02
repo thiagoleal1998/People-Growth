@@ -10,8 +10,8 @@ export async function createUser(formData: FormData) {
   const actor = await getCurrentProfile();
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const role = (String(formData.get("role") ?? "author")) as "admin" | "author";
-  const authorId = String(formData.get("author_id") ?? "") || null;
+  const role = (String(formData.get("role") ?? "columnist")) as "admin" | "columnist";
+  const columnistId = String(formData.get("columnist_id") ?? "") || null;
 
   if (!email || !password) {
     redirect(`/admin/usuarios?userError=${encodeURIComponent("E-mail e senha são obrigatórios.")}`);
@@ -33,7 +33,7 @@ export async function createUser(formData: FormData) {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = admin as any;
-  await client.from("user_profiles").insert({ id: data.user!.id, email, role, author_id: authorId });
+  await client.from("user_profiles").insert({ id: data.user!.id, email, role, columnist_id: columnistId });
 
   if (actor) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "create", entityType: "usuário", entityLabel: email });
@@ -43,7 +43,7 @@ export async function createUser(formData: FormData) {
   redirect("/admin/usuarios?saved=1");
 }
 
-export async function updateUserRole(id: string, role: "admin" | "author") {
+export async function updateUserRole(id: string, role: "admin" | "columnist") {
   const actor = await getCurrentProfile();
   const admin = await createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -56,10 +56,10 @@ export async function updateUserRole(id: string, role: "admin" | "author") {
   revalidatePath("/admin/usuarios");
 }
 
-export async function updateUserAuthorLink(id: string, authorId: string | null) {
+export async function updateUserColumnistLink(id: string, columnistId: string | null) {
   const admin = await createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  await (admin as any).from("user_profiles").update({ author_id: authorId }).eq("id", id);
+  await (admin as any).from("user_profiles").update({ columnist_id: columnistId }).eq("id", id);
   revalidatePath("/admin/usuarios");
 }
 

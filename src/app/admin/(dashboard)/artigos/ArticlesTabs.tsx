@@ -52,7 +52,7 @@ function homeSlotLabel(slot: string | null | undefined): string {
   }
 }
 
-export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[]; currentAuthorId: string | null }) {
+export function ArticlesTabs({ articles, currentColumnistId }: { articles: Article[]; currentColumnistId: string | null }) {
   const [active, setActive] = useState<TabId>("published");
 
   const filtered = articles.filter((a) => {
@@ -60,12 +60,12 @@ export function ArticlesTabs({ articles, currentAuthorId }: { articles: Article[
     if (active === "draft") return a.status === "draft";
     if (active === "pending") return a.status === "pending";
     if (active === "scheduled") return a.status === "scheduled";
-    return currentAuthorId != null && a.author_id === currentAuthorId;
+    return currentColumnistId != null && a.columnist_id === currentColumnistId;
   });
 
   const counts: Record<TabId, number> = {
     published: articles.filter((a) => a.status === "published").length,
-    mine: currentAuthorId ? articles.filter((a) => a.author_id === currentAuthorId).length : 0,
+    mine: currentColumnistId ? articles.filter((a) => a.columnist_id === currentColumnistId).length : 0,
     draft: articles.filter((a) => a.status === "draft").length,
     pending: articles.filter((a) => a.status === "pending").length,
     scheduled: articles.filter((a) => a.status === "scheduled").length,

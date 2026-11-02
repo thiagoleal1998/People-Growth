@@ -1,0 +1,237 @@
+"use server";
+
+import { revalidatePath } from "next/cache";
+import { redirect } from "next/navigation";
+import slugify from "slugify";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { getCurrentProfile } from "@/lib/auth/profile";
+import { uploadPublicImage } from "@/lib/supabase/storage";
+import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
+import { calculateReadTime } from "@/lib/markdown-lite";
+import { insertNotification, type NotificationTemplateKey } from "@/lib/notify";
+import type { Article, ArticleSource } from "@/types/database.types";
+
+// Rows come in as parallel source_label / source_url fields; rows without a label are dropped.
+function parseSources(formData: FormData): ArticleSource[] {
+  const labels = formData.getAll("source_label").map((value) => String(value).trim());
+  const urls = formData.getAll("source_url").map((value) => String(value).trim());
+  return labels.map((label, i) => ({ label, url: urls[i] || null })).filter((source) => source.label !== "");
+}
+
+// Columnists have no RLS permission to insert into `notifications` at all —
+// only "Admins can create notifications for anyone" exists (migration 038)
+// — so this has to run entirely on the service-role client, both to list
+// who the admins are (user_profiles RLS also only allows reading your own
+// row) and to write the rows.
+async function notifyAdmins(key: NotificationTemplateKey, vars: Record<string, string>, link: string) {
+  const admin = await createAdminClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: admins } = await (admin as any).from("user_profiles").select("id").eq("role", "admin");
+  if (!admins || admins.length === 0) return;
+  await Promise.all(admins.map((a: { id: string }) => insertNotification(admin, a.id, key, vars, link)));
+}
+
+export async function upsertOwnArticle(id: string | null, formData: FormData) {
+  try {
+    await upsertOwnArticleInner(id, formData);
+  } catch (err) {
+    // Anything unexpected (a thrown exception, not just a Supabase {error})
+    // used to bubble up as Next's generic "server error" page with no way
+    // to tell what actually happened — surface it on the form instead.
+    if (isRedirectError(err)) throw err; // redirect() itself throws — let it through
+    const message = err instanceof Error ? err.message : String(err);
+    console.error("upsertOwnArticle failed:", err);
+    redirect(`/colunista/artigos/${id ?? "novo"}?saveError=${encodeURIComponent(message)}`);
+  }
+}
+
+function isRedirectError(err: unknown): boolean {
+  return typeof err === "object" && err !== null && "digest" in err && typeof (err as { digest?: unknown }).digest === "string" && (err as { digest: string }).digest.startsWith("NEXT_REDIRECT");
+}
+
+async function upsertOwnArticleInner(id: string | null, formData: FormData) {
+  const profile = await getCurrentProfile();
+  if (!profile?.columnist_id) {
+    redirect("/colunista?error=" + encodeURIComponent("Seu login ainda não está vinculado a um perfil de colunista. Peça a um admin para vincular."));
+  }
+
+  const supabase = await createClient();
+  // UI-level convenience check — RLS (063_author_terms_acceptance.sql,
+  // current_user_terms_accepted()) is the actual enforcement, this only
+  // avoids a columnist filling out the whole form before hitting the wall.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const { data: columnistRow } = await (supabase as any).from("columnists").select("terms_accepted_at").eq("id", profile.columnist_id).single();
+  if (!columnistRow?.terms_accepted_at) {
+    redirect("/colunista?error=" + encodeURIComponent("Você precisa aceitar o Termo de Aceite para criar ou editar conteúdo."));
+  }
+
+  const { url: coverImageUrl, error: imageError } = await uploadPublicImage(formData.get("cover_image_file"), "articles");
+
+  const title_pt = String(formData.get("title_pt") ?? "");
+  const slugInput = String(formData.get("slug") ?? "").trim();
+  const intent = String(formData.get("intent") ?? "draft");
+  const format = (String(formData.get("format") ?? "opiniao")) as Article["format"];
+  const requestedScheduledFor = String(formData.get("scheduled_for") ?? "").trim() || null;
+
+  // Status is never picked directly — it follows which of the three action
+  // buttons was clicked. Columnists can only ever reach draft/pending; only an
+  // admin's approval can move an article to scheduled/published (see
+  // approveAndSchedule/publishArticle in the admin actions).
+  let status: Article["status"] = "draft";
+  let scheduledFor = requestedScheduledFor;
+  if (intent === "schedule") {
+    if (!requestedScheduledFor) {
+      throw new Error("Escolha uma data de publicação antes de agendar.");
+    }
+    status = "pending";
+  } else if (intent === "send") {
+    status = "pending";
+    // No specific date requested — this is the "approve = publish right
+    // away" path (see the admin list's "Aprovar" vs "Aprovar e agendar").
+    scheduledFor = null;
+  }
+  // intent === "draft" (or anything else): stays draft, keeping whatever
+  // date was already set so a draft-in-progress doesn't lose a planned date.
+
+  // Normalize any "\r\n" that might still slip through — the markdown-lite
+  // renderer's paragraph/list/quote splitting only recognizes plain "\n\n".
+  const contentPt = String(formData.get("content_pt") ?? "").replace(/\r\n?/g, "\n");
+
+  // Mandatory AI-use declaration — the radio group lives on the "Detalhes"
+  // tab, which is display:none (not removed) when inactive, so the native
+  // HTML `required` attribute alone can't be trusted to block submission if
+  // the columnist never opens that tab. This is the real enforcement.
+  const aiUsedRaw = formData.get("ai_used");
+  if (aiUsedRaw !== "yes" && aiUsedRaw !== "no") {
+    throw new Error("Responda se este artigo utilizou inteligência artificial (aba Detalhes) antes de salvar.");
+  }
+
+  const payload = {
+    title_pt,
+    title_en: String(formData.get("title_en") ?? "") || null,
+    slug: slugInput || slugify(title_pt, { lower: true, strict: true }),
+    content_pt: contentPt,
+    content_en: String(formData.get("content_en") ?? "").replace(/\r\n?/g, "\n") || null,
+    excerpt_pt: String(formData.get("excerpt_pt") ?? "") || null,
+    excerpt_en: String(formData.get("excerpt_en") ?? "") || null,
+    summary_pt: String(formData.get("summary_pt") ?? "") || null,
+    summary_en: String(formData.get("summary_en") ?? "") || null,
+    cover_image: coverImageUrl || String(formData.get("cover_image_url") ?? "").trim() || String(formData.get("current_cover_image") ?? "") || null,
+    cover_image_caption: String(formData.get("cover_image_caption") ?? "") || null,
+    cover_image_credit: String(formData.get("cover_image_credit") ?? "") || null,
+    video_url: String(formData.get("video_url") ?? "").trim() || null,
+    category_id: String(formData.get("category_id") ?? "") || null,
+    seo_title_pt: String(formData.get("seo_title_pt") ?? "") || null,
+    seo_desc_pt: String(formData.get("seo_desc_pt") ?? "") || null,
+    ai_usage: aiUsedRaw === "yes" ? formData.getAll("ai_usage").map((value) => String(value)) : [],
+    sources: parseSources(formData),
+    read_time: calculateReadTime(contentPt),
+    format,
+    status,
+    scheduled_for: scheduledFor,
+    columnist_id: profile.columnist_id,
+    // Clear any standing "alterações solicitadas" note once the columnist
+    // actually resubmits — leave it alone on a plain draft save (an
+    // `undefined` value is dropped from the JSON body entirely, so the
+    // column is left untouched rather than being overwritten with it).
+    review_feedback: intent === "draft" ? undefined : null,
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  let articleId = id;
+  const isNew = !articleId;
+  let oldArticle: Article | null = null;
+  let saveError: string | null = null;
+  if (articleId) {
+    const { data } = await client.from("articles").select("*").eq("id", articleId).single();
+    oldArticle = data as Article | null;
+    // .select() after update is required to actually prove a row was
+    // written — RLS silently returns success with zero rows (no error at
+    // all) when the policy blocks the write, which looks identical to a
+    // real save unless you check that a row actually came back.
+    const { data: updated, error } = await client.from("articles").update(payload).eq("id", articleId).eq("columnist_id", profile.columnist_id).select("id");
+    if (error) saveError = error.message;
+    else if (!updated || updated.length === 0) saveError = "A alteração não foi salva — este artigo pode não estar mais vinculado à sua conta.";
+  } else {
+    const { data, error } = await client.from("articles").insert(payload).select("id").single();
+    if (error) saveError = error.message;
+    articleId = data?.id ?? null;
+  }
+
+  // Additional categories (beyond the primary category_id above): replace the
+  // whole set on every save. RLS ("Columnists manage categories of their own
+  // articles") checks the article's real columnist_id, not a client-supplied one.
+  if (!saveError && articleId) {
+    const primaryCategoryId = String(formData.get("category_id") ?? "");
+    const extraCategoryIds = [...new Set(formData.getAll("extra_category_ids").map((value) => String(value)).filter((cid) => cid && cid !== primaryCategoryId))];
+    await client.from("article_categories").delete().eq("article_id", articleId);
+    if (extraCategoryIds.length > 0) {
+      await client.from("article_categories").insert(extraCategoryIds.map((category_id) => ({ article_id: articleId, category_id })));
+    }
+  }
+
+  // Co-authors (collaborative pieces): same replace-the-whole-set approach.
+  // RLS ("Columnists manage coauthors of their own articles") checks the
+  // article's real columnist_id, not a client-supplied one.
+  if (!saveError && articleId) {
+    const coauthorIds = [...new Set(formData.getAll("coauthor_ids").map((value) => String(value)).filter((cid) => cid && cid !== profile.columnist_id))];
+    await client.from("article_coauthors").delete().eq("article_id", articleId);
+    if (coauthorIds.length > 0) {
+      await client.from("article_coauthors").insert(coauthorIds.map((columnist_id) => ({ article_id: articleId, columnist_id })));
+    }
+  }
+
+  // A failed write (e.g. a duplicate slug) must never look like a success —
+  // this used to redirect to ?saved=1 unconditionally regardless of error.
+  if (saveError) {
+    redirect(`/colunista/artigos/${articleId ?? "novo"}?saveError=${encodeURIComponent(saveError)}`);
+  }
+
+  await logActivity({
+    userId: profile.id,
+    userEmail: profile.email,
+    action: isNew ? "create" : "update",
+    entityType: "artigo",
+    entityLabel: title_pt,
+    details: diffFields(oldArticle, payload, ARTICLE_TRACKED_FIELDS),
+  });
+
+  // Only notify on the transition INTO pending — not every draft save, and
+  // not again if it was already sitting in pending (e.g. re-saving without
+  // changing the action taken).
+  const wasPending = oldArticle?.status === "pending";
+  if (status === "pending" && !wasPending) {
+    const cameFromChangesRequested = Boolean(oldArticle?.review_feedback);
+    await notifyAdmins(
+      cameFromChangesRequested ? "article_resubmitted_for_approval" : "article_submitted_for_approval",
+      { title: title_pt },
+      `/admin/artigos/${articleId}/revisar`
+    );
+  }
+
+  revalidatePath("/colunista");
+  revalidatePath("/colunista/artigos");
+  revalidatePath("/admin/artigos");
+
+  if (imageError && articleId) {
+    redirect(`/colunista/artigos/${articleId}?imageError=${encodeURIComponent(imageError)}`);
+  }
+  // Stay on the article being edited instead of bouncing back to the list —
+  // the person decides when they're done, not the save action.
+  redirect(`/colunista/artigos/${articleId}?saved=1`);
+}
+
+export async function deleteOwnArticle(id: string) {
+  const profile = await getCurrentProfile();
+  if (!profile?.columnist_id) return;
+
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  const { data: article } = await client.from("articles").select("title_pt").eq("id", id).single();
+  await client.from("articles").delete().eq("id", id).eq("columnist_id", profile.columnist_id);
+  await logActivity({ userId: profile.id, userEmail: profile.email, action: "delete", entityType: "artigo", entityLabel: article?.title_pt });
+  revalidatePath("/colunista");
+  revalidatePath("/colunista/artigos");
+}

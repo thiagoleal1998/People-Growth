@@ -80,7 +80,7 @@ export type Competition = "serie_a" | "serie_b" | "copa_do_brasil" | "libertador
 // isn't published anywhere else on api-futebol.com.br's pages). Downloaded
 // each one once (same images, confirmed live against /leagues?id=X) and
 // re-hosted them on this project's own Supabase Storage bucket — the same
-// CDN already relied on for every author photo and article cover on the
+// CDN already relied on for every columnist photo and article cover on the
 // site — removing the third-party DNS dependency entirely rather than
 // hoping a fallback catches it.
 const SPORTS_LOGO_BASE = "https://lqgkxpoyymokrratgabe.supabase.co/storage/v1/object/public/site-assets/sports-logos";

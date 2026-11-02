@@ -34,7 +34,7 @@ export default async function ArtigosAdminPage({ searchParams }: { searchParams:
 
       <ArtigosComentariosTabs
         articles={articles}
-        currentAuthorId={profile?.author_id ?? null}
+        currentColumnistId={profile?.columnist_id ?? null}
         comments={comments}
         articleTitles={articleTitles}
         initialTab={tab}

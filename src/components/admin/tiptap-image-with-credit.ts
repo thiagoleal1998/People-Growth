@@ -61,7 +61,7 @@ export const ImageWithCredit = Image.extend<ImageWithCreditOptions>({
       wrap.appendChild(img);
 
       // Only shown while the image is selected, so a column of photos reads
-      // as plain text-flow until the author actually clicks one.
+      // as plain text-flow until the columnist actually clicks one.
       const controls = document.createElement("div");
       controls.contentEditable = "false";
       controls.style.cssText = "display:none;position:absolute;top:0.5rem;right:0.5rem;gap:0.375rem;z-index:2";

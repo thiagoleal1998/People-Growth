@@ -40,7 +40,7 @@ This policy may be updated if the site starts using new cookies or third-party t
     titlePt: "Aviso de Direitos Autorais",
     titleEn: "Copyright Notice",
     bodyPt: `## Titularidade do conteúdo
-Os textos, imagens, vídeos e demais materiais publicados pelo Grupo Festina — incluindo artigos, a coluna Mea Sententia e páginas institucionais — são de titularidade do Grupo Festina ou de seus autores, e protegidos pela legislação brasileira de direitos autorais (Lei nº 9.610/1998), salvo quando indicada outra fonte.
+Os textos, imagens, vídeos e demais materiais publicados pelo Grupo Festina — incluindo artigos, a coluna Mea Sententia e páginas institucionais — são de titularidade do Grupo Festina ou de seus colunistas, e protegidos pela legislação brasileira de direitos autorais (Lei nº 9.610/1998), salvo quando indicada outra fonte.
 
 ## Uso permitido
 É permitido compartilhar links para o nosso conteúdo e citar trechos curtos, desde que citada a fonte com link para o artigo original. Reprodução integral de artigos, sem autorização prévia, não é permitida.
@@ -51,7 +51,7 @@ Imagens e vídeos incorporados de terceiros (como YouTube) pertencem a seus resp
 ## Solicitações e denúncias
 Caso identifique conteúdo nosso publicado indevidamente em outro site, ou acredite que publicamos algo que viola direitos autorais de terceiros, entre em contato pela [página de Contato](/contato).`,
     bodyEn: `## Content ownership
-The text, images, videos and other materials published by Festina — including articles, the Mea Sententia column and institutional pages — are owned by Festina or its authors, and protected by Brazilian copyright law (Law No. 9,610/1998), unless another source is indicated.
+The text, images, videos and other materials published by Festina — including articles, the Mea Sententia column and institutional pages — are owned by Festina or its columnists, and protected by Brazilian copyright law (Law No. 9,610/1998), unless another source is indicated.
 
 ## Permitted use
 You may share links to our content and quote short excerpts, provided the source is cited with a link to the original article. Full reproduction of articles without prior authorization is not permitted.
@@ -141,7 +141,7 @@ The use of cookies on the site is covered separately in our [Cookie Policy](/coo
 Ao acessar e usar o site do Grupo Festina, você concorda com estes Termos de Uso. Se não concordar com algum ponto, pedimos que não utilize o site.
 
 ## Sobre o conteúdo
-Os artigos, análises e materiais publicados aqui — incluindo os da seção Mea Sententia — representam a opinião de seus autores e têm caráter informativo. Não constituem aconselhamento profissional individualizado (jurídico, financeiro, contábil ou de outra natureza) para o caso concreto de cada leitor.
+Os artigos, análises e materiais publicados aqui — incluindo os da seção Mea Sententia — representam a opinião de seus colunistas e têm caráter informativo. Não constituem aconselhamento profissional individualizado (jurídico, financeiro, contábil ou de outra natureza) para o caso concreto de cada leitor.
 
 ## Propriedade intelectual
 Textos, imagens, marca e demais materiais do site são de propriedade do Grupo Festina ou de terceiros licenciados, protegidos por direitos autorais. A reprodução total ou parcial sem autorização prévia não é permitida — veja também nosso [Aviso de Direitos Autorais](/direitos-autorais).
@@ -164,7 +164,7 @@ Estes termos são regidos pelas leis da República Federativa do Brasil. Dúvida
 By accessing and using the Festina website, you agree to these Terms of Use. If you disagree with any part, please do not use the site.
 
 ## About the content
-The articles, analyses and materials published here — including those in the Mea Sententia section — represent the opinion of their authors and are informational in nature. They do not constitute individualized professional advice (legal, financial, accounting or otherwise) for any reader's specific situation.
+The articles, analyses and materials published here — including those in the Mea Sententia section — represent the opinion of their columnists and are informational in nature. They do not constitute individualized professional advice (legal, financial, accounting or otherwise) for any reader's specific situation.
 
 ## Intellectual property
 Text, images, brand and other site materials are the property of Festina or licensed third parties, protected by copyright. Full or partial reproduction without prior authorization is not permitted — see also our [Copyright Notice](/direitos-autorais).

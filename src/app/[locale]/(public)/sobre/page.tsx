@@ -4,7 +4,7 @@ import { getLocale, getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { ArrowRight, Lightbulb } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import type { Author } from "@/types/database.types";
+import type { Columnist } from "@/types/database.types";
 import { pickLocale } from "@/lib/locale-content";
 import { INSTITUTIONAL_DEFAULTS } from "@/lib/institutional-defaults";
 import { extractPhilosophyLevels } from "@/lib/philosophy-levels";
@@ -45,13 +45,13 @@ export default async function SobrePage() {
         { icon: "👥", title: t("level3Title"), description: t("level3Desc") },
         { icon: "📈", title: t("level4Title"), description: t("level4Desc") },
       ];
-  const { data: authorsData } = await client
-    .from("authors")
+  const { data: columnistsData } = await client
+    .from("columnists")
     .select("*")
     .eq("status", "active")
     .eq("is_founder", true)
     .order("order");
-  const authors = (authorsData ?? []) as Author[];
+  const columnists = (columnistsData ?? []) as Columnist[];
 
   return (
     <>
@@ -319,8 +319,8 @@ export default async function SobrePage() {
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "1.5rem" }}>
-            {authors.map((author) => (
-              <FounderCard key={author.id} author={author} />
+            {columnists.map((columnist) => (
+              <FounderCard key={columnist.id} columnist={columnist} />
             ))}
           </div>
 

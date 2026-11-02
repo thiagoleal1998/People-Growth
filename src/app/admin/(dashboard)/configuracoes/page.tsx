@@ -3,7 +3,7 @@ import { PageHeader } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
 import { ConfiguracoesTabs } from "./ConfiguracoesTabs";
 import { updateSeoConfig } from "../seo/actions";
-import { ADMIN_MENU_DEFAULTS, AUTHOR_MENU_DEFAULTS, applyMenuOverrides, isMenuGroup, type MenuOverride } from "@/lib/menu-registry";
+import { ADMIN_MENU_DEFAULTS, COLUMNIST_MENU_DEFAULTS, applyMenuOverrides, isMenuGroup, type MenuOverride } from "@/lib/menu-registry";
 import { formatName, getGovernorRace, getPresidentRace, INCUMBENT_SEEKING_REELECTION, raceStatus, UF_IN_RUNOFF, UF_OPTIONS, type TseRace } from "@/lib/tse";
 import type { MenuEditorItem } from "./MenuEditor";
 import type { Category, NotificationTemplate } from "@/types/database.types";
@@ -33,13 +33,13 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data }, { data: categoriesData }, { data: articlesData }, { data: extraCategoriesData }, { data: adminMenuOverrides }, { data: authorMenuOverrides }, { data: notificationTemplatesData }] = await Promise.all([
+  const [{ data }, { data: categoriesData }, { data: articlesData }, { data: extraCategoriesData }, { data: adminMenuOverrides }, { data: columnistMenuOverrides }, { data: notificationTemplatesData }] = await Promise.all([
     client.from("site_config").select("*") as Promise<{ data: SiteConfigRow[] | null }>,
     client.from("categories").select("*").order("name_pt"),
     client.from("articles").select("id, category_id"),
     client.from("article_categories").select("article_id, category_id"),
     client.from("menu_items").select("id,label,sort_order").eq("panel", "admin"),
-    client.from("menu_items").select("id,label,sort_order").eq("panel", "autor"),
+    client.from("menu_items").select("id,label,sort_order").eq("panel", "colunista"),
     // Table doesn't exist until migration 067 runs — tolerate the error
     // (data comes back null, not a thrown rejection) so the rest of the
     // Configurações page still loads fine in the meantime.
@@ -53,9 +53,9 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
   // as one reorderable/renamable row; its own children keep their built-in
   // order, out of scope for this editor (see menu-registry.ts).
   const adminMenu = applyMenuOverrides(ADMIN_MENU_DEFAULTS, (adminMenuOverrides ?? []) as MenuOverride[]);
-  const authorMenu = applyMenuOverrides(AUTHOR_MENU_DEFAULTS, (authorMenuOverrides ?? []) as MenuOverride[]);
+  const columnistMenu = applyMenuOverrides(COLUMNIST_MENU_DEFAULTS, (columnistMenuOverrides ?? []) as MenuOverride[]);
   const adminMenuItems: MenuEditorItem[] = adminMenu.map((item) => ({ id: item.id, label: item.label, href: isMenuGroup(item) ? undefined : item.href }));
-  const authorMenuItems: MenuEditorItem[] = authorMenu.map((item) => ({ id: item.id, label: item.label, href: item.href }));
+  const columnistMenuItems: MenuEditorItem[] = columnistMenu.map((item) => ({ id: item.id, label: item.label, href: item.href }));
 
   // How many articles sit under each category — shown so deleting one isn't a
   // guess, and counting both an article's primary category and any additional
@@ -97,7 +97,7 @@ export default async function ConfiguracoesPage({ searchParams }: { searchParams
         updateSeoConfigAction={updateSeoConfig}
         siteUrl={process.env.NEXT_PUBLIC_SITE_URL ?? "https://grupofestina.com.br"}
         adminMenuItems={adminMenuItems}
-        authorMenuItems={authorMenuItems}
+        columnistMenuItems={columnistMenuItems}
         electionsStatus={electionsStatus}
       />
     </div>

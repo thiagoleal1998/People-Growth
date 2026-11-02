@@ -21,13 +21,13 @@ import type { ArticleWithCategory } from "@/app/[locale]/(public)/page";
 // once the measurement runs.
 export function ClampedNewsList({
   articles,
-  authorNames,
+  columnistNames,
   locale,
   byLabel,
   sidebarId,
 }: {
   articles: ArticleWithCategory[];
-  authorNames: Record<string, string>;
+  columnistNames: Record<string, string>;
   locale: string;
   byLabel: string;
   sidebarId: string;
@@ -119,7 +119,7 @@ export function ClampedNewsList({
                 </p>
               )}
               <span style={{ fontSize: "0.75rem", color: "var(--site-faint)" }}>
-                {article.author_id && authorNames[article.author_id] && <>{byLabel} {authorNames[article.author_id]} · </>}
+                {article.columnist_id && columnistNames[article.columnist_id] && <>{byLabel} {columnistNames[article.columnist_id]} · </>}
                 {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short" })}
               </span>
             </div>

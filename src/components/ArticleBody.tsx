@@ -243,7 +243,7 @@ export function ArticleBody({
         .tts-active-word { background-color: rgba(49, 94, 156, 0.18); color: var(--site-text); }
         @media (max-width: 640px) {
           .article-cover-figure { float: none !important; width: 100% !important; margin-left: 0 !important; }
-          /* A width the author picked for a wide desktop column reads as
+          /* A width the columnist picked for a wide desktop column reads as
              tiny on an already-narrow phone screen — full width on mobile,
              with the lightbox above as the way to see original detail. */
           .article-img-figure { width: 100% !important; }

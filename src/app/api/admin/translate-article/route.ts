@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { translateArticleToEnglish } from "@/lib/translate";
 
-// Used by both the admin and author article editors — any logged-in user
+// Used by both the admin and columnist article editors — any logged-in user
 // with a profile can translate their own draft, same access level as
 // uploading a content image (see /api/admin/upload-content-image).
 export async function POST(req: NextRequest) {

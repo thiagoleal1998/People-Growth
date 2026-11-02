@@ -7,7 +7,7 @@ import { saveMenuOrder, resetMenuOrder } from "./menu-actions";
 
 export type MenuEditorItem = { id: string; label: string; href?: string };
 
-export function MenuEditor({ panel, title, items }: { panel: "admin" | "autor"; title: string; items: MenuEditorItem[] }) {
+export function MenuEditor({ panel, title, items }: { panel: "admin" | "colunista"; title: string; items: MenuEditorItem[] }) {
   const [list, setList] = useState(items);
   const [pending, startTransition] = useTransition();
 

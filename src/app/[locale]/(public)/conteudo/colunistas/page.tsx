@@ -4,8 +4,8 @@ import { Link } from "@/i18n/navigation";
 import { ArrowLeft, ArrowRight } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
 import { pickLocale } from "@/lib/locale-content";
-import { isAuthorPubliclyVisible } from "@/lib/founder-data";
-import type { Author } from "@/types/database.types";
+import { isColumnistPubliclyVisible } from "@/lib/founder-data";
+import type { Columnist } from "@/types/database.types";
 
 export const revalidate = 300;
 
@@ -19,15 +19,15 @@ export default async function ColunistasPage() {
   const tNav = await getTranslations("nav");
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data } = await (supabase as any).from("authors").select("*").eq("status", "active").order("order");
-  const allAuthors = ((data ?? []) as Author[]).filter(isAuthorPubliclyVisible);
+  const { data } = await (supabase as any).from("columnists").select("*").eq("status", "active").order("order");
+  const allColumnists = ((data ?? []) as Columnist[]).filter(isColumnistPubliclyVisible);
   // The DB's own "order" column doesn't distinguish founders from everyone
   // else, so the grid used to just come out in whatever order rows happened
   // to be inserted — founders first, in their own row, then everyone else
   // alphabetically, rather than one undifferentiated list.
-  const byName = (a: Author, b: Author) => a.name.localeCompare(b.name, "pt-BR");
-  const founders = allAuthors.filter((a) => a.is_founder).sort(byName);
-  const columnists = allAuthors.filter((a) => !a.is_founder).sort(byName);
+  const byName = (a: Columnist, b: Columnist) => a.name.localeCompare(b.name, "pt-BR");
+  const founders = allColumnists.filter((a) => a.is_founder).sort(byName);
+  const columnists = allColumnists.filter((a) => !a.is_founder).sort(byName);
   // The founders row is a 2-up-1-down pyramid (Gustavo and Raul side by
   // side, Thiago centered below them) rather than a plain 3-column grid —
   // alphabetical order happens to put Thiago last, which is exactly the
@@ -57,7 +57,7 @@ export default async function ColunistasPage() {
 
       <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
         <div className="container-xl" style={{ maxWidth: "900px" }}>
-          {allAuthors.length === 0 ? (
+          {allColumnists.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               {locale === "en" ? "No columnists registered at the moment." : "Nenhum colunista cadastrado no momento."}
             </div>
@@ -69,21 +69,21 @@ export default async function ColunistasPage() {
                     {locale === "en" ? "Editorial Board" : "Conselho Editorial"}
                   </div>
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "1.5rem" }}>
-                    {foundersTopRow.map((author) => (
-                      <AuthorCard key={author.id} author={author} locale={locale} accent="#C89A4A" />
+                    {foundersTopRow.map((columnist) => (
+                      <ColumnistCard key={columnist.id} columnist={columnist} locale={locale} accent="#C89A4A" />
                     ))}
                   </div>
                   {foundersBottomRow.length > 0 && (
                     <div style={{ display: "flex", justifyContent: "center", marginTop: "1.5rem" }}>
-                      {foundersBottomRow.map((author) => (
+                      {foundersBottomRow.map((columnist) => (
                         // Full width below the same breakpoint where the top
                         // row's own grid (minmax(min(280px, 100%), 1fr)) falls
                         // back to one column — a fixed "min-width: 280px" alone
                         // left this card visibly narrower than Raul's/Gustavo's
                         // on phones under ~360px wide, where the grid above
                         // goes full-width but this stayed capped at 280px.
-                        <div key={author.id} className="founders-bottom-card">
-                          <AuthorCard author={author} locale={locale} accent="#C89A4A" />
+                        <div key={columnist.id} className="founders-bottom-card">
+                          <ColumnistCard columnist={columnist} locale={locale} accent="#C89A4A" />
                         </div>
                       ))}
                     </div>
@@ -105,8 +105,8 @@ export default async function ColunistasPage() {
                     </div>
                   )}
                   <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "1.5rem" }}>
-                    {columnists.map((author) => (
-                      <AuthorCard key={author.id} author={author} locale={locale} accent="#315E9C" />
+                    {columnists.map((columnist) => (
+                      <ColumnistCard key={columnist.id} columnist={columnist} locale={locale} accent="#315E9C" />
                     ))}
                   </div>
                 </div>
@@ -119,7 +119,7 @@ export default async function ColunistasPage() {
   );
 }
 
-function AuthorCard({ author, locale, accent }: { author: Author; locale: string; accent: string }) {
+function ColumnistCard({ columnist, locale, accent }: { columnist: Columnist; locale: string; accent: string }) {
   return (
     <article
       style={{
@@ -139,30 +139,30 @@ function AuthorCard({ author, locale, accent }: { author: Author; locale: string
             height: "4rem",
             borderRadius: "50%",
             flexShrink: 0,
-            background: author.photo_url ? `url("${author.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
+            background: columnist.photo_url ? `url("${columnist.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
           }}
         />
         <div>
-          <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)" }}>{author.name}</h2>
-          {author.role_pt && (
-            <p style={{ color: accent, fontWeight: 600, fontSize: "0.8125rem" }}>{pickLocale(locale, author.role_pt, author.role_en)}</p>
+          <h2 style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)" }}>{columnist.name}</h2>
+          {columnist.role_pt && (
+            <p style={{ color: accent, fontWeight: 600, fontSize: "0.8125rem" }}>{pickLocale(locale, columnist.role_pt, columnist.role_en)}</p>
           )}
         </div>
       </div>
-      {(author.tagline_pt || author.bio_pt) && (
+      {(columnist.tagline_pt || columnist.bio_pt) && (
         <p style={{ color: "var(--site-muted)", fontSize: "0.875rem", lineHeight: 1.6, flex: 1, marginBottom: "1rem" }}>
-          {pickLocale(locale, author.tagline_pt, author.tagline_en)?.trim() || pickLocale(locale, author.bio_pt, author.bio_en)}
+          {pickLocale(locale, columnist.tagline_pt, columnist.tagline_en)?.trim() || pickLocale(locale, columnist.bio_pt, columnist.bio_en)}
         </p>
       )}
-      <div style={{ display: "flex", gap: "1.25rem", marginTop: (author.tagline_pt || author.bio_pt) ? 0 : "auto", paddingTop: (author.tagline_pt || author.bio_pt) ? 0 : "1rem" }}>
+      <div style={{ display: "flex", gap: "1.25rem", marginTop: (columnist.tagline_pt || columnist.bio_pt) ? 0 : "auto", paddingTop: (columnist.tagline_pt || columnist.bio_pt) ? 0 : "1rem" }}>
         <Link
-          href={{ pathname: "/sobre/[slug]", params: { slug: author.slug }, query: { from: "colunistas" } }}
+          href={{ pathname: "/sobre/[slug]", params: { slug: columnist.slug }, query: { from: "colunistas" } }}
           style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: accent, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
         >
           {locale === "en" ? "About" : "Sobre"} <ArrowRight size={15} />
         </Link>
         <Link
-          href={{ pathname: "/conteudo/autor/[slug]", params: { slug: author.slug }, query: { from: "colunistas" } }}
+          href={{ pathname: "/conteudo/colunista/[slug]", params: { slug: columnist.slug }, query: { from: "colunistas" } }}
           style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--site-muted)", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}
         >
           {locale === "en" ? "View articles" : "Ver artigos"} <ArrowRight size={15} />

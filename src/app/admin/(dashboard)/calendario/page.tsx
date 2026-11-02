@@ -5,7 +5,7 @@ import { SavedToast } from "@/components/admin/SavedToast";
 import { CalendarGrid } from "./CalendarGrid";
 import { buildMonthGrid, parseMonthParam, monthParamKey, shiftMonth, MONTH_NAMES_PT } from "@/lib/calendar-grid";
 import { dateKeySaoPaulo } from "@/lib/date-key";
-import type { Article, Author, ContentCalendarItem } from "@/types/database.types";
+import type { Article, Columnist, ContentCalendarItem } from "@/types/database.types";
 
 export default async function CalendarioPage({
   searchParams,
@@ -25,15 +25,15 @@ export default async function CalendarioPage({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const [{ data: itemsData }, { data: articlesData }, { data: authorsData }] = await Promise.all([
+  const [{ data: itemsData }, { data: articlesData }, { data: columnistsData }] = await Promise.all([
     client.from("content_calendar_items").select("*").gte("scheduled_date", firstKey).lte("scheduled_date", lastKey),
-    client.from("articles").select("id, title_pt, status, scheduled_for, author_id").not("scheduled_for", "is", null).in("status", ["pending", "scheduled"]),
-    client.from("authors").select("id, name"),
+    client.from("articles").select("id, title_pt, status, scheduled_for, columnist_id").not("scheduled_for", "is", null).in("status", ["pending", "scheduled"]),
+    client.from("columnists").select("id, name"),
   ]);
 
   const items = (itemsData ?? []) as ContentCalendarItem[];
-  const articles = (articlesData ?? []) as Pick<Article, "id" | "title_pt" | "status" | "scheduled_for" | "author_id">[];
-  const authorNameById = new Map(((authorsData ?? []) as Pick<Author, "id" | "name">[]).map((a) => [a.id, a.name]));
+  const articles = (articlesData ?? []) as Pick<Article, "id" | "title_pt" | "status" | "scheduled_for" | "columnist_id">[];
+  const columnistNameById = new Map(((columnistsData ?? []) as Pick<Columnist, "id" | "name">[]).map((a) => [a.id, a.name]));
 
   const itemsByDate = new Map<string, ContentCalendarItem[]>();
   for (const item of items) {
@@ -42,13 +42,13 @@ export default async function CalendarioPage({
     itemsByDate.get(key)!.push(item);
   }
 
-  const articlesByDate = new Map<string, (Pick<Article, "id" | "title_pt" | "status" | "scheduled_for" | "author_id"> & { authorName: string | null })[]>();
+  const articlesByDate = new Map<string, (Pick<Article, "id" | "title_pt" | "status" | "scheduled_for" | "columnist_id"> & { columnistName: string | null })[]>();
   for (const article of articles) {
     if (!article.scheduled_for) continue;
     const key = dateKeySaoPaulo(article.scheduled_for);
     if (key < firstKey || key > lastKey) continue;
     if (!articlesByDate.has(key)) articlesByDate.set(key, []);
-    articlesByDate.get(key)!.push({ ...article, authorName: article.author_id ? authorNameById.get(article.author_id) ?? null : null });
+    articlesByDate.get(key)!.push({ ...article, columnistName: article.columnist_id ? columnistNameById.get(article.columnist_id) ?? null : null });
   }
 
   return (

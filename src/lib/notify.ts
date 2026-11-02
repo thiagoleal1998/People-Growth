@@ -36,7 +36,7 @@ export async function renderNotificationTemplate(
 // no-op until VAPID_PRIVATE_KEY is configured, see src/lib/push.ts).
 // `client` is whichever Supabase client the caller already has on hand —
 // the admin's own session (RLS allows admins to insert for anyone) or the
-// service-role client (e.g. an author notifying every admin, who have no
+// service-role client (e.g. a columnist notifying every admin, who have no
 // insert policy of their own).
 export async function insertNotification(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

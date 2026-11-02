@@ -3,7 +3,7 @@ import writeExcelFile, { type Row } from "write-excel-file/node";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { AD_SLOT_DEFS } from "@/app/admin/(dashboard)/publicidade/ad-slots";
-import type { Article, Ad, Author, Comment, InternalTicket, ErrorReport } from "@/types/database.types";
+import type { Article, Ad, Columnist, Comment, InternalTicket, ErrorReport } from "@/types/database.types";
 
 export const SECTION_KEYS = ["resumo", "paginas", "origens", "localizacoes", "anuncios", "artigos", "chamados", "erros", "atividade"] as const;
 export type SectionKey = (typeof SECTION_KEYS)[number];
@@ -223,13 +223,13 @@ export async function GET(req: NextRequest) {
   }
 
   if (requested.includes("artigos")) {
-    const [{ data: articlesForStats }, { data: authorsData }, { data: commentsData }, { data: scrollData }] = await Promise.all([
-      client.from("articles").select("id, title_pt, author_id, views").eq("status", "published"),
-      client.from("authors").select("id, name"),
+    const [{ data: articlesForStats }, { data: columnistsData }, { data: commentsData }, { data: scrollData }] = await Promise.all([
+      client.from("articles").select("id, title_pt, columnist_id, views").eq("status", "published"),
+      client.from("columnists").select("id, name"),
       client.from("comments").select("article_id, likes, reports"),
       client.from("page_views").select("article_id, scroll_depth").not("article_id", "is", null).not("scroll_depth", "is", null),
     ]);
-    const authorNames = new Map(((authorsData ?? []) as Pick<Author, "id" | "name">[]).map((a) => [a.id, a.name]));
+    const columnistNames = new Map(((columnistsData ?? []) as Pick<Columnist, "id" | "name">[]).map((a) => [a.id, a.name]));
     const byArticle = new Map<string, { comments: number; likes: number; reports: number }>();
     for (const c of (commentsData ?? []) as Pick<Comment, "article_id" | "likes" | "reports">[]) {
       const entry = byArticle.get(c.article_id) ?? { comments: 0, likes: 0, reports: 0 };
@@ -244,7 +244,7 @@ export async function GET(req: NextRequest) {
       arr.push(v.scroll_depth);
       scrollByArticle.set(v.article_id, arr);
     }
-    const rows = ((articlesForStats ?? []) as Pick<Article, "id" | "title_pt" | "author_id" | "views">[])
+    const rows = ((articlesForStats ?? []) as Pick<Article, "id" | "title_pt" | "columnist_id" | "views">[])
       .map((a) => {
         const s = byArticle.get(a.id) ?? { comments: 0, likes: 0, reports: 0 };
         const scrollSamplesForArticle = scrollByArticle.get(a.id);
@@ -253,7 +253,7 @@ export async function GET(req: NextRequest) {
           : null;
         return {
           title: a.title_pt,
-          author: a.author_id ? (authorNames.get(a.author_id) ?? "—") : "—",
+          columnist: a.columnist_id ? (columnistNames.get(a.columnist_id) ?? "—") : "—",
           views: a.views,
           avgScrollDepth,
           comments: s.comments,
@@ -268,7 +268,7 @@ export async function GET(req: NextRequest) {
       data: [
         [
           { value: "Artigo", ...HEADER },
-          { value: "Autor", ...HEADER },
+          { value: "Colunista", ...HEADER },
           { value: "Visualizações", ...HEADER },
           { value: "Leitura média (%)", ...HEADER },
           { value: "Comentários", ...HEADER },
@@ -277,7 +277,7 @@ export async function GET(req: NextRequest) {
         ],
         ...rows.map((r) => [
           { value: r.title },
-          { value: r.author },
+          { value: r.columnist },
           { value: r.views, type: Number },
           { value: r.avgScrollDepth ?? 0, type: Number },
           { value: r.comments, type: Number },
@@ -367,16 +367,16 @@ export async function GET(req: NextRequest) {
     const adminClient = admin as any;
     const [{ data: activityData }, { data: allUsersData }] = await Promise.all([
       activityQuery,
-      adminClient.from("user_profiles").select("email, author_id"),
+      adminClient.from("user_profiles").select("email, columnist_id"),
     ]);
-    const profiles = (allUsersData ?? []) as { email: string; author_id: string | null }[];
-    const authorIds = profiles.map((p) => p.author_id).filter((id): id is string => Boolean(id));
-    let authorNamesById = new Map<string, string>();
-    if (authorIds.length > 0) {
-      const { data: authorsData } = await adminClient.from("authors").select("id, name").in("id", authorIds);
-      authorNamesById = new Map(((authorsData ?? []) as { id: string; name: string }[]).map((a) => [a.id, a.name]));
+    const profiles = (allUsersData ?? []) as { email: string; columnist_id: string | null }[];
+    const columnistIds = profiles.map((p) => p.columnist_id).filter((id): id is string => Boolean(id));
+    let columnistNamesById = new Map<string, string>();
+    if (columnistIds.length > 0) {
+      const { data: columnistsData } = await adminClient.from("columnists").select("id, name").in("id", columnistIds);
+      columnistNamesById = new Map(((columnistsData ?? []) as { id: string; name: string }[]).map((a) => [a.id, a.name]));
     }
-    const nameByEmail = new Map(profiles.map((p) => [p.email, (p.author_id && authorNamesById.get(p.author_id)) || p.email]));
+    const nameByEmail = new Map(profiles.map((p) => [p.email, (p.columnist_id && columnistNamesById.get(p.columnist_id)) || p.email]));
 
     const ACTION_LABELS: Record<string, string> = { create: "Criou", update: "Atualizou", delete: "Excluiu", publish: "Publicou", login: "Entrou", logout: "Saiu" };
     const rows = (activityData ?? []) as { created_at: string; user_email: string; action: string; entity_type: string; entity_label: string | null }[];

@@ -60,7 +60,7 @@ function InstructionRow({
             <button type="button" onClick={() => setEditing(true)} style={{ padding: "0.375rem 0.75rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border-strong)", backgroundColor: "var(--admin-surface-alt)", color: "var(--admin-text)", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}>
               Editar
             </button>
-            <ConfirmDeleteButton confirmText={`Excluir "${item.title}"? Some do painel do autor.`} onDelete={async () => { await deleteInstructionItem(item.id, item.title); onDeleted(); }} />
+            <ConfirmDeleteButton confirmText={`Excluir "${item.title}"? Some do painel do colunista.`} onDelete={async () => { await deleteInstructionItem(item.id, item.title); onDeleted(); }} />
           </div>
         </div>
       </div>
