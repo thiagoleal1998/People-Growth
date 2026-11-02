@@ -171,7 +171,14 @@ async function scrapeInstagram(handle: string, profileUrl: string | null): Promi
     await new Promise((resolve) => setTimeout(resolve, 2000));
     const bodyText: string = await page.evaluate(() => document.body.innerText);
     const match = bodyText.match(SOCIAL_COUNT_RE);
-    if (!match) return { ok: false, error: "Não encontrei o número de seguidores na página — confira o handle/URL, ou o perfil pode estar privado." };
+    if (!match) {
+      // Temporary diagnostic: surface what the page actually rendered
+      // instead of just "not found" — the deployed environment's result
+      // has differed from local testing twice already (language, and now
+      // this), so guessing again isn't worth it.
+      const snippet = bodyText.replace(/\s+/g, " ").trim().slice(0, 300);
+      return { ok: false, error: `Não encontrei o número de seguidores. Página capturada (${bodyText.length} caractere(s)): "${snippet}"` };
+    }
     const count = parseSocialCount(match[1]);
     if (count == null) return { ok: false, error: `Não consegui interpretar "${match[1]}".` };
     return { ok: true, count, source: "scrape" };
