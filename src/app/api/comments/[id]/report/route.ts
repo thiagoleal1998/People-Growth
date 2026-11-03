@@ -16,23 +16,11 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const client = supabase as any;
 
-    const { data: current, error: fetchError } = await client
-      .from("comments")
-      .select("reports")
-      .eq("id", id)
-      .eq("status", "approved")
-      .single();
-
-    if (fetchError || !current) {
+    const { data: reports, error: rpcError } = await client.rpc("increment_comment_reports", { comment_id: id });
+    if (rpcError) throw rpcError;
+    if (reports == null) {
       return NextResponse.json({ error: "Comentário não encontrado." }, { status: 404 });
     }
-
-    const { error: updateError } = await client
-      .from("comments")
-      .update({ reports: current.reports + 1 })
-      .eq("id", id);
-
-    if (updateError) throw updateError;
 
     return NextResponse.json({ success: true });
   } catch (err) {

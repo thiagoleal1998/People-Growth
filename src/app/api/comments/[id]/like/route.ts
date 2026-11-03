@@ -16,27 +16,13 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const client = supabase as any;
 
-    const { data: current, error: fetchError } = await client
-      .from("comments")
-      .select("likes")
-      .eq("id", id)
-      .eq("status", "approved")
-      .single();
-
-    if (fetchError || !current) {
+    const { data: likes, error: rpcError } = await client.rpc("increment_comment_likes", { comment_id: id });
+    if (rpcError) throw rpcError;
+    if (likes == null) {
       return NextResponse.json({ error: "Comentário não encontrado." }, { status: 404 });
     }
 
-    const { data: updated, error: updateError } = await client
-      .from("comments")
-      .update({ likes: current.likes + 1 })
-      .eq("id", id)
-      .select("likes")
-      .single();
-
-    if (updateError) throw updateError;
-
-    return NextResponse.json({ likes: updated.likes });
+    return NextResponse.json({ likes });
   } catch (err) {
     console.error("Comment like error:", err);
     return NextResponse.json({ error: "Erro interno." }, { status: 500 });

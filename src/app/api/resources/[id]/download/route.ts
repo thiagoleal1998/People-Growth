@@ -24,7 +24,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
 
     const { data: resource } = await client
       .from("resources")
-      .select("id, title_pt, file_url, lead_required, download_count, status")
+      .select("id, title_pt, file_url, lead_required, status")
       .eq("id", id)
       .eq("status", "active")
       .single();
@@ -49,7 +49,7 @@ export async function POST(req: NextRequest, { params }: { params: Promise<{ id:
       });
     }
 
-    await client.from("resources").update({ download_count: resource.download_count + 1 }).eq("id", id);
+    await client.rpc("increment_resource_downloads", { resource_id: id });
 
     return NextResponse.json({ url: resource.file_url });
   } catch (err) {

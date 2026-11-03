@@ -6,7 +6,29 @@ import type { Database } from "@/types/database.types";
 
 const intlMiddleware = createMiddleware(routing);
 
+// The site is reachable from a few leftover hostnames (the old Vercel
+// project URLs from before the custom domain was set up, plus the bare
+// "www" variant) — anyone who still has one of these bookmarked/indexed
+// gets sent to the one canonical domain (NEXT_PUBLIC_SITE_URL, matches
+// what metadataBase/sitemap/robots.txt already treat as canonical)
+// instead of serving the same content from multiple hosts. Deliberately
+// an explicit allowlist, not "anything that isn't the canonical host" —
+// that would also catch Vercel's own per-branch preview deployment URLs
+// (*.vercel.app with a build hash) and localhost during development,
+// which must keep working unredirected.
+const CANONICAL_HOST = "grupofestina.com.br";
+const REDIRECT_HOSTS = new Set(["www.grupofestina.com.br", "grupofestina.vercel.app", "people-growth.vercel.app"]);
+
 export async function proxy(request: NextRequest) {
+  const host = request.headers.get("host")?.toLowerCase();
+  if (host && REDIRECT_HOSTS.has(host)) {
+    const url = request.nextUrl.clone();
+    url.protocol = "https";
+    url.host = CANONICAL_HOST;
+    url.port = "";
+    return NextResponse.redirect(url, 308);
+  }
+
   // The columnist panel used to live at /autor — old bookmarks/links still
   // point there. Handled here (not next.config.ts's redirects()) because
   // this proxy runs before Next's own redirect handling for every request
