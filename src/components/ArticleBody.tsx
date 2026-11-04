@@ -397,8 +397,14 @@ export function ArticleBody({
            this, a grid container avoids the floated photo for its whole
            height even though this box only starts once the photo has
            already ended -- clear forces it below the float so its width
-           resolves full-width instead of narrow again. */
-        .summary-box-cleared {
+           resolves full-width instead of narrow again. Scoped to
+           "-expanded" only: this box stays mounted (at 0 height) after
+           collapsing, since the layout state isn't reset until the next
+           open (see the comment above the reset effect) -- an always-on
+           clear would keep forcing the article body text that follows it
+           below the photo even while collapsed, breaking the normal
+           narrow-wrap layout for anyone who closed the summary. */
+        .summary-box-cleared.summary-box-expanded {
           clear: right;
         }
         .summary-box-expanded {
