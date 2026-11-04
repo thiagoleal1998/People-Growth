@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
+import type { ReactNode } from "react";
+import { ArrowLeft, Newspaper, Trophy, CalendarDays, ListOrdered, Users, ChevronRight } from "lucide-react";
 import {
   COMPETITIONS,
   COMPETITION_ORDER,
@@ -36,25 +38,59 @@ export const metadata: Metadata = {
 // Portuguese-only, same as /eleicoes — Brazilian competition data for a
 // Brazilian audience, no locale branching needed here.
 const BRAND = "#315E9C";
+const GOLD = "#C89A4A";
+const LIVE = "#DC2626";
 
 const cardStyle = {
-  borderRadius: "0.75rem",
-  border: "1px solid var(--site-border-strong)",
+  borderRadius: "1.25rem",
+  border: "1px solid var(--site-border)",
   backgroundColor: "var(--site-card)",
-  padding: "1rem 1.125rem",
+  padding: "1.5rem",
+  boxShadow: "0 1px 2px rgba(13,27,42,0.05)",
 } as const;
 
 const TABS = [
-  { id: "artigos", label: "Artigos" },
-  { id: "brasileirao", label: "Futebol" },
+  { id: "artigos", label: "Artigos", icon: Newspaper },
+  { id: "brasileirao", label: "Futebol", icon: Trophy },
   { id: "nfl", label: "NFL" },
   { id: "nba", label: "NBA" },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
 
+// Small filled/outline pill, reused for the top-level tab bar and the
+// competition / club sub-navs below each tab — one consistent "segmented
+// control" language across every level of navigation on this page instead
+// of three slightly different ad-hoc pill styles.
+function NavPill({ href, active, children }: { href: string; active: boolean; children: ReactNode }) {
+  return (
+    <a
+      href={href}
+      aria-current={active ? "page" : undefined}
+      className="sports-pill"
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        gap: "0.5rem",
+        padding: "0.5rem 1rem",
+        borderRadius: "9999px",
+        backgroundColor: active ? BRAND : "transparent",
+        color: active ? "white" : "var(--site-text-secondary)",
+        border: `1px solid ${active ? BRAND : "var(--site-border-strong)"}`,
+        fontWeight: 700,
+        fontSize: "0.8125rem",
+        textDecoration: "none",
+        whiteSpace: "nowrap",
+        flexShrink: 0,
+      }}
+    >
+      {children}
+    </a>
+  );
+}
+
 function TabNav({ active }: { active: TabId }) {
   return (
-    <nav style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.25rem" }}>
+    <nav className="sports-tabnav" style={{ display: "flex", gap: "0.5rem", marginBottom: "2rem", overflowX: "auto", padding: "0.3125rem" }}>
       {TABS.map((t) => (
         <a
           key={t.id}
@@ -64,21 +100,48 @@ function TabNav({ active }: { active: TabId }) {
             display: "inline-flex",
             alignItems: "center",
             gap: "0.5rem",
-            padding: "0.5rem 1.125rem",
-            borderRadius: "0.5rem",
-            border: `1px solid ${t.id === active ? BRAND : "var(--site-border-strong)"}`,
-            color: t.id === active ? BRAND : "var(--site-text-secondary)",
-            fontWeight: 700,
+            padding: "0.6875rem 1.375rem",
+            borderRadius: "9999px",
+            backgroundColor: t.id === active ? BRAND : "transparent",
+            color: t.id === active ? "white" : "var(--site-text-secondary)",
+            fontWeight: 800,
             fontSize: "0.875rem",
             textDecoration: "none",
+            whiteSpace: "nowrap",
+            flexShrink: 0,
+            transition: "background-color 0.2s ease, color 0.2s ease",
           }}
         >
+          {"icon" in t && <t.icon size={16} />}
           {t.id === "nfl" && <TeamCrest src={NFL_LOGO_URL} alt="" size={18} />}
           {t.id === "nba" && <TeamCrest src={NBA_LOGO_URL} alt="" size={18} />}
           {t.label}
         </a>
       ))}
     </nav>
+  );
+}
+
+function SectionHeader({ icon: Icon, title }: { icon: typeof CalendarDays; title: string }) {
+  return (
+    <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.125rem" }}>
+      <span
+        style={{
+          display: "inline-flex",
+          alignItems: "center",
+          justifyContent: "center",
+          width: "2.125rem",
+          height: "2.125rem",
+          borderRadius: "0.75rem",
+          backgroundColor: `${BRAND}14`,
+          color: BRAND,
+          flexShrink: 0,
+        }}
+      >
+        <Icon size={18} />
+      </span>
+      <h2 style={{ fontSize: "1.0625rem", fontWeight: 800, color: "var(--site-text)" }}>{title}</h2>
+    </div>
   );
 }
 
@@ -89,22 +152,35 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
   const isFinished = fixture.status === "finished";
   const scoreLabel = isLive || isFinished ? `${fixture.homeGoals ?? 0} – ${fixture.awayGoals ?? 0}` : dateLabel;
   return (
-    <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0", borderTop: "1px solid var(--site-border)" }}>
-      <div style={{ width: "4.5rem", flexShrink: 0, fontSize: "0.75rem", color: isLive ? "#DC2626" : "var(--site-muted)", fontWeight: isLive ? 800 : 600 }}>
+    <div className="fixture-row" style={{ display: "flex", alignItems: "center", gap: "0.875rem", padding: "0.75rem 0.875rem", borderRadius: "0.75rem" }}>
+      <div style={{ width: "4.5rem", flexShrink: 0, display: "flex", alignItems: "center", gap: "0.3125rem", fontSize: "0.75rem", color: isLive ? LIVE : "var(--site-muted)", fontWeight: isLive ? 800 : 600 }}>
+        {isLive && <span className="live-dot" />}
         {isLive ? (fixture.elapsed ? `${fixture.elapsed}'` : "Ao vivo") : dateLabel.split(",")[0] ?? dateLabel}
       </div>
       <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
-        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "0.375rem" }}>
+        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", justifyContent: "flex-end", gap: "0.5rem" }}>
           <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", textAlign: "right" }}>
             {fixture.homeTeamName}
           </span>
-          <TeamCrest src={fixture.homeTeamLogo} alt={fixture.homeTeamName} size={20} />
+          <TeamCrest src={fixture.homeTeamLogo} alt={fixture.homeTeamName} size={22} />
         </div>
-        <span style={{ fontWeight: 800, color: isLive || isFinished ? BRAND : "var(--site-muted)", fontSize: "0.875rem", flexShrink: 0, minWidth: "3.5rem", textAlign: "center" }}>
+        <span
+          style={{
+            fontWeight: 800,
+            color: isLive ? LIVE : isFinished ? "var(--site-text)" : "var(--site-muted)",
+            backgroundColor: isLive || isFinished ? "var(--site-surface-alt)" : "transparent",
+            borderRadius: "0.5rem",
+            padding: isLive || isFinished ? "0.1875rem 0.5rem" : 0,
+            fontSize: "0.875rem",
+            flexShrink: 0,
+            minWidth: "3.5rem",
+            textAlign: "center",
+          }}
+        >
           {scoreLabel}
         </span>
-        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: "0.375rem" }}>
-          <TeamCrest src={fixture.awayTeamLogo} alt={fixture.awayTeamName} size={20} />
+        <div style={{ flex: 1, minWidth: 0, display: "flex", alignItems: "center", gap: "0.5rem" }}>
+          <TeamCrest src={fixture.awayTeamLogo} alt={fixture.awayTeamName} size={22} />
           <span style={{ fontSize: "0.875rem", color: "var(--site-text)", fontWeight: 600, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
             {fixture.awayTeamName}
           </span>
@@ -116,7 +192,7 @@ function FixtureRow({ fixture }: { fixture: Fixture }) {
 
 function ComingSoonNote({ text }: { text: string }) {
   return (
-    <p style={{ fontSize: "0.8125rem", color: "var(--site-faint)", padding: "0.75rem 1rem", backgroundColor: "var(--site-surface-alt)", borderRadius: "0.625rem" }}>
+    <p style={{ fontSize: "0.8125rem", color: "var(--site-faint)", padding: "0.875rem 1.125rem", backgroundColor: "var(--site-surface-alt)", borderRadius: "0.75rem" }}>
       {text}
     </p>
   );
@@ -134,43 +210,45 @@ function StandingsTable({ standings }: { standings: StandingRow[] | null }) {
   }
   return (
     <div>
-      <div style={{ overflowX: "auto" }}>
-        <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
+      <div style={{ overflowX: "auto", borderRadius: "0.875rem", border: "1px solid var(--site-border)" }}>
+        <table className="standings-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
           <thead>
-            <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
-              <th style={{ padding: "0.5rem" }}>#</th>
-              <th style={{ padding: "0.5rem" }}>Clube</th>
-              <th style={{ padding: "0.5rem", textAlign: "center" }}>J</th>
-              <th style={{ padding: "0.5rem", textAlign: "center" }}>V</th>
-              <th style={{ padding: "0.5rem", textAlign: "center" }}>E</th>
-              <th style={{ padding: "0.5rem", textAlign: "center" }}>D</th>
-              <th style={{ padding: "0.5rem", textAlign: "center" }}>GP</th>
-              <th style={{ padding: "0.5rem", textAlign: "center" }}>GC</th>
-              <th style={{ padding: "0.5rem", textAlign: "center" }}>SG</th>
-              <th style={{ padding: "0.5rem", textAlign: "center" }}>Pts</th>
+            <tr style={{ color: "var(--site-muted)", textAlign: "left", backgroundColor: "var(--site-surface-alt)" }}>
+              <th style={{ padding: "0.625rem 0.5rem", fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.03em" }}>#</th>
+              <th style={{ padding: "0.625rem 0.5rem", fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase", letterSpacing: "0.03em" }}>Clube</th>
+              <th style={{ padding: "0.625rem 0.5rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>J</th>
+              <th style={{ padding: "0.625rem 0.5rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>V</th>
+              <th style={{ padding: "0.625rem 0.5rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>E</th>
+              <th style={{ padding: "0.625rem 0.5rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>D</th>
+              <th style={{ padding: "0.625rem 0.5rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>GP</th>
+              <th style={{ padding: "0.625rem 0.5rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>GC</th>
+              <th style={{ padding: "0.625rem 0.5rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>SG</th>
+              <th style={{ padding: "0.625rem 0.5rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>Pts</th>
             </tr>
           </thead>
           <tbody>
             {standings.map((row) => (
-              <tr key={row.teamId} style={{ borderTop: "1px solid var(--site-border)", borderLeft: `3px solid ${row.zoneColor ?? "transparent"}` }}>
-                <td style={{ padding: "0.5rem", fontWeight: 700, color: "var(--site-text-secondary)" }}>{row.rank}</td>
-                <td style={{ padding: "0.5rem", color: "var(--site-text)", fontWeight: 600 }}>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <tr key={row.teamId} style={{ borderLeft: `4px solid ${row.zoneColor ?? "transparent"}` }}>
+                <td style={{ padding: "0.625rem 0.5rem", fontWeight: 700, color: "var(--site-text-secondary)" }}>{row.rank}</td>
+                <td style={{ padding: "0.625rem 0.5rem", color: "var(--site-text)", fontWeight: 600 }}>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.625rem" }}>
                     {row.teamLogo && (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={row.teamLogo} alt="" width={20} height={20} style={{ objectFit: "contain", flexShrink: 0 }} />
+                      <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "1.75rem", height: "1.75rem", borderRadius: "9999px", backgroundColor: "var(--site-surface-alt)", flexShrink: 0 }}>
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={row.teamLogo} alt="" width={18} height={18} style={{ objectFit: "contain" }} />
+                      </span>
                     )}
                     <span>{row.teamName}</span>
                   </div>
                 </td>
-                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.played}</td>
-                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.win}</td>
-                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.draw}</td>
-                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.lose}</td>
-                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsFor}</td>
-                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsAgainst}</td>
-                <td style={{ padding: "0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsDiff}</td>
-                <td style={{ padding: "0.5rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{row.points}</td>
+                <td style={{ padding: "0.625rem 0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.played}</td>
+                <td style={{ padding: "0.625rem 0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.win}</td>
+                <td style={{ padding: "0.625rem 0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.draw}</td>
+                <td style={{ padding: "0.625rem 0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.lose}</td>
+                <td style={{ padding: "0.625rem 0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsFor}</td>
+                <td style={{ padding: "0.625rem 0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsAgainst}</td>
+                <td style={{ padding: "0.625rem 0.5rem", textAlign: "center", color: "var(--site-muted)" }}>{row.goalsDiff}</td>
+                <td style={{ padding: "0.625rem 0.5rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{row.points}</td>
               </tr>
             ))}
           </tbody>
@@ -194,33 +272,50 @@ function AmericanGameCard({ game }: { game: NflGame | NbaGame }) {
   const isLive = game.status === "live";
   const hasScore = game.status !== "scheduled";
   return (
-    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", padding: "0.875rem 0.75rem", borderRadius: "0.625rem", border: "1px solid var(--site-border-strong)", backgroundColor: "var(--site-card)", minWidth: 0 }}>
+    <div
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "0.625rem",
+        padding: "1rem 0.875rem",
+        borderRadius: "1rem",
+        border: `1px solid ${isLive ? LIVE : "var(--site-border)"}`,
+        backgroundColor: "var(--site-card)",
+        boxShadow: isLive ? "0 0 0 3px rgba(220,38,38,0.08)" : "0 1px 2px rgba(13,27,42,0.04)",
+        minWidth: 0,
+      }}
+    >
       <span
         style={{
+          display: "inline-flex",
+          alignItems: "center",
+          gap: "0.3125rem",
           fontSize: "0.625rem",
           fontWeight: 800,
-          color: isLive ? "#DC2626" : "var(--site-muted)",
+          color: isLive ? LIVE : "var(--site-muted)",
           backgroundColor: isLive ? "rgba(220,38,38,0.1)" : "var(--site-surface-alt)",
-          padding: "0.1875rem 0.5rem",
+          padding: "0.1875rem 0.5625rem",
           borderRadius: "9999px",
           textAlign: "center",
         }}
       >
+        {isLive && <span className="live-dot" />}
         {game.statusDetail}
       </span>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: "0.625rem", width: "100%" }}>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem", flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.375rem", flex: 1, minWidth: 0 }}>
           <TeamCrest src={game.away.logo} alt={game.away.name} size={36} />
-          <span style={{ fontSize: "0.6875rem", fontWeight: 600, color: "var(--site-text)", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
+          <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: "var(--site-text)", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
             {game.away.abbreviation}
           </span>
         </div>
         <span style={{ fontWeight: 800, color: BRAND, fontSize: "1.0625rem", flexShrink: 0 }}>
           {hasScore ? `${game.away.score}–${game.home.score}` : "×"}
         </span>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem", flex: 1, minWidth: 0 }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.375rem", flex: 1, minWidth: 0 }}>
           <TeamCrest src={game.home.logo} alt={game.home.name} size={36} />
-          <span style={{ fontSize: "0.6875rem", fontWeight: 600, color: "var(--site-text)", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
+          <span style={{ fontSize: "0.6875rem", fontWeight: 700, color: "var(--site-text)", textAlign: "center", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", maxWidth: "100%" }}>
             {game.home.abbreviation}
           </span>
         </div>
@@ -236,32 +331,35 @@ function NflDivisionTable({ division }: { division: NflDivisionStandings }) {
     // below the table's natural content width (a long club name + 4 stat
     // columns), forcing the card wider than its track and spilling past
     // the rounded border instead of truncating the name.
-    <div style={{ ...cardStyle, padding: "1rem", minWidth: 0 }}>
-      <h3 style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.625rem" }}>{division.division}</h3>
+    <div style={{ ...cardStyle, padding: "1.125rem", minWidth: 0 }}>
+      <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.9375rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>
+        <span style={{ width: "0.5rem", height: "0.5rem", borderRadius: "9999px", backgroundColor: BRAND, flexShrink: 0 }} />
+        {division.division}
+      </h3>
       <div style={{ overflowX: "auto" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
+      <table className="standings-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
         <thead>
           <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
-            <th style={{ padding: "0.375rem 0.25rem" }}>Clube</th>
-            <th style={{ padding: "0.375rem 0.25rem", textAlign: "center" }}>V</th>
-            <th style={{ padding: "0.375rem 0.25rem", textAlign: "center" }}>D</th>
-            <th style={{ padding: "0.375rem 0.25rem", textAlign: "center" }}>E</th>
-            <th style={{ padding: "0.375rem 0.25rem", textAlign: "center" }}>Aprov.</th>
+            <th style={{ padding: "0.375rem 0.375rem", fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase" }}>Clube</th>
+            <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>V</th>
+            <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>D</th>
+            <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>E</th>
+            <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>Aprov.</th>
           </tr>
         </thead>
         <tbody>
           {division.teams.map((team) => (
-            <tr key={team.teamId} style={{ borderTop: "1px solid var(--site-border)" }}>
-              <td style={{ padding: "0.375rem 0.25rem", color: "var(--site-text)", fontWeight: 600 }}>
+            <tr key={team.teamId}>
+              <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-text)", fontWeight: 600 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <TeamCrest src={team.logo} alt={team.name} size={18} />
                   <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{team.name}</span>
                 </div>
               </td>
-              <td style={{ padding: "0.375rem 0.25rem", textAlign: "center", color: "var(--site-muted)" }}>{team.wins}</td>
-              <td style={{ padding: "0.375rem 0.25rem", textAlign: "center", color: "var(--site-muted)" }}>{team.losses}</td>
-              <td style={{ padding: "0.375rem 0.25rem", textAlign: "center", color: "var(--site-muted)" }}>{team.ties}</td>
-              <td style={{ padding: "0.375rem 0.25rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{team.winPercent}</td>
+              <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", color: "var(--site-muted)" }}>{team.wins}</td>
+              <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", color: "var(--site-muted)" }}>{team.losses}</td>
+              <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", color: "var(--site-muted)" }}>{team.ties}</td>
+              <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{team.winPercent}</td>
             </tr>
           ))}
         </tbody>
@@ -273,30 +371,33 @@ function NflDivisionTable({ division }: { division: NflDivisionStandings }) {
 
 function NbaDivisionTable({ division }: { division: NbaDivisionStandings }) {
   return (
-    <div style={{ ...cardStyle, padding: "1rem", minWidth: 0 }}>
-      <h3 style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.625rem" }}>{division.division}</h3>
+    <div style={{ ...cardStyle, padding: "1.125rem", minWidth: 0 }}>
+      <h3 style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.9375rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>
+        <span style={{ width: "0.5rem", height: "0.5rem", borderRadius: "9999px", backgroundColor: BRAND, flexShrink: 0 }} />
+        {division.division}
+      </h3>
       <div style={{ overflowX: "auto" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
+      <table className="standings-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
         <thead>
           <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
-            <th style={{ padding: "0.375rem 0.25rem" }}>Clube</th>
-            <th style={{ padding: "0.375rem 0.25rem", textAlign: "center" }}>V</th>
-            <th style={{ padding: "0.375rem 0.25rem", textAlign: "center" }}>D</th>
-            <th style={{ padding: "0.375rem 0.25rem", textAlign: "center" }}>Aprov.</th>
+            <th style={{ padding: "0.375rem 0.375rem", fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase" }}>Clube</th>
+            <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>V</th>
+            <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>D</th>
+            <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>Aprov.</th>
           </tr>
         </thead>
         <tbody>
           {division.teams.map((team) => (
-            <tr key={team.teamId} style={{ borderTop: "1px solid var(--site-border)" }}>
-              <td style={{ padding: "0.375rem 0.25rem", color: "var(--site-text)", fontWeight: 600 }}>
+            <tr key={team.teamId}>
+              <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-text)", fontWeight: 600 }}>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   <TeamCrest src={team.logo} alt={team.name} size={18} />
                   <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{team.name}</span>
                 </div>
               </td>
-              <td style={{ padding: "0.375rem 0.25rem", textAlign: "center", color: "var(--site-muted)" }}>{team.wins}</td>
-              <td style={{ padding: "0.375rem 0.25rem", textAlign: "center", color: "var(--site-muted)" }}>{team.losses}</td>
-              <td style={{ padding: "0.375rem 0.25rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{team.winPercent}</td>
+              <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", color: "var(--site-muted)" }}>{team.wins}</td>
+              <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", color: "var(--site-muted)" }}>{team.losses}</td>
+              <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{team.winPercent}</td>
             </tr>
           ))}
         </tbody>
@@ -348,61 +449,94 @@ export default async function EsportesPage({
   const tc = await getTranslations("common");
 
   return (
-    <section className="section-padding esportes-page" style={{ backgroundColor: "var(--site-bg)", minHeight: "70vh" }}>
-      <div className="container-xl" style={{ maxWidth: "1000px" }}>
-        <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", marginBottom: "1rem", color: BRAND, fontWeight: 700, fontSize: "0.875rem", textDecoration: "none" }}>
-          ← Voltar para o início
-        </Link>
+    <>
+      <section style={{ background: "linear-gradient(135deg, #0d1b2a 0%, #1a1f3e 100%)", paddingTop: "6rem", paddingBottom: "3rem", color: "white" }}>
+        <div className="container-xl" style={{ maxWidth: "1000px" }}>
+          <Link href="/" style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem", color: "rgba(255,255,255,0.5)", fontSize: "0.875rem", marginBottom: "1.5rem", textDecoration: "none" }}>
+            <ArrowLeft size={16} /> Início
+          </Link>
+          <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.875rem" }}>
+            <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "1.75rem", height: "1.75rem", borderRadius: "0.5rem", backgroundColor: `${GOLD}26`, color: GOLD }}>
+              <Trophy size={15} />
+            </span>
+            <span style={{ fontSize: "0.8125rem", fontWeight: 800, letterSpacing: "0.06em", textTransform: "uppercase", color: GOLD }}>Ao vivo e atualizado</span>
+          </div>
+          <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 800, lineHeight: 1.1, marginBottom: "0.875rem" }}>Esportes</h1>
+          <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "1.0625rem", lineHeight: 1.7, maxWidth: "540px" }}>
+            Notícias, Brasileirão, NFL e NBA — classificação e jogos atualizados em tempo real.
+          </p>
+        </div>
+      </section>
 
-        <div style={{ color: BRAND, fontWeight: 700, fontSize: "0.9375rem", marginBottom: "1rem" }}>Esportes</div>
+      <section className="section-padding esportes-page" style={{ backgroundColor: "var(--site-surface-alt)", minHeight: "60vh" }}>
+        <div className="container-xl" style={{ maxWidth: "1000px" }}>
+          <TabNav active={tab} />
 
-        <TabNav active={tab} />
+          {tab === "artigos" && (
+            <ArticlesTab />
+          )}
 
-        {tab === "artigos" && (
-          <ArticlesTab />
-        )}
+          {tab === "brasileirao" && (
+            <BrasileiraoTab rawCompeticao={rawCompeticao} rawClube={rawClube} />
+          )}
 
-        {tab === "brasileirao" && (
-          <BrasileiraoTab rawCompeticao={rawCompeticao} rawClube={rawClube} />
-        )}
+          {tab === "nfl" && <NflTab />}
 
-        {tab === "nfl" && <NflTab />}
-
-        {tab === "nba" && <NbaTab />}
-      </div>
+          {tab === "nba" && <NbaTab />}
+        </div>
+      </section>
 
       <style>{`
         body:has(.esportes-page) .category-nav,
         body:has(.esportes-page) .social-sidebar { display: none !important; }
+        .sports-tabnav { background-color: var(--site-surface); border-radius: 9999px; border: 1px solid var(--site-border); width: fit-content; max-width: 100%; }
+        .fixture-row:nth-child(even) { background-color: var(--site-surface-alt); }
+        .standings-table tbody tr:nth-child(even) { background-color: var(--site-surface-alt); }
+        .live-dot {
+          display: inline-block;
+          width: 0.4375rem;
+          height: 0.4375rem;
+          border-radius: 9999px;
+          background-color: ${LIVE};
+          animation: sports-live-pulse 1.4s ease-in-out infinite;
+          flex-shrink: 0;
+        }
+        @keyframes sports-live-pulse {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.45; transform: scale(0.75); }
+        }
       `}</style>
-    </section>
+    </>
   );
 
   async function ArticlesTab() {
     const { category, articles, columnistById, categoryById } = await getSportsArticles();
     return (
       <div>
-        <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "1.25rem" }}>
-          Notícias de esporte
-        </h1>
+        <header style={{ display: "flex", alignItems: "center", gap: "0.75rem", borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "2.75rem", height: "2.75rem", borderRadius: "0.875rem", backgroundColor: `${BRAND}14`, color: BRAND, flexShrink: 0 }}>
+            <Newspaper size={22} />
+          </span>
+          <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>Notícias de esporte</h1>
+        </header>
         {articles.length === 0 ? (
           <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>Nenhum artigo publicado em esporte ainda.</div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+          <div style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}>
             {articles.map((article) => (
               <Link key={article.id} href={articleHref(article, article.category_id ? categoryById.get(article.category_id)?.slug : null)} style={{ display: "block", textDecoration: "none" }} className="hover-card">
-                <article style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--site-border)", display: "flex", gap: "1.25rem", alignItems: "flex-start" }}>
+                <article style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "1.25rem", border: "1px solid var(--site-border)", boxShadow: "0 1px 2px rgba(13,27,42,0.05)", display: "flex", gap: "1.25rem", alignItems: "flex-start" }}>
                   <div
                     style={{
-                      width: "5rem",
-                      height: "5rem",
+                      width: "6.5rem",
+                      height: "6.5rem",
                       flexShrink: 0,
-                      borderRadius: "0.75rem",
+                      borderRadius: "1rem",
                       background: article.cover_image ? `url("${article.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                     }}
                   />
-                  <div style={{ flex: 1 }}>
-                    <div style={{ marginBottom: "0.375rem" }}>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ marginBottom: "0.5rem" }}>
                       <FormatTag format={article.format} locale="pt" />
                       {category?.is_people_growth && <PeopleGrowthBadge />}
                       {category?.is_ponto_de_replica && <PontoDeReplicaBadge />}
@@ -411,7 +545,7 @@ export default async function EsportesPage({
                       {pickLocale("pt", article.title_pt, article.title_en)}
                     </h3>
                     {article.excerpt_pt && (
-                      <p style={{ fontSize: "0.875rem", color: "var(--site-muted)", lineHeight: 1.6, marginBottom: "0.625rem" }}>
+                      <p style={{ fontSize: "0.875rem", color: "var(--site-muted)", lineHeight: 1.6, marginBottom: "0.625rem", overflow: "hidden", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical" }}>
                         {pickLocale("pt", article.excerpt_pt, article.excerpt_en)}
                       </p>
                     )}
@@ -451,35 +585,19 @@ export default async function EsportesPage({
           <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>{info.name_pt}</h1>
         </header>
 
-        <nav style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.25rem" }}>
+        <nav style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.5rem" }}>
           {COMPETITION_ORDER.map((option) => (
-            <a
-              key={option}
-              href={`?tab=brasileirao&competicao=${option}`}
-              aria-current={option === competition ? "page" : undefined}
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.5rem",
-                padding: "0.5rem 1.125rem",
-                borderRadius: "0.5rem",
-                border: `1px solid ${option === competition ? BRAND : "var(--site-border-strong)"}`,
-                color: option === competition ? BRAND : "var(--site-text-secondary)",
-                fontWeight: 700,
-                fontSize: "0.875rem",
-                textDecoration: "none",
-              }}
-            >
-              <TeamCrest src={COMPETITIONS[option].logo} alt="" size={20} />
+            <NavPill key={option} href={`?tab=brasileirao&competicao=${option}`} active={option === competition}>
+              <TeamCrest src={COMPETITIONS[option].logo} alt="" size={18} />
               {COMPETITIONS[option].name_pt}
-            </a>
+            </NavPill>
           ))}
         </nav>
 
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
           {todayFixtures.length > 0 && (
-            <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
-              <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Jogos de hoje</h2>
+            <div className="fixture-list" style={cardStyle}>
+              <SectionHeader icon={CalendarDays} title="Jogos de hoje" />
               <div>
                 {todayFixtures.map((fixture) => (
                   <FixtureRow key={fixture.id} fixture={fixture} />
@@ -489,14 +607,14 @@ export default async function EsportesPage({
           )}
 
           {info.format === "table" && (
-            <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
-              <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Classificação</h2>
+            <div style={cardStyle}>
+              <SectionHeader icon={ListOrdered} title="Classificação" />
               <StandingsTable standings={standings} />
             </div>
           )}
 
-          <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Jogos da rodada</h2>
+          <div className="fixture-list" style={cardStyle}>
+            <SectionHeader icon={CalendarDays} title="Jogos da rodada" />
             {roundFixtures && roundFixtures.length > 0 ? (
               <div>
                 {roundFixtures.map((fixture) => (
@@ -508,35 +626,19 @@ export default async function EsportesPage({
             )}
           </div>
 
-          <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
-            <h2 style={{ fontSize: "1.125rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Jogos por clube</h2>
+          <div className="fixture-list" style={cardStyle}>
+            <SectionHeader icon={Users} title="Jogos por clube" />
             {info.format === "table" && standings && standings.length > 0 ? (
               <>
-                <nav style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginBottom: "1rem" }}>
+                <nav style={{ display: "flex", flexWrap: "wrap", gap: "0.375rem", marginBottom: "1.125rem" }}>
                   {standings.map((row) => (
-                    <a
-                      key={row.teamId}
-                      href={`?tab=brasileirao&competicao=${competition}&clube=${encodeURIComponent(row.teamName)}`}
-                      aria-current={row.teamName === clube ? "page" : undefined}
-                      style={{
-                        display: "inline-flex",
-                        alignItems: "center",
-                        gap: "0.375rem",
-                        padding: "0.375rem 0.75rem",
-                        borderRadius: "9999px",
-                        border: `1px solid ${row.teamName === clube ? BRAND : "var(--site-border-strong)"}`,
-                        color: row.teamName === clube ? BRAND : "var(--site-text-secondary)",
-                        fontWeight: 600,
-                        fontSize: "0.8125rem",
-                        textDecoration: "none",
-                      }}
-                    >
+                    <NavPill key={row.teamId} href={`?tab=brasileirao&competicao=${competition}&clube=${encodeURIComponent(row.teamName)}`} active={row.teamName === clube}>
                       {row.teamLogo && (
                         // eslint-disable-next-line @next/next/no-img-element
                         <img src={row.teamLogo} alt="" width={16} height={16} style={{ objectFit: "contain", flexShrink: 0 }} />
                       )}
                       {row.teamName}
-                    </a>
+                    </NavPill>
                   ))}
                 </nav>
                 {clube ? (
@@ -570,14 +672,13 @@ export default async function EsportesPage({
     const [games, standings] = await Promise.all([getCurrentWeekGames(), getNflStandingsByDivision()]);
     return (
       <>
-        <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem" }}>
+        <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.875rem" }}>
+          <TeamCrest src={NFL_LOGO_URL} alt="" size={44} />
           <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>NFL</h1>
         </header>
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-          <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>
-              Jogos da semana{games && games[0]?.week ? ` (semana ${games[0].week})` : ""}
-            </h2>
+          <div style={cardStyle}>
+            <SectionHeader icon={CalendarDays} title={`Jogos da semana${games && games[0]?.week ? ` (semana ${games[0].week})` : ""}`} />
             {games && games.length > 0 ? (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "0.75rem" }}>
                 {games.map((game) => (
@@ -588,16 +689,18 @@ export default async function EsportesPage({
               <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Jogos indisponíveis no momento.</p>
             )}
           </div>
-          <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Classificação por divisão</h2>
+          <div style={cardStyle}>
+            <SectionHeader icon={ListOrdered} title="Classificação por divisão" />
             {standings && standings.length > 0 ? (
               <>
+                <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--site-faint)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.625rem" }}>AFC</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
                   {standings.filter((d) => d.conference === "AFC").map((division) => (
                     <NflDivisionTable key={division.division} division={division} />
                   ))}
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", marginTop: "1rem" }}>
+                <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--site-faint)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "1.5rem 0 0.625rem" }}>NFC</div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
                   {standings.filter((d) => d.conference === "NFC").map((division) => (
                     <NflDivisionTable key={division.division} division={division} />
                   ))}
@@ -617,12 +720,13 @@ export default async function EsportesPage({
     const [games, standings] = await Promise.all([getTodayGames(), getNbaStandingsByDivision()]);
     return (
       <>
-        <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem" }}>
+        <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.875rem" }}>
+          <TeamCrest src={NBA_LOGO_URL} alt="" size={44} />
           <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>NBA</h1>
         </header>
         <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
-          <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Jogos de hoje</h2>
+          <div style={cardStyle}>
+            <SectionHeader icon={CalendarDays} title="Jogos de hoje" />
             {games && games.length > 0 ? (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(160px, 1fr))", gap: "0.75rem" }}>
                 {games.map((game) => (
@@ -633,16 +737,18 @@ export default async function EsportesPage({
               <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Nenhum jogo hoje.</p>
             )}
           </div>
-          <div style={{ ...cardStyle, padding: "1.25rem 1.5rem" }}>
-            <h2 style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>Classificação por divisão</h2>
+          <div style={cardStyle}>
+            <SectionHeader icon={ListOrdered} title="Classificação por divisão" />
             {standings && standings.length > 0 ? (
               <>
+                <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--site-faint)", textTransform: "uppercase", letterSpacing: "0.06em", marginBottom: "0.625rem" }}>Leste</div>
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
                   {standings.filter((d) => d.conference === "East").map((division) => (
                     <NbaDivisionTable key={division.division} division={division} />
                   ))}
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem", marginTop: "1rem" }}>
+                <div style={{ fontSize: "0.75rem", fontWeight: 800, color: "var(--site-faint)", textTransform: "uppercase", letterSpacing: "0.06em", margin: "1.5rem 0 0.625rem" }}>Oeste</div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
                   {standings.filter((d) => d.conference === "West").map((division) => (
                     <NbaDivisionTable key={division.division} division={division} />
                   ))}
