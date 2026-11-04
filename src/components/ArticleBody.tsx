@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { List, ChevronDown } from "lucide-react";
 import { TextToSpeechButton } from "./TextToSpeechButton";
 import { useImageLightbox } from "./ImageLightbox";
@@ -86,6 +86,28 @@ export function ArticleBody({
   // takes this spot when there's no video competing for it.
   const showCoverImage = Boolean(coverImage) && !videoEmbedUrl;
 
+  // The cover photo floats right, so when the summary opens with less text
+  // than the photo is tall, the text column next to it runs out early and
+  // leaves blank page background beside the rest of the photo. Matching the
+  // card's min-height to the photo's rendered height (desktop only — on
+  // mobile the photo isn't floated, see the media query below) lets the
+  // tinted card fill that space instead of leaving it empty.
+  const coverImageRef = useRef<HTMLImageElement | null>(null);
+  const [summaryMinHeight, setSummaryMinHeight] = useState<number | undefined>(undefined);
+  useEffect(() => {
+    if (!expanded || !showCoverImage) return;
+    const updateHeight = () => {
+      const img = coverImageRef.current;
+      setSummaryMinHeight(img && window.innerWidth > 640 ? img.offsetHeight : undefined);
+    };
+    updateHeight();
+    window.addEventListener("resize", updateHeight);
+    return () => window.removeEventListener("resize", updateHeight);
+  }, [expanded, showCoverImage, coverImageStatus]);
+  // Only meaningful while expanded — collapsing or losing the cover image
+  // just falls back to the card's own content height, no reset needed.
+  const activeSummaryMinHeight = expanded && showCoverImage ? summaryMinHeight : undefined;
+
   return (
     <>
       <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
@@ -145,6 +167,7 @@ export function ArticleBody({
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img
+                ref={coverImageRef}
                 src={coverImageSrc!}
                 alt={coverImageCaption ?? title}
                 style={{ width: "100%", height: "auto", borderRadius: "0.625rem", display: "block" }}
@@ -180,7 +203,7 @@ export function ArticleBody({
         {summary && (
           <div className={`summary-box${expanded ? " summary-box-expanded" : ""}`}>
             <div className="summary-box-clip">
-              <div className="summary-box-content">
+              <div className="summary-box-content" style={{ minHeight: activeSummaryMinHeight, boxSizing: "border-box" }}>
                 <p style={{ fontSize: "1.0625rem", lineHeight: 1.75, color: "var(--site-text)", whiteSpace: "pre-line", margin: 0 }}>
                   {summary}
                 </p>
