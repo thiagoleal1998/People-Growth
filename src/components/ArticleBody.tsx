@@ -1,10 +1,43 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { List, ChevronDown } from "lucide-react";
 import { TextToSpeechButton } from "./TextToSpeechButton";
 import { useImageLightbox } from "./ImageLightbox";
 import type { ArticleSource } from "@/types/database.types";
+
+// Finds the character offset (snapped to a word boundary) up to which `p`'s
+// text renders at or above `maxBottomY` (viewport px) — i.e. how much of the
+// summary fits in the narrow column before it runs past the floated cover
+// photo. Walks word-by-word (not a binary search — summaries are short)
+// measuring each prefix's rendered bottom edge via Range, since that's the
+// only way to know real wrapped-line positions without reimplementing the
+// browser's own line-breaking.
+function findSummarySplitIndex(p: HTMLParagraphElement, maxBottomY: number): number {
+  const textNode = p.firstChild;
+  if (!textNode || textNode.nodeType !== Node.TEXT_NODE) return 0;
+  const text = textNode.textContent || "";
+  const words = text.match(/\S+\s*/g) || [];
+  const range = document.createRange();
+  let offset = 0;
+  let lastGoodOffset = 0;
+  for (const word of words) {
+    const candidate = offset + word.length;
+    range.setStart(textNode, 0);
+    range.setEnd(textNode, candidate);
+    const rects = range.getClientRects();
+    const lastRect = rects[rects.length - 1];
+    if (lastRect && lastRect.bottom <= maxBottomY) {
+      lastGoodOffset = candidate;
+    } else {
+      break;
+    }
+    offset = candidate;
+  }
+  return lastGoodOffset;
+}
+
+type SummaryLayout = { mode: "solo" } | { mode: "stretch"; height: number } | { mode: "split"; splitIndex: number };
 
 type Props = {
   title: string;
@@ -86,27 +119,85 @@ export function ArticleBody({
   // takes this spot when there's no video competing for it.
   const showCoverImage = Boolean(coverImage) && !videoEmbedUrl;
 
-  // The cover photo floats right, so when the summary opens with less text
-  // than the photo is tall, the text column next to it runs out early and
-  // leaves blank page background beside the rest of the photo. Matching the
-  // card's min-height to the photo's rendered height (desktop only — on
-  // mobile the photo isn't floated, see the media query below) lets the
-  // tinted card fill that space instead of leaving it empty.
-  const coverImageRef = useRef<HTMLImageElement | null>(null);
-  const [summaryMinHeight, setSummaryMinHeight] = useState<number | undefined>(undefined);
+  // The cover photo floats right of the summary card. Two ways that goes
+  // wrong once the card is open, and the fix for each:
+  //  - Photo taller than the summary text: the card's own text runs out
+  //    before the photo does, leaving blank page background below it ->
+  //    stretch the card's min-height to match the photo (mode "stretch").
+  //  - Summary longer than the photo: once the card's narrow column
+  //    (forced narrow by the float-avoiding grid box below, needed so it
+  //    never overlaps the photo) runs past the photo's bottom, nothing
+  //    reclaims the now-free full width beside/under it -> split the card
+  //    in two at the exact word where the photo ends, so part one stays
+  //    narrow (still avoiding the photo) and part two continues full width
+  //    below it (mode "split"). Measuring is real DOM Range measurement on
+  //    the rendered text, not an estimate, since line-wrap points depend on
+  //    font metrics no formula here could reproduce reliably.
+  // Both are desktop-only (mobile unfloats the photo entirely, see the
+  // media query below) and only matter once the card is actually open.
+  // On the <figure> itself, not just the <img> -- the figure (which is what
+  // actually floats) also includes the caption below the image, so the
+  // float's real bottom edge is further down than the image alone.
+  const coverFigureRef = useRef<HTMLElement | null>(null);
+  const summaryMeasureRef = useRef<HTMLParagraphElement | null>(null);
+  const [summaryLayout, setSummaryLayout] = useState<SummaryLayout>({ mode: "solo" });
+
+  // Falls back to "solo" (full text, narrow column, un-stretched) whenever
+  // something that could change the measurement happens while open; the
+  // layout effect below then measures that "solo" render and upgrades it —
+  // both are layout effects so this reset-then-measure cascade fully
+  // resolves before the browser paints, with no visible flash back to
+  // "solo" in between. Skipped while collapsed/collapsing so a
+  // "stretch"/"split" layout doesn't swap back to one unsplit block of text
+  // mid-close-animation — the next open re-triggers this with a clean
+  // "solo" baseline regardless.
+  useLayoutEffect(() => {
+    if (!expanded) return;
+    // Resetting to the DOM-measurement baseline on open/content-change is
+    // the legitimate case the lint rule can't tell apart from accidental
+    // cascading renders — there's no way to know the right layout without
+    // first rendering "solo" and measuring it.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setSummaryLayout({ mode: "solo" });
+  }, [expanded, showCoverImage, coverImageStatus, summary]);
+
+  useLayoutEffect(() => {
+    if (summaryLayout.mode !== "solo" || !expanded || !showCoverImage || !summary) return;
+    if (window.innerWidth <= 640) return; // mobile: photo isn't floated, "solo" is already correct
+    const figure = coverFigureRef.current;
+    const p = summaryMeasureRef.current;
+    if (!figure || !p) return;
+    const figureBottom = figure.getBoundingClientRect().bottom;
+    const pBottom = p.getBoundingClientRect().bottom;
+    if (pBottom <= figureBottom) {
+      setSummaryLayout({ mode: "stretch", height: figure.getBoundingClientRect().height });
+      return;
+    }
+    const splitIndex = findSummarySplitIndex(p, figureBottom);
+    if (splitIndex > 0 && splitIndex < summary.length) {
+      setSummaryLayout({ mode: "split", splitIndex });
+    }
+  }, [summaryLayout, expanded, showCoverImage, summary]);
+
+  // Separate from the measurement effect above so the listener stays
+  // attached after upgrading to "stretch"/"split" — a resize needs to
+  // bounce back to "solo" first either way, to get a fresh baseline to
+  // re-measure, which is what re-triggers the effect above.
   useEffect(() => {
-    if (!expanded || !showCoverImage) return;
-    const updateHeight = () => {
-      const img = coverImageRef.current;
-      setSummaryMinHeight(img && window.innerWidth > 640 ? img.offsetHeight : undefined);
+    if (!expanded || !showCoverImage || !summary) return;
+    let resizeTimer: ReturnType<typeof setTimeout>;
+    const onResize = () => {
+      clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => setSummaryLayout({ mode: "solo" }), 150);
     };
-    updateHeight();
-    window.addEventListener("resize", updateHeight);
-    return () => window.removeEventListener("resize", updateHeight);
-  }, [expanded, showCoverImage, coverImageStatus]);
-  // Only meaningful while expanded — collapsing or losing the cover image
-  // just falls back to the card's own content height, no reset needed.
-  const activeSummaryMinHeight = expanded && showCoverImage ? summaryMinHeight : undefined;
+    window.addEventListener("resize", onResize);
+    return () => {
+      clearTimeout(resizeTimer);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [expanded, showCoverImage, summary]);
+
+  const summaryParagraphStyle = { fontSize: "1.0625rem", lineHeight: 1.75, color: "var(--site-text)", whiteSpace: "pre-line" as const, margin: 0 };
 
   return (
     <>
@@ -154,7 +245,11 @@ export function ArticleBody({
           than the photo sitting alone in its own isolated column. */}
       <div>
         {showCoverImage && (
-          <figure className="article-cover-figure" style={{ float: "right", width: "320px", margin: "0.25rem 0 1rem 1.75rem" }}>
+          <figure
+            ref={coverFigureRef}
+            className="article-cover-figure"
+            style={{ float: "right", width: "320px", margin: "0.25rem 0 1rem 1.75rem" }}
+          >
             {coverImageStatus === "failed" ? (
               <div
                 style={{
@@ -167,7 +262,6 @@ export function ArticleBody({
             ) : (
               // eslint-disable-next-line @next/next/no-img-element
               <img
-                ref={coverImageRef}
                 src={coverImageSrc!}
                 alt={coverImageCaption ?? title}
                 style={{ width: "100%", height: "auto", borderRadius: "0.625rem", display: "block" }}
@@ -201,15 +295,32 @@ export function ArticleBody({
         )}
 
         {summary && (
-          <div className={`summary-box${expanded ? " summary-box-expanded" : ""}`}>
-            <div className="summary-box-clip">
-              <div className="summary-box-content" style={{ minHeight: activeSummaryMinHeight, boxSizing: "border-box" }}>
-                <p style={{ fontSize: "1.0625rem", lineHeight: 1.75, color: "var(--site-text)", whiteSpace: "pre-line", margin: 0 }}>
-                  {summary}
-                </p>
+          <>
+            <div className={`summary-box${expanded ? " summary-box-expanded" : ""}`}>
+              <div className="summary-box-clip">
+                <div
+                  className={`summary-box-content${summaryLayout.mode === "split" ? " summary-box-content-top" : ""}`}
+                  style={{
+                    minHeight: summaryLayout.mode === "stretch" ? summaryLayout.height : undefined,
+                    boxSizing: "border-box",
+                  }}
+                >
+                  <p ref={summaryMeasureRef} style={summaryParagraphStyle}>
+                    {summaryLayout.mode === "split" ? summary.slice(0, summaryLayout.splitIndex) : summary}
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
+            {summaryLayout.mode === "split" && (
+              <div className={`summary-box summary-box-cleared${expanded ? " summary-box-expanded" : ""}`}>
+                <div className="summary-box-clip">
+                  <div className="summary-box-content summary-box-content-bottom">
+                    <p style={summaryParagraphStyle}>{summary.slice(summaryLayout.splitIndex)}</p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </>
         )}
 
         <div
@@ -282,6 +393,14 @@ export function ArticleBody({
           opacity: 0;
           transition: grid-template-rows 0.35s ease, opacity 0.25s ease;
         }
+        /* Part two of a split summary (see "split" mode above): without
+           this, a grid container avoids the floated photo for its whole
+           height even though this box only starts once the photo has
+           already ended -- clear forces it below the float so its width
+           resolves full-width instead of narrow again. */
+        .summary-box-cleared {
+          clear: right;
+        }
         .summary-box-expanded {
           grid-template-rows: 1fr;
           opacity: 1;
@@ -296,6 +415,17 @@ export function ArticleBody({
           border-radius: 0 0.625rem 0.625rem 0;
           padding: 1.25rem 1.5rem;
           margin-bottom: 1.5rem;
+        }
+        /* Split mode: two cards reading as one continuous one -- part one
+           (still narrow, still avoiding the photo) loses its bottom
+           rounding and margin so it butts straight into part two, which
+           picks the rounding back up at the bottom. */
+        .summary-box-content-top {
+          border-radius: 0 0.625rem 0 0;
+          margin-bottom: 0;
+        }
+        .summary-box-content-bottom {
+          border-radius: 0 0 0.625rem 0.625rem;
         }
       `}</style>
     </>
