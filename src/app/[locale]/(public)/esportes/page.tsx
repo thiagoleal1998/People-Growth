@@ -522,20 +522,22 @@ export default async function EsportesPage({
         {articles.length === 0 ? (
           <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>Nenhum artigo publicado em esporte ainda.</div>
         ) : (
-          <div style={{ display: "flex", flexDirection: "column", gap: "1.125rem" }}>
+          <div className="sports-articles-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1.25rem" }}>
             {articles.map((article) => (
-              <Link key={article.id} href={articleHref(article, article.category_id ? categoryById.get(article.category_id)?.slug : null)} style={{ display: "block", textDecoration: "none" }} className="hover-card">
-                <article style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", padding: "1.25rem", border: "1px solid var(--site-border)", boxShadow: "0 1px 2px rgba(13,27,42,0.05)", display: "flex", gap: "1.25rem", alignItems: "flex-start" }}>
+              <Link
+                key={article.id}
+                href={articleHref(article, article.category_id ? categoryById.get(article.category_id)?.slug : null)}
+                style={{ display: "block", textDecoration: "none", height: "100%" }}
+                className="hover-card"
+              >
+                <article style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", border: "1px solid var(--site-border)", boxShadow: "0 1px 2px rgba(13,27,42,0.05)", overflow: "hidden", height: "100%", display: "flex", flexDirection: "column" }}>
                   <div
                     style={{
-                      width: "6.5rem",
-                      height: "6.5rem",
-                      flexShrink: 0,
-                      borderRadius: "1rem",
+                      aspectRatio: "16 / 10",
                       background: article.cover_image ? `url("${article.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
                     }}
                   />
-                  <div style={{ flex: 1, minWidth: 0 }}>
+                  <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", flex: 1 }}>
                     <div style={{ marginBottom: "0.5rem" }}>
                       <FormatTag format={article.format} locale="pt" />
                       {category?.is_people_growth && <PeopleGrowthBadge />}
@@ -550,7 +552,7 @@ export default async function EsportesPage({
                       </p>
                     )}
                     {(article.columnist_id || article.published_at) && (
-                      <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
+                      <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)", marginTop: "auto" }}>
                         {article.columnist_id && columnistById.get(article.columnist_id) && <>{tc("by")} {columnistById.get(article.columnist_id)!.name} · </>}
                         {article.published_at && new Date(article.published_at).toLocaleDateString("pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                       </span>
@@ -561,6 +563,11 @@ export default async function EsportesPage({
             ))}
           </div>
         )}
+        <style>{`
+          @media (max-width: 640px) {
+            .sports-articles-grid { grid-template-columns: 1fr !important; }
+          }
+        `}</style>
       </div>
     );
   }
