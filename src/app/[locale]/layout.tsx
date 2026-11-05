@@ -33,18 +33,18 @@ export async function generateMetadata({
   const titleKey = locale === "en" ? "seo_meta_title_en" : "seo_meta_title_pt";
   const descriptionKey = locale === "en" ? "seo_meta_description_en" : "seo_meta_description_pt";
 
-  // Falls back to the logo when no og:image has been set in Configurações —
-  // a share with no image at all looks broken (this is what WhatsApp
-  // showed with nothing to pull), same reasoning as the article fallback
-  // in [slug]/page.tsx. Routed through /api/og-image so it's always a real
+  // Falls back to the favicon (the two hummingbirds mark, not the text
+  // wordmark) when no og:image has been set in Configurações — a share
+  // with no image at all looks broken (this is what WhatsApp showed with
+  // nothing to pull), same reasoning as the article fallback in
+  // [slug]/page.tsx. Routed through /api/og-image so it's always a real
   // 1200x630 file, since WhatsApp is known to silently drop images whose
-  // declared dimensions don't match the real file. The logo specifically
-  // needs fit=contain (not the default cover/crop): it's a wide, mostly
-  // transparent wordmark, and cropping it to fill a 1200x630 frame zoomed
-  // into an unreadable white-on-white sliver of it.
+  // declared dimensions don't match the real file. fit=contain (not the
+  // default cover/crop): the mark is a square, transparent PNG, and
+  // "cover" would crop into it rather than show it whole.
   const ogImage = config.seo_og_image
     ? ogImageUrl(config.seo_og_image)
-    : ogImageUrl(config.logo_url || null, { fit: "contain", bg: "0d1b2a" });
+    : ogImageUrl(config.favicon_url || config.logo_url || null, { fit: "contain", bg: "ffffff" });
 
   return {
     title: {
