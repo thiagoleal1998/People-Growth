@@ -121,6 +121,11 @@ export async function generateMetadata({
 
   const title = pickLocale(locale, result.article.seo_title_pt, result.article.seo_title_en) || pickLocale(locale, result.article.title_pt, result.article.title_en);
   const description = pickLocale(locale, result.article.seo_desc_pt, result.article.seo_desc_en) || pickLocale(locale, result.article.excerpt_pt, result.article.excerpt_en) || undefined;
+  // openGraph/twitter titles are set explicitly below, which bypasses the
+  // root layout's title.template ("%s | Grupo Festina") entirely — that
+  // template only ever applies to the plain <title> string, so the brand
+  // suffix has to be added here by hand for link-preview cards to show it.
+  const ogTitle = `${title} | Grupo Festina`;
   const allColumnistNames = [result.columnist, ...result.coauthors].filter((a): a is Columnist => Boolean(a)).map((a) => a.name);
 
   // Falls back to the site-wide default OG image (admin-configurable, same
@@ -142,7 +147,7 @@ export async function generateMetadata({
     description,
     openGraph: {
       type: "article",
-      title,
+      title: ogTitle,
       description,
       images,
       url,
@@ -153,7 +158,7 @@ export async function generateMetadata({
     },
     twitter: {
       card: "summary_large_image",
-      title,
+      title: ogTitle,
       description,
       images: ogImage ? [ogImage] : undefined,
     },

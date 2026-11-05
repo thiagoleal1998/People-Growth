@@ -79,7 +79,7 @@ export function WhatsAppChannelBanner() {
         </span>
         <div>
           <h3 style={{ color: "white", fontWeight: 800, fontSize: "1.0625rem", marginBottom: "0.1875rem" }}>
-            {locale === "en" ? "Follow Festina on WhatsApp" : "Acompanhe a Festina no WhatsApp"}
+            {locale === "en" ? "Follow Grupo Festina on WhatsApp" : "Acompanhe o Grupo Festina no WhatsApp"}
           </h3>
           <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "0.875rem" }}>
             {locale === "en" ? "Join our Channel for the news as it happens — no group, no spam." : "Entre no nosso Canal e receba as notícias em primeira mão — sem grupo, sem spam."}
@@ -166,7 +166,7 @@ export function WhatsAppChannelArticleCTA() {
       </span>
       <span style={{ flex: 1, minWidth: 0 }}>
         <span style={{ display: "block", color: "var(--site-text)", fontWeight: 700, fontSize: "0.9375rem" }}>
-          {locale === "en" ? "Liked it? Follow us on WhatsApp" : "Gostou? Acompanhe a Festina no WhatsApp"}
+          {locale === "en" ? "Liked it? Follow Grupo Festina on WhatsApp" : "Gostou? Acompanhe o Grupo Festina no WhatsApp"}
         </span>
         <span style={{ display: "block", color: "var(--site-muted)", fontSize: "0.8125rem" }}>
           {locale === "en" ? "Join our Channel for more stories like this one" : "Entre no nosso Canal e receba mais matérias como essa"}

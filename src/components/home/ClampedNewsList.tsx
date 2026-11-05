@@ -16,9 +16,16 @@ import type { ArticleWithCategory } from "@/app/[locale]/(public)/page";
 // single article count that lines up with every combination, so instead of
 // guessing one, this measures the sidebar's real rendered height in the
 // browser and shows exactly as many rows as fit it, recomputing on resize.
-// Server-rendered with every article already in the markup (so it still
-// reads fine with JS off or before hydration) — the clamp only kicks in
-// once the measurement runs.
+// Every article is still server-rendered in the markup either way (so
+// "Mais notícias" is fully there for a no-JS visitor or a crawler, just
+// hidden past the safe default below) — but the INITIAL visible count
+// defaults small rather than "all of them": if hydration is ever slow or
+// disrupted (a hydration mismatch elsewhere on the page forcing React to
+// redo this subtree, a slow connection, etc.), the failure mode is a
+// slightly short list with a little blank space next to the sidebar —
+// not a wall of unclamped articles spilling far past it, which is what a
+// *large* starting count would briefly (or not so briefly) show instead.
+const SAFE_INITIAL_COUNT = 3;
 export function ClampedNewsList({
   articles,
   columnistNames,
@@ -33,7 +40,7 @@ export function ClampedNewsList({
   sidebarId: string;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
-  const [visibleCount, setVisibleCount] = useState(articles.length);
+  const [visibleCount, setVisibleCount] = useState(Math.min(SAFE_INITIAL_COUNT, articles.length));
 
   useLayoutEffect(() => {
     function recompute() {

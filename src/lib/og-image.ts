@@ -10,8 +10,11 @@
 // open SSRF proxy, since the route is public and unauthenticated.
 const STORAGE_PREFIX = `${process.env.NEXT_PUBLIC_SUPABASE_URL}/storage/v1/object/public/`;
 
-export function ogImageUrl(src: string | null | undefined): string | null {
+export function ogImageUrl(src: string | null | undefined, opts?: { fit?: "cover" | "contain"; bg?: string }): string | null {
   if (!src) return null;
   if (!src.startsWith(STORAGE_PREFIX)) return src;
-  return `/api/og-image?src=${encodeURIComponent(src)}`;
+  const params = new URLSearchParams({ src });
+  if (opts?.fit) params.set("fit", opts.fit);
+  if (opts?.bg) params.set("bg", opts.bg);
+  return `/api/og-image?${params.toString()}`;
 }
