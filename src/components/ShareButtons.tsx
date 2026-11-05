@@ -26,6 +26,7 @@ function XIcon({ size = 16 }: { size?: number }) {
 
 export function ShareButtons({ title, compact }: { title: string; compact?: boolean }) {
   const [url, setUrl] = useState("");
+  const [shareUrl, setShareUrl] = useState("");
   const [copied, setCopied] = useState(false);
 
   useEffect(() => {
@@ -34,6 +35,24 @@ export function ShareButtons({ title, compact }: { title: string; compact?: bool
     // call past the effect's own first synchronous line.
     Promise.resolve().then(() => setUrl(window.location.href));
   }, []);
+
+  useEffect(() => {
+    if (!url) return;
+    // The real article URL (locale + format + category + slug) is long
+    // enough to read badly inside a WhatsApp message, so the share text
+    // uses a short /api/s/ link instead — same one every time for this
+    // article, since the endpoint reuses an existing code for the same URL.
+    // shareUrl stays empty (falling back to the real URL below) until this
+    // resolves, never blocking the share on it.
+    fetch("/api/short-link", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ url }) })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.code) setShareUrl(`${window.location.origin}/api/s/${data.code}`);
+      })
+      .catch(() => {
+        /* keep the real URL as shareUrl */
+      });
+  }, [url]);
 
   async function copyLink() {
     try {
@@ -48,11 +67,12 @@ export function ShareButtons({ title, compact }: { title: string; compact?: bool
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
   // WhatsApp's own share links (its "Share" button on an article, not just a
-  // bare link someone pastes) use this exact shape: *bold title*, a blank
-  // line, "Leia mais: <url>", a blank line, then a one-line brand sign-off —
-  // the structure the user pointed at with CNN's "Pense bem, pense CNN".
-  // *asterisks* are WhatsApp's own bold markdown, not ours.
-  const whatsappText = `*${title}*\n\nLeia mais: ${url}\n\n*Festina — apressa-te devagar*`;
+  // bare link someone pastes) use this exact shape: *bold title | brand*, a
+  // blank line, "Leia mais: <short url>", a blank line, then a one-line
+  // brand sign-off — the structure the user pointed at with CNN Brasil's
+  // own WhatsApp channel messages ("Título | CNN Brasil" ... "Pense bem,
+  // pense CNN"). *asterisks* are WhatsApp's own bold markdown, not ours.
+  const whatsappText = `*${title} | Grupo Festina*\n\nLeia mais: ${shareUrl || url}\n\n*Grupo Festina — apressa-te devagar*`;
 
   const links = [
     {

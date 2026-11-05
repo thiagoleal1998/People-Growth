@@ -9,6 +9,7 @@ import { routing } from "@/i18n/routing";
 import { createClient } from "@/lib/supabase/server";
 import { getFaqEntriesFromConfig } from "@/lib/faq";
 import { jsonLdString } from "@/lib/json-ld";
+import { ogImageUrl } from "@/lib/og-image";
 import "../globals.css";
 
 type SiteConfigRow = { key: string; value: string | null };
@@ -32,10 +33,18 @@ export async function generateMetadata({
   const titleKey = locale === "en" ? "seo_meta_title_en" : "seo_meta_title_pt";
   const descriptionKey = locale === "en" ? "seo_meta_description_en" : "seo_meta_description_pt";
 
+  // Falls back to the logo when no og:image has been set in Configurações —
+  // a share with no image at all looks broken (this is what WhatsApp
+  // showed with nothing to pull), same reasoning as the article fallback
+  // in [slug]/page.tsx. Routed through /api/og-image so it's always a real
+  // 1200x630 file, since WhatsApp is known to silently drop images whose
+  // declared dimensions don't match the real file.
+  const ogImage = ogImageUrl(config.seo_og_image || config.logo_url || null);
+
   return {
     title: {
       default: config[titleKey] || "Festina",
-      template: "%s | Festina",
+      template: "%s | Grupo Festina",
     },
     description: config[descriptionKey] || t("heroSubtitle"),
     metadataBase: new URL(
@@ -46,12 +55,13 @@ export async function generateMetadata({
     openGraph: {
       type: "website",
       locale: locale === "pt" ? "pt_BR" : "en_US",
-      siteName: "Festina",
-      images: config.seo_og_image ? [{ url: config.seo_og_image }] : undefined,
+      siteName: "Grupo Festina",
+      images: ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : undefined,
     },
     twitter: {
       card: "summary_large_image",
       site: config.seo_twitter_handle || undefined,
+      images: ogImage ? [ogImage] : undefined,
     },
     robots: {
       index: true,

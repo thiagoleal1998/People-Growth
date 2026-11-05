@@ -38,6 +38,7 @@ export function SocialSidebar({ instagram, linkedin, whatsapp, youtube, x }: Pro
         display: "flex",
         flexDirection: "column",
         gap: "0.625rem",
+        transform: "translateY(-50%)",
       }}
     >
       {links.map(({ label, href, Icon }) => (

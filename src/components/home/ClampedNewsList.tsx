@@ -67,14 +67,24 @@ export function ClampedNewsList({
     // The sidebar's own iframes/images (YouTube embeds, the sports crest)
     // can still be loading at mount time and grow the sidebar afterwards —
     // "load" catches that; the short delay catches late web-font swaps
-    // nudging text (and so row/sidebar heights) by a few pixels.
+    // nudging text (and so row/sidebar heights) by a few pixels. None of
+    // those are a guarantee though — a ResizeObserver on the sidebar itself
+    // is what actually keeps this correct no matter *why* its height later
+    // changes (a slow sports-standings fetch resolving, a config-driven
+    // widget mounting late, React recovering from an unrelated hydration
+    // mismatch elsewhere on the page), instead of hoping one of the fixed
+    // checkpoints above happens to land after whatever moved it.
     window.addEventListener("resize", recompute);
     window.addEventListener("load", recompute);
     const lateRecheck = setTimeout(recompute, 800);
+    const sidebarEl = document.getElementById(sidebarId);
+    const observer = sidebarEl ? new ResizeObserver(recompute) : null;
+    if (sidebarEl && observer) observer.observe(sidebarEl);
     return () => {
       window.removeEventListener("resize", recompute);
       window.removeEventListener("load", recompute);
       clearTimeout(lateRecheck);
+      observer?.disconnect();
     };
   }, [articles.length, sidebarId]);
 

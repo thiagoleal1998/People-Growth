@@ -24,6 +24,7 @@ import { PontoDeReplicaBadge } from "@/components/PontoDeReplicaBadge";
 import { TestimonialsCarousel } from "@/components/TestimonialsCarousel";
 import { MediaCarousel } from "@/components/MediaCarousel";
 import { AdBanner } from "@/components/AdBanner";
+import { WhatsAppChannelBanner } from "@/components/WhatsAppChannelCTA";
 import { Reveal } from "@/components/Reveal";
 import { VideoFacade } from "@/components/VideoFacade";
 import { toYouTubeEmbedUrl, withAutoplay, getYouTubeThumbnail } from "@/lib/youtube";
@@ -370,6 +371,10 @@ export default async function HomePage() {
 
       <div className="container-xl" style={{ paddingTop: "1.25rem" }}>
         <AdBanner slotKey="home-top" />
+      </div>
+
+      <div className="container-xl" style={{ paddingTop: "1.25rem" }}>
+        <WhatsAppChannelBanner />
       </div>
 
       {featured && featured.is_special_feature && featured.cover_image && (

@@ -4,6 +4,7 @@ import { CookieBanner } from "@/components/layout/CookieBanner";
 import { CategoryNav } from "@/components/layout/CategoryNav";
 import { UtilityBar } from "@/components/layout/UtilityBar";
 import { SocialSidebar } from "@/components/layout/SocialSidebar";
+import { WhatsAppChannelFloatingButton } from "@/components/WhatsAppChannelCTA";
 import { createClient } from "@/lib/supabase/server";
 import { publishDueScheduledArticles } from "@/lib/publish-scheduled";
 
@@ -62,6 +63,7 @@ export default async function PublicLayout({
         youtube={config.youtube || undefined}
         x={config.x || undefined}
       />
+      <WhatsAppChannelFloatingButton />
       <CookieBanner />
       <style>{`
         @media (max-width: 768px) {

@@ -8,6 +8,7 @@ import { NewsletterForm } from "@/components/NewsletterForm";
 import { FormatTag } from "@/components/FormatTag";
 import { PEOPLE_GROWTH_LOGO_URL, PONTO_DE_REPLICA_LOGO_URL, MEA_SENTENTIA_LOGO_URL } from "@/lib/brand-logos";
 import { ShareButtons } from "@/components/ShareButtons";
+import { WhatsAppChannelArticleCTA } from "@/components/WhatsAppChannelCTA";
 import { Comments } from "@/components/Comments";
 import { AdBanner } from "@/components/AdBanner";
 import { MostRead } from "@/components/MostRead";
@@ -145,7 +146,7 @@ export async function generateMetadata({
       description,
       images,
       url,
-      siteName: "Festina",
+      siteName: "Grupo Festina",
       locale: locale === "pt" ? "pt_BR" : "en_US",
       publishedTime: result.article.published_at ?? undefined,
       authors: allColumnistNames.length > 0 ? allColumnistNames : undefined,
@@ -425,6 +426,8 @@ export default async function ArticlePage({
             />
 
             <ShareButtons title={pickLocale(locale, article.title_pt, article.title_en)} />
+
+            <WhatsAppChannelArticleCTA />
 
             <div style={{ marginTop: "2rem" }}>
               <AdBanner slotKey="article-instream" articleId={article.id} />

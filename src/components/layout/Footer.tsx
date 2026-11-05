@@ -6,6 +6,7 @@ import { ErrorReportButton } from "@/components/ErrorReportButton";
 import { FooterSection } from "@/components/layout/FooterSection";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { XIcon } from "@/components/icons/XIcon";
+import { WhatsAppChannelFooterBox } from "@/components/WhatsAppChannelCTA";
 
 type FooterProps = {
   logoUrl?: string | null;
@@ -36,6 +37,7 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
       }}
     >
       <div className="container-xl">
+        <WhatsAppChannelFooterBox />
         <div
           className="ft-grid"
           style={{
