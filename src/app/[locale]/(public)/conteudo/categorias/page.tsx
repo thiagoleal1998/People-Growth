@@ -15,7 +15,7 @@ export const metadata: Metadata = {
 // The bar on every page only ever shows a handful of categories (see CategoryNav);
 // this page is where the rest — and, here, every category with at least one
 // published article — can be reached.
-type LatestArticle = { title_pt: string; title_en: string | null; cover_image: string | null };
+type LatestArticle = { id: string; title_pt: string; title_en: string | null; cover_image: string | null };
 
 export default async function CategoriasPage() {
   const locale = await getLocale();
@@ -55,37 +55,45 @@ export default async function CategoriasPage() {
   for (const row of (extraData ?? []) as { article_id: string; category_id: string }[]) {
     if (publishedIds.has(row.article_id)) addToCategory(row.category_id, row.article_id);
   }
-  // Each card's teaser is the most recent article whose PRIMARY category is
-  // this one — `published` already comes back newest-first, so the first
-  // match per category wins.
-  const latestByCategory = new Map<string, LatestArticle>();
-  for (const article of published) {
-    if (article.category_id && !latestByCategory.has(article.category_id)) {
-      latestByCategory.set(article.category_id, article);
-    }
-  }
-  // Some categories only ever get used as a secondary tag (article_categories),
-  // never as anyone's primary category — without this fallback those cards had
-  // no teaser at all despite genuinely having articles. Same newest-first rule.
-  const secondaryArticleIdsByCategory = new Map<string, Set<string>>();
-  for (const row of (extraData ?? []) as { article_id: string; category_id: string }[]) {
-    if (!publishedIds.has(row.article_id)) continue;
-    if (!secondaryArticleIdsByCategory.has(row.category_id)) secondaryArticleIdsByCategory.set(row.category_id, new Set());
-    secondaryArticleIdsByCategory.get(row.category_id)!.add(row.article_id);
-  }
-  for (const category of categories) {
-    if (latestByCategory.has(category.id)) continue;
-    const ids = secondaryArticleIdsByCategory.get(category.id);
-    if (!ids) continue;
-    const latest = published.find((a) => ids.has(a.id));
-    if (latest) latestByCategory.set(category.id, latest);
-  }
   // Sorted by how active the section actually is, not alphabetically — the
   // busiest beats reads first, like a real section front rather than a
   // phone book.
   const withArticles = categories
     .filter((category) => counts.has(category.id))
     .sort((a, b) => (counts.get(b.id)?.size ?? 0) - (counts.get(a.id)?.size ?? 0));
+
+  // Each card's candidate teasers, newest-first: the category's own primary
+  // articles first, then ones where it's only a secondary tag — a plain
+  // "most recent article in this category" pick would show the same handful
+  // of multi-category articles (e.g. one tagged Cultura + POP + Tecnologia)
+  // over and over, so instead every card walks its candidate list and takes
+  // the first one not already claimed by an earlier (busier) card, only
+  // reusing an article if that category genuinely has no other option.
+  const candidatesByCategory = new Map<string, LatestArticle[]>();
+  const pushCandidate = (categoryId: string, article: LatestArticle) => {
+    if (!candidatesByCategory.has(categoryId)) candidatesByCategory.set(categoryId, []);
+    candidatesByCategory.get(categoryId)!.push(article);
+  };
+  for (const article of published) {
+    if (article.category_id) pushCandidate(article.category_id, article);
+  }
+  const articlesById = new Map(published.map((a) => [a.id, a]));
+  for (const row of (extraData ?? []) as { article_id: string; category_id: string }[]) {
+    if (!publishedIds.has(row.article_id)) continue;
+    const article = articlesById.get(row.article_id);
+    if (article) pushCandidate(row.category_id, article);
+  }
+  const latestByCategory = new Map<string, LatestArticle>();
+  const usedArticleIds = new Set<string>();
+  for (const category of withArticles) {
+    const candidates = candidatesByCategory.get(category.id) ?? [];
+    const fresh = candidates.find((a) => !usedArticleIds.has(a.id));
+    const chosen = fresh ?? candidates[0];
+    if (chosen) {
+      latestByCategory.set(category.id, chosen);
+      usedArticleIds.add(chosen.id);
+    }
+  }
 
   return (
     <>
