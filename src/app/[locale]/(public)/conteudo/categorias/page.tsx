@@ -56,13 +56,29 @@ export default async function CategoriasPage() {
     if (publishedIds.has(row.article_id)) addToCategory(row.category_id, row.article_id);
   }
   // Each card's teaser is the most recent article whose PRIMARY category is
-  // this one (not the secondary/extra links above) — `published` already
-  // comes back newest-first, so the first match per category wins.
+  // this one — `published` already comes back newest-first, so the first
+  // match per category wins.
   const latestByCategory = new Map<string, LatestArticle>();
   for (const article of published) {
     if (article.category_id && !latestByCategory.has(article.category_id)) {
       latestByCategory.set(article.category_id, article);
     }
+  }
+  // Some categories only ever get used as a secondary tag (article_categories),
+  // never as anyone's primary category — without this fallback those cards had
+  // no teaser at all despite genuinely having articles. Same newest-first rule.
+  const secondaryArticleIdsByCategory = new Map<string, Set<string>>();
+  for (const row of (extraData ?? []) as { article_id: string; category_id: string }[]) {
+    if (!publishedIds.has(row.article_id)) continue;
+    if (!secondaryArticleIdsByCategory.has(row.category_id)) secondaryArticleIdsByCategory.set(row.category_id, new Set());
+    secondaryArticleIdsByCategory.get(row.category_id)!.add(row.article_id);
+  }
+  for (const category of categories) {
+    if (latestByCategory.has(category.id)) continue;
+    const ids = secondaryArticleIdsByCategory.get(category.id);
+    if (!ids) continue;
+    const latest = published.find((a) => ids.has(a.id));
+    if (latest) latestByCategory.set(category.id, latest);
   }
   // Sorted by how active the section actually is, not alphabetically — the
   // busiest beats reads first, like a real section front rather than a
