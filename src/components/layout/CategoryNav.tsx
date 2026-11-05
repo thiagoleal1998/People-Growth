@@ -154,6 +154,7 @@ export async function CategoryNav() {
             padding: 0;
             background: none !important;
             box-shadow: none;
+            transform: translateY(-50%);
           }
           .category-nav .category-nav-wrap { overflow: visible; }
           .category-nav .category-nav-row {
