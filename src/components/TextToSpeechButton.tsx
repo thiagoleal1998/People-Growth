@@ -89,6 +89,19 @@ export function TextToSpeechButton({
           activeWordRef.current?.classList.remove("tts-active-word");
           active?.span.classList.add("tts-active-word");
           activeWordRef.current = active?.span ?? null;
+          // The page follows the reading along, instead of leaving the
+          // reader to notice it drifted off the bottom of the screen and
+          // scroll by hand to catch up — triggers once the word nears the
+          // edge of the viewport (about to leave it), not only once it's
+          // already gone, and the same check catches a skip-back landing
+          // above the top edge too.
+          if (active?.span) {
+            const rect = active.span.getBoundingClientRect();
+            const viewportH = window.innerHeight;
+            if (rect.bottom > viewportH * 0.8 || rect.top < viewportH * 0.15) {
+              window.scrollTo({ top: window.scrollY + rect.top - viewportH * 0.35, behavior: "smooth" });
+            }
+          }
         }
       }
       frameId = requestAnimationFrame(tick);

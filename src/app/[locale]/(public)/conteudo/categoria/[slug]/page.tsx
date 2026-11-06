@@ -103,7 +103,7 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
       </section>
 
       <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
-        <div className="container-xl" style={{ maxWidth: "800px" }}>
+        <div className="container-xl" style={{ maxWidth: "1040px" }}>
           {articles.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               {locale === "en"
@@ -111,49 +111,53 @@ export default async function CategoryPage({ params }: { params: Promise<{ slug:
                 : `Nenhum artigo publicado em ${category.name_pt} ainda.`}
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-              {articles.map((article) => (
-                <Link
-                  key={article.id}
-                  href={articleHref(article, article.category_id ? categoryById.get(article.category_id)?.slug : null)}
-                  style={{ display: "block", textDecoration: "none" }}
-                  className="hover-card"
-                >
-                  <article style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--site-border)", display: "flex", gap: "1.25rem", alignItems: "flex-start" }}>
-                    <div
-                      style={{
-                        width: "5rem",
-                        height: "5rem",
-                        flexShrink: 0,
-                        borderRadius: "0.75rem",
-                        background: article.cover_image ? `url("${article.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
-                      }}
-                    />
-                    <div style={{ flex: 1 }}>
-                      <div style={{ marginBottom: "0.375rem" }}>
-                        <FormatTag format={article.format} locale={locale} />
-                        {category.is_people_growth && <PeopleGrowthBadge />}
-                        {category.is_ponto_de_replica && <PontoDeReplicaBadge />}
+            <>
+              <div className="category-articles-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "1.25rem" }}>
+                {articles.map((article) => (
+                  <Link
+                    key={article.id}
+                    href={articleHref(article, article.category_id ? categoryById.get(article.category_id)?.slug : null)}
+                    style={{ display: "block", textDecoration: "none", height: "100%" }}
+                    className="hover-card"
+                  >
+                    <article style={{ backgroundColor: "var(--site-card)", borderRadius: "1.25rem", border: "1px solid var(--site-border)", boxShadow: "0 1px 2px rgba(13,27,42,0.05)", overflow: "hidden", height: "100%", display: "flex", flexDirection: "column" }}>
+                      <div
+                        style={{
+                          aspectRatio: "16 / 10",
+                          background: article.cover_image ? `url("${article.cover_image}") center/cover` : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
+                        }}
+                      />
+                      <div style={{ padding: "1.25rem", display: "flex", flexDirection: "column", flex: 1 }}>
+                        <div style={{ marginBottom: "0.5rem", display: "flex", flexWrap: "wrap", gap: "0.375rem" }}>
+                          <FormatTag format={article.format} locale={locale} />
+                          {category.is_people_growth && <PeopleGrowthBadge />}
+                          {category.is_ponto_de_replica && <PontoDeReplicaBadge />}
+                        </div>
+                        <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.5rem" }}>
+                          {pickLocale(locale, article.title_pt, article.title_en)}
+                        </h3>
+                        {article.excerpt_pt && (
+                          <p style={{ fontSize: "0.875rem", color: "var(--site-muted)", lineHeight: 1.6, marginBottom: "0.625rem", display: "-webkit-box", WebkitLineClamp: 2, WebkitBoxOrient: "vertical", overflow: "hidden" }}>
+                            {pickLocale(locale, article.excerpt_pt, article.excerpt_en)}
+                          </p>
+                        )}
+                        {(article.columnist_id || article.published_at) && (
+                          <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)", marginTop: "auto" }}>
+                            {article.columnist_id && columnistById.get(article.columnist_id) && <>{tc("by")} {columnistById.get(article.columnist_id)!.name} · </>}
+                            {article.published_at && new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
+                          </span>
+                        )}
                       </div>
-                      <h3 style={{ fontWeight: 700, fontSize: "1.0625rem", color: "var(--site-text)", lineHeight: 1.4, marginBottom: "0.375rem" }}>
-                        {pickLocale(locale, article.title_pt, article.title_en)}
-                      </h3>
-                      {article.excerpt_pt && (
-                        <p style={{ fontSize: "0.875rem", color: "var(--site-muted)", lineHeight: 1.6, marginBottom: "0.625rem" }}>
-                          {pickLocale(locale, article.excerpt_pt, article.excerpt_en)}
-                        </p>
-                      )}
-                      {(article.columnist_id || article.published_at) && (
-                        <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
-                          {article.columnist_id && columnistById.get(article.columnist_id) && <>{tc("by")} {columnistById.get(article.columnist_id)!.name} · </>}
-                          {article.published_at && new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
-                        </span>
-                      )}
-                    </div>
-                  </article>
-                </Link>
-              ))}
-            </div>
+                    </article>
+                  </Link>
+                ))}
+              </div>
+              <style>{`
+                @media (max-width: 640px) {
+                  .category-articles-grid { grid-template-columns: 1fr !important; }
+                }
+              `}</style>
+            </>
           )}
         </div>
       </section>
