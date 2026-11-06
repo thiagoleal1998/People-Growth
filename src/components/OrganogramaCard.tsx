@@ -184,9 +184,7 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
               </div>
             </div>
 
-            <div style={{ textAlign: "center", margin: "1.5rem 0 1.25rem" }}>
-              <div style={{ fontSize: "0.8125rem", fontWeight: 800, color: "var(--admin-text)", textTransform: "uppercase", letterSpacing: "0.04em" }}>C-Level</div>
-            </div>
+            <div style={{ marginTop: "1.5rem" }} />
 
             {/* Everything from the C-Level box down through any reports
                 hanging off one of these people shares one relative-
@@ -197,11 +195,14 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                 and which sits outside it. */}
             <div id={CLEVEL_WRAP_ID} style={{ position: "relative" }}>
               {/* The C-Level pyramid gets its own box (same treatment as the
-                  Conselho boxes above/below) specifically so anyone
-                  reporting to one of these people — rendered further down,
-                  outside this box — reads as clearly NOT part of C-Level
-                  itself, just connected to it. */}
+                  Conselho boxes above/below, "C-Level" label included inside
+                  it same as "Conselho Administrativo"/"Conselho Editorial"
+                  are inside theirs) specifically so anyone reporting to one
+                  of these people — rendered further down, outside this box —
+                  reads as clearly NOT part of C-Level itself, just connected
+                  to it. */}
               <div style={{ backgroundColor: "rgba(49, 94, 156, 0.05)", border: "1px solid rgba(49, 94, 156, 0.15)", borderRadius: "0.875rem", padding: "1.5rem 1.25rem" }}>
+                <div style={{ fontSize: "0.8125rem", fontWeight: 800, color: "var(--admin-text)", textTransform: "uppercase", letterSpacing: "0.04em", textAlign: "center", marginBottom: "1.25rem" }}>C-Level</div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                   <FounderBox columnist={ceoFounder} index={0} />
                   <Connector />

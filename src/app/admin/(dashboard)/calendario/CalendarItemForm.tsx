@@ -20,6 +20,7 @@ const statuses: { value: ContentCalendarItem["status"]; label: string }[] = [
   { value: "planned", label: "Planejado" },
   { value: "in_progress", label: "Em produção" },
   { value: "done", label: "Pronto" },
+  { value: "published", label: "Publicado" },
 ];
 
 // Where it actually went out, ticked off after the fact — separate from

@@ -31,6 +31,7 @@ export default async function CalendarioPage({
     client.from("columnists").select("id, name"),
   ]);
 
+  const todayKey = dateKeySaoPaulo(new Date().toISOString());
   const items = (itemsData ?? []) as ContentCalendarItem[];
   const articles = (articlesData ?? []) as Pick<Article, "id" | "title_pt" | "status" | "scheduled_for" | "columnist_id">[];
   const columnistNameById = new Map(((columnistsData ?? []) as Pick<Columnist, "id" | "name">[]).map((a) => [a.id, a.name]));
@@ -73,8 +74,10 @@ export default async function CalendarioPage({
         <span><span style={{ color: "#A07B3B" }}>✓</span> Matéria agendada (aprovada)</span>
         <span><span style={{ color: "#315E9C" }}>📱</span> Post de rede social</span>
         <span>📝 Pauta de matéria a produzir</span>
+        <span><span style={{ color: "#16A34A" }}>✓</span> Item já publicado</span>
+        <span><span style={{ color: "#dc2626" }}>⚠</span> Atrasado (data passou, ainda não publicado)</span>
       </div>
-      <CalendarPageClient grid={grid} itemsByDate={itemsByDate} articlesByDate={articlesByDate} monthKey={monthKey} />
+      <CalendarPageClient grid={grid} itemsByDate={itemsByDate} articlesByDate={articlesByDate} monthKey={monthKey} todayKey={todayKey} />
     </div>
   );
 }

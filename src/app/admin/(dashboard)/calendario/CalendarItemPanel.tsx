@@ -28,6 +28,7 @@ const STATUSES: { value: ContentCalendarItem["status"]; label: string }[] = [
   { value: "planned", label: "Planejado" },
   { value: "in_progress", label: "Em produção" },
   { value: "done", label: "Pronto" },
+  { value: "published", label: "Publicado" },
 ];
 
 /** Slide-over editor for a content_calendar_items row — opens over the

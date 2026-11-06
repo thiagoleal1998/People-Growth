@@ -462,9 +462,24 @@ type ContentCalendarItemRow = {
   platform: "instagram" | "linkedin" | "whatsapp" | "tiktok" | "youtube" | "x" | "live" | "other" | null;
   responsible: string | null;
   scheduled_date: string;
-  status: "planned" | "in_progress" | "done";
+  status: "planned" | "in_progress" | "done" | "published";
   published_channels: string[];
   created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type RoleProfileRow = {
+  id: string;
+  columnist_id: string | null;
+  acronym: string | null;
+  title: string | null;
+  function_summary: string | null;
+  general_responsibilities: string | null;
+  primary_responsibilities: string | null;
+  secondary_responsibilities: string | null;
+  tertiary_responsibilities: string | null;
+  order: number;
   created_at: string;
   updated_at: string;
 };
@@ -593,6 +608,7 @@ export type Database = {
       promo_search_rules: { Row: PromoSearchRuleRow; Insert: Omit<PromoSearchRuleRow, "id" | "created_at">; Update: Partial<Omit<PromoSearchRuleRow, "id" | "created_at">>; Relationships: [] };
       leadership_assessments: { Row: LeadershipAssessmentRow; Insert: Omit<LeadershipAssessmentRow, "id" | "created_at">; Update: Partial<Omit<LeadershipAssessmentRow, "id" | "created_at">>; Relationships: [] };
       content_calendar_items: { Row: ContentCalendarItemRow; Insert: Omit<ContentCalendarItemRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<ContentCalendarItemRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      role_profiles: { Row: RoleProfileRow; Insert: Omit<RoleProfileRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<RoleProfileRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       announcements: { Row: AnnouncementRow; Insert: Omit<AnnouncementRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<AnnouncementRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       announcement_reads: { Row: AnnouncementReadRow; Insert: Omit<AnnouncementReadRow, "read_at">; Update: Partial<AnnouncementReadRow>; Relationships: [] };
       instruction_items: { Row: InstructionItemRow; Insert: Omit<InstructionItemRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<InstructionItemRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
@@ -622,6 +638,7 @@ export type Course = CourseRow;
 export type Resource = ResourceRow;
 export type MediaItem = MediaItemRow;
 export type Columnist = ColumnistRow;
+export type RoleProfile = RoleProfileRow;
 export type ErrorReport = ErrorReportRow;
 export type UserProfile = UserProfileRow;
 export type InternalTicket = InternalTicketRow;

@@ -15,11 +15,13 @@ export function CalendarPageClient({
   itemsByDate,
   articlesByDate,
   monthKey,
+  todayKey,
 }: {
   grid: CalendarCell[];
   itemsByDate: Map<string, ContentCalendarItem[]>;
   articlesByDate: Map<string, ArticlePill[]>;
   monthKey: string;
+  todayKey: string;
 }) {
   const [panel, setPanel] = useState<PanelState>(null);
 
@@ -35,6 +37,7 @@ export function CalendarPageClient({
         itemsByDate={itemsByDate}
         articlesByDate={articlesByDate}
         monthKey={monthKey}
+        todayKey={todayKey}
         onOpenItem={(id) => setPanel({ mode: "edit", id })}
         onOpenNew={(date) => setPanel({ mode: "new", date })}
       />

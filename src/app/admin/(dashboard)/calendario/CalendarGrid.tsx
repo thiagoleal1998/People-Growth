@@ -35,6 +35,7 @@ export function CalendarGrid({
   itemsByDate,
   articlesByDate,
   monthKey,
+  todayKey,
   onOpenItem,
   onOpenNew,
 }: {
@@ -42,6 +43,9 @@ export function CalendarGrid({
   itemsByDate: Map<string, ContentCalendarItem[]>;
   articlesByDate: Map<string, ArticlePill[]>;
   monthKey: string;
+  /** YYYY-MM-DD, America/Sao_Paulo — an item is "overdue" when its own
+   * scheduled_date is before this and it isn't published yet. */
+  todayKey: string;
   /** Opens the slide-over panel for an existing content_calendar_items row
    * (not an article pill, which still navigates to the full article editor —
    * too big a form to usefully fit in a side panel). */
@@ -121,12 +125,26 @@ export function CalendarGrid({
                   {items.map((item) => {
                     const isSocial = item.type === "social_post";
                     const PlatformIcon = isSocial ? PLATFORM_ICON[item.platform ?? "other"] : null;
+                    const isPublished = item.status === "published";
+                    const isOverdue = !isPublished && item.scheduled_date < todayKey;
+                    // Published/overdue override the normal social-vs-pauta
+                    // color — whether this went out (or is late) matters more
+                    // here than what kind of item it is.
+                    const backgroundColor = isPublished
+                      ? "rgba(22,163,74,0.14)"
+                      : isOverdue
+                        ? "rgba(220,38,38,0.14)"
+                        : isSocial
+                          ? "rgba(49, 94, 156,0.12)"
+                          : "rgba(148,163,184,0.18)";
+                    const color = isPublished ? "#16A34A" : isOverdue ? "#dc2626" : isSocial ? "#315E9C" : "var(--admin-text-secondary)";
+                    const titlePrefix = isPublished ? "✓ Publicado: " : isOverdue ? "⚠ Atrasado: " : isSocial && item.platform ? `${PLATFORM_LABEL[item.platform]}: ` : "";
                     return (
                       <button
                         key={`i-${item.id}`}
                         type="button"
                         onClick={() => onOpenItem(item.id)}
-                        title={`${isSocial && item.platform ? `${PLATFORM_LABEL[item.platform]}: ` : ""}${item.title}`}
+                        title={`${titlePrefix}${item.title}`}
                         style={{
                           display: "flex",
                           alignItems: "center",
@@ -139,11 +157,19 @@ export function CalendarGrid({
                           border: "none",
                           cursor: "pointer",
                           textAlign: "left",
-                          backgroundColor: isSocial ? "rgba(49, 94, 156,0.12)" : "rgba(148,163,184,0.18)",
-                          color: isSocial ? "#315E9C" : "var(--admin-text-secondary)",
+                          backgroundColor,
+                          color,
                         }}
                       >
-                        {PlatformIcon ? <PlatformIcon size={11} style={{ flexShrink: 0 }} /> : <span style={{ flexShrink: 0 }}>📝</span>}
+                        {isPublished ? (
+                          <span style={{ flexShrink: 0 }}>✓</span>
+                        ) : isOverdue ? (
+                          <span style={{ flexShrink: 0 }}>⚠</span>
+                        ) : PlatformIcon ? (
+                          <PlatformIcon size={11} style={{ flexShrink: 0 }} />
+                        ) : (
+                          <span style={{ flexShrink: 0 }}>📝</span>
+                        )}
                         <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title}</span>
                       </button>
                     );
