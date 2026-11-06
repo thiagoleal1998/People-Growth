@@ -251,7 +251,7 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
               )}
 
               {reportPairs.length > 0 && (
-                <OrgChartConnectorLines pairs={reportPairs} containerId={CLEVEL_WRAP_ID} color="#315E9C" />
+                <OrgChartConnectorLines pairs={reportPairs} containerId={CLEVEL_WRAP_ID} color="rgba(49, 94, 156, 0.4)" />
               )}
             </div>
           </div>
