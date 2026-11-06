@@ -96,13 +96,6 @@ function FounderBox({ columnist, index, compact }: { columnist: Columnist; index
   );
 }
 
-// A short drop-line from a manager's box down to their row of reports —
-// same visual language as Connector above, just a single stem (no split)
-// since it's hanging off one box, not branching from the CEO.
-function ReportsConnector() {
-  return <div style={{ width: "2px", height: "1rem", backgroundColor: "var(--admin-border-strong)" }} />;
-}
-
 // Pure-CSS "⊤" connector between the CEO box above and the two boxes below
 // it: a short vertical drop, then a bar split in half where each half's
 // inner border turns the corner down into its own box — no SVG needed.
@@ -179,40 +172,38 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
               <div style={{ fontSize: "0.8125rem", fontWeight: 800, color: "var(--admin-text)", textTransform: "uppercase", letterSpacing: "0.04em" }}>C-Level</div>
             </div>
 
-            <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-              <FounderBox columnist={ceoFounder} index={0} />
-              {(reportsByManager.get(ceoFounder.id)?.length ?? 0) > 0 && (
-                <>
-                  <ReportsConnector />
-                  <div style={{ display: "flex", gap: "1.25rem", justifyContent: "center", flexWrap: "wrap" }}>
-                    {reportsByManager.get(ceoFounder.id)!.map((r, ri) => (
-                      <FounderBox key={r.id} columnist={r} index={ri} compact />
-                    ))}
-                  </div>
-                </>
-              )}
-              <Connector />
-              <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center", flexWrap: "wrap" }}>
-                {otherFounders.map((a, i) => {
-                  const reports = reportsByManager.get(a.id) ?? [];
-                  return (
-                    <div key={a.id} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
-                      <FounderBox columnist={a} index={i + 1} />
-                      {reports.length > 0 && (
-                        <>
-                          <ReportsConnector />
-                          <div style={{ display: "flex", gap: "1.25rem", justifyContent: "center", flexWrap: "wrap" }}>
-                            {reports.map((r, ri) => (
-                              <FounderBox key={r.id} columnist={r} index={ri} compact />
-                            ))}
-                          </div>
-                        </>
-                      )}
-                    </div>
-                  );
-                })}
+            {/* The C-Level pyramid gets its own box (same treatment as the
+                Conselho boxes above/below) specifically so anyone reporting
+                to one of these people — rendered further down, outside this
+                box — reads as clearly NOT part of C-Level itself, just
+                connected to it. */}
+            <div style={{ backgroundColor: "rgba(49, 94, 156, 0.05)", border: "1px solid rgba(49, 94, 156, 0.15)", borderRadius: "0.875rem", padding: "1.5rem 1.25rem" }}>
+              <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                <FounderBox columnist={ceoFounder} index={0} />
+                <Connector />
+                <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center", flexWrap: "wrap" }}>
+                  {otherFounders.map((a, i) => (
+                    <FounderBox key={a.id} columnist={a} index={i + 1} />
+                  ))}
+                </div>
               </div>
             </div>
+
+            {[ceoFounder, ...otherFounders].some((a) => (reportsByManager.get(a.id)?.length ?? 0) > 0) && (
+              <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
+                <div style={{ width: "2px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 auto" }} />
+                <div style={{ display: "flex", justifyContent: "center", gap: "1.75rem", flexWrap: "wrap", marginTop: "0.25rem" }}>
+                  {[ceoFounder, ...otherFounders].flatMap((manager) =>
+                    (reportsByManager.get(manager.id) ?? []).map((r, ri) => (
+                      <div key={r.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem" }}>
+                        <FounderBox columnist={r} index={ri} compact />
+                        <span style={{ fontSize: "0.6875rem", color: "var(--admin-faint)" }}>Reporta a {manager.name}</span>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            )}
           </div>
         )}
 
