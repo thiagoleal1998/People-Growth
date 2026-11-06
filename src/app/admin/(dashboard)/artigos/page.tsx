@@ -11,17 +11,19 @@ export default async function ArtigosAdminPage({ searchParams }: { searchParams:
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const [{ data }, profile, { data: commentsData }, { data: articlesForTitles }] = await Promise.all([
+  const [{ data }, profile, { data: commentsData }, { data: articlesForTitles }, { data: columnistsData }] = await Promise.all([
     client.from("articles").select("*").order("created_at", { ascending: false }),
     getCurrentProfile(),
     client.from("comments").select("*").order("created_at", { ascending: false }),
     client.from("articles").select("id,title_pt"),
+    client.from("columnists").select("id,name").order("name"),
   ]);
   const articles = (data ?? []) as Article[];
   const comments = (commentsData ?? []) as Comment[];
   const articleTitles = Object.fromEntries(
     ((articlesForTitles ?? []) as Pick<Article, "id" | "title_pt">[]).map((a) => [a.id, a.title_pt])
   );
+  const columnists = (columnistsData ?? []) as { id: string; name: string }[];
 
   return (
     <div>
@@ -37,6 +39,7 @@ export default async function ArtigosAdminPage({ searchParams }: { searchParams:
         currentColumnistId={profile?.columnist_id ?? null}
         comments={comments}
         articleTitles={articleTitles}
+        columnists={columnists}
         initialTab={tab}
       />
     </div>

@@ -17,12 +17,14 @@ export function ArtigosComentariosTabs({
   currentColumnistId,
   comments,
   articleTitles,
+  columnists,
   initialTab,
 }: {
   articles: Article[];
   currentColumnistId: string | null;
   comments: Comment[];
   articleTitles: Record<string, string>;
+  columnists: { id: string; name: string }[];
   initialTab?: string;
 }) {
   const [active, setActive] = useState<OuterTabId>(initialTab === "comentarios" ? "comentarios" : "artigos");
@@ -76,7 +78,7 @@ export function ArtigosComentariosTabs({
       </div>
 
       {active === "artigos" ? (
-        <ArticlesTabs articles={articles} currentColumnistId={currentColumnistId} />
+        <ArticlesTabs articles={articles} currentColumnistId={currentColumnistId} columnists={columnists} />
       ) : (
         <CommentsClient comments={comments} articleTitles={articleTitles} />
       )}

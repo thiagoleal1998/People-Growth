@@ -1,9 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import Link from "next/link";
-import { Edit, Eye, Check, MessageSquareWarning } from "lucide-react";
-import { Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
+import { Edit, Eye, Check, MessageSquareWarning, Search } from "lucide-react";
+import { Card, EmptyState, Badge, ConfirmDeleteButton, Input, Select } from "@/components/admin/ui";
 import { deleteArticle, publishArticle, approveAndSchedule, setHomeSlot } from "./actions";
 import type { Article } from "@/types/database.types";
 
@@ -52,15 +52,37 @@ function homeSlotLabel(slot: string | null | undefined): string {
   }
 }
 
-export function ArticlesTabs({ articles, currentColumnistId }: { articles: Article[]; currentColumnistId: string | null }) {
+export function ArticlesTabs({
+  articles,
+  currentColumnistId,
+  columnists,
+}: {
+  articles: Article[];
+  currentColumnistId: string | null;
+  columnists: { id: string; name: string }[];
+}) {
   const [active, setActive] = useState<TabId>("published");
+  const [search, setSearch] = useState("");
+  const [columnistFilter, setColumnistFilter] = useState("");
 
-  const filtered = articles.filter((a) => {
+  const columnistName = useMemo(() => new Map(columnists.map((c) => [c.id, c.name])), [columnists]);
+
+  // Counts next to each tab label stay off the search/columnist filters —
+  // they're the tab's own total, same as before this was added, not "how
+  // many match the current search".
+  const byTab = articles.filter((a) => {
     if (active === "published") return a.status === "published";
     if (active === "draft") return a.status === "draft";
     if (active === "pending") return a.status === "pending";
     if (active === "scheduled") return a.status === "scheduled";
     return currentColumnistId != null && a.columnist_id === currentColumnistId;
+  });
+
+  const trimmedSearch = search.trim().toLowerCase();
+  const filtered = byTab.filter((a) => {
+    if (trimmedSearch && !a.title_pt.toLowerCase().includes(trimmedSearch)) return false;
+    if (columnistFilter && a.columnist_id !== columnistFilter) return false;
+    return true;
   });
 
   const counts: Record<TabId, number> = {
@@ -97,14 +119,33 @@ export function ArticlesTabs({ articles, currentColumnistId }: { articles: Artic
         ))}
       </div>
 
+      <div style={{ display: "flex", gap: "0.75rem", marginBottom: "1rem", flexWrap: "wrap" }}>
+        <div style={{ position: "relative", flex: "1 1 240px", minWidth: 0 }}>
+          <Search size={15} style={{ position: "absolute", left: "0.75rem", top: "50%", transform: "translateY(-50%)", color: "var(--admin-faint)" }} />
+          <Input
+            type="search"
+            placeholder="Buscar por título..."
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            style={{ paddingLeft: "2.25rem" }}
+          />
+        </div>
+        <Select value={columnistFilter} onChange={(e) => setColumnistFilter(e.target.value)} style={{ flex: "0 1 220px" }}>
+          <option value="">Todos os colunistas</option>
+          {columnists.map((c) => (
+            <option key={c.id} value={c.id}>{c.name}</option>
+          ))}
+        </Select>
+      </div>
+
       <Card>
         {filtered.length === 0 ? (
-          <EmptyState text="Nenhum artigo nesta categoria." />
+          <EmptyState text={search || columnistFilter ? "Nenhum artigo encontrado com esses filtros." : "Nenhum artigo nesta categoria."} />
         ) : (
           <table style={{ width: "100%", borderCollapse: "collapse" }}>
             <thead>
               <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                {["Título", "Formato", "Status", "Visualizações", "Posição na home", "Data", ""].map((h) => (
+                {["Título", "Colunista", "Formato", "Status", "Visualizações", "Posição na home", "Data", ""].map((h) => (
                   <th key={h} style={{ padding: "0.75rem 1.25rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{h}</th>
                 ))}
               </tr>
@@ -114,6 +155,9 @@ export function ArticlesTabs({ articles, currentColumnistId }: { articles: Artic
                 <tr key={a.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
                   <td style={{ padding: "0.875rem 1.25rem", fontWeight: 600, color: "var(--admin-text)", fontSize: "0.875rem", maxWidth: "320px" }}>
                     <div style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{a.title_pt}</div>
+                  </td>
+                  <td style={{ padding: "0.875rem 1.25rem", color: "var(--admin-muted)", fontSize: "0.8125rem", whiteSpace: "nowrap" }}>
+                    {a.columnist_id ? (columnistName.get(a.columnist_id) ?? "—") : "—"}
                   </td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <Badge tone={formatConfig[a.format].tone}>{formatConfig[a.format].label}</Badge>
