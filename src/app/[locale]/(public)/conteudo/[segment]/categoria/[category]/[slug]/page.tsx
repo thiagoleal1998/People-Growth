@@ -432,6 +432,37 @@ export default async function ArticlePage({
 
             <ShareButtons title={pickLocale(locale, article.title_pt, article.title_en)} />
 
+            {/* Comments — right after the content/AI disclosure/share row,
+                ahead of the WhatsApp CTA, ad, columnist bio and related
+                articles that used to sit between them and push this down to
+                the very bottom of the page. */}
+            <div style={{ marginTop: "3rem", paddingTop: "1.5rem", borderTop: "2px solid #315E9C" }}>
+              <h2 style={{ fontWeight: 800, fontSize: "1.375rem", color: "var(--site-text)", marginBottom: "0.75rem" }}>
+                {comments.length} {locale === "en" ? `comment${comments.length === 1 ? "" : "s"}` : `comentário${comments.length === 1 ? "" : "s"}`}
+              </h2>
+              <p style={{ color: "var(--site-muted)", fontSize: "0.8125rem", lineHeight: 1.6, marginBottom: "2rem" }}>
+                {locale === "en" ? (
+                  <>
+                    The columnist of the message, not Festina, is responsible for the comment. Read the{" "}
+                    <Link href="/comentarios" style={{ color: "#315E9C", fontWeight: 600, textDecoration: "underline" }}>
+                      Comment Guidelines
+                    </Link>
+                    .
+                  </>
+                ) : (
+                  <>
+                    O autor da mensagem, e não o Grupo Festina, é o responsável pelo comentário. Leia as{" "}
+                    <Link href="/comentarios" style={{ color: "#315E9C", fontWeight: 600, textDecoration: "underline" }}>
+                      Regras de Uso dos Comentários
+                    </Link>
+                    .
+                  </>
+                )}
+              </p>
+
+              <Comments articleId={article.id} comments={comments} />
+            </div>
+
             <WhatsAppChannelArticleCTA />
 
             <div style={{ marginTop: "2rem" }}>
@@ -522,34 +553,6 @@ export default async function ArticlePage({
                 </div>
               </div>
             )}
-
-            {/* Comments */}
-            <div style={{ marginTop: "3rem", paddingTop: "1.5rem", borderTop: "2px solid #315E9C" }}>
-              <h2 style={{ fontWeight: 800, fontSize: "1.375rem", color: "var(--site-text)", marginBottom: "0.75rem" }}>
-                {comments.length} {locale === "en" ? `comment${comments.length === 1 ? "" : "s"}` : `comentário${comments.length === 1 ? "" : "s"}`}
-              </h2>
-              <p style={{ color: "var(--site-muted)", fontSize: "0.8125rem", lineHeight: 1.6, marginBottom: "2rem" }}>
-                {locale === "en" ? (
-                  <>
-                    The columnist of the message, not Festina, is responsible for the comment. Read the{" "}
-                    <Link href="/comentarios" style={{ color: "#315E9C", fontWeight: 600, textDecoration: "underline" }}>
-                      Comment Guidelines
-                    </Link>
-                    .
-                  </>
-                ) : (
-                  <>
-                    O autor da mensagem, e não o Grupo Festina, é o responsável pelo comentário. Leia as{" "}
-                    <Link href="/comentarios" style={{ color: "#315E9C", fontWeight: 600, textDecoration: "underline" }}>
-                      Regras de Uso dos Comentários
-                    </Link>
-                    .
-                  </>
-                )}
-              </p>
-
-              <Comments articleId={article.id} comments={comments} />
-            </div>
           </article>
 
           {/* Sidebar */}

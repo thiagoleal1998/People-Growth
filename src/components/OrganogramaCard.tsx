@@ -193,16 +193,16 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
 
             {/* The CEO's own direct reports (rare) sit centered under the
                 whole box, which already lines up with the CEO's box since
-                that one is itself centered in it. */}
+                that one is itself centered in it. No marginTop/gap before
+                the connector — it starts right where the box's own border
+                ends, so it reads as one continuous drop from the CEO's box
+                rather than a separate floating line. */}
             {(reportsByManager.get(ceoFounder.id)?.length ?? 0) > 0 && (
-              <div style={{ textAlign: "center", marginTop: "1.5rem" }}>
-                <div style={{ width: "2px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)", margin: "0 auto" }} />
-                <div style={{ display: "flex", justifyContent: "center", gap: "1.75rem", flexWrap: "wrap", marginTop: "0.25rem" }}>
+              <div style={{ textAlign: "center" }}>
+                <div style={{ width: "2px", height: "1.5rem", backgroundColor: "var(--admin-border-strong)", margin: "0 auto" }} />
+                <div style={{ display: "flex", justifyContent: "center", gap: "1.75rem", flexWrap: "wrap" }}>
                   {reportsByManager.get(ceoFounder.id)!.map((r, ri) => (
-                    <div key={r.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem" }}>
-                      <FounderBox columnist={r} index={ri} compact />
-                      <span style={{ fontSize: "0.6875rem", color: "var(--admin-faint)" }}>Reporta a {ceoFounder.name}</span>
-                    </div>
+                    <FounderBox key={r.id} columnist={r} index={ri} compact />
                   ))}
                 </div>
               </div>
@@ -213,9 +213,10 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                 so each report's connector drops straight down from
                 directly under its own manager — e.g. Bruno lands under
                 Gustavo specifically, not centered under the whole chart —
-                while still sitting outside the C-Level box itself. */}
+                while still sitting outside the C-Level box itself. Same
+                zero-gap reasoning as the CEO case above. */}
             {otherFounders.some((a) => (reportsByManager.get(a.id)?.length ?? 0) > 0) && (
-              <div style={{ padding: "0 1.25rem", marginTop: "1.5rem" }}>
+              <div style={{ padding: "0 1.25rem" }}>
                 <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center", flexWrap: "wrap" }}>
                   {otherFounders.map((a) => {
                     const reports = reportsByManager.get(a.id) ?? [];
@@ -223,13 +224,10 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                       <div key={a.id} style={{ width: "5.5rem", display: "flex", flexDirection: "column", alignItems: "center" }}>
                         {reports.length > 0 && (
                           <>
-                            <div style={{ width: "2px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)" }} />
+                            <div style={{ width: "2px", height: "1.5rem", backgroundColor: "var(--admin-border-strong)" }} />
                             <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
                               {reports.map((r, ri) => (
-                                <div key={r.id} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem" }}>
-                                  <FounderBox columnist={r} index={ri} compact />
-                                  <span style={{ fontSize: "0.6875rem", color: "var(--admin-faint)" }}>Reporta a {a.name}</span>
-                                </div>
+                                <FounderBox key={r.id} columnist={r} index={ri} compact />
                               ))}
                             </div>
                           </>
