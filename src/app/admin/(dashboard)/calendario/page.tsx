@@ -2,7 +2,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import { PageHeader } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
-import { CalendarGrid } from "./CalendarGrid";
+import { CalendarPageClient } from "./CalendarPageClient";
 import { buildMonthGrid, parseMonthParam, monthParamKey, shiftMonth, MONTH_NAMES_PT } from "@/lib/calendar-grid";
 import { dateKeySaoPaulo } from "@/lib/date-key";
 import type { Article, Columnist, ContentCalendarItem } from "@/types/database.types";
@@ -74,7 +74,7 @@ export default async function CalendarioPage({
         <span><span style={{ color: "#315E9C" }}>📱</span> Post de rede social</span>
         <span>📝 Pauta de matéria a produzir</span>
       </div>
-      <CalendarGrid grid={grid} itemsByDate={itemsByDate} articlesByDate={articlesByDate} monthKey={monthKey} />
+      <CalendarPageClient grid={grid} itemsByDate={itemsByDate} articlesByDate={articlesByDate} monthKey={monthKey} />
     </div>
   );
 }

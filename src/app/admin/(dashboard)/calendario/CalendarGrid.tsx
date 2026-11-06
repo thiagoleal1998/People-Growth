@@ -35,11 +35,18 @@ export function CalendarGrid({
   itemsByDate,
   articlesByDate,
   monthKey,
+  onOpenItem,
+  onOpenNew,
 }: {
   grid: CalendarCell[];
   itemsByDate: Map<string, ContentCalendarItem[]>;
   articlesByDate: Map<string, ArticlePill[]>;
   monthKey: string;
+  /** Opens the slide-over panel for an existing content_calendar_items row
+   * (not an article pill, which still navigates to the full article editor —
+   * too big a form to usefully fit in a side panel). */
+  onOpenItem: (id: string) => void;
+  onOpenNew: (dateKey: string) => void;
 }) {
   return (
     <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
@@ -74,13 +81,14 @@ export function CalendarGrid({
                 <span style={{ fontSize: "0.8125rem", fontWeight: 700, color: cell.inMonth ? "var(--admin-text)" : "var(--admin-faint)" }}>
                   {cell.date.getDate()}
                 </span>
-                <Link
-                  href={`/admin/calendario/novo?date=${cell.dateKey}&month=${monthKey}`}
+                <button
+                  type="button"
+                  onClick={() => onOpenNew(cell.dateKey)}
                   title="Adicionar item"
-                  style={{ color: "var(--admin-faint)", display: "flex", alignItems: "center" }}
+                  style={{ color: "var(--admin-faint)", display: "flex", alignItems: "center", background: "none", border: "none", padding: 0, cursor: "pointer" }}
                 >
                   <Plus size={14} />
-                </Link>
+                </button>
               </div>
 
               {hasContent && (
@@ -114,9 +122,10 @@ export function CalendarGrid({
                     const isSocial = item.type === "social_post";
                     const PlatformIcon = isSocial ? PLATFORM_ICON[item.platform ?? "other"] : null;
                     return (
-                      <Link
+                      <button
                         key={`i-${item.id}`}
-                        href={`/admin/calendario/${item.id}?month=${monthKey}`}
+                        type="button"
+                        onClick={() => onOpenItem(item.id)}
                         title={`${isSocial && item.platform ? `${PLATFORM_LABEL[item.platform]}: ` : ""}${item.title}`}
                         style={{
                           display: "flex",
@@ -127,13 +136,16 @@ export function CalendarGrid({
                           fontSize: "0.6875rem",
                           fontWeight: 700,
                           minWidth: 0,
+                          border: "none",
+                          cursor: "pointer",
+                          textAlign: "left",
                           backgroundColor: isSocial ? "rgba(49, 94, 156,0.12)" : "rgba(148,163,184,0.18)",
                           color: isSocial ? "#315E9C" : "var(--admin-text-secondary)",
                         }}
                       >
                         {PlatformIcon ? <PlatformIcon size={11} style={{ flexShrink: 0 }} /> : <span style={{ flexShrink: 0 }}>📝</span>}
                         <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{item.title}</span>
-                      </Link>
+                      </button>
                     );
                   })}
                 </div>

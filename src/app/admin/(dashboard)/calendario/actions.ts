@@ -10,7 +10,11 @@ import type { Database } from "@/types/database.types";
 
 type CalendarItemInsert = Database["public"]["Tables"]["content_calendar_items"]["Insert"];
 
-export async function upsertCalendarItem(id: string | null, formData: FormData) {
+// Shared by the standalone edit page (upsertCalendarItem, below — redirects
+// back to the grid, the no-JS/direct-link fallback) and the slide-over
+// panel (upsertCalendarItemInline — same write, but returns instead of
+// redirecting, since the panel stays on the calendar page itself).
+async function saveCalendarItem(id: string | null, formData: FormData) {
   const supabase = await createClient();
   const actor = await getCurrentProfile();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,6 +32,7 @@ export async function upsertCalendarItem(id: string | null, formData: FormData) 
     responsible: String(formData.get("responsible") ?? "").trim() || null,
     scheduled_date: String(formData.get("scheduled_date") ?? ""),
     status: String(formData.get("status") ?? "planned") as CalendarItemInsert["status"],
+    published_channels: formData.getAll("published_channels").map(String),
   };
 
   const isNew = !id;
@@ -43,10 +48,20 @@ export async function upsertCalendarItem(id: string | null, formData: FormData) 
   }
 
   revalidatePath("/admin/calendario");
+  return { monthKey };
+}
+
+export async function upsertCalendarItem(id: string | null, formData: FormData) {
+  const { monthKey } = await saveCalendarItem(id, formData);
   redirect(`/admin/calendario?month=${monthKey}&saved=1`);
 }
 
-export async function deleteCalendarItem(id: string, month: string) {
+export async function upsertCalendarItemInline(id: string | null, formData: FormData) {
+  await saveCalendarItem(id, formData);
+  return { ok: true as const };
+}
+
+async function removeCalendarItem(id: string) {
   const supabase = await createClient();
   const actor = await getCurrentProfile();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,6 +72,15 @@ export async function deleteCalendarItem(id: string, month: string) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "item do calendário", entityLabel: item?.title });
   }
   revalidatePath("/admin/calendario");
+}
+
+export async function deleteCalendarItem(id: string, month: string) {
+  await removeCalendarItem(id);
   const { year, month: m } = parseMonthParam(month);
   redirect(`/admin/calendario?month=${monthParamKey(year, m)}`);
+}
+
+export async function deleteCalendarItemInline(id: string) {
+  await removeCalendarItem(id);
+  return { ok: true as const };
 }

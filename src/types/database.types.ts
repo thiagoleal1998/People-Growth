@@ -463,6 +463,7 @@ type ContentCalendarItemRow = {
   responsible: string | null;
   scheduled_date: string;
   status: "planned" | "in_progress" | "done";
+  published_channels: string[];
   created_by: string | null;
   created_at: string;
   updated_at: string;

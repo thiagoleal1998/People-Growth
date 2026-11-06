@@ -22,6 +22,14 @@ const statuses: { value: ContentCalendarItem["status"]; label: string }[] = [
   { value: "done", label: "Pronto" },
 ];
 
+// Where it actually went out, ticked off after the fact — separate from
+// "Plataforma" above (where it's planned for). Kept in sync with the same
+// checklist in CalendarItemPanel.tsx (the slide-over panel most edits go
+// through now); this standalone form stays as the direct-link/no-JS path,
+// and has to submit the same field or saving through it would silently
+// wipe it back to empty.
+const checklistChannels = platforms.filter((p) => p.value !== "other");
+
 export function CalendarItemForm({
   item,
   date,
@@ -76,6 +84,16 @@ export function CalendarItemForm({
               <option key={s.value} value={s.value}>{s.label}</option>
             ))}
           </Select>
+        </Field>
+        <Field label="Divulgado em" hint="Marque os canais onde esse post já foi publicado de fato.">
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem" }}>
+            {checklistChannels.map((c) => (
+              <label key={c.value} style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                <input type="checkbox" name="published_channels" value={c.value} defaultChecked={item?.published_channels?.includes(c.value) ?? false} />
+                {c.label}
+              </label>
+            ))}
+          </div>
         </Field>
         <SubmitButton>{item ? "Salvar alterações" : "Criar item"}</SubmitButton>
       </form>
