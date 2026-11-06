@@ -61,11 +61,28 @@ export function TextToSpeechButton({
   // a re-render on its own.
   const alignedWordsRef = useRef<AlignedWord[] | null>(null);
   const activeWordRef = useRef<HTMLElement | null>(null);
+  // Set on any real user scroll gesture (wheel/touch), not on the
+  // programmatic scrollTo below — the auto-follow skips its next move for a
+  // few seconds after one of these, so scrolling up to re-read something (or
+  // to reach this button) doesn't get immediately undone by the next word.
+  const lastManualScrollRef = useRef(0);
 
   function clearActiveWord() {
     activeWordRef.current?.classList.remove("tts-active-word");
     activeWordRef.current = null;
   }
+
+  useEffect(() => {
+    function markManualScroll() {
+      lastManualScrollRef.current = Date.now();
+    }
+    window.addEventListener("wheel", markManualScroll, { passive: true });
+    window.addEventListener("touchmove", markManualScroll, { passive: true });
+    return () => {
+      window.removeEventListener("wheel", markManualScroll);
+      window.removeEventListener("touchmove", markManualScroll);
+    };
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -95,7 +112,8 @@ export function TextToSpeechButton({
           // edge of the viewport (about to leave it), not only once it's
           // already gone, and the same check catches a skip-back landing
           // above the top edge too.
-          if (active?.span) {
+          const scrolledManuallyRecently = Date.now() - lastManualScrollRef.current < 3000;
+          if (active?.span && !scrolledManuallyRecently) {
             const rect = active.span.getBoundingClientRect();
             const viewportH = window.innerHeight;
             if (rect.bottom > viewportH * 0.8 || rect.top < viewportH * 0.15) {
@@ -251,6 +269,36 @@ export function TextToSpeechButton({
   const progress = duration > 0 ? currentTime / duration : 0;
 
   return (
+    <>
+    {/* Floating play/pause, fixed to the viewport — the auto-scroll above
+        keeps the page roughly in sync with the reading, but the reader
+        still shouldn't *have* to scroll back up to the original button
+        (which may now be off-screen) just to pause. Bottom-left, so it
+        doesn't collide with the WhatsApp channel button fixed bottom-right. */}
+    <button
+      type="button"
+      onClick={togglePlay}
+      title={playing ? "Pausar leitura" : "Retomar leitura"}
+      style={{
+        position: "fixed",
+        left: "1.25rem",
+        bottom: "5.5rem",
+        zIndex: 45,
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        width: "3.25rem",
+        height: "3.25rem",
+        borderRadius: "50%",
+        border: "none",
+        backgroundColor: "#315E9C",
+        color: "white",
+        boxShadow: "0 6px 20px -4px rgba(49,94,156,0.55)",
+        cursor: "pointer",
+      }}
+    >
+      {buffering ? <Loader2 size={24} className="tts-spin" /> : playing ? <CirclePause size={26} /> : <CirclePlay size={26} />}
+    </button>
     <div
       style={{
         display: "flex",
@@ -327,5 +375,6 @@ export function TextToSpeechButton({
 
       <style>{`.tts-spin { animation: tts-spin 0.9s linear infinite; } @keyframes tts-spin { to { transform: rotate(360deg); } }`}</style>
     </div>
+    </>
   );
 }

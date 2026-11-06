@@ -58,10 +58,10 @@ export function OrgChartConnectorLines({ pairs, containerId, color }: { pairs: P
             position: "absolute",
             left: l.left,
             top: l.top,
-            width: "2px",
+            width: "3px",
             height: l.height,
             backgroundColor: color,
-            transform: "translateX(-1px)",
+            transform: "translateX(-1.5px)",
             zIndex: 0,
             pointerEvents: "none",
           }}

@@ -92,7 +92,11 @@ function FounderBox({ columnist, index, compact }: { columnist: Columnist; index
           boxShadow: "0 0 0 1px var(--admin-border-strong)",
         }}
       />
-      <div style={{ textAlign: "center" }}>
+      {/* position/zIndex here too, same reasoning as the avatar above — this
+          sits in the same stacking context as a manager→report connector
+          line (see OrgChartConnectorLines), which should pass behind the
+          name and role same as it does the photo, not draw over them. */}
+      <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
         <div className="og-name" style={{ fontWeight: 800, fontSize: "0.75rem", color: "var(--admin-text)", lineHeight: 1.25 }}>{columnist.name}</div>
         {role && (
           <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: compact ? "#A07B3B" : "#315E9C", letterSpacing: "0.03em", marginTop: "0.125rem" }}>{role}</div>
@@ -246,7 +250,7 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
               )}
 
               {reportPairs.length > 0 && (
-                <OrgChartConnectorLines pairs={reportPairs} containerId={CLEVEL_WRAP_ID} color="var(--admin-border-strong)" />
+                <OrgChartConnectorLines pairs={reportPairs} containerId={CLEVEL_WRAP_ID} color="#315E9C" />
               )}
             </div>
           </div>
