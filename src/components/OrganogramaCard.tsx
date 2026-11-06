@@ -9,13 +9,17 @@ const cardHeaderStyle = { padding: "1.25rem 1.5rem", borderBottom: "1px solid va
 const FOUNDER_PHOTO_SIZE = "3rem";
 const FOUNDER_CHIP_PHOTO_SIZE = "2.25rem";
 
-// role_pt/role_en are a full sentence each ("Fundador e CEO do Grupo
-// Festina · ...") — too long for a chart box, so this just pulls out the
-// three-letter title. Checks both languages rather than only role_pt: an
-// edit can rephrase the Portuguese text without the acronym (e.g. role_pt
-// spelling out "Diretor de Assuntos Corporativos" instead of "CCAO") while
-// role_en keeps it, so relying on a single field silently drops the badge.
-function shortRole(columnist: Pick<Columnist, "role_pt" | "role_en">): string | null {
+// org_chart_role is the manual override (set in the columnist's edit form,
+// "Organograma" field) — anyone can have one, not just founders. Falls back
+// to sniffing role_pt/role_en for the three-letter title when it's empty,
+// same as before, so existing founders keep working unchanged without
+// having to re-enter anything. Checks both languages rather than only
+// role_pt: an edit can rephrase the Portuguese text without the acronym
+// (e.g. role_pt spelling out "Diretor de Assuntos Corporativos" instead of
+// "CCAO") while role_en keeps it, so relying on a single field silently
+// drops the badge.
+function shortRole(columnist: Pick<Columnist, "role_pt" | "role_en" | "org_chart_role">): string | null {
+  if (columnist.org_chart_role?.trim()) return columnist.org_chart_role.trim();
   const text = `${columnist.role_pt ?? ""} ${columnist.role_en ?? ""}`;
   if (text.includes("CEO")) return "CEO";
   if (text.includes("CCAO")) return "CCAO";
@@ -65,15 +69,16 @@ function ColumnistChip({ columnist, index }: { columnist: Columnist; index: numb
   );
 }
 
-function FounderBox({ columnist, index }: { columnist: Columnist; index: number }) {
+function FounderBox({ columnist, index, compact }: { columnist: Columnist; index: number; compact?: boolean }) {
   const role = shortRole(columnist);
+  const photoSize = compact ? "2.75rem" : FOUNDER_PHOTO_SIZE;
   return (
-    <div className="og-item" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", width: "5.5rem", animationDelay: `${index * 60}ms` }}>
+    <div className="og-item" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", width: compact ? "5rem" : "5.5rem", animationDelay: `${index * 60}ms` }}>
       <div
         className="og-avatar"
         style={{
-          width: FOUNDER_PHOTO_SIZE,
-          height: FOUNDER_PHOTO_SIZE,
+          width: photoSize,
+          height: photoSize,
           borderRadius: "50%",
           flexShrink: 0,
           background: columnist.photo_url ? `url("${columnist.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
@@ -84,11 +89,18 @@ function FounderBox({ columnist, index }: { columnist: Columnist; index: number 
       <div style={{ textAlign: "center" }}>
         <div className="og-name" style={{ fontWeight: 800, fontSize: "0.75rem", color: "var(--admin-text)", lineHeight: 1.25 }}>{columnist.name}</div>
         {role && (
-          <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "#315E9C", letterSpacing: "0.03em", marginTop: "0.125rem" }}>{role}</div>
+          <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: compact ? "#A07B3B" : "#315E9C", letterSpacing: "0.03em", marginTop: "0.125rem" }}>{role}</div>
         )}
       </div>
     </div>
   );
+}
+
+// A short drop-line from a manager's box down to their row of reports —
+// same visual language as Connector above, just a single stem (no split)
+// since it's hanging off one box, not branching from the CEO.
+function ReportsConnector() {
+  return <div style={{ width: "2px", height: "1rem", backgroundColor: "var(--admin-border-strong)" }} />;
 }
 
 // Pure-CSS "⊤" connector between the CEO box above and the two boxes below
@@ -123,6 +135,22 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
   const foundersAlpha = [...founders].sort(byName);
   const otherColumnistsAlpha = [...otherColumnists].sort(byName);
 
+  // Anyone (founder or not) can be set as someone's manager from the
+  // columnist edit form — this opens a new tier under that manager's box,
+  // not just the fixed C-Level pyramid. Same placeholder hygiene as above,
+  // and someone can be both a report here *and* still show in the regular
+  // Colunistas grid below (being set as e.g. a Social Media Manager doesn't
+  // remove them from "also a columnist").
+  const eligible = (a: Columnist) => a.status === "active" && a.photo_url && a.name?.trim();
+  const reportsByManager = new Map<string, Columnist[]>();
+  for (const a of columnists) {
+    if (!a.org_chart_manager_id || !eligible(a)) continue;
+    const list = reportsByManager.get(a.org_chart_manager_id) ?? [];
+    list.push(a);
+    reportsByManager.set(a.org_chart_manager_id, list);
+  }
+  for (const list of reportsByManager.values()) list.sort(byName);
+
   if (!ceoFounder && founders.length === 0 && otherColumnists.length === 0) return null;
 
   return (
@@ -153,11 +181,36 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
 
             <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
               <FounderBox columnist={ceoFounder} index={0} />
+              {(reportsByManager.get(ceoFounder.id)?.length ?? 0) > 0 && (
+                <>
+                  <ReportsConnector />
+                  <div style={{ display: "flex", gap: "1.25rem", justifyContent: "center", flexWrap: "wrap" }}>
+                    {reportsByManager.get(ceoFounder.id)!.map((r, ri) => (
+                      <FounderBox key={r.id} columnist={r} index={ri} compact />
+                    ))}
+                  </div>
+                </>
+              )}
               <Connector />
-              <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center" }}>
-                {otherFounders.map((a, i) => (
-                  <FounderBox key={a.id} columnist={a} index={i + 1} />
-                ))}
+              <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center", flexWrap: "wrap" }}>
+                {otherFounders.map((a, i) => {
+                  const reports = reportsByManager.get(a.id) ?? [];
+                  return (
+                    <div key={a.id} style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
+                      <FounderBox columnist={a} index={i + 1} />
+                      {reports.length > 0 && (
+                        <>
+                          <ReportsConnector />
+                          <div style={{ display: "flex", gap: "1.25rem", justifyContent: "center", flexWrap: "wrap" }}>
+                            {reports.map((r, ri) => (
+                              <FounderBox key={r.id} columnist={r} index={ri} compact />
+                            ))}
+                          </div>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
               </div>
             </div>
           </div>

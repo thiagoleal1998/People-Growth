@@ -14,9 +14,13 @@ export default async function EditarColunistaPage({
   const { imageError } = await searchParams;
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: item } = await (supabase as any).from("columnists").select("*").eq("id", id).single();
+  const client = supabase as any;
+  const [{ data: item }, { data: allColumnists }] = await Promise.all([
+    client.from("columnists").select("*").eq("id", id).single(),
+    client.from("columnists").select("*").order("name"),
+  ]);
 
   if (!item) notFound();
 
-  return <ColumnistForm item={item as Columnist} imageError={imageError} />;
+  return <ColumnistForm item={item as Columnist} allColumnists={(allColumnists ?? []) as Columnist[]} imageError={imageError} />;
 }

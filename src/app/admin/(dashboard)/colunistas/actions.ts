@@ -41,6 +41,8 @@ export async function upsertColumnist(id: string | null, formData: FormData) {
     status: (String(formData.get("status") ?? "active")) as Columnist["status"],
     order: Number(formData.get("order") ?? 0),
     is_founder: formData.get("is_founder") === "on",
+    org_chart_role: String(formData.get("org_chart_role") ?? "").trim() || null,
+    org_chart_manager_id: String(formData.get("org_chart_manager_id") ?? "").trim() || null,
   };
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

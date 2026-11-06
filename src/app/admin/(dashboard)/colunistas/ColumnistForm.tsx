@@ -60,7 +60,7 @@ const tabs = [
 
 type TabId = (typeof tabs)[number]["id"];
 
-export function ColumnistForm({ item, imageError }: { item?: Columnist; imageError?: string }) {
+export function ColumnistForm({ item, allColumnists, imageError }: { item?: Columnist; allColumnists?: Columnist[]; imageError?: string }) {
   const action = upsertColumnist.bind(null, item?.id ?? null);
   const [active, setActive] = useState<TabId>("perfil");
   const [pendingFile, setPendingFile] = useState<File | null>(null);
@@ -242,6 +242,19 @@ export function ColumnistForm({ item, imageError }: { item?: Columnist; imageErr
                 É um dos fundadores do Festina
               </label>
             </Field>
+            <FieldGrid>
+              <Field label="Cargo no organograma" hint='Aparece na caixinha do Organograma (A empresa). Ex: "CEO", "CMO", "Social Media Manager". Em branco, usa o Cargo (PT) da aba Perfil se reconhecer CEO/CMO/CCAO nele.'>
+                <Input name="org_chart_role" defaultValue={item?.org_chart_role ?? ""} />
+              </Field>
+              <Field label="Reporta para" hint="Se escolhido, essa pessoa aparece numa caixinha abaixo da pessoa selecionada no Organograma — além de continuar aparecendo normalmente em Colunistas.">
+                <Select name="org_chart_manager_id" defaultValue={item?.org_chart_manager_id ?? ""}>
+                  <option value="">Ninguém</option>
+                  {(allColumnists ?? []).filter((c) => c.id !== item?.id).map((c) => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </Select>
+              </Field>
+            </FieldGrid>
             {item && <TermsAcceptanceStatus columnist={item} />}
           </div>
         </div>

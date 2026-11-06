@@ -343,6 +343,8 @@ type ColumnistRow = {
   status: "active" | "inactive";
   order: number;
   is_founder: boolean;
+  org_chart_role: string | null;
+  org_chart_manager_id: string | null;
   terms_accepted_at: string | null;
   terms_declined_at: string | null;
   created_at: string;
