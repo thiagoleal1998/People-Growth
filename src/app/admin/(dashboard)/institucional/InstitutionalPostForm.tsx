@@ -1,13 +1,27 @@
 "use client";
 
+import { useState } from "react";
 import { FormShell, Field, Input, Select, SubmitButton, ConfirmDeleteButton } from "@/components/admin/ui";
 import { MarkdownEditor } from "@/components/admin/MarkdownEditor";
 import { upsertInstitutionalPost, deleteInstitutionalPost } from "./actions";
 import type { Columnist, InstitutionalPost } from "@/types/database.types";
 
-export function InstitutionalPostForm({ item, columnists }: { item?: InstitutionalPost; columnists: Columnist[] }) {
+export function InstitutionalPostForm({
+  item,
+  columnists,
+  authorIds,
+}: {
+  item?: InstitutionalPost;
+  columnists: Columnist[];
+  authorIds?: string[];
+}) {
   const action = upsertInstitutionalPost.bind(null, item?.id ?? null);
   const backHref = "/admin/institucional";
+  const cLevel = columnists.filter((c) => c.is_founder);
+  const [authors, setAuthors] = useState<string[]>(authorIds ?? []);
+  function toggleAuthor(id: string) {
+    setAuthors((prev) => (prev.includes(id) ? prev.filter((v) => v !== id) : [...prev, id]));
+  }
 
   return (
     <FormShell
@@ -27,13 +41,19 @@ export function InstitutionalPostForm({ item, columnists }: { item?: Institution
           <Input name="slug" defaultValue={item?.slug ?? ""} placeholder="ex: carta-ao-leitor-2026" />
         </Field>
 
-        <Field label="Assinado por" hint="Deixe em 'Grupo Festina' para um comunicado sem assinatura de uma pessoa específica.">
-          <Select name="author_columnist_id" defaultValue={item?.author_columnist_id ?? ""}>
-            <option value="">— Grupo Festina (sem assinatura) —</option>
-            {columnists.map((c) => (
-              <option key={c.id} value={c.id}>{c.name}</option>
-            ))}
-          </Select>
+        <Field label="Assinado por" hint="Restrito ao C-level. Deixe tudo desmarcado para um comunicado sem assinatura de pessoa específica (assina como 'Grupo Festina'); marque mais de um para uma carta conjunta.">
+          {cLevel.length === 0 ? (
+            <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)" }}>Nenhum colunista marcado como C-level (founder) ainda.</p>
+          ) : (
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.625rem 1.75rem" }}>
+              {cLevel.map((c) => (
+                <label key={c.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                  <input type="checkbox" name="author_ids" value={c.id} checked={authors.includes(c.id)} onChange={() => toggleAuthor(c.id)} />
+                  {c.name}
+                </label>
+              ))}
+            </div>
+          )}
         </Field>
 
         <Field label="Status">

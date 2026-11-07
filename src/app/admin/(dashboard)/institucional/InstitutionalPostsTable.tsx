@@ -2,6 +2,7 @@ import Link from "next/link";
 import type { CSSProperties } from "react";
 import { Plus, Edit, Eye } from "lucide-react";
 import { Card, EmptyState, PrimaryLinkButton, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
+import { joinColumnistNames } from "@/lib/founder-data";
 import { deleteInstitutionalPost } from "./actions";
 import type { InstitutionalPost } from "@/types/database.types";
 
@@ -13,7 +14,15 @@ function formatDate(iso: string | null) {
   return new Date(iso).toLocaleDateString("pt-BR", { day: "2-digit", month: "2-digit", year: "numeric" });
 }
 
-export function InstitutionalPostsTable({ posts, columnistNameById }: { posts: InstitutionalPost[]; columnistNameById: Map<string, string> }) {
+export function InstitutionalPostsTable({
+  posts,
+  columnistNameById,
+  authorIdsByPost,
+}: {
+  posts: InstitutionalPost[];
+  columnistNameById: Map<string, string>;
+  authorIdsByPost: Map<string, string[]>;
+}) {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
@@ -35,10 +44,12 @@ export function InstitutionalPostsTable({ posts, columnistNameById }: { posts: I
                 </tr>
               </thead>
               <tbody>
-                {posts.map((p) => (
+                {posts.map((p) => {
+                  const authorNames = (authorIdsByPost.get(p.id) ?? []).map((id) => columnistNameById.get(id)).filter((n): n is string => Boolean(n));
+                  return (
                   <tr key={p.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
                     <td style={{ ...CELL_STYLE, fontWeight: 700, color: "var(--admin-text)", minWidth: "220px" }}>{p.title_pt}</td>
-                    <td style={CELL_STYLE}>{p.author_columnist_id ? columnistNameById.get(p.author_columnist_id) ?? "—" : "Grupo Festina"}</td>
+                    <td style={CELL_STYLE}>{authorNames.length > 0 ? joinColumnistNames(authorNames, "pt") : "Grupo Festina"}</td>
                     <td style={CELL_STYLE}>
                       <Badge tone={p.status === "published" ? "success" : "neutral"}>{p.status === "published" ? "Publicado" : "Rascunho"}</Badge>
                     </td>
@@ -55,7 +66,8 @@ export function InstitutionalPostsTable({ posts, columnistNameById }: { posts: I
                       </div>
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

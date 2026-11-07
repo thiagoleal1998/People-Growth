@@ -3,6 +3,7 @@ import { Link } from "@/i18n/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { institucionalHref } from "@/lib/institucional-url";
 import { pickLocale } from "@/lib/locale-content";
+import { joinColumnistNames } from "@/lib/founder-data";
 import type { Columnist, InstitutionalPost } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -16,14 +17,22 @@ async function getInstitutionalData() {
   const supabase = await createClient();
   const client = supabase as any;
 
-  const [{ data: postsData }, { data: columnistsData }] = await Promise.all([
+  const [{ data: postsData }, { data: columnistsData }, { data: authorsData }] = await Promise.all([
     client.from("institutional_posts").select("*").eq("status", "published").order("published_at", { ascending: false }),
     client.from("columnists").select("*"),
+    client.from("institutional_post_authors").select("post_id, columnist_id"),
   ]);
+
+  const columnistById = new Map(((columnistsData ?? []) as Columnist[]).map((c) => [c.id, c]));
+  const authorIdsByPost = new Map<string, string[]>();
+  for (const a of (authorsData ?? []) as { post_id: string; columnist_id: string }[]) {
+    authorIdsByPost.set(a.post_id, [...(authorIdsByPost.get(a.post_id) ?? []), a.columnist_id]);
+  }
 
   return {
     posts: (postsData ?? []) as InstitutionalPost[],
-    columnistById: new Map(((columnistsData ?? []) as Columnist[]).map((c) => [c.id, c])),
+    columnistById,
+    authorIdsByPost,
   };
 }
 
@@ -40,7 +49,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
 export default async function InstitucionalPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const { posts, columnistById } = await getInstitutionalData();
+  const { posts, columnistById, authorIdsByPost } = await getInstitutionalData();
 
   return (
     <>
@@ -80,7 +89,10 @@ export default async function InstitucionalPage({ params }: { params: Promise<{ 
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
               {posts.map((post) => {
-                const columnist = post.author_columnist_id ? columnistById.get(post.author_columnist_id) : null;
+                const authorNames = (authorIdsByPost.get(post.id) ?? [])
+                  .map((id) => columnistById.get(id)?.name)
+                  .filter((n): n is string => Boolean(n));
+                const byline = authorNames.length > 0 ? joinColumnistNames(authorNames, locale) : "Grupo Festina";
                 return (
                   <Link key={post.id} href={institucionalHref(post)} style={{ display: "block", textDecoration: "none" }} className="hover-card">
                     <article style={{ backgroundColor: "var(--site-card)", borderRadius: "1rem", padding: "1.5rem", border: "1px solid var(--site-border)", display: "flex", gap: "1.25rem", alignItems: "flex-start" }}>
@@ -120,7 +132,7 @@ export default async function InstitucionalPage({ params }: { params: Promise<{ 
                           </p>
                         )}
                         <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)" }}>
-                          {(locale === "en" ? "By " : "Por ") + (columnist?.name ?? "Grupo Festina")}
+                          {(locale === "en" ? "By " : "Por ") + byline}
                           {post.published_at && " · " + new Date(post.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                         </span>
                       </div>

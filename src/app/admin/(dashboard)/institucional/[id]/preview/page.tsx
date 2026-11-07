@@ -12,16 +12,17 @@ export default async function PreviewPostInstitucionalPage({ params }: { params:
   const { data } = await client.from("institutional_posts").select("*").eq("id", id).single();
   if (!data) notFound();
   const post = data as InstitutionalPost;
-  const columnist = post.author_columnist_id
-    ? ((await client.from("columnists").select("*").eq("id", post.author_columnist_id).single()).data as Columnist | null)
-    : null;
+  const { data: authorRows } = await client.from("institutional_post_authors").select("columnist_id").eq("post_id", id);
+  const authorIds = ((authorRows ?? []) as { columnist_id: string }[]).map((a) => a.columnist_id);
+  const columnists =
+    authorIds.length > 0 ? (((await client.from("columnists").select("*").in("id", authorIds)).data ?? []) as Columnist[]) : [];
 
   return (
     <div style={{ maxWidth: "820px" }}>
       <Link href="/admin/institucional" style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none", marginBottom: "1rem", display: "inline-block" }}>
         &larr; Voltar
       </Link>
-      <InstitutionalPostView post={post} columnist={columnist} preview />
+      <InstitutionalPostView post={post} columnists={columnists} preview />
     </div>
   );
 }

@@ -31,11 +31,21 @@ export async function upsertInstitutionalPost(id: string | null, formData: FormD
     cover_image: String(formData.get("cover_image") ?? "").trim() || null,
     cover_image_caption: String(formData.get("cover_image_caption") ?? "").trim() || null,
     cover_image_credit: String(formData.get("cover_image_credit") ?? "").trim() || null,
-    author_columnist_id: String(formData.get("author_columnist_id") ?? "").trim() || null,
     status,
   };
 
+  // Signers are restricted to C-level (is_founder = true, same definition
+  // the org chart uses) — re-validated here against the real column rather
+  // than trusting the submitted ids, since the form's checkboxes are the
+  // only thing stopping a non-founder id from ever reaching this far.
+  const requestedAuthorIds = [...new Set(formData.getAll("author_ids").map((v) => String(v)).filter(Boolean))];
+  const authorIds =
+    requestedAuthorIds.length > 0
+      ? ((await client.from("columnists").select("id").eq("is_founder", true).in("id", requestedAuthorIds)).data ?? []).map((c: { id: string }) => c.id)
+      : [];
+
   const isNew = !id;
+  let postId = id;
   if (id) {
     // A post only gets a published_at the first time it flips to
     // "published" — editing an already-published post afterward must not
@@ -48,11 +58,19 @@ export async function upsertInstitutionalPost(id: string | null, formData: FormD
       .update({ ...payload, ...(justPublished ? { published_at: new Date().toISOString() } : {}), updated_at: new Date().toISOString() })
       .eq("id", id);
   } else {
-    await client.from("institutional_posts").insert({
-      ...payload,
-      published_at: status === "published" ? new Date().toISOString() : null,
-      created_by: actor?.id ?? null,
-    });
+    const { data } = await client
+      .from("institutional_posts")
+      .insert({ ...payload, published_at: status === "published" ? new Date().toISOString() : null, created_by: actor?.id ?? null })
+      .select("id")
+      .single();
+    postId = data?.id ?? null;
+  }
+
+  if (postId) {
+    await client.from("institutional_post_authors").delete().eq("post_id", postId);
+    if (authorIds.length > 0) {
+      await client.from("institutional_post_authors").insert(authorIds.map((columnist_id: string) => ({ post_id: postId, columnist_id })));
+    }
   }
 
   if (actor) {

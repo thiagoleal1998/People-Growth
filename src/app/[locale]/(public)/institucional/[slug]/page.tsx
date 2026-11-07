@@ -14,10 +14,11 @@ async function getPost(slug: string) {
   const { data } = await client.from("institutional_posts").select("*").eq("slug", slug).eq("status", "published").single();
   if (!data) return null;
   const post = data as InstitutionalPost;
-  const columnist = post.author_columnist_id
-    ? ((await client.from("columnists").select("*").eq("id", post.author_columnist_id).single()).data as Columnist | null)
-    : null;
-  return { ...post, columnist };
+  const { data: authorRows } = await client.from("institutional_post_authors").select("columnist_id").eq("post_id", post.id);
+  const authorIds = ((authorRows ?? []) as { columnist_id: string }[]).map((a) => a.columnist_id);
+  const columnists =
+    authorIds.length > 0 ? (((await client.from("columnists").select("*").in("id", authorIds)).data ?? []) as Columnist[]) : [];
+  return { ...post, columnists };
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string; locale: string }> }): Promise<Metadata> {
@@ -38,7 +39,7 @@ export default async function InstitucionalPostPage({ params }: { params: Promis
   return (
     <section className="section-padding" style={{ backgroundColor: "var(--site-bg)", paddingTop: "6rem" }}>
       <div className="container-xl" style={{ maxWidth: "760px" }}>
-        <InstitutionalPostView post={post} columnist={post.columnist} locale={locale} />
+        <InstitutionalPostView post={post} columnists={post.columnists} locale={locale} />
       </div>
     </section>
   );
