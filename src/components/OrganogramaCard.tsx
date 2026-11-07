@@ -139,12 +139,16 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
   const otherColumnistsAlpha = [...otherColumnists].sort(byName);
 
   // Anyone (founder or not) can be set as someone's manager from the
-  // columnist edit form — this opens a new tier under that manager's box,
-  // not just the fixed C-Level pyramid. Same placeholder hygiene as above,
-  // and someone can be both a report here *and* still show in the regular
-  // Colunistas grid below (being set as e.g. a Social Media Manager doesn't
-  // remove them from "also a columnist").
-  const eligible = (a: Columnist) => a.status === "active" && a.photo_url && a.name?.trim();
+  // columnist edit form — this opens a new tier hanging off that manager,
+  // not just the fixed C-Level pyramid. Only a name is required (not an
+  // active status or a photo — FounderBox already falls back to a gradient
+  // avatar) because this also covers a prospective hire who doesn't have a
+  // real columnist profile yet, just a placeholder row with status
+  // "inactive" so they never show up anywhere public. Someone can be both
+  // a report here *and* still show in the regular Colunistas grid below
+  // (being set as e.g. a Social Media Manager doesn't remove them from
+  // "also a columnist").
+  const eligible = (a: Columnist) => Boolean(a.name?.trim());
   const reportsByManager = new Map<string, Columnist[]>();
   for (const a of columnists) {
     if (!a.org_chart_manager_id || !eligible(a)) continue;
@@ -154,11 +158,32 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
   }
   for (const list of reportsByManager.values()) list.sort(byName);
 
-  const reportPairs = ceoFounder
-    ? [ceoFounder, ...otherFounders].flatMap((manager) =>
-        (reportsByManager.get(manager.id) ?? []).map((r) => ({ managerId: manager.id, reportId: r.id }))
-      )
-    : [];
+  // Reports hang off the *side* of the C-Level box (connected by an L-shaped
+  // line out of their manager, see OrgChartConnectorLines) rather than
+  // straight down from them — stacking every report directly under its own
+  // manager got cramped once more than one manager had one, and read as
+  // part of the box itself rather than clearly outside it. Side is picked
+  // once, here, from the manager's own position: whichever half of the
+  // otherFounders row they're in (so it stays consistent if a manager
+  // picks up a second report later); the CEO defaults to the right, having
+  // no "half" of their own to go by.
+  const managerSide = new Map<string, "left" | "right">();
+  if (ceoFounder) managerSide.set(ceoFounder.id, "right");
+  otherFounders.forEach((a, i) => {
+    managerSide.set(a.id, i < Math.ceil(otherFounders.length / 2) ? "left" : "right");
+  });
+
+  const allManagers = ceoFounder ? [ceoFounder, ...otherFounders] : [];
+  const reportPairs: { managerId: string; reportId: string; side: "left" | "right" }[] = [];
+  const leftReports: Columnist[] = [];
+  const rightReports: Columnist[] = [];
+  for (const manager of allManagers) {
+    const side = managerSide.get(manager.id) ?? "right";
+    for (const r of reportsByManager.get(manager.id) ?? []) {
+      reportPairs.push({ managerId: manager.id, reportId: r.id, side });
+      (side === "left" ? leftReports : rightReports).push(r);
+    }
+  }
 
   if (!ceoFounder && founders.length === 0 && otherColumnists.length === 0) return null;
 
@@ -216,36 +241,22 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                 </div>
               </div>
 
-              {/* The CEO's own direct reports (rare) sit centered under the
-                  whole box, which already lines up with the CEO's box since
-                  that one is itself centered in it. */}
-              {(reportsByManager.get(ceoFounder.id)?.length ?? 0) > 0 && (
-                <div style={{ display: "flex", justifyContent: "center", gap: "1.75rem", flexWrap: "wrap", paddingTop: "1.5rem" }}>
-                  {reportsByManager.get(ceoFounder.id)!.map((r, ri) => (
-                    <FounderBox key={r.id} columnist={r} index={ri} compact />
-                  ))}
-                </div>
-              )}
-
-              {/* The other founders' reports mirror that same row's slots
-                  (same width/gap, same horizontal padding as the box above)
-                  so each report lands directly under its own manager — e.g.
-                  Bruno under Gustavo specifically, not centered under the
-                  whole chart — while still sitting outside the C-Level box
-                  itself. */}
-              {otherFounders.some((a) => (reportsByManager.get(a.id)?.length ?? 0) > 0) && (
-                <div style={{ padding: "0 1.25rem", paddingTop: "1.5rem" }}>
-                  <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center", flexWrap: "wrap" }}>
-                    {otherFounders.map((a) => {
-                      const reports = reportsByManager.get(a.id) ?? [];
-                      return (
-                        <div key={a.id} style={{ width: "5.5rem", display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
-                          {reports.map((r, ri) => (
-                            <FounderBox key={r.id} columnist={r} index={ri} compact />
-                          ))}
-                        </div>
-                      );
-                    })}
+              {/* Reports sit in two outer columns, pushed to the left/right
+                  edges by the space-between row below — not under the box,
+                  not centered under it, but out to its side, matching
+                  managerSide above. Each column stacks vertically if a side
+                  ever picks up more than one report. */}
+              {(leftReports.length > 0 || rightReports.length > 0) && (
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", paddingTop: "1.5rem" }}>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
+                    {leftReports.map((r, ri) => (
+                      <FounderBox key={r.id} columnist={r} index={ri} compact />
+                    ))}
+                  </div>
+                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
+                    {rightReports.map((r, ri) => (
+                      <FounderBox key={r.id} columnist={r} index={ri} compact />
+                    ))}
                   </div>
                 </div>
               )}
