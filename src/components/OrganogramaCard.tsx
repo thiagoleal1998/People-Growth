@@ -241,13 +241,15 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                 </div>
               </div>
 
-              {/* Reports sit in two outer columns, pushed to the left/right
-                  edges by the space-between row below — not under the box,
-                  not centered under it, but out to its side, matching
-                  managerSide above. Each column stacks vertically if a side
-                  ever picks up more than one report. */}
+              {/* Reports sit to the left/right of center, matching
+                  managerSide above — not under the box, not pinned all the
+                  way out to its edges either (maxWidth below reins the
+                  space-between in from the full card width, which read as
+                  "launched into the corners" at anything wider than a
+                  phone). Each column stacks vertically if a side ever picks
+                  up more than one report. */}
               {(leftReports.length > 0 || rightReports.length > 0) && (
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", paddingTop: "1.5rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", maxWidth: "20rem", margin: "0 auto", paddingTop: "1.5rem" }}>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
                     {leftReports.map((r, ri) => (
                       <FounderBox key={r.id} columnist={r} index={ri} compact />
