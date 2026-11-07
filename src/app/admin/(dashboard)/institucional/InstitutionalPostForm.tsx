@@ -41,18 +41,21 @@ export function InstitutionalPostForm({
           <Input name="slug" defaultValue={item?.slug ?? ""} placeholder="ex: carta-ao-leitor-2026" />
         </Field>
 
-        <Field label="Assinado por" hint="Restrito ao C-level. Deixe tudo desmarcado para um comunicado sem assinatura de pessoa específica (assina como 'Grupo Festina'); marque mais de um para uma carta conjunta.">
-          {cLevel.length === 0 ? (
-            <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)" }}>Nenhum colunista marcado como C-level (founder) ainda.</p>
-          ) : (
-            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.625rem 1.75rem" }}>
-              {cLevel.map((c) => (
-                <label key={c.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
-                  <input type="checkbox" name="author_ids" value={c.id} checked={authors.includes(c.id)} onChange={() => toggleAuthor(c.id)} />
-                  {c.name}
-                </label>
-              ))}
-            </div>
+        <Field label="Assinado por" hint="Restrito ao C-level. Marque 'Grupo Festina' para um comunicado sem assinatura de pessoa específica, ou um ou mais nomes para uma carta individual/conjunta.">
+          <div style={{ display: "flex", flexWrap: "wrap", gap: "0.625rem 1.75rem" }}>
+            <label style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", fontWeight: 700, color: "var(--admin-text)" }}>
+              <input type="checkbox" checked={authors.length === 0} onChange={() => setAuthors([])} />
+              Grupo Festina (sem assinatura individual)
+            </label>
+            {cLevel.map((c) => (
+              <label key={c.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                <input type="checkbox" name="author_ids" value={c.id} checked={authors.includes(c.id)} onChange={() => toggleAuthor(c.id)} />
+                {c.name}
+              </label>
+            ))}
+          </div>
+          {cLevel.length === 0 && (
+            <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginTop: "0.5rem" }}>Nenhum colunista marcado como C-level (founder) ainda.</p>
           )}
         </Field>
 
