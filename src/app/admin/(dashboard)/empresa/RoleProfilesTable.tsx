@@ -1,10 +1,12 @@
 import Link from "next/link";
 import type { CSSProperties } from "react";
-import { Plus, Edit } from "lucide-react";
+import { Plus, Edit, ChevronUp, ChevronDown } from "lucide-react";
 import { Card, EmptyState, PrimaryLinkButton, ConfirmDeleteButton } from "@/components/admin/ui";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
-import { deleteRoleProfile } from "./actions";
+import { deleteRoleProfile, reorderRoleProfile } from "./actions";
 import type { RoleProfile } from "@/types/database.types";
+
+const REORDER_BUTTON_STYLE: CSSProperties = { display: "flex", alignItems: "center", justifyContent: "center", width: "1.5rem", height: "1.125rem", padding: 0, border: "none", background: "none", color: "var(--admin-muted)", cursor: "pointer" };
 
 const CELL_STYLE: CSSProperties = { padding: "0.875rem 1rem", verticalAlign: "top", fontSize: "0.8125rem", color: "var(--admin-text-secondary)", lineHeight: 1.5, minWidth: "220px" };
 const HEADER_STYLE: CSSProperties = { padding: "0.75rem 1rem", textAlign: "left", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", whiteSpace: "nowrap" };
@@ -40,10 +42,27 @@ export function RoleProfilesTable({ profiles, columnistNameById }: { profiles: R
                 </tr>
               </thead>
               <tbody>
-                {profiles.map((p) => (
+                {profiles.map((p, i) => (
                   <tr key={p.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
-                    <td style={{ ...CELL_STYLE, fontWeight: 800, color: "var(--admin-text)", minWidth: "140px" }}>
-                      {p.columnist_id ? columnistNameById.get(p.columnist_id) ?? "—" : "—"}
+                    <td style={{ ...CELL_STYLE, fontWeight: 800, color: "var(--admin-text)", minWidth: "160px" }}>
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        {/* Swaps this row's order with its neighbor's — see
+                            reorderRoleProfile. Plain forms (no client state
+                            needed): disabled at either end of the list. */}
+                        <div style={{ display: "flex", flexDirection: "column", flexShrink: 0 }}>
+                          <form action={reorderRoleProfile.bind(null, p.id, "up")}>
+                            <button type="submit" disabled={i === 0} title="Mover para cima" style={{ ...REORDER_BUTTON_STYLE, opacity: i === 0 ? 0.3 : 1, cursor: i === 0 ? "default" : "pointer" }}>
+                              <ChevronUp size={14} />
+                            </button>
+                          </form>
+                          <form action={reorderRoleProfile.bind(null, p.id, "down")}>
+                            <button type="submit" disabled={i === profiles.length - 1} title="Mover para baixo" style={{ ...REORDER_BUTTON_STYLE, opacity: i === profiles.length - 1 ? 0.3 : 1, cursor: i === profiles.length - 1 ? "default" : "pointer" }}>
+                              <ChevronDown size={14} />
+                            </button>
+                          </form>
+                        </div>
+                        <span>{p.columnist_id ? columnistNameById.get(p.columnist_id) ?? "—" : "—"}</span>
+                      </div>
                     </td>
                     <td style={{ ...CELL_STYLE, fontWeight: 700, color: "#315E9C", minWidth: "80px" }}>{p.acronym || "—"}</td>
                     <td style={{ ...CELL_STYLE, minWidth: "180px" }}>{p.title || "—"}</td>

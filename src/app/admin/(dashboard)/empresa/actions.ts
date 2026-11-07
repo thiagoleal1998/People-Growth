@@ -45,6 +45,34 @@ export async function upsertRoleProfile(id: string | null, formData: FormData) {
   redirect("/admin/empresa?tab=cargos&saved=1");
 }
 
+// Swaps this row's `order` with its neighbor's, so the up/down buttons in
+// the table move it one place at a time — simpler than editing a raw
+// number, and doesn't require renumbering every other row to stay
+// consistent.
+export async function reorderRoleProfile(id: string, direction: "up" | "down") {
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+
+  const { data: rows } = await client.from("role_profiles").select("id, order").order("order");
+  const list = (rows ?? []) as { id: string; order: number }[];
+  const index = list.findIndex((r) => r.id === id);
+  const swapIndex = direction === "up" ? index - 1 : index + 1;
+  if (index === -1 || swapIndex < 0 || swapIndex >= list.length) {
+    revalidatePath("/admin/empresa");
+    return;
+  }
+
+  const current = list[index];
+  const neighbor = list[swapIndex];
+  await Promise.all([
+    client.from("role_profiles").update({ order: neighbor.order }).eq("id", current.id),
+    client.from("role_profiles").update({ order: current.order }).eq("id", neighbor.id),
+  ]);
+
+  revalidatePath("/admin/empresa");
+}
+
 export async function deleteRoleProfile(id: string) {
   const supabase = await createClient();
   const actor = await getCurrentProfile();
