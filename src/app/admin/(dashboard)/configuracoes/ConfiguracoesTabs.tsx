@@ -345,6 +345,12 @@ export function ConfiguracoesTabs({
                 Sim, mostrar Cursos
               </label>
             </Field>
+            <Field label="Mostrar Institucional?" hint="Desative para ocultar o link no menu/rodapé e a página /institucional, sem apagar os posts cadastrados.">
+              <label style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                <input type="checkbox" name="institucional_enabled" defaultChecked={values.institucional_enabled !== "false"} />
+                Sim, mostrar Institucional
+              </label>
+            </Field>
           </div>
         </div>
 

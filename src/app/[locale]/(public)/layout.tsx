@@ -20,7 +20,7 @@ export default async function PublicLayout({
   const { data: configData } = await client
     .from("site_config")
     .select("key,value")
-    .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email", "instagram", "linkedin", "whatsapp", "youtube", "x", "media_enabled", "sports_widget_enabled", "portfolio_enabled", "courses_enabled"]);
+    .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email", "instagram", "linkedin", "whatsapp", "youtube", "x", "media_enabled", "sports_widget_enabled", "portfolio_enabled", "courses_enabled", "institucional_enabled"]);
 
   const config = Object.fromEntries(((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""]));
   const logoUrl = config.logo_url || undefined;
@@ -34,11 +34,12 @@ export default async function PublicLayout({
   const sportsEnabled = config.sports_widget_enabled !== "false";
   const portfolioEnabled = config.portfolio_enabled !== "false";
   const coursesEnabled = config.courses_enabled !== "false";
+  const institucionalEnabled = config.institucional_enabled !== "false";
 
   return (
     <>
       <UtilityBar cityName={weatherCity} lat={weatherLat} lon={weatherLon} />
-      <Navbar logoUrl={logoUrl} mediaEnabled={mediaEnabled} portfolioEnabled={portfolioEnabled} coursesEnabled={coursesEnabled} />
+      <Navbar logoUrl={logoUrl} mediaEnabled={mediaEnabled} portfolioEnabled={portfolioEnabled} coursesEnabled={coursesEnabled} institucionalEnabled={institucionalEnabled} />
       <main className="public-main" style={{ paddingTop: "6.43rem" }}>
         <CategoryNav />
         {children}
@@ -55,6 +56,7 @@ export default async function PublicLayout({
         sportsEnabled={sportsEnabled}
         portfolioEnabled={portfolioEnabled}
         coursesEnabled={coursesEnabled}
+        institucionalEnabled={institucionalEnabled}
       />
       <SocialSidebar
         instagram={config.instagram || undefined}

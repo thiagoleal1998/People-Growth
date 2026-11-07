@@ -20,9 +20,10 @@ type FooterProps = {
   sportsEnabled?: boolean;
   portfolioEnabled?: boolean;
   coursesEnabled?: boolean;
+  institucionalEnabled?: boolean;
 };
 
-export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, youtube, x, mediaEnabled = true, sportsEnabled = true, portfolioEnabled = true, coursesEnabled = true }: FooterProps) {
+export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, youtube, x, mediaEnabled = true, sportsEnabled = true, portfolioEnabled = true, coursesEnabled = true, institucionalEnabled = true }: FooterProps) {
   const t = useTranslations("footer");
   const nav = useTranslations("nav");
   const year = new Date().getFullYear();
@@ -166,13 +167,20 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
                 { key: "peopleGrowth", href: "/people-growth" as const },
                 { key: "pontoDeReplica", href: "/ponto-de-replica" as const },
                 { key: "meaSententia", href: "/mea-sententia" as const },
+                { key: "institucional", href: "/institucional" as const },
                 { key: "portfolio", href: "/portfolio" as const },
                 { key: "newsletter", href: "/conteudo" as const },
                 { key: "media", href: "/na-midia" as const },
                 { key: "sports", href: "/esportes" as const },
                 { key: "contact", href: "/contato" as const },
               ]
-                .filter((l) => (mediaEnabled || l.key !== "media") && (sportsEnabled || l.key !== "sports") && (portfolioEnabled || l.key !== "portfolio"))
+                .filter(
+                  (l) =>
+                    (mediaEnabled || l.key !== "media") &&
+                    (sportsEnabled || l.key !== "sports") &&
+                    (portfolioEnabled || l.key !== "portfolio") &&
+                    (institucionalEnabled || l.key !== "institucional")
+                )
                 .map(({ key, href }) => (
                 <li key={key}>
                   <Link

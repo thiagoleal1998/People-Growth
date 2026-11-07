@@ -51,6 +51,8 @@ export const routing = defineRouting({
     "/people-growth": { pt: "/people-growth", en: "/people-growth" },
     "/ponto-de-replica": { pt: "/ponto-de-replica", en: "/ponto-de-replica" },
     "/mea-sententia": { pt: "/mea-sententia", en: "/mea-sententia" },
+    "/institucional": { pt: "/institucional", en: "/institutional" },
+    "/institucional/[slug]": { pt: "/institucional/[slug]", en: "/institutional/[slug]" },
     "/faq": { pt: "/faq", en: "/faq" },
     "/contato": { pt: "/contato", en: "/contact" },
     "/cookies": { pt: "/cookies", en: "/cookies" },

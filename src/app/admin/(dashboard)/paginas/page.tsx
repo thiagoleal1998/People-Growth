@@ -16,7 +16,7 @@ export default async function PaginasInstitucionaisPage({ searchParams }: { sear
   return (
     <div>
       <SavedToast show={saved === "1"} />
-      <PageHeader title="Páginas Institucionais" subtitle="Cookies, direitos autorais e regras de comentários — o texto exibido no site." />
+      <PageHeader title="Páginas Legais" subtitle="Cookies, direitos autorais e regras de comentários — o texto exibido no site." />
 
       <Card>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>

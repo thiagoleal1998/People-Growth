@@ -22,6 +22,7 @@ const navGroups = [
       { key: "peopleGrowth", href: "/people-growth" as const },
       { key: "pontoDeReplica", href: "/ponto-de-replica" as const },
       { key: "meaSententia", href: "/mea-sententia" as const },
+      { key: "institucional", href: "/institucional" as const },
     ],
   },
   {
@@ -41,11 +42,13 @@ export function Navbar({
   mediaEnabled = true,
   portfolioEnabled = true,
   coursesEnabled = true,
+  institucionalEnabled = true,
 }: {
   logoUrl?: string | null;
   mediaEnabled?: boolean;
   portfolioEnabled?: boolean;
   coursesEnabled?: boolean;
+  institucionalEnabled?: boolean;
 }) {
   const t = useTranslations("nav");
   const pathname = usePathname();
@@ -54,7 +57,13 @@ export function Navbar({
   const visibleNavGroups = navGroups
     .map((g) => ({
       ...g,
-      items: g.items.filter((l) => (mediaEnabled || l.key !== "media") && (portfolioEnabled || l.key !== "portfolio") && (coursesEnabled || l.key !== "courses")),
+      items: g.items.filter(
+        (l) =>
+          (mediaEnabled || l.key !== "media") &&
+          (portfolioEnabled || l.key !== "portfolio") &&
+          (coursesEnabled || l.key !== "courses") &&
+          (institucionalEnabled || l.key !== "institucional")
+      ),
     }))
     .filter((g) => g.items.length > 0);
 
