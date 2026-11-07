@@ -246,10 +246,14 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                   way out to its edges either (maxWidth below reins the
                   space-between in from the full card width, which read as
                   "launched into the corners" at anything wider than a
-                  phone). Each column stacks vertically if a side ever picks
-                  up more than one report. */}
+                  phone). Wide enough that each report's vertical drop clears
+                  the *other* side's FounderBox column — otherwise it cuts
+                  straight through the CEO-to-founders Connector's own
+                  horizontal bar on its way down, the two reading as one
+                  crossed line. Each column stacks vertically if a side ever
+                  picks up more than one report. */}
               {(leftReports.length > 0 || rightReports.length > 0) && (
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", maxWidth: "20rem", margin: "0 auto", paddingTop: "1.5rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", maxWidth: "30rem", margin: "0 auto", paddingTop: "1.5rem" }}>
                   <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
                     {leftReports.map((r, ri) => (
                       <FounderBox key={r.id} columnist={r} index={ri} compact />
