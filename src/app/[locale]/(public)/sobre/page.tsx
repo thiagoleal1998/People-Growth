@@ -357,14 +357,19 @@ export default async function SobrePage() {
                   Talentos que dão vida ao que construímos juntos, todos os dias.
                 </p>
               </div>
-              {/* Unlike the founders grid above (always 3, fills the row
-                  evenly via 1fr), the team list can be just one or two
-                  people — minmax(240px, 300px) keeps each card the same
-                  size founders get instead of stretching to fill the row,
-                  and justifyContent centers whatever's left over. */}
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 300px))", gap: "1.5rem", justifyContent: "center" }}>
+              {/* Unlike the founders grid above (always 3, so the grid's
+                  own 1fr columns naturally land at this width), the team
+                  list can be just one or two people — a flex row with each
+                  card's basis set to literally the same math a 3-column
+                  grid row works out to (100% minus 2 gaps, divided by 3)
+                  reproduces that exact card width instead of a smaller,
+                  mismatched one, and justifyContent centers what's left
+                  over when there's fewer than 3. */}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem", justifyContent: "center" }}>
                 {team.map((member) => (
-                  <FounderCard key={member.id} columnist={member} />
+                  <div key={member.id} style={{ flex: "0 1 calc((100% - 3rem) / 3)", minWidth: "240px" }}>
+                    <FounderCard columnist={member} />
+                  </div>
                 ))}
               </div>
             </div>
