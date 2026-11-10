@@ -8,6 +8,7 @@ import type { Columnist } from "@/types/database.types";
 import { pickLocale } from "@/lib/locale-content";
 import { INSTITUTIONAL_DEFAULTS } from "@/lib/institutional-defaults";
 import { extractPhilosophyLevels } from "@/lib/philosophy-levels";
+import { isColumnistPubliclyVisible } from "@/lib/founder-data";
 import { FounderCard } from "./FounderCard";
 
 export async function generateMetadata({
@@ -58,6 +59,10 @@ export default async function SobrePage() {
   // having a manager placed there (org_chart_manager_id), rather than a
   // hardcoded name list. Founders are excluded since they have their own
   // grid above and are each other's "manager" in spirit, not reports.
+  // Only ones with a presentable profile (photo + tagline, same bar
+  // /sobre/[slug] itself requires) actually show up — someone like Raphael,
+  // added to the org chart before his photo/bio were filled in, stays off
+  // this list until that's done rather than appearing with an empty avatar.
   const { data: teamData } = await client
     .from("columnists")
     .select("*")
@@ -65,7 +70,7 @@ export default async function SobrePage() {
     .eq("is_founder", false)
     .not("org_chart_manager_id", "is", null)
     .order("name");
-  const team = (teamData ?? []) as Columnist[];
+  const team = ((teamData ?? []) as Columnist[]).filter(isColumnistPubliclyVisible);
 
   return (
     <>
