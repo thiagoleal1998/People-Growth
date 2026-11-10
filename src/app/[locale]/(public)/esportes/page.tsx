@@ -430,29 +430,27 @@ function formatF1DateTime(date: string, time: string | null): string {
 // Small styled badge with a 2-letter country code — stands in for a flag
 // image/emoji (see f1.ts header comment: flag emoji rendering is
 // inconsistent across platforms, a styled badge isn't).
+// Real flag images (lipis/flag-icons, MIT-licensed — confirmed against the
+// repo's own LICENSE file, no attribution required) rather than Unicode
+// flag emoji, whose colored-glyph rendering isn't guaranteed across every
+// OS/browser (confirmed falling back to plain-text letter codes in
+// testing here) — an <img> looks the same everywhere. Served straight off
+// jsdelivr's CDN mirror of the repo rather than re-hosted, same as how
+// NFL/NBA team crests are hotlinked from ESPN's own CDN rather than copied
+// into this project's Storage bucket (that bucket is reserved for the
+// small, fixed set of brand logos that never change).
 function CountryBadge({ code, size = "sm" }: { code: string; size?: "sm" | "lg" }) {
   if (!code) return null;
   const lg = size === "lg";
+  const width = lg ? 36 : 20;
   return (
-    <span
-      style={{
-        display: "inline-flex",
-        alignItems: "center",
-        justifyContent: "center",
-        minWidth: lg ? "2.75rem" : "1.625rem",
-        height: lg ? "1.875rem" : "1.0625rem",
-        padding: lg ? "0 0.5rem" : "0 0.25rem",
-        borderRadius: "0.3125rem",
-        backgroundColor: `${BRAND}14`,
-        color: BRAND,
-        fontSize: lg ? "0.8125rem" : "0.625rem",
-        fontWeight: 800,
-        letterSpacing: "0.02em",
-        flexShrink: 0,
-      }}
-    >
-      {code}
-    </span>
+    <img
+      src={`https://cdn.jsdelivr.net/gh/lipis/flag-icons@7/flags/4x3/${code.toLowerCase()}.svg`}
+      alt={code}
+      width={width}
+      height={Math.round((width * 3) / 4)}
+      style={{ width, height: Math.round((width * 3) / 4), borderRadius: "0.1875rem", border: "1px solid var(--site-border)", flexShrink: 0, objectFit: "cover" }}
+    />
   );
 }
 
