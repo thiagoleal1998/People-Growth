@@ -357,7 +357,12 @@ export default async function SobrePage() {
                   Talentos que dão vida ao que construímos juntos, todos os dias.
                 </p>
               </div>
-              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "1.5rem" }}>
+              {/* Unlike the founders grid above (always 3, fills the row
+                  evenly via 1fr), the team list can be just one or two
+                  people — minmax(240px, 300px) keeps each card the same
+                  size founders get instead of stretching to fill the row,
+                  and justifyContent centers whatever's left over. */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(240px, 300px))", gap: "1.5rem", justifyContent: "center" }}>
                 {team.map((member) => (
                   <FounderCard key={member.id} columnist={member} />
                 ))}
