@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { ReactNode } from "react";
-import { ArrowLeft, Newspaper, Trophy, CalendarDays, ListOrdered, Users, ChevronRight } from "lucide-react";
+import { ArrowLeft, Newspaper, Trophy, CalendarDays, ListOrdered, Users, ChevronRight, Flag, MapPin } from "lucide-react";
 import {
   COMPETITIONS,
   COMPETITION_ORDER,
@@ -19,6 +19,7 @@ import { getCurrentWeekGames, getStandingsByDivision as getNflStandingsByDivisio
 import { getTodayGames, getStandingsByDivision as getNbaStandingsByDivision, type NbaDivisionStandings, type NbaGame } from "@/lib/nba";
 import { NFL_LOGO_URL } from "@/lib/nfl";
 import { NBA_LOGO_URL } from "@/lib/nba";
+import { getNextRace, getDriverStandings, getConstructorStandings, getLastRaceResult, type F1DriverStanding, type F1ConstructorStanding } from "@/lib/f1";
 import { TeamCrest } from "@/components/TeamCrest";
 import { FormatTag } from "@/components/FormatTag";
 import { PeopleGrowthBadge } from "@/components/PeopleGrowthBadge";
@@ -31,8 +32,8 @@ import type { Article, Columnist, Category } from "@/types/database.types";
 export const revalidate = 180;
 
 export const metadata: Metadata = {
-  title: "Esportes — notícias, Brasileirão, NFL e NBA",
-  description: "Notícias de esporte, classificação e jogos do Brasileirão Série A e B, Copa do Brasil, Libertadores, Sul-Americana, NFL e NBA.",
+  title: "Esportes — notícias, Brasileirão, NFL, NBA e F1",
+  description: "Notícias de esporte, classificação e jogos do Brasileirão Série A e B, Copa do Brasil, Libertadores, Sul-Americana, NFL, NBA e Fórmula 1.",
 };
 
 // Portuguese-only, same as /eleicoes — Brazilian competition data for a
@@ -54,6 +55,7 @@ const TABS = [
   { id: "brasileirao", label: "Futebol", icon: Trophy },
   { id: "nfl", label: "NFL" },
   { id: "nba", label: "NBA" },
+  { id: "f1", label: "F1", icon: Flag },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
 
@@ -407,6 +409,63 @@ function NbaDivisionTable({ division }: { division: NbaDivisionStandings }) {
   );
 }
 
+function formatF1DateTime(date: string, time: string | null): string {
+  const d = new Date(time ? `${date}T${time}` : `${date}T00:00:00Z`);
+  return d.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", ...(time ? { hour: "2-digit", minute: "2-digit" } : {}) });
+}
+
+function F1DriverStandingsTable({ standings }: { standings: F1DriverStanding[] }) {
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table className="standings-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
+        <thead>
+          <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
+            <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>Pos</th>
+            <th style={{ padding: "0.375rem 0.375rem", fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase" }}>Piloto</th>
+            <th style={{ padding: "0.375rem 0.375rem", fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase" }}>Equipe</th>
+            <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>Pts</th>
+          </tr>
+        </thead>
+        <tbody>
+          {standings.map((s) => (
+            <tr key={s.driverCode}>
+              <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{s.position}</td>
+              <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-text)", fontWeight: 600, whiteSpace: "nowrap" }}>{s.driverName}</td>
+              <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-muted)", whiteSpace: "nowrap" }}>{s.constructorName}</td>
+              <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{s.points}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function F1ConstructorStandingsTable({ standings }: { standings: F1ConstructorStanding[] }) {
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <table className="standings-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
+        <thead>
+          <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
+            <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>Pos</th>
+            <th style={{ padding: "0.375rem 0.375rem", fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase" }}>Equipe</th>
+            <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>Pts</th>
+          </tr>
+        </thead>
+        <tbody>
+          {standings.map((s) => (
+            <tr key={s.constructorName}>
+              <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{s.position}</td>
+              <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-text)", fontWeight: 600, whiteSpace: "nowrap" }}>{s.constructorName}</td>
+              <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{s.points}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 // Articles tagged "esporte" — same merge-by-primary-or-extra-category logic
 // as the generic /conteudo/categoria/[slug] template, just hardcoded to this
 // one category since /conteudo/categoria/esporte now redirects here.
@@ -463,7 +522,7 @@ export default async function EsportesPage({
           </div>
           <h1 style={{ fontSize: "clamp(2rem, 5vw, 3rem)", fontWeight: 800, lineHeight: 1.1, marginBottom: "0.875rem" }}>Esportes</h1>
           <p style={{ color: "rgba(255,255,255,0.65)", fontSize: "1.0625rem", lineHeight: 1.7, maxWidth: "540px" }}>
-            Notícias, Brasileirão, NFL e NBA — classificação e jogos atualizados em tempo real.
+            Notícias, Brasileirão, NFL, NBA e F1 — classificação e jogos atualizados em tempo real.
           </p>
         </div>
       </section>
@@ -483,6 +542,8 @@ export default async function EsportesPage({
           {tab === "nfl" && <NflTab />}
 
           {tab === "nba" && <NbaTab />}
+
+          {tab === "f1" && <F1Tab />}
         </div>
       </section>
 
@@ -767,6 +828,97 @@ export default async function EsportesPage({
           </div>
         </div>
         <p style={{ fontSize: "0.75rem", color: "var(--site-faint)", marginTop: "1.5rem" }}>Fonte: ESPN.</p>
+      </>
+    );
+  }
+
+  async function F1Tab() {
+    const [nextRace, lastResult, driverStandings, constructorStandings] = await Promise.all([
+      getNextRace(),
+      getLastRaceResult(),
+      getDriverStandings(),
+      getConstructorStandings(),
+    ]);
+    return (
+      <>
+        <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.875rem" }}>
+          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "2.75rem", height: "2.75rem", borderRadius: "0.875rem", backgroundColor: `${BRAND}14`, color: BRAND, flexShrink: 0 }}>
+            <Flag size={22} />
+          </span>
+          <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>Fórmula 1</h1>
+        </header>
+        <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
+          <div style={cardStyle}>
+            <SectionHeader icon={CalendarDays} title="Próxima corrida" />
+            {nextRace ? (
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem" }}>
+                <div>
+                  <div style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)" }}>{nextRace.name}</div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--site-muted)", fontSize: "0.875rem", marginTop: "0.25rem" }}>
+                    <MapPin size={14} />
+                    {nextRace.circuitName}
+                    {nextRace.locality ? ` · ${nextRace.locality}, ${nextRace.country}` : nextRace.country ? ` · ${nextRace.country}` : ""}
+                  </div>
+                </div>
+                <div style={{ fontWeight: 800, color: BRAND, fontSize: "0.9375rem", whiteSpace: "nowrap" }}>{formatF1DateTime(nextRace.date, nextRace.time)}</div>
+              </div>
+            ) : (
+              <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Nenhuma corrida agendada no momento.</p>
+            )}
+          </div>
+
+          <div style={cardStyle}>
+            <SectionHeader icon={Flag} title={lastResult ? `Resultado — ${lastResult.name}` : "Último resultado"} />
+            {lastResult && lastResult.results.length > 0 ? (
+              <div style={{ overflowX: "auto" }}>
+                <table className="standings-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
+                  <thead>
+                    <tr style={{ color: "var(--site-muted)", textAlign: "left" }}>
+                      <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>Pos</th>
+                      <th style={{ padding: "0.375rem 0.375rem", fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase" }}>Piloto</th>
+                      <th style={{ padding: "0.375rem 0.375rem", fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase" }}>Equipe</th>
+                      <th style={{ padding: "0.375rem 0.375rem", fontSize: "0.6875rem", fontWeight: 800, textTransform: "uppercase" }}>Status</th>
+                      <th style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontSize: "0.6875rem", fontWeight: 800 }}>Pts</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {lastResult.results.slice(0, 10).map((r) => (
+                      <tr key={r.position}>
+                        <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{r.position}</td>
+                        <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-text)", fontWeight: 600, whiteSpace: "nowrap" }}>{r.driverName}</td>
+                        <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-muted)", whiteSpace: "nowrap" }}>{r.constructorName}</td>
+                        <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-faint)", whiteSpace: "nowrap" }}>{r.status}</td>
+                        <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{r.points}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Resultado indisponível no momento.</p>
+            )}
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1rem" }}>
+            <div style={{ ...cardStyle, padding: "1.125rem", minWidth: 0 }}>
+              <SectionHeader icon={ListOrdered} title="Pilotos" />
+              {driverStandings && driverStandings.length > 0 ? (
+                <F1DriverStandingsTable standings={driverStandings} />
+              ) : (
+                <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Classificação indisponível no momento.</p>
+              )}
+            </div>
+            <div style={{ ...cardStyle, padding: "1.125rem", minWidth: 0 }}>
+              <SectionHeader icon={Users} title="Construtores" />
+              {constructorStandings && constructorStandings.length > 0 ? (
+                <F1ConstructorStandingsTable standings={constructorStandings} />
+              ) : (
+                <p style={{ color: "var(--site-faint)", fontSize: "0.875rem", padding: "0.75rem 0" }}>Classificação indisponível no momento.</p>
+              )}
+            </div>
+          </div>
+        </div>
+        <p style={{ fontSize: "0.75rem", color: "var(--site-faint)", marginTop: "1.5rem" }}>Fonte: Jolpica F1 (dados públicos, sucessor do Ergast).</p>
       </>
     );
   }
