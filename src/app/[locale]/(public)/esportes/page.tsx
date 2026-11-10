@@ -3,6 +3,7 @@ import { getTranslations } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import type { ReactNode } from "react";
 import { ArrowLeft, Newspaper, Trophy, CalendarDays, ListOrdered, Users, ChevronRight, Flag, MapPin } from "lucide-react";
+import { CheckeredFlagIcon } from "@/components/icons/CheckeredFlagIcon";
 import {
   COMPETITIONS,
   COMPETITION_ORDER,
@@ -19,7 +20,17 @@ import { getCurrentWeekGames, getStandingsByDivision as getNflStandingsByDivisio
 import { getTodayGames, getStandingsByDivision as getNbaStandingsByDivision, type NbaDivisionStandings, type NbaGame } from "@/lib/nba";
 import { NFL_LOGO_URL } from "@/lib/nfl";
 import { NBA_LOGO_URL } from "@/lib/nba";
-import { getNextRace, getDriverStandings, getConstructorStandings, getLastRaceResult, type F1DriverStanding, type F1ConstructorStanding } from "@/lib/f1";
+import {
+  getNextRace,
+  getDriverStandings,
+  getConstructorStandings,
+  getLastRaceResult,
+  countryCode,
+  nationalityCode,
+  constructorColor,
+  type F1DriverStanding,
+  type F1ConstructorStanding,
+} from "@/lib/f1";
 import { TeamCrest } from "@/components/TeamCrest";
 import { FormatTag } from "@/components/FormatTag";
 import { PeopleGrowthBadge } from "@/components/PeopleGrowthBadge";
@@ -55,7 +66,7 @@ const TABS = [
   { id: "brasileirao", label: "Futebol", icon: Trophy },
   { id: "nfl", label: "NFL" },
   { id: "nba", label: "NBA" },
-  { id: "f1", label: "F1", icon: Flag },
+  { id: "f1", label: "F1" },
 ] as const;
 type TabId = (typeof TABS)[number]["id"];
 
@@ -117,6 +128,7 @@ function TabNav({ active }: { active: TabId }) {
           {"icon" in t && <t.icon size={16} />}
           {t.id === "nfl" && <TeamCrest src={NFL_LOGO_URL} alt="" size={18} />}
           {t.id === "nba" && <TeamCrest src={NBA_LOGO_URL} alt="" size={18} />}
+          {t.id === "f1" && <CheckeredFlagIcon size={16} />}
           {t.label}
         </a>
       ))}
@@ -124,7 +136,7 @@ function TabNav({ active }: { active: TabId }) {
   );
 }
 
-function SectionHeader({ icon: Icon, title }: { icon: typeof CalendarDays; title: string }) {
+function SectionHeader({ icon: Icon, title, extra }: { icon: typeof CalendarDays; title: string; extra?: ReactNode }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", marginBottom: "1.125rem" }}>
       <span
@@ -143,6 +155,7 @@ function SectionHeader({ icon: Icon, title }: { icon: typeof CalendarDays; title
         <Icon size={18} />
       </span>
       <h2 style={{ fontSize: "1.0625rem", fontWeight: 800, color: "var(--site-text)" }}>{title}</h2>
+      {extra}
     </div>
   );
 }
@@ -414,6 +427,46 @@ function formatF1DateTime(date: string, time: string | null): string {
   return d.toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo", day: "2-digit", month: "2-digit", ...(time ? { hour: "2-digit", minute: "2-digit" } : {}) });
 }
 
+// Small styled badge with a 2-letter country code — stands in for a flag
+// image/emoji (see f1.ts header comment: flag emoji rendering is
+// inconsistent across platforms, a styled badge isn't).
+function CountryBadge({ code, size = "sm" }: { code: string; size?: "sm" | "lg" }) {
+  if (!code) return null;
+  const lg = size === "lg";
+  return (
+    <span
+      style={{
+        display: "inline-flex",
+        alignItems: "center",
+        justifyContent: "center",
+        minWidth: lg ? "2.75rem" : "1.625rem",
+        height: lg ? "1.875rem" : "1.0625rem",
+        padding: lg ? "0 0.5rem" : "0 0.25rem",
+        borderRadius: "0.3125rem",
+        backgroundColor: `${BRAND}14`,
+        color: BRAND,
+        fontSize: lg ? "0.8125rem" : "0.625rem",
+        fontWeight: 800,
+        letterSpacing: "0.02em",
+        flexShrink: 0,
+      }}
+    >
+      {code}
+    </span>
+  );
+}
+
+// Small colored dot + name — stands in for a team logo (see f1.ts header
+// comment on why real team logos aren't hosted here).
+function ConstructorDot({ name }: { name: string }) {
+  return (
+    <span style={{ display: "inline-flex", alignItems: "center", gap: "0.4375rem" }}>
+      <span style={{ width: "0.5625rem", height: "0.5625rem", borderRadius: "9999px", backgroundColor: constructorColor(name), flexShrink: 0 }} />
+      {name}
+    </span>
+  );
+}
+
 function F1DriverStandingsTable({ standings }: { standings: F1DriverStanding[] }) {
   return (
     <div style={{ overflowX: "auto" }}>
@@ -430,8 +483,15 @@ function F1DriverStandingsTable({ standings }: { standings: F1DriverStanding[] }
           {standings.map((s) => (
             <tr key={s.driverCode}>
               <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{s.position}</td>
-              <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-text)", fontWeight: 600, whiteSpace: "nowrap" }}>{s.driverName}</td>
-              <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-muted)", whiteSpace: "nowrap" }}>{s.constructorName}</td>
+              <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-text)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                <span style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
+                  <CountryBadge code={nationalityCode(s.driverNationality)} />
+                  {s.driverName}
+                </span>
+              </td>
+              <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-muted)", whiteSpace: "nowrap" }}>
+                <ConstructorDot name={s.constructorName} />
+              </td>
               <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{s.points}</td>
             </tr>
           ))}
@@ -456,7 +516,9 @@ function F1ConstructorStandingsTable({ standings }: { standings: F1ConstructorSt
           {standings.map((s) => (
             <tr key={s.constructorName}>
               <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{s.position}</td>
-              <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-text)", fontWeight: 600, whiteSpace: "nowrap" }}>{s.constructorName}</td>
+              <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-text)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                <ConstructorDot name={s.constructorName} />
+              </td>
               <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{s.points}</td>
             </tr>
           ))}
@@ -842,8 +904,8 @@ export default async function EsportesPage({
     return (
       <>
         <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.875rem" }}>
-          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "2.75rem", height: "2.75rem", borderRadius: "0.875rem", backgroundColor: `${BRAND}14`, color: BRAND, flexShrink: 0 }}>
-            <Flag size={22} />
+          <span style={{ display: "inline-flex", alignItems: "center", justifyContent: "center", width: "2.75rem", height: "2.75rem", borderRadius: "0.875rem", backgroundColor: `${BRAND}14`, flexShrink: 0 }}>
+            <CheckeredFlagIcon size={24} />
           </span>
           <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>Fórmula 1</h1>
         </header>
@@ -852,12 +914,15 @@ export default async function EsportesPage({
             <SectionHeader icon={CalendarDays} title="Próxima corrida" />
             {nextRace ? (
               <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.75rem" }}>
-                <div>
-                  <div style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)" }}>{nextRace.name}</div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--site-muted)", fontSize: "0.875rem", marginTop: "0.25rem" }}>
-                    <MapPin size={14} />
-                    {nextRace.circuitName}
-                    {nextRace.locality ? ` · ${nextRace.locality}, ${nextRace.country}` : nextRace.country ? ` · ${nextRace.country}` : ""}
+                <div style={{ display: "flex", alignItems: "center", gap: "0.75rem" }}>
+                  <CountryBadge code={countryCode(nextRace.country)} size="lg" />
+                  <div>
+                    <div style={{ fontWeight: 800, fontSize: "1.0625rem", color: "var(--site-text)" }}>{nextRace.name}</div>
+                    <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", color: "var(--site-muted)", fontSize: "0.875rem", marginTop: "0.25rem" }}>
+                      <MapPin size={14} />
+                      {nextRace.circuitName}
+                      {nextRace.locality ? ` · ${nextRace.locality}, ${nextRace.country}` : nextRace.country ? ` · ${nextRace.country}` : ""}
+                    </div>
                   </div>
                 </div>
                 <div style={{ fontWeight: 800, color: BRAND, fontSize: "0.9375rem", whiteSpace: "nowrap" }}>{formatF1DateTime(nextRace.date, nextRace.time)}</div>
@@ -868,7 +933,11 @@ export default async function EsportesPage({
           </div>
 
           <div style={cardStyle}>
-            <SectionHeader icon={Flag} title={lastResult ? `Resultado — ${lastResult.name}` : "Último resultado"} />
+            <SectionHeader
+              icon={Flag}
+              title={lastResult ? `Resultado — ${lastResult.name}` : "Último resultado"}
+              extra={lastResult ? <CountryBadge code={countryCode(lastResult.country)} /> : undefined}
+            />
             {lastResult && lastResult.results.length > 0 ? (
               <div style={{ overflowX: "auto" }}>
                 <table className="standings-table" style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.8125rem" }}>
@@ -885,8 +954,15 @@ export default async function EsportesPage({
                     {lastResult.results.slice(0, 10).map((r) => (
                       <tr key={r.position}>
                         <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{r.position}</td>
-                        <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-text)", fontWeight: 600, whiteSpace: "nowrap" }}>{r.driverName}</td>
-                        <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-muted)", whiteSpace: "nowrap" }}>{r.constructorName}</td>
+                        <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-text)", fontWeight: 600, whiteSpace: "nowrap" }}>
+                          <span style={{ display: "inline-flex", alignItems: "center", gap: "0.375rem" }}>
+                            <CountryBadge code={nationalityCode(r.driverNationality)} />
+                            {r.driverName}
+                          </span>
+                        </td>
+                        <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-muted)", whiteSpace: "nowrap" }}>
+                          <ConstructorDot name={r.constructorName} />
+                        </td>
                         <td style={{ padding: "0.375rem 0.375rem", color: "var(--site-faint)", whiteSpace: "nowrap" }}>{r.status}</td>
                         <td style={{ padding: "0.375rem 0.375rem", textAlign: "center", fontWeight: 800, color: BRAND }}>{r.points}</td>
                       </tr>
