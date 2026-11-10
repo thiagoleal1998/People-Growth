@@ -53,6 +53,20 @@ export default async function SobrePage() {
     .order("order");
   const columnists = (columnistsData ?? []) as Columnist[];
 
+  // Team members who are also columnists (Bruno, Raphael, and whoever else
+  // joins later) — identified the same way the org chart already does, by
+  // having a manager placed there (org_chart_manager_id), rather than a
+  // hardcoded name list. Founders are excluded since they have their own
+  // grid above and are each other's "manager" in spirit, not reports.
+  const { data: teamData } = await client
+    .from("columnists")
+    .select("*")
+    .eq("status", "active")
+    .eq("is_founder", false)
+    .not("org_chart_manager_id", "is", null)
+    .order("name");
+  const team = (teamData ?? []) as Columnist[];
+
   return (
     <>
       {/* Hero */}
@@ -327,6 +341,24 @@ export default async function SobrePage() {
           <p style={{ color: "var(--site-text-secondary)", fontSize: "1.0625rem", lineHeight: 1.75, maxWidth: "760px", margin: "3rem auto 0", textAlign: "center" }}>
             Juntos, unem consultoria de negócios, tecnologia e um espaço de conteúdo — notícias e a coluna de opinião <strong>Mea Sententia</strong> — com lives aos sábados e vídeos ao longo da semana sobre temas que vão de negócios a política, economia e meio ambiente, no regional, no Brasil e no mundo.
           </p>
+
+          {team.length > 0 && (
+            <div style={{ marginTop: "4rem", paddingTop: "3rem", borderTop: "1px solid var(--site-border)" }}>
+              <div style={{ textAlign: "center", maxWidth: "720px", margin: "0 auto 2.5rem" }}>
+                <h3 style={{ fontSize: "clamp(1.375rem, 3vw, 1.75rem)", fontWeight: 800, color: "var(--site-text)", marginBottom: "0.75rem" }}>
+                  Equipe
+                </h3>
+                <p style={{ color: "var(--site-muted)", fontSize: "1rem", lineHeight: 1.7 }}>
+                  Quem, no dia a dia, coloca tudo isso em prática ao lado dos sócios.
+                </p>
+              </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "1.5rem" }}>
+                {team.map((member) => (
+                  <FounderCard key={member.id} columnist={member} />
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </section>
 

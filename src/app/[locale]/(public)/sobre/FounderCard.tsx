@@ -2,24 +2,23 @@ import { ChevronRight } from "lucide-react";
 import { getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import { pickLocale } from "@/lib/locale-content";
+import { isColumnistPubliclyVisible } from "@/lib/founder-data";
 import type { Columnist } from "@/types/database.types";
 
 export async function FounderCard({ columnist }: { columnist: Columnist }) {
   const locale = await getLocale();
-  return (
-    <Link
-      href={{ pathname: "/sobre/[slug]", params: { slug: columnist.slug } }}
-      className="hover-card"
-      style={{
-        display: "block",
-        textDecoration: "none",
-        color: "inherit",
-        backgroundColor: "var(--site-surface-alt)",
-        borderRadius: "1rem",
-        padding: "1.25rem",
-        border: "1px solid var(--site-border)",
-      }}
-    >
+  const cardStyle = {
+    display: "block" as const,
+    textDecoration: "none",
+    color: "inherit",
+    backgroundColor: "var(--site-surface-alt)",
+    borderRadius: "1rem",
+    padding: "1.25rem",
+    border: "1px solid var(--site-border)",
+  };
+
+  const content = (
+    <>
       <div style={{ display: "flex", gap: "0.875rem", alignItems: "center" }}>
         <div
           style={{
@@ -58,6 +57,21 @@ export async function FounderCard({ columnist }: { columnist: Columnist }) {
           {pickLocale(locale, columnist.tagline_pt, columnist.tagline_en)}
         </p>
       )}
+    </>
+  );
+
+  // A team member can be listed here (name + role) before their profile
+  // page is ready (photo + tagline) — isColumnistPubliclyVisible is the
+  // same gate /sobre/[slug] itself uses, so linking to it early would just
+  // 404. Rendered as a plain, non-clickable card instead of a dead link
+  // in that case (no "Ver trajetória" either, since there's nowhere to go).
+  if (!isColumnistPubliclyVisible(columnist)) {
+    return <div style={cardStyle}>{content}</div>;
+  }
+
+  return (
+    <Link href={{ pathname: "/sobre/[slug]", params: { slug: columnist.slug } }} className="hover-card" style={cardStyle}>
+      {content}
 
       <div
         className="hover-link-move"
