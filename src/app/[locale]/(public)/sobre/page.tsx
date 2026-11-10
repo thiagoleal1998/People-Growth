@@ -349,7 +349,7 @@ export default async function SobrePage() {
                   Equipe
                 </h3>
                 <p style={{ color: "var(--site-muted)", fontSize: "1rem", lineHeight: 1.7 }}>
-                  Quem, no dia a dia, coloca tudo isso em prática ao lado dos sócios.
+                  Talento que dá vida ao que construímos juntos, todos os dias.
                 </p>
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "1.5rem" }}>
