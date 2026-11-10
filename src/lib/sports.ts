@@ -89,11 +89,20 @@ export const COMPETITIONS: Record<Competition, { apiLeagueId: number; name_pt: s
   serie_a: { apiLeagueId: 71, name_pt: "Brasileirão Série A", name_en: "Brasileirão Série A", format: "table", logo: `${SPORTS_LOGO_BASE}/brasileirao-serie-a.png` },
   serie_b: { apiLeagueId: 72, name_pt: "Brasileirão Série B", name_en: "Brasileirão Série B", format: "table", logo: `${SPORTS_LOGO_BASE}/brasileirao-serie-b.png` },
   copa_do_brasil: { apiLeagueId: 73, name_pt: "Copa do Brasil", name_en: "Copa do Brasil", format: "list", logo: `${SPORTS_LOGO_BASE}/copa-do-brasil.png` },
-  libertadores: { apiLeagueId: 13, name_pt: "Libertadores", name_en: "Copa Libertadores", format: "list", logo: `${SPORTS_LOGO_BASE}/libertadores.png` },
+  // Logo deliberately left blank (TeamCrest already falls back to its
+  // generic gradient placeholder for a falsy src, same as a broken-image
+  // case) — CONMEBOL's official terms (cdn.conmebol.com .../TERMINOS_Y_
+  // CONDICIONES_MEDIAHUB.pdf, cl.8) explicitly and specifically prohibit
+  // reproducing their logos/images anywhere outside conmebol.com, even for
+  // free/non-commercial public display, with no editorial exception —
+  // confirmed live, the most explicit of any competition on this page, so
+  // the hosted copy was taken down rather than kept on a "probably fine"
+  // basis the way some of the others here are.
+  libertadores: { apiLeagueId: 13, name_pt: "Libertadores", name_en: "Copa Libertadores", format: "list", logo: "" },
   // apiLeagueId=11 confirmed live via /leagues?search=sudamericana ("CONMEBOL
   // Sudamericana"). Knockout-only like Copa do Brasil/Libertadores — no
   // round-robin group table to show at this point in most seasons either.
-  sulamericana: { apiLeagueId: 11, name_pt: "Sul-Americana", name_en: "Copa Sudamericana", format: "list", logo: `${SPORTS_LOGO_BASE}/sulamericana.png` },
+  sulamericana: { apiLeagueId: 11, name_pt: "Sul-Americana", name_en: "Copa Sudamericana", format: "list", logo: "" },
   // apiLeagueId values below (39/140/2) are API-Football's own long-standing,
   // widely-documented ids for these three competitions — NOT live-verified
   // against /leagues?search= the way every id above this point was, because
@@ -119,7 +128,13 @@ export const COMPETITIONS: Record<Competition, { apiLeagueId: number; name_pt: s
   // that page has no table and getFullStandings naturally returns null —
   // the UI already handles a null table gracefully elsewhere, so this just
   // stops showing one rather than needing a mid-season format change.
-  champions_league: { apiLeagueId: 2, name_pt: "Champions League", name_en: "Champions League", format: "table", logo: `${SPORTS_LOGO_BASE}/champions-league.png` },
+  // Logo blank for the same reason as libertadores/sulamericana above —
+  // UEFA's general terms (uefa.com/termsconditions, 8.2) grant no implied
+  // license for any use of "any UEFA Marks or Content" beyond what's
+  // expressly detailed there, and no editorial exception for the logo is
+  // expressly detailed — confirmed live, structurally the same silence-
+  // means-no posture as CONMEBOL and F1, so the hosted copy was taken down.
+  champions_league: { apiLeagueId: 2, name_pt: "Champions League", name_en: "Champions League", format: "table", logo: "" },
 };
 
 export const COMPETITION_ORDER: Competition[] = ["serie_a", "serie_b", "copa_do_brasil", "libertadores", "sulamericana", "premier_league", "la_liga", "champions_league"];
