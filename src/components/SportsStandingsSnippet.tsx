@@ -3,7 +3,7 @@
 import { useRef, useState } from "react";
 import { Link } from "@/i18n/navigation";
 import { ChevronLeft, ChevronRight } from "lucide-react";
-import { TeamCrest } from "@/components/TeamCrest";
+import { CompetitionCrest } from "@/components/CompetitionCrest";
 import { COMPETITIONS, COMPETITION_ORDER, type Competition, type StandingRow } from "@/lib/sports";
 
 const BRAND = "#315E9C";
@@ -63,7 +63,7 @@ export function SportsStandingsSnippet({
       <div style={{ backgroundColor: BRAND, color: "white", padding: "0.625rem 1rem", display: "flex", alignItems: "center", gap: "0.625rem" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flex: 1, minWidth: 0, ...fadeStyle }}>
           {activeCompetition ? (
-            <TeamCrest src={COMPETITIONS[activeCompetition].logo} alt="" size={28} />
+            <CompetitionCrest competition={activeCompetition} size={28} />
           ) : (
             <div style={{ width: 28, height: 28, borderRadius: "50%", backgroundColor: "rgba(255,255,255,0.2)" }} />
           )}

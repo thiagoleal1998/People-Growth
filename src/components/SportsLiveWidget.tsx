@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import { COMPETITIONS, COMPETITION_ORDER, type Fixture, type SportsWidgetTab } from "@/lib/sports";
 import { TeamCrest } from "@/components/TeamCrest";
+import { CompetitionCrest } from "@/components/CompetitionCrest";
 
 const BRAND = "#315E9C";
 const VISIBLE_COUNT = 3;
@@ -47,7 +48,7 @@ function MatchCard({ fixture, locale }: { fixture: Fixture; locale: string }) {
       }}
     >
       <div style={{ display: "flex", alignItems: "center", gap: "0.3125rem", fontSize: "0.625rem", color: "var(--site-faint)", textAlign: "center", overflow: "hidden", maxWidth: "100%" }}>
-        <TeamCrest src={COMPETITIONS[fixture.competition].logo} alt="" size={14} />
+        <CompetitionCrest competition={fixture.competition} size={14} />
         <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{COMPETITIONS[fixture.competition].name_pt}</span>
       </div>
       <span
@@ -196,8 +197,8 @@ export function SportsLiveWidget({
   // longer needs the "only when every fixture agrees" fallback the flat-list
   // version did.
   const widgetTitle = activeBlock
-    ? { logo: COMPETITIONS[activeBlock.competition].logo, name: locale === "en" ? COMPETITIONS[activeBlock.competition].name_en : COMPETITIONS[activeBlock.competition].name_pt }
-    : { logo: null, name: locale === "en" ? "Sports" : "Esportes" };
+    ? { competition: activeBlock.competition, name: locale === "en" ? COMPETITIONS[activeBlock.competition].name_en : COMPETITIONS[activeBlock.competition].name_pt }
+    : { competition: null, name: locale === "en" ? "Sports" : "Esportes" };
   const transitionKey = `${activeKey}-${activeBlock?.competition ?? "none"}-${blockIndex}-${activePageIndex}`;
 
   return (
@@ -218,7 +219,7 @@ export function SportsLiveWidget({
           borderBottom: "1px solid var(--site-border)",
         }}
       >
-        {widgetTitle.logo ? <TeamCrest src={widgetTitle.logo} alt="" size={32} /> : <span style={{ fontSize: "1.5rem" }}>🏆</span>}
+        {widgetTitle.competition ? <CompetitionCrest competition={widgetTitle.competition} size={32} /> : <span style={{ fontSize: "1.5rem" }}>🏆</span>}
         {widgetTitle.name}
       </div>
       <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginBottom: "0.875rem", flexWrap: "wrap" }}>

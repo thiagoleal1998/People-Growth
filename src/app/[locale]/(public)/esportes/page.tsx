@@ -32,6 +32,7 @@ import {
   type F1ConstructorStanding,
 } from "@/lib/f1";
 import { TeamCrest } from "@/components/TeamCrest";
+import { CompetitionCrest } from "@/components/CompetitionCrest";
 import { FormatTag } from "@/components/FormatTag";
 import { PeopleGrowthBadge } from "@/components/PeopleGrowthBadge";
 import { PontoDeReplicaBadge } from "@/components/PontoDeReplicaBadge";
@@ -709,14 +710,14 @@ export default async function EsportesPage({
     return (
       <>
         <header style={{ borderBottom: `2px solid ${BRAND}`, paddingBottom: "1rem", marginBottom: "1.5rem", display: "flex", alignItems: "center", gap: "0.875rem" }}>
-          <TeamCrest src={info.logo} alt="" size={44} />
+          <CompetitionCrest competition={competition} size={44} />
           <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.25rem)", fontWeight: 800, color: "var(--site-text)" }}>{info.name_pt}</h1>
         </header>
 
         <nav style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", marginBottom: "1.5rem" }}>
           {COMPETITION_ORDER.map((option) => (
             <NavPill key={option} href={`?tab=brasileirao&competicao=${option}`} active={option === competition}>
-              <TeamCrest src={COMPETITIONS[option].logo} alt="" size={18} />
+              <CompetitionCrest competition={option} size={18} />
               {COMPETITIONS[option].name_pt}
             </NavPill>
           ))}
