@@ -31,6 +31,16 @@ async function notifyAdmins(key: NotificationTemplateKey, vars: Record<string, s
   await Promise.all(admins.map((a: { id: string }) => insertNotification(admin, a.id, key, vars, link)));
 }
 
+// Mirrors the `tabs` array in ColumnistArticleForm.tsx — see the matching
+// constant/comment in the admin artigos/actions.ts for why this is a
+// separate literal rather than an import, and why every save-related
+// redirect below echoes it back in the URL.
+const ARTICLE_FORM_TABS = ["conteudo", "fontes", "detalhes", "seo"];
+function tabQueryParam(formData: FormData): string {
+  const tab = String(formData.get("active_tab") ?? "");
+  return ARTICLE_FORM_TABS.includes(tab) ? `&tab=${tab}` : "";
+}
+
 export async function upsertOwnArticle(id: string | null, formData: FormData) {
   try {
     await upsertOwnArticleInner(id, formData);
@@ -41,7 +51,7 @@ export async function upsertOwnArticle(id: string | null, formData: FormData) {
     if (isRedirectError(err)) throw err; // redirect() itself throws — let it through
     const message = err instanceof Error ? err.message : String(err);
     console.error("upsertOwnArticle failed:", err);
-    redirect(`/colunista/artigos/${id ?? "novo"}?saveError=${encodeURIComponent(message)}`);
+    redirect(`/colunista/artigos/${id ?? "novo"}?saveError=${encodeURIComponent(message)}${tabQueryParam(formData)}`);
   }
 }
 
@@ -185,7 +195,7 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
   // A failed write (e.g. a duplicate slug) must never look like a success —
   // this used to redirect to ?saved=1 unconditionally regardless of error.
   if (saveError) {
-    redirect(`/colunista/artigos/${articleId ?? "novo"}?saveError=${encodeURIComponent(saveError)}`);
+    redirect(`/colunista/artigos/${articleId ?? "novo"}?saveError=${encodeURIComponent(saveError)}${tabQueryParam(formData)}`);
   }
 
   await logActivity({
@@ -215,11 +225,11 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
   revalidatePath("/admin/artigos");
 
   if (imageError && articleId) {
-    redirect(`/colunista/artigos/${articleId}?imageError=${encodeURIComponent(imageError)}`);
+    redirect(`/colunista/artigos/${articleId}?imageError=${encodeURIComponent(imageError)}${tabQueryParam(formData)}`);
   }
   // Stay on the article being edited instead of bouncing back to the list —
   // the person decides when they're done, not the save action.
-  redirect(`/colunista/artigos/${articleId}?saved=1`);
+  redirect(`/colunista/artigos/${articleId}?saved=1${tabQueryParam(formData)}`);
 }
 
 export async function deleteOwnArticle(id: string) {

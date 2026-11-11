@@ -77,6 +77,20 @@ function uniqueId(base: string, seen: Map<string, number>): string {
   return count === 0 ? base : `${base}-${count + 1}`;
 }
 
+// One cell of a ":::grid-N" block (see renderMarkdownLite) — deliberately
+// not the same builder the standalone image regex uses: a grid cell has no
+// "{w:NN}" width handle (meaningless once the column is already split into
+// 2-3) and no outer margin (the grid's own `gap` spaces the cells, and
+// `article-img-figure`'s mobile-full-width override doesn't apply here —
+// the whole grid collapses to one column on mobile instead, see globals.css).
+function buildGridFigureHtml(alt: string, url: string, credit: string | undefined, source: string | undefined): string {
+  const captionLine = alt ? `<span style="display:block">${alt}</span>` : "";
+  const creditLine = credit ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Créditos: ${credit}</span>` : "";
+  const sourceLine = source ? `<span style="display:block;margin-top:0.25rem;font-size:0.75rem;color:var(--site-faint)">Fonte: ${source}</span>` : "";
+  const figcaption = alt || credit || source ? `<figcaption style="margin-top:0.625rem;font-size:0.8125rem;color:var(--site-muted);text-align:center">${captionLine}${creditLine}${sourceLine}</figcaption>` : "";
+  return `<figure style="margin:0"><img src="${url}" alt="${alt}" style="width:100%;border-radius:0.75rem;display:block;cursor:zoom-in" />${figcaption}</figure>`;
+}
+
 export function renderMarkdownLite(text: string, options: { anchorHeadings?: boolean } = {}): string {
   const headingIds = new Map<string, number>();
   // URLs (in images/links) commonly contain "_" — signed CDN tokens
@@ -103,6 +117,25 @@ export function renderMarkdownLite(text: string, options: { anchorHeadings?: boo
   // makes every downstream regex CRLF-agnostic.
   let html = text
     .replace(/\r\n?/g, "\n")
+    // ":::grid-2" / ":::grid-3" fenced block — N photos side by side (the
+    // editor's "Fotos lado a lado" toolbar button inserts this; nothing
+    // stops someone from typing it by hand too). Must run before the
+    // single-image regex below, same reasoning as !video/!gif: it shares
+    // the "![alt](url)" shape for each line inside the fence, so the plain
+    // image regex would otherwise consume them as standalone full-width
+    // figures before this ever sees the fence markers. Each inner line
+    // reuses the exact same "![alt](url "credito" "fonte")" attribute
+    // syntax as a standalone image — no separate dialect to parse — but
+    // skips the "{w:NN}" width handle, which is meaningless as a percentage
+    // of a column that's already been split into 2 or 3.
+    .replace(/^:::grid-([23])\n([\s\S]*?)\n:::$/gm, (_match, cols: string, inner: string) => {
+      const images: string[] = [];
+      const imgRe = /!\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g;
+      let m: RegExpExecArray | null;
+      while ((m = imgRe.exec(inner))) images.push(buildGridFigureHtml(m[1], m[2], m[3], m[4]));
+      if (images.length === 0) return "";
+      return protect("FIG", `<div class="article-img-grid-${cols}">${images.join("")}</div>`);
+    })
     .replace(/^### (.+)$/gm, '<h3 style="font-size:1.25rem;font-weight:800;color:var(--site-text);margin:1.75rem 0 0.875rem">$1</h3>\n')
     .replace(/^## (.+)$/gm, (_match, title: string) => {
       const plain = stripHeadingEmphasis(title).trim();
@@ -319,6 +352,7 @@ export function stripMarkdownLite(text: string): string {
     .replace(/^>\s?/gm, "")
     .replace(/^#{2,3}\s+/gm, "")
     .replace(/^[-\d]+\.?\s+/gm, "")
+    .replace(/^:::grid-[23]\n[\s\S]*?\n:::$/gm, "")
     .replace(/!video\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+\)/g, "")
     .replace(/!gif\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+(?:\s+"[^"]*")?(?:\s+"[^"]*")?\)/g, "")
     .replace(/!\[[^\]]*\]\((?:[^\s()]|\([^()]*\))+(?:\s+"[^"]*")?(?:\s+"[^"]*")?\)(?:\{w:\d{1,3}\})?/g, "")

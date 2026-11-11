@@ -11,6 +11,19 @@ import { calculateReadTime } from "@/lib/markdown-lite";
 import { insertNotification, type NotificationTemplateKey } from "@/lib/notify";
 import type { Article, ArticleSource } from "@/types/database.types";
 
+// Mirrors the `tabs` array in ArticleForm.tsx (kept as a separate literal
+// here rather than importing it — that file is a "use client" component,
+// not something a server action module should pull in). Every redirect
+// below echoes this back in the URL so the form reopens on whichever tab
+// was active when "Salvar" was clicked, instead of always bouncing to
+// "Conteúdo" — a plain `redirect()` is a real navigation that remounts the
+// form and resets any plain useState, regardless of where it points.
+const ARTICLE_FORM_TABS = ["conteudo", "fontes", "detalhes", "seo"];
+function tabQueryParam(formData: FormData): string {
+  const tab = String(formData.get("active_tab") ?? "");
+  return ARTICLE_FORM_TABS.includes(tab) ? `&tab=${tab}` : "";
+}
+
 // Shared by publishArticle/approveAndSchedule/requestChanges — resolves
 // which login is linked to a columnist (user_profiles' own RLS only allows
 // reading your own row, hence the admin client) and drops a notification
@@ -48,7 +61,7 @@ export async function upsertArticle(id: string | null, formData: FormData) {
     if (isRedirectError(err)) throw err; // redirect() itself throws — let it through
     const message = err instanceof Error ? err.message : String(err);
     console.error("upsertArticle failed:", err);
-    redirect(`/admin/artigos/${articleIdForErrorRedirect ?? "novo"}?saveError=${encodeURIComponent(message)}`);
+    redirect(`/admin/artigos/${articleIdForErrorRedirect ?? "novo"}?saveError=${encodeURIComponent(message)}${tabQueryParam(formData)}`);
   }
 }
 
@@ -176,7 +189,7 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
   // A failed write (e.g. a duplicate slug) must never look like a success —
   // this used to redirect to ?saved=1 unconditionally regardless of error.
   if (saveError) {
-    redirect(`/admin/artigos/${articleId ?? "novo"}?saveError=${encodeURIComponent(saveError)}`);
+    redirect(`/admin/artigos/${articleId ?? "novo"}?saveError=${encodeURIComponent(saveError)}${tabQueryParam(formData)}`);
   }
 
   if (profile) {
@@ -195,11 +208,11 @@ async function upsertArticleInner(id: string | null, formData: FormData) {
   revalidatePath("/[locale]", "page");
 
   if (imageError && articleId) {
-    redirect(`/admin/artigos/${articleId}?imageError=${encodeURIComponent(imageError)}`);
+    redirect(`/admin/artigos/${articleId}?imageError=${encodeURIComponent(imageError)}${tabQueryParam(formData)}`);
   }
   // Stay on the article being edited instead of bouncing back to the list —
   // the person decides when they're done, not the save action.
-  redirect(`/admin/artigos/${articleId}?saved=1`);
+  redirect(`/admin/artigos/${articleId}?saved=1${tabQueryParam(formData)}`);
 }
 
 // Sets an article's place on the home straight from the list, without opening the editor.

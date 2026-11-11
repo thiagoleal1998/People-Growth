@@ -4,12 +4,13 @@ import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "re
 import { useEditor, EditorContent, type Editor } from "@tiptap/react";
 import { Selection } from "@tiptap/pm/state";
 import StarterKit from "@tiptap/starter-kit";
-import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Film, Youtube, Highlighter, Unlink, Loader2 } from "lucide-react";
+import { Bold, Italic, Underline, Heading2, Heading3, Link2, List, ListOrdered, Quote, Undo2, Redo2, ImagePlus, ExternalLink, Film, Youtube, Highlighter, Unlink, Loader2, LayoutGrid } from "lucide-react";
 import { markdownLiteToEditorHtml, editorHtmlToMarkdownLite } from "@/lib/markdown-lite-editor";
 import { extractYouTubeId } from "@/lib/youtube";
 import { promptDialog, alertDialog } from "./dialog-store";
 import { ImageWithCredit } from "./tiptap-image-with-credit";
 import { VideoGif } from "./tiptap-videogif";
+import { ImageGrid } from "./tiptap-image-grid";
 import { YoutubeEmbed } from "./tiptap-youtube";
 import { HighlightQuotes } from "./tiptap-highlight-quotes";
 import { ImageCropper, type AspectOption } from "./ImageCropper";
@@ -80,6 +81,30 @@ const CROP_ASPECTS: AspectOption[] = [
   { label: "3:2", value: 3 / 2 },
   { label: "1:1", value: 1 },
 ];
+
+// Promise-based file picker for the "fotos lado a lado" flow below, which
+// needs to ask for 2-3 files one at a time (each with its own upload +
+// caption step) rather than through the single `fileInputRef` already wired
+// to the main "Inserir imagem" button's one-shot handler. Listens for both
+// "change" (a file was picked) and "cancel" (the OS dialog was dismissed —
+// supported in evergreen Chromium/Firefox) so dismissing never leaves the
+// grid-insert flow hanging on an unresolved promise.
+function pickImageFile(): Promise<File | null> {
+  return new Promise((resolve) => {
+    const input = document.createElement("input");
+    input.type = "file";
+    input.accept = "image/png,image/jpeg,image/webp,image/gif";
+    input.style.display = "none";
+    const settle = (file: File | null) => {
+      resolve(file);
+      input.remove();
+    };
+    input.addEventListener("change", () => settle(input.files?.[0] ?? null), { once: true });
+    input.addEventListener("cancel", () => settle(null), { once: true });
+    document.body.appendChild(input);
+    input.click();
+  });
+}
 
 async function uploadContentImage(file: File): Promise<string> {
   const formData = new FormData();
@@ -221,6 +246,7 @@ export const MarkdownEditor = forwardRef<
     extensions: [
       StarterKit.configure({ heading: { levels: [2, 3] } }),
       ImageWithCredit.configure({ onEditRequest: editImageFields, onCropRequest: requestImageCrop }),
+      ImageGrid,
       VideoGif,
       YoutubeEmbed,
       BrandHighlight,
@@ -390,6 +416,43 @@ export const MarkdownEditor = forwardRef<
     }
   }
 
+  async function handleImageGridInsert() {
+    if (!editor) return;
+    const colsInput = await promptDialog("Quantas fotos lado a lado? Digite 2 ou 3.");
+    if (colsInput === null) return;
+    const cols = Number(colsInput.trim());
+    if (cols !== 2 && cols !== 3) {
+      await alertDialog("Digite 2 ou 3.");
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const images: { src: string; alt: string | null }[] = [];
+      for (let i = 0; i < cols; i++) {
+        const file = await pickImageFile();
+        // Cancelling partway through drops the whole grid rather than
+        // inserting a partial one with fewer photos than the chosen column
+        // count — the node requires exactly `cols` children (see
+        // tiptap-image-grid.ts's content expression), so a partial insert
+        // isn't even a valid document state to produce here.
+        if (!file) return;
+        const url = await uploadContentImage(file);
+        const caption = (await promptDialog(`Legenda da foto ${i + 1} de ${cols} (opcional, dá pra adicionar créditos e fonte depois clicando na foto):`)) ?? "";
+        images.push({ src: url, alt: caption || null });
+      }
+      editor.chain().focus().setImageGrid({ cols: cols as 2 | 3, images }).run();
+      // Same fix as insertImageMarkdown — see its comment for why this is needed.
+      const { state, view } = editor;
+      const selection = Selection.near(state.doc.resolve(state.selection.to));
+      view.dispatch(state.tr.setSelection(selection));
+    } catch (err) {
+      await alertDialog(err instanceof Error ? err.message : "Erro ao enviar as fotos.");
+    } finally {
+      setUploading(false);
+    }
+  }
+
   if (!editor) return null;
 
   return (
@@ -480,6 +543,15 @@ export const MarkdownEditor = forwardRef<
           style={toolButtonStyle}
         >
           <ExternalLink size={16} />
+        </button>
+        <button
+          type="button"
+          title="Inserir fotos lado a lado (2 ou 3 colunas)"
+          disabled={uploading}
+          onClick={handleImageGridInsert}
+          style={{ ...toolButtonStyle, cursor: uploading ? "default" : "pointer" }}
+        >
+          <LayoutGrid size={16} />
         </button>
         <button
           type="button"

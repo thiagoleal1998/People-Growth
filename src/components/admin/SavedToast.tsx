@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter, usePathname } from "next/navigation";
+import { useRouter, usePathname, useSearchParams } from "next/navigation";
 import { CheckCircle2, X } from "lucide-react";
 
 const DURATION_MS = 5000;
@@ -9,6 +9,19 @@ const DURATION_MS = 5000;
 export function SavedToast({ show }: { show: boolean }) {
   const router = useRouter();
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+
+  // Strips only "saved" from whatever's in the URL right now, keeping
+  // everything else (e.g. "?tab=fontes", which needs to survive this toast
+  // clearing itself just as much as it needs to survive the redirect that
+  // put it there — see ArticleForm.tsx/ColumnistArticleForm.tsx). This used
+  // to replace with the bare pathname, wiping the entire query string.
+  function clearSavedParam() {
+    const params = new URLSearchParams(searchParams.toString());
+    params.delete("saved");
+    const query = params.toString();
+    router.replace(query ? `${pathname}?${query}` : pathname, { scroll: false });
+  }
   // Lets the "x" button hide the toast immediately, ahead of the auto-
   // dismiss timer below (which still fires and clears the URL regardless —
   // harmless, since a second router.replace to the same path is a no-op).
@@ -34,7 +47,7 @@ export function SavedToast({ show }: { show: boolean }) {
   // there's no premature transition for a cleanup to race against.
   useEffect(() => {
     if (!show) return;
-    const timer = setTimeout(() => router.replace(pathname, { scroll: false }), DURATION_MS);
+    const timer = setTimeout(clearSavedParam, DURATION_MS);
     return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show]);
@@ -45,7 +58,7 @@ export function SavedToast({ show }: { show: boolean }) {
 
   const close = () => {
     setDismissed(true);
-    router.replace(pathname, { scroll: false });
+    clearSavedParam();
   };
 
   return (

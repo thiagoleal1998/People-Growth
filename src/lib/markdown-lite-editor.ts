@@ -33,6 +33,22 @@ export function markdownLiteToEditorHtml(text: string): string {
     .replace(/\r\n?/g, "\n")
     .replace(/^### (.+)$/gm, "<h3>$1</h3>\n")
     .replace(/^## (.+)$/gm, "<h2>$1</h2>\n")
+    // ":::grid-2"/":::grid-3" fenced block — see the matching comment in
+    // markdown-lite.ts. Must run before the single-image regex below for
+    // the same "shares the ![alt](url) shape" reason as !video/!gif.
+    .replace(/^:::grid-([23])\n([\s\S]*?)\n:::$/gm, (_match, cols: string, inner: string) => {
+      const imgRe = /!\[([^\]]*)\]\(((?:[^\s()]|\([^()]*\))+)(?:\s+"([^"]*)")?(?:\s+"([^"]*)")?\)/g;
+      const imgs: string[] = [];
+      let m: RegExpExecArray | null;
+      while ((m = imgRe.exec(inner))) {
+        const [, alt, src, credit, source] = m;
+        const creditAttr = credit ? ` data-credit="${credit}"` : "";
+        const sourceAttr = source ? ` data-source="${source}"` : "";
+        imgs.push(`<img src="${src}" alt="${alt}"${creditAttr}${sourceAttr} />`);
+      }
+      if (imgs.length === 0) return "";
+      return protect("FIG", `<image-grid data-cols="${cols}">${imgs.join("")}</image-grid>`);
+    })
     // "!video[caption](url)" — a YouTube link rendered as a click-to-play
     // thumbnail by renderMarkdownLite. Must run before the image regex
     // since it shares the "[alt](url)" shape.
@@ -129,6 +145,16 @@ function serializeYoutube(el: HTMLElement): string {
   return `!video[${caption}](${url})`;
 }
 
+// See ImageGrid in tiptap-image-grid.ts — a node view rendering a CSS grid
+// of plain <img> children, serialized here back into the same ":::grid-N"
+// fence markdown-lite.ts parses. Reuses serializeImage's own <img> ->
+// "![alt](src ...)" logic per child rather than duplicating it.
+function serializeImageGrid(el: HTMLElement): string {
+  const cols = el.getAttribute("data-cols") ?? "2";
+  const images = Array.from(el.querySelectorAll("img")).map((img) => serializeImage(img));
+  return `:::grid-${cols}\n${images.join("\n")}\n:::`;
+}
+
 export function editorHtmlToMarkdownLite(html: string): string {
   const doc = new DOMParser().parseFromString(html, "text/html");
 
@@ -161,6 +187,8 @@ export function editorHtmlToMarkdownLite(html: string): string {
         return serializeVideoGif(el);
       case "youtube-embed":
         return serializeYoutube(el);
+      case "image-grid":
+        return serializeImageGrid(el);
       case "br":
         // Same reasoning as the text-node case above.
         return "\n\n";
@@ -188,6 +216,8 @@ export function editorHtmlToMarkdownLite(html: string): string {
         return serializeVideoGif(el);
       case "youtube-embed":
         return serializeYoutube(el);
+      case "image-grid":
+        return serializeImageGrid(el);
       case "ul":
         return Array.from(el.children).map((li) => `- ${renderChildrenInline(li)}`).join("\n");
       case "ol":

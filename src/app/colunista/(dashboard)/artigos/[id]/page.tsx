@@ -9,10 +9,10 @@ export default async function EditarArtigoColunistaPage({
   searchParams,
 }: {
   params: Promise<{ id: string }>;
-  searchParams: Promise<{ imageError?: string; saveError?: string; saved?: string }>;
+  searchParams: Promise<{ imageError?: string; saveError?: string; saved?: string; tab?: string }>;
 }) {
   const { id } = await params;
-  const { imageError, saveError, saved } = await searchParams;
+  const { imageError, saveError, saved, tab } = await searchParams;
   const profile = await getCurrentProfile();
   if (!profile?.columnist_id) notFound();
 
@@ -39,6 +39,7 @@ export default async function EditarArtigoColunistaPage({
       imageError={imageError}
       saveError={saveError}
       saved={saved === "1"}
+      initialTab={tab}
     />
   );
 }

@@ -381,7 +381,19 @@ export function ArticleBody({
              tiny on an already-narrow phone screen — full width on mobile,
              with the lightbox above as the way to see original detail. */
           .article-img-figure { width: 100% !important; }
+          /* 2-3 photos side by side reads as cramped on a phone column —
+             same reasoning as the single-image rule above, collapse to a
+             single stacked column instead of forcing the grid narrower. */
+          .article-img-grid-2, .article-img-grid-3 { grid-template-columns: 1fr !important; }
         }
+        .article-img-grid-2, .article-img-grid-3 {
+          display: grid;
+          gap: 1rem;
+          margin: 2rem auto;
+        }
+        .article-img-grid-2 { grid-template-columns: repeat(2, 1fr); }
+        .article-img-grid-3 { grid-template-columns: repeat(3, 1fr); }
+        .article-img-grid-2 figure, .article-img-grid-3 figure { margin: 0; }
         /* Animates from 0 to its natural content height with no JS height
            measuring: a single-row grid with height:auto on the container
            resolves 1fr against the row's max-content size, so "0fr -> 1fr"

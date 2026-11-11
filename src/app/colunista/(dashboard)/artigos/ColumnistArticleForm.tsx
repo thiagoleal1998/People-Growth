@@ -60,9 +60,12 @@ function slugifyPreview(text: string): string {
     .replace(/(^-|-$)/g, "");
 }
 
-export function ColumnistArticleForm({ item, categories, otherColumnists, extraCategoryIds, coauthorIds, imageError, saveError, saved }: { item?: Article; categories: Category[]; otherColumnists?: Columnist[]; extraCategoryIds?: string[]; coauthorIds?: string[]; imageError?: string; saveError?: string; saved?: boolean }) {
+export function ColumnistArticleForm({ item, categories, otherColumnists, extraCategoryIds, coauthorIds, imageError, saveError, saved, initialTab }: { item?: Article; categories: Category[]; otherColumnists?: Columnist[]; extraCategoryIds?: string[]; coauthorIds?: string[]; imageError?: string; saveError?: string; saved?: boolean; initialTab?: string }) {
   const action = upsertOwnArticle.bind(null, item?.id ?? null);
-  const [active, setActive] = useState<TabId>("conteudo");
+  // Seeded from the URL (actions.ts's redirects echo it back) rather than
+  // always "conteudo" — see the matching comment in the admin ArticleForm
+  // for why a plain useState alone always lost this on save.
+  const [active, setActive] = useState<TabId>(() => (tabs.some((t) => t.id === initialTab) ? (initialTab as TabId) : "conteudo"));
   const [coverImageUrl, setCoverImageUrl] = useState("");
   const [titlePt, setTitlePt] = useState(item?.title_pt ?? "");
   const [excerptPt, setExcerptPt] = useState(item?.excerpt_pt ?? "");
@@ -199,6 +202,7 @@ export function ColumnistArticleForm({ item, categories, otherColumnists, extraC
       </div>
 
       <form action={action} className="columnist-form-grid" style={{ display: "grid", gridTemplateColumns: "1fr 320px", gap: "1.5rem", alignItems: "start" }}>
+        <input type="hidden" name="active_tab" value={active} />
         <div>
           <div style={{ display: "flex", gap: "0.25rem", borderBottom: "1px solid var(--admin-border)", marginBottom: "1.75rem" }}>
             {tabs.map((tab) => (

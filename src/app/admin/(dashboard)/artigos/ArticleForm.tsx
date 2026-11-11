@@ -44,6 +44,7 @@ export function ArticleForm({
   imageError,
   saveError,
   saved,
+  initialTab,
 }: {
   item?: Article;
   categories: Category[];
@@ -53,9 +54,16 @@ export function ArticleForm({
   imageError?: string;
   saveError?: string;
   saved?: boolean;
+  initialTab?: string;
 }) {
   const action = upsertArticle.bind(null, item?.id ?? null);
-  const [active, setActive] = useState<TabId>("conteudo");
+  // Seeded from the URL (see actions.ts's redirects, which now echo back
+  // whichever tab was active when the form was submitted) rather than
+  // always "conteudo" — otherwise saving from "Fontes"/"Detalhes" always
+  // bounced back to "Conteúdo", since a Server Action's redirect is a real
+  // navigation that remounts this component and resets any plain useState
+  // regardless of where the redirect points.
+  const [active, setActive] = useState<TabId>(() => (tabs.some((t) => t.id === initialTab) ? (initialTab as TabId) : "conteudo"));
   const [coverImageUrl, setCoverImageUrl] = useState("");
   const [sources, setSources] = useState<ArticleSource[]>(item?.sources ?? []);
   const [aiUsed, setAiUsed] = useState((item?.ai_usage ?? []).length > 0);
@@ -179,6 +187,7 @@ export function ArticleForm({
       </div>
 
       <form action={action}>
+        <input type="hidden" name="active_tab" value={active} />
         <div style={{ display: "flex", gap: "0.25rem", borderBottom: "1px solid var(--admin-border)", marginBottom: "1.75rem" }}>
           {tabs.map((tab) => (
             <button

@@ -6,9 +6,9 @@ import type { Columnist, Category } from "@/types/database.types";
 export default async function NovoArtigoColunistaPage({
   searchParams,
 }: {
-  searchParams: Promise<{ saveError?: string }>;
+  searchParams: Promise<{ saveError?: string; tab?: string }>;
 }) {
-  const { saveError } = await searchParams;
+  const { saveError, tab } = await searchParams;
   const profile = await getCurrentProfile();
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,6 +23,7 @@ export default async function NovoArtigoColunistaPage({
       categories={(categoriesData ?? []) as Category[]}
       otherColumnists={(otherColumnistsData ?? []) as Columnist[]}
       saveError={saveError}
+      initialTab={tab}
     />
   );
 }
