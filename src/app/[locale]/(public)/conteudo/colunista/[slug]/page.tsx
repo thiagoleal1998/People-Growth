@@ -11,6 +11,7 @@ import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
 import { aboutColumnistLabel, isColumnistPubliclyVisible } from "@/lib/founder-data";
+import { ogImageUrl } from "@/lib/og-image";
 import type { Article, Columnist, Category } from "@/types/database.types";
 
 export const revalidate = 300;
@@ -43,9 +44,50 @@ export async function generateMetadata({
   const { slug, locale } = await params;
   const result = await getColumnistData(slug);
   if (!result) return { title: "Colunista não encontrado" };
+
+  const { columnist } = result;
+  const title = `${columnist.name} — ${locale === "en" ? "Content" : "Conteúdo"}`;
+  const ogTitle = `${columnist.name} | Grupo Festina`;
+  const description = pickLocale(locale, columnist.role_pt, columnist.role_en) ?? pickLocale(locale, columnist.tagline_pt, columnist.tagline_en) ?? undefined;
+
+  // Falls back to the site-wide default OG image (same one articles use)
+  // when this columnist has no photo yet — a link preview with no image at
+  // all reads as broken, same reasoning as the article page's fallback.
+  // "contain" (not the article page's "cover") for the columnist's own
+  // photo specifically — a portrait headshot center-cropped into a wide
+  // 1200x630 frame loses the top of the head/eyes (confirmed visually,
+  // only the mouth-down was left on screen); the site-wide fallback banner
+  // is already shaped for "cover" so that one keeps the article pages' default.
+  let coverSrc: string | null = columnist.photo_url;
+  let fit: "cover" | "contain" = "cover";
+  if (coverSrc) {
+    fit = "contain";
+  } else {
+    const supabase = await createClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (supabase as any).from("site_config").select("value").eq("key", "seo_og_image").maybeSingle();
+    coverSrc = (data?.value as string | undefined) || null;
+  }
+  const ogImage = ogImageUrl(coverSrc, fit === "contain" ? { fit: "contain", bg: "0d1b2a" } : undefined);
+  const images = ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : undefined;
+
   return {
-    title: `${result.columnist.name} — ${locale === "en" ? "Content" : "Conteúdo"}`,
-    description: pickLocale(locale, result.columnist.role_pt, result.columnist.role_en) ?? undefined,
+    title,
+    description,
+    openGraph: {
+      type: "profile",
+      title: ogTitle,
+      description,
+      images,
+      siteName: "Grupo Festina",
+      locale: locale === "pt" ? "pt_BR" : "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+    },
   };
 }
 

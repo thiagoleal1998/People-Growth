@@ -7,6 +7,7 @@ import { createClient } from "@/lib/supabase/server";
 import { pickLocale } from "@/lib/locale-content";
 import type { Columnist } from "@/types/database.types";
 import { parseMilestones, bioParagraphs, isColumnistPubliclyVisible } from "@/lib/founder-data";
+import { ogImageUrl } from "@/lib/og-image";
 
 export const revalidate = 300;
 
@@ -35,9 +36,46 @@ export async function generateMetadata({
   const { slug, locale } = await params;
   const result = await getFounder(slug);
   if (!result) return { title: "Não encontrado" };
+
+  const { columnist } = result;
+  const description = pickLocale(locale, columnist.tagline_pt, columnist.tagline_en) ?? pickLocale(locale, columnist.role_pt, columnist.role_en) ?? undefined;
+  const ogTitle = `${columnist.name} | Grupo Festina`;
+
+  // Same fallback-to-site-default reasoning as the /conteudo/colunista
+  // profile and the article pages — no image at all reads as broken in a
+  // WhatsApp/Telegram link preview. "contain" for the columnist's own photo
+  // specifically — see the matching comment in /conteudo/colunista/[slug]
+  // for why a center-cropped headshot loses the top of the head/eyes.
+  let coverSrc: string | null = columnist.photo_url;
+  let fit: "cover" | "contain" = "cover";
+  if (coverSrc) {
+    fit = "contain";
+  } else {
+    const supabase = await createClient();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const { data } = await (supabase as any).from("site_config").select("value").eq("key", "seo_og_image").maybeSingle();
+    coverSrc = (data?.value as string | undefined) || null;
+  }
+  const ogImage = ogImageUrl(coverSrc, fit === "contain" ? { fit: "contain", bg: "0d1b2a" } : undefined);
+  const images = ogImage ? [{ url: ogImage, width: 1200, height: 630 }] : undefined;
+
   return {
-    title: result.columnist.name,
-    description: pickLocale(locale, result.columnist.tagline_pt, result.columnist.tagline_en) ?? pickLocale(locale, result.columnist.role_pt, result.columnist.role_en) ?? undefined,
+    title: columnist.name,
+    description,
+    openGraph: {
+      type: "profile",
+      title: ogTitle,
+      description,
+      images,
+      siteName: "Grupo Festina",
+      locale: locale === "pt" ? "pt_BR" : "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: ogTitle,
+      description,
+      images: ogImage ? [ogImage] : undefined,
+    },
   };
 }
 
