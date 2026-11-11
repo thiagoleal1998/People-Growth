@@ -430,14 +430,28 @@ export const MarkdownEditor = forwardRef<
     try {
       const images: { src: string; alt: string | null }[] = [];
       for (let i = 0; i < cols; i++) {
-        const file = await pickImageFile();
-        // Cancelling partway through drops the whole grid rather than
-        // inserting a partial one with fewer photos than the chosen column
-        // count — the node requires exactly `cols` children (see
-        // tiptap-image-grid.ts's content expression), so a partial insert
-        // isn't even a valid document state to produce here.
-        if (!file) return;
-        const url = await uploadContentImage(file);
+        // Same either/or as the single-image flow's two separate toolbar
+        // buttons ("Inserir imagem" vs. "Inserir imagem por link"), just
+        // folded into one prompt per photo — a leftover toolbar button per
+        // slot isn't possible since `cols` isn't known until the first
+        // dialog above resolves.
+        const linkInput = await promptDialog(
+          `Foto ${i + 1} de ${cols}: cole o link de uma imagem já publicada, ou deixe em branco para enviar um arquivo do computador.`
+        );
+        if (linkInput === null) return;
+        let url: string;
+        if (linkInput.trim()) {
+          url = linkInput.trim();
+        } else {
+          const file = await pickImageFile();
+          // Cancelling partway through drops the whole grid rather than
+          // inserting a partial one with fewer photos than the chosen column
+          // count — the node requires exactly `cols` children (see
+          // tiptap-image-grid.ts's content expression), so a partial insert
+          // isn't even a valid document state to produce here.
+          if (!file) return;
+          url = await uploadContentImage(file);
+        }
         const caption = (await promptDialog(`Legenda da foto ${i + 1} de ${cols} (opcional, dá pra adicionar créditos e fonte depois clicando na foto):`)) ?? "";
         images.push({ src: url, alt: caption || null });
       }

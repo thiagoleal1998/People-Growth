@@ -5,6 +5,7 @@ import Link from "next/link";
 import { Field, Input, Textarea, Select, SubmitButton, FieldGrid } from "@/components/admin/ui";
 import { ErrorBanner } from "@/components/admin/ErrorBanner";
 import { ImageCropper } from "@/components/admin/ImageCropper";
+import { alertDialog } from "@/components/admin/dialog-store";
 import { upsertColumnist } from "./actions";
 import type { Columnist } from "@/types/database.types";
 
@@ -65,12 +66,32 @@ export function ColumnistForm({ item, allColumnists, imageError }: { item?: Colu
   const [active, setActive] = useState<TabId>("perfil");
   const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [croppedPreview, setCroppedPreview] = useState<string | null>(null);
+  const [fetchingCurrentPhoto, setFetchingCurrentPhoto] = useState(false);
   const submitFileRef = useRef<HTMLInputElement>(null);
 
   function handlePicked(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     e.target.value = "";
     if (file) setPendingFile(file);
+  }
+
+  // Lets the admin re-crop/re-zoom the photo that's already saved without
+  // having to find and re-upload the original file — fetches the existing
+  // image back into a File so it can go through the exact same ImageCropper
+  // flow as a freshly picked one.
+  async function handleAdjustCurrentPhoto() {
+    if (!item?.photo_url) return;
+    setFetchingCurrentPhoto(true);
+    try {
+      const res = await fetch(item.photo_url);
+      if (!res.ok) throw new Error();
+      const blob = await res.blob();
+      setPendingFile(new File([blob], "foto-atual.webp", { type: blob.type || "image/webp" }));
+    } catch {
+      await alertDialog("Não foi possível carregar a foto atual para ajustar. Tente enviar o arquivo de novo.");
+    } finally {
+      setFetchingCurrentPhoto(false);
+    }
   }
 
   function handleCropConfirm(cropped: File) {
@@ -151,12 +172,34 @@ export function ColumnistForm({ item, allColumnists, imageError }: { item?: Colu
               hint='Envie um arquivo (recomendado) — links copiados de redes sociais como Instagram costumam expirar depois de um tempo e a foto some sozinha. Depois de escolher o arquivo, você pode ajustar o posicionamento e o zoom antes de salvar. PNG, JPG ou WEBP, convertida automaticamente para WebP.'
             >
               {(croppedPreview ?? item?.photo_url) && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={croppedPreview ?? item?.photo_url ?? undefined}
-                  alt="Foto atual"
-                  style={{ width: "4rem", height: "4rem", borderRadius: "50%", objectFit: "cover", display: "block", marginBottom: "0.625rem", border: "1px solid var(--admin-border)" }}
-                />
+                <div style={{ display: "flex", alignItems: "center", gap: "0.875rem", marginBottom: "0.625rem" }}>
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={croppedPreview ?? item?.photo_url ?? undefined}
+                    alt="Foto atual"
+                    style={{ width: "4rem", height: "4rem", borderRadius: "50%", objectFit: "cover", display: "block", border: "1px solid var(--admin-border)" }}
+                  />
+                  {!croppedPreview && item?.photo_url && (
+                    <button
+                      type="button"
+                      onClick={handleAdjustCurrentPhoto}
+                      disabled={fetchingCurrentPhoto}
+                      style={{
+                        padding: "0.5rem 0.875rem",
+                        borderRadius: "0.5rem",
+                        border: "1px solid var(--admin-border-strong)",
+                        backgroundColor: "var(--admin-surface)",
+                        color: "var(--admin-text)",
+                        fontWeight: 600,
+                        fontSize: "0.8125rem",
+                        cursor: fetchingCurrentPhoto ? "default" : "pointer",
+                        opacity: fetchingCurrentPhoto ? 0.6 : 1,
+                      }}
+                    >
+                      {fetchingCurrentPhoto ? "Carregando..." : "Ajustar foto atual"}
+                    </button>
+                  )}
+                </div>
               )}
               {/* This is the file the form actually submits — its contents are
                   set programmatically from the cropped result, never picked
