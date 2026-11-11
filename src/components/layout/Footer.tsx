@@ -211,7 +211,6 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
           <FooterSection title={t("resources")}>
             <ul style={{ listStyle: "none", display: "flex", flexDirection: "column", gap: "0.625rem" }}>
               {[
-                { key: "meaSententia", label: "Mea Sententia", href: "/conteudo" as const },
                 { key: "freeResources", label: t("freeResources"), href: "/recursos" as const },
                 { key: "courses", label: nav("courses"), href: "/cursos" as const },
                 { key: "aiLab", label: nav("aiLab"), href: "/laboratorio-ia" as const },
