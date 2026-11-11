@@ -357,19 +357,26 @@ export default async function SobrePage() {
                   Talentos que dão vida ao que construímos juntos, todos os dias.
                 </p>
               </div>
-              {/* Unlike the founders grid above (always 3, so the grid's
-                  own 1fr columns naturally land at this width), the team
-                  list can be just one or two people — a flex row with each
-                  card's basis set to literally the same math a 3-column
-                  grid row works out to (100% minus 2 gaps, divided by 3)
-                  reproduces that exact card width instead of a smaller,
-                  mismatched one, and justifyContent centers what's left
-                  over when there's fewer than 3. */}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "1.5rem", justifyContent: "center" }}>
+              {/* Reuses the exact same grid template as the founders grid
+                  above (not a flex-basis approximation of it — that was
+                  tried first and matched on desktop but silently diverged
+                  at phone widths, where the founders grid's own column-
+                  count breakpoint isn't reproducible with a fixed formula)
+                  so every column, at every viewport, is pixel-identical to
+                  a founder's. Padded with invisible, zero-height filler
+                  cells up to 3 slots so a 1- or 2-person team still centers
+                  instead of stretching to fill the row or hugging the
+                  left edge — past 3 people it wraps like the founders grid
+                  already does, no padding needed. */}
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "1.5rem" }}>
+                {Array.from({ length: Math.max(0, Math.floor((Math.max(team.length, 3) - team.length) / 2)) }).map((_, i) => (
+                  <div key={`filler-before-${i}`} aria-hidden />
+                ))}
                 {team.map((member) => (
-                  <div key={member.id} style={{ flex: "0 1 calc((100% - 3rem) / 3)", minWidth: "240px" }}>
-                    <FounderCard columnist={member} />
-                  </div>
+                  <FounderCard key={member.id} columnist={member} />
+                ))}
+                {Array.from({ length: Math.max(0, Math.ceil((Math.max(team.length, 3) - team.length) / 2)) }).map((_, i) => (
+                  <div key={`filler-after-${i}`} aria-hidden />
                 ))}
               </div>
             </div>
