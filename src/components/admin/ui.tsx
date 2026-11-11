@@ -256,3 +256,28 @@ export function FieldGrid({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
+// A lighter-weight grouping than SectionCard, for breaking up a long list of
+// fields that already sits inside one outer card (e.g. a tab's content) into
+// labeled, visually distinct groups — without nesting a second heavy border.
+// Pure layout/visual; doesn't touch field names or form behavior.
+export function FormSection({ icon, title, hint, children, last }: { icon: ReactNode; title: string; hint?: string; children: ReactNode; last?: boolean }) {
+  return (
+    <section
+      style={{
+        marginBottom: last ? 0 : "1.5rem",
+        backgroundColor: "var(--admin-surface-alt)",
+        border: "1px solid var(--admin-border)",
+        borderRadius: "0.875rem",
+        padding: "1.375rem 1.5rem",
+      }}
+    >
+      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: hint ? "0.375rem" : "1.125rem" }}>
+        <span style={{ display: "flex", color: "#315E9C" }}>{icon}</span>
+        <h3 style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)", margin: 0 }}>{title}</h3>
+      </div>
+      {hint && <p style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", margin: "0 0 1.125rem", lineHeight: 1.5 }}>{hint}</p>}
+      {children}
+    </section>
+  );
+}

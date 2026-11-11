@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import { Eye, Languages, Sparkles, Loader2, TriangleAlert } from "lucide-react";
-import { Field, Input, Textarea, Select, SubmitButton, Badge } from "@/components/admin/ui";
+import { Eye, Languages, Sparkles, Loader2, TriangleAlert, Type, AlignLeft, FileText, Video, Link2, Bot, Tags, Users, Image as ImageIcon, CalendarClock, Search, Rocket } from "lucide-react";
+import { Field, Input, Textarea, Select, SubmitButton, Badge, FieldGrid, FormSection } from "@/components/admin/ui";
 import { MarkdownEditor, type MarkdownEditorHandle } from "@/components/admin/MarkdownEditor";
 import { DateTimePicker } from "@/components/admin/DateTimePicker";
 import { SeoPreview } from "@/components/admin/SeoPreview";
@@ -229,245 +229,282 @@ export function ColumnistArticleForm({ item, categories, otherColumnists, extraC
 
           <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.75rem" }}>
           <div style={{ display: active === "conteudo" ? "block" : "none" }}>
-            <Field label="Título (PT)">
-              <Input name="title_pt" value={titlePt} onChange={(e) => setTitlePt(e.target.value)} required />
-            </Field>
-            <Field label="Título (EN)">
-              <Input name="title_en" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} />
-            </Field>
+            <FormSection icon={<Type size={17} />} title="Título">
+              <FieldGrid>
+                <Field label="Título (PT)">
+                  <Input name="title_pt" value={titlePt} onChange={(e) => setTitlePt(e.target.value)} required />
+                </Field>
+                <Field label="Título (EN)">
+                  <Input name="title_en" value={titleEn} onChange={(e) => setTitleEn(e.target.value)} />
+                </Field>
+              </FieldGrid>
+            </FormSection>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "0 0 1.25rem" }}>
-              <button
-                type="button"
-                onClick={handleGenerateExcerpt}
-                disabled={generatingExcerpt}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  backgroundColor: "var(--admin-surface-alt)",
-                  border: "1px solid var(--admin-border-strong)",
-                  color: "var(--admin-text)",
-                  padding: "0.625rem 1.125rem",
-                  borderRadius: "0.625rem",
-                  fontWeight: 700,
-                  fontSize: "0.875rem",
-                  cursor: generatingExcerpt ? "default" : "pointer",
-                  opacity: generatingExcerpt ? 0.7 : 1,
-                }}
+            <FormSection icon={<AlignLeft size={17} />} title="Linha fina e resumo">
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "0 0 1.25rem" }}>
+                <button
+                  type="button"
+                  onClick={handleGenerateExcerpt}
+                  disabled={generatingExcerpt}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    backgroundColor: "var(--admin-surface)",
+                    border: "1px solid var(--admin-border-strong)",
+                    color: "var(--admin-text)",
+                    padding: "0.625rem 1.125rem",
+                    borderRadius: "0.625rem",
+                    fontWeight: 700,
+                    fontSize: "0.875rem",
+                    cursor: generatingExcerpt ? "default" : "pointer",
+                    opacity: generatingExcerpt ? 0.7 : 1,
+                  }}
+                >
+                  {generatingExcerpt ? <Loader2 size={16} className="admin-spin" /> : <Sparkles size={16} />}
+                  {generatingExcerpt ? "Gerando..." : "Gerar linha fina e resumo (PT)"}
+                </button>
+                <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+                  Usa o Conteúdo (PT) escrito abaixo para preencher os dois campos PT a seguir — sobrescreve o que já estiver neles.
+                </span>
+              </div>
+
+              <FieldGrid>
+                <Field label="Linha fina / subtítulo (PT)" hint="Aparece nas listagens e cards de artigos — não é o Resumo em destaque abaixo.">
+                  <Textarea name="excerpt_pt" rows={2} value={excerptPt} onChange={(e) => setExcerptPt(e.target.value)} />
+                </Field>
+                <Field label="Linha fina / subtítulo (EN)">
+                  <Textarea name="excerpt_en" rows={2} value={excerptEn} onChange={(e) => setExcerptEn(e.target.value)} />
+                </Field>
+              </FieldGrid>
+              <FieldGrid>
+                <Field label="Resumo em destaque (PT)" hint='Opcional. Aparece numa caixa "Resumo" expansível, no início do artigo. Deixe em branco para não mostrar essa caixa.'>
+                  <Textarea name="summary_pt" rows={3} value={summaryPt} onChange={(e) => setSummaryPt(e.target.value)} />
+                </Field>
+                <Field label="Resumo em destaque (EN)">
+                  <Textarea name="summary_en" rows={3} value={summaryEn} onChange={(e) => setSummaryEn(e.target.value)} />
+                </Field>
+              </FieldGrid>
+            </FormSection>
+
+            <FormSection icon={<FileText size={17} />} title="Conteúdo">
+              <Field
+                label="Conteúdo (PT)"
+                hint='Use a barra de ferramentas para negrito, itálico, sublinhado, subtítulos, listas, citação, link e imagem — ou digite direto: **negrito**, _itálico_, ++sublinhado++, [link](url), ## subtítulo, ### subtítulo pequeno, "- " para lista, "> texto" para citação (com "> — Colunista" numa linha própria, opcional).'
               >
-                {generatingExcerpt ? <Loader2 size={16} className="admin-spin" /> : <Sparkles size={16} />}
-                {generatingExcerpt ? "Gerando..." : "Gerar linha fina e resumo (PT)"}
-              </button>
-              <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>
-                Usa o Conteúdo (PT) escrito abaixo para preencher os dois campos PT a seguir — sobrescreve o que já estiver neles.
-              </span>
-            </div>
+                <MarkdownEditor
+                  ref={contentPtRef}
+                  name="content_pt"
+                  defaultValue={item?.content_pt ?? ""}
+                  highlightQuotes={feedbackBlocks.map((b) => b.quote)}
+                />
+              </Field>
 
-            <Field label="Linha fina / subtítulo (PT)" hint="Aparece nas listagens e cards de artigos — não é o Resumo em destaque abaixo.">
-              <Textarea name="excerpt_pt" rows={2} value={excerptPt} onChange={(e) => setExcerptPt(e.target.value)} />
-            </Field>
-            <Field label="Linha fina / subtítulo (EN)">
-              <Textarea name="excerpt_en" rows={2} value={excerptEn} onChange={(e) => setExcerptEn(e.target.value)} />
-            </Field>
-            <Field label="Resumo em destaque (PT)" hint='Opcional. Aparece numa caixa "Resumo" expansível, no início do artigo. Deixe em branco para não mostrar essa caixa.'>
-              <Textarea name="summary_pt" rows={3} value={summaryPt} onChange={(e) => setSummaryPt(e.target.value)} />
-            </Field>
-            <Field label="Resumo em destaque (EN)">
-              <Textarea name="summary_en" rows={3} value={summaryEn} onChange={(e) => setSummaryEn(e.target.value)} />
-            </Field>
-            <Field
-              label="Conteúdo (PT)"
-              hint='Use a barra de ferramentas para negrito, itálico, sublinhado, subtítulos, listas, citação, link e imagem — ou digite direto: **negrito**, _itálico_, ++sublinhado++, [link](url), ## subtítulo, ### subtítulo pequeno, "- " para lista, "> texto" para citação (com "> — Colunista" numa linha própria, opcional).'
-            >
-              <MarkdownEditor
-                ref={contentPtRef}
-                name="content_pt"
-                defaultValue={item?.content_pt ?? ""}
-                highlightQuotes={feedbackBlocks.map((b) => b.quote)}
-              />
-            </Field>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "1.25rem 0" }}>
+                <button
+                  type="button"
+                  onClick={handleTranslate}
+                  disabled={translating}
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    gap: "0.5rem",
+                    backgroundColor: "var(--admin-surface)",
+                    border: "1px solid var(--admin-border-strong)",
+                    color: "var(--admin-text)",
+                    padding: "0.625rem 1.125rem",
+                    borderRadius: "0.625rem",
+                    fontWeight: 700,
+                    fontSize: "0.875rem",
+                    cursor: translating ? "default" : "pointer",
+                    opacity: translating ? 0.7 : 1,
+                  }}
+                >
+                  {translating ? <Loader2 size={16} className="admin-spin" /> : <Languages size={16} />}
+                  {translating ? "Traduzindo..." : "Traduzir para inglês (PT → EN)"}
+                </button>
+                <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>
+                  Preenche título, linha fina, resumo e conteúdo em inglês a partir do texto em PT acima — sobrescreve o que já estiver nos campos EN.
+                </span>
+              </div>
 
-            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", margin: "1.25rem 0" }}>
-              <button
-                type="button"
-                onClick={handleTranslate}
-                disabled={translating}
-                style={{
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "0.5rem",
-                  backgroundColor: "var(--admin-surface-alt)",
-                  border: "1px solid var(--admin-border-strong)",
-                  color: "var(--admin-text)",
-                  padding: "0.625rem 1.125rem",
-                  borderRadius: "0.625rem",
-                  fontWeight: 700,
-                  fontSize: "0.875rem",
-                  cursor: translating ? "default" : "pointer",
-                  opacity: translating ? 0.7 : 1,
-                }}
-              >
-                {translating ? <Loader2 size={16} className="admin-spin" /> : <Languages size={16} />}
-                {translating ? "Traduzindo..." : "Traduzir para inglês (PT → EN)"}
-              </button>
-              <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)" }}>
-                Preenche título, linha fina, resumo e conteúdo em inglês a partir do texto em PT acima — sobrescreve o que já estiver nos campos EN.
-              </span>
-            </div>
+              <Field label="Conteúdo (EN)">
+                <MarkdownEditor ref={contentEnRef} name="content_en" defaultValue={item?.content_en ?? ""} minHeight={280} />
+              </Field>
+            </FormSection>
 
-            <Field label="Conteúdo (EN)">
-              <MarkdownEditor ref={contentEnRef} name="content_en" defaultValue={item?.content_en ?? ""} minHeight={280} />
-            </Field>
-            <Field label="Vídeo (URL do YouTube)" hint="Opcional — vira o visual principal do artigo, no lugar da imagem de capa. Mesmo assim, cadastre uma imagem de capa na aba Detalhes: ela é usada como miniatura ao compartilhar o link.">
-              <Input name="video_url" defaultValue={item?.video_url ?? ""} placeholder="https://www.youtube.com/watch?v=..." />
-            </Field>
+            <FormSection icon={<Video size={17} />} title="Vídeo" last>
+              <Field label="Vídeo (URL do YouTube)" hint="Opcional — vira o visual principal do artigo, no lugar da imagem de capa. Mesmo assim, cadastre uma imagem de capa na aba Detalhes: ela é usada como miniatura ao compartilhar o link.">
+                <Input name="video_url" defaultValue={item?.video_url ?? ""} placeholder="https://www.youtube.com/watch?v=..." />
+              </Field>
+            </FormSection>
           </div>
 
           <div style={{ display: active === "fontes" ? "block" : "none" }}>
-            <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "1rem", lineHeight: 1.6 }}>
-              Onde você pesquisou para escrever este texto. Elas aparecem no fim do artigo, para o leitor conferir a origem das informações — não cole links/fontes direto no Conteúdo, use esta aba.
-            </p>
-            {sources.map((source, index) => (
-              <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "0.625rem", alignItems: "center", marginBottom: "0.625rem" }}>
-                <Input name="source_label" value={source.label} placeholder="Ex: IBGE, Folha de S.Paulo, Google Trends" onChange={(e) => updateSource(index, { label: e.target.value })} />
-                <Input name="source_url" value={source.url ?? ""} placeholder="https://... (opcional)" onChange={(e) => updateSource(index, { url: e.target.value })} />
-                <button
-                  type="button"
-                  onClick={() => removeSource(index)}
-                  title="Remover fonte"
-                  style={{ padding: "0.5rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", background: "var(--admin-surface)", color: "#ef4444", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer" }}
-                >
-                  Remover
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              onClick={() => setSources((prev) => [...prev, { label: "", url: null }])}
-              style={{ padding: "0.5rem 0.875rem", borderRadius: "0.5rem", border: "1px dashed #315E9C", background: "transparent", color: "#315E9C", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+            <FormSection
+              icon={<Link2 size={17} />}
+              title="Fontes"
+              hint="Onde você pesquisou para escrever este texto. Elas aparecem no fim do artigo, para o leitor conferir a origem das informações — não cole links/fontes direto no Conteúdo, use esta aba."
+              last
             >
-              + Adicionar fonte
-            </button>
+              {sources.map((source, index) => (
+                <div key={index} style={{ display: "grid", gridTemplateColumns: "1fr 1fr auto", gap: "0.625rem", alignItems: "center", marginBottom: "0.625rem" }}>
+                  <Input name="source_label" value={source.label} placeholder="Ex: IBGE, Folha de S.Paulo, Google Trends" onChange={(e) => updateSource(index, { label: e.target.value })} />
+                  <Input name="source_url" value={source.url ?? ""} placeholder="https://... (opcional)" onChange={(e) => updateSource(index, { url: e.target.value })} />
+                  <button
+                    type="button"
+                    onClick={() => removeSource(index)}
+                    title="Remover fonte"
+                    style={{ padding: "0.5rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", background: "var(--admin-surface)", color: "#ef4444", fontSize: "0.8125rem", fontWeight: 600, cursor: "pointer" }}
+                  >
+                    Remover
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                onClick={() => setSources((prev) => [...prev, { label: "", url: null }])}
+                style={{ padding: "0.5rem 0.875rem", borderRadius: "0.5rem", border: "1px dashed #315E9C", background: "transparent", color: "#315E9C", fontSize: "0.8125rem", fontWeight: 700, cursor: "pointer" }}
+              >
+                + Adicionar fonte
+              </button>
+            </FormSection>
           </div>
 
           <div style={{ display: active === "seo" ? "block" : "none" }}>
-            <Field label="SEO — título (PT)" hint="Deixe em branco para usar o título do artigo.">
-              <Input name="seo_title_pt" value={seoTitlePt} onChange={(e) => setSeoTitlePt(e.target.value)} maxLength={70} />
-            </Field>
-            <Field label="SEO — descrição (PT)" hint="Deixe em branco para usar a linha fina / subtítulo.">
-              <Textarea name="seo_desc_pt" rows={2} value={seoDescPt} onChange={(e) => setSeoDescPt(e.target.value)} maxLength={170} />
-            </Field>
-            <div style={{ marginTop: "1.5rem" }}>
-              <div style={{ fontSize: "0.8rem", fontWeight: 600, color: "var(--admin-text-secondary)", marginBottom: "0.625rem" }}>
-                Como aparece no Google
-              </div>
+            <FormSection icon={<Search size={17} />} title="SEO">
+              <Field label="SEO — título (PT)" hint="Deixe em branco para usar o título do artigo.">
+                <Input name="seo_title_pt" value={seoTitlePt} onChange={(e) => setSeoTitlePt(e.target.value)} maxLength={70} />
+              </Field>
+              <Field label="SEO — descrição (PT)" hint="Deixe em branco para usar a linha fina / subtítulo.">
+                <Textarea name="seo_desc_pt" rows={2} value={seoDescPt} onChange={(e) => setSeoDescPt(e.target.value)} maxLength={170} />
+              </Field>
+            </FormSection>
+
+            <FormSection icon={<Eye size={17} />} title="Como aparece no Google" last>
               <SeoPreview url={previewUrl} title={seoTitlePt || titlePt} description={seoDescPt || excerptPt} />
-            </div>
+            </FormSection>
           </div>
 
           <div style={{ display: active === "detalhes" ? "block" : "none" }}>
-            <Field label="Slug" hint="Deixe em branco para gerar automaticamente">
-              <Input name="slug" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={slugifyPreview(titlePt)} />
-            </Field>
-            <Field label="Tipo de conteúdo" hint="Notícia: fatos, de forma clara e verificável. Análise: interpreta e contextualiza os fatos. Opinião: ponto de vista do colunista, aparece com a tag Mea Sententia.">
-              <Select name="format" value={format} onChange={(e) => setFormat(e.target.value as Article["format"])}>
-                <option value="opiniao">Opinião (Mea Sententia)</option>
-                <option value="analise">Análise</option>
-                <option value="noticia">Notícia</option>
-              </Select>
-            </Field>
-            <Field label="Categoria principal">
-              <Select
-                name="category_id"
-                value={categoryId}
-                onChange={(e) => {
-                  setCategoryId(e.target.value);
-                  setExtraCategories((prev) => prev.filter((id) => id !== e.target.value));
-                }}
-              >
-                <option value="">Sem categoria</option>
-                {categories.map((c) => (
-                  <option key={c.id} value={c.id}>{c.name_pt}</option>
-                ))}
-              </Select>
-            </Field>
-            <Field label="Categorias adicionais" hint="O artigo também aparece listado nelas, além da principal — útil quando o tema cruza mais de uma área.">
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
-                {categories.filter((c) => c.id !== categoryId).map((c) => (
-                  <label key={c.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
-                    <input
-                      type="checkbox"
-                      name="extra_category_ids"
-                      value={c.id}
-                      checked={extraCategories.includes(c.id)}
-                      onChange={() => toggleExtraCategory(c.id)}
-                    />
-                    {c.name_pt}
-                  </label>
-                ))}
-              </div>
-            </Field>
-            {otherColumnists && otherColumnists.length > 0 && (
-              <Field label="Colaboradores" hint="Para textos escritos em conjunto — aparecem junto com você na assinatura do artigo.">
+            <FormSection icon={<Rocket size={17} />} title="Publicação">
+              <Field label="Slug" hint="Deixe em branco para gerar automaticamente">
+                <Input name="slug" value={slug} onChange={(e) => setSlug(e.target.value)} placeholder={slugifyPreview(titlePt)} />
+              </Field>
+            </FormSection>
+
+            <FormSection icon={<Tags size={17} />} title="Classificação">
+              <FieldGrid>
+                <Field label="Tipo de conteúdo" hint="Notícia: fatos, de forma clara e verificável. Análise: interpreta e contextualiza os fatos. Opinião: ponto de vista do colunista, aparece com a tag Mea Sententia.">
+                  <Select name="format" value={format} onChange={(e) => setFormat(e.target.value as Article["format"])}>
+                    <option value="opiniao">Opinião (Mea Sententia)</option>
+                    <option value="analise">Análise</option>
+                    <option value="noticia">Notícia</option>
+                  </Select>
+                </Field>
+                <Field label="Categoria principal">
+                  <Select
+                    name="category_id"
+                    value={categoryId}
+                    onChange={(e) => {
+                      setCategoryId(e.target.value);
+                      setExtraCategories((prev) => prev.filter((id) => id !== e.target.value));
+                    }}
+                  >
+                    <option value="">Sem categoria</option>
+                    {categories.map((c) => (
+                      <option key={c.id} value={c.id}>{c.name_pt}</option>
+                    ))}
+                  </Select>
+                </Field>
+              </FieldGrid>
+              <Field label="Categorias adicionais" hint="O artigo também aparece listado nelas, além da principal — útil quando o tema cruza mais de uma área.">
                 <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
-                  {otherColumnists.map((a) => (
-                    <label key={a.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                  {categories.filter((c) => c.id !== categoryId).map((c) => (
+                    <label key={c.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
                       <input
                         type="checkbox"
-                        name="coauthor_ids"
-                        value={a.id}
-                        checked={coauthors.includes(a.id)}
-                        onChange={() => toggleCoauthor(a.id)}
+                        name="extra_category_ids"
+                        value={c.id}
+                        checked={extraCategories.includes(c.id)}
+                        onChange={() => toggleExtraCategory(c.id)}
                       />
-                      {a.name}
+                      {c.name_pt}
                     </label>
                   ))}
                 </div>
               </Field>
-            )}
-            <Field label="Imagem de capa" hint="PNG, JPG ou WEBP — convertida automaticamente para WebP e comprimida para menos de 1MB.">
-              {item?.cover_image && (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
-                  src={item.cover_image}
-                  alt="Capa atual"
-                  style={{ maxHeight: "6rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border)" }}
-                />
-              )}
-              <input className="admin-file-input" type="file" name="cover_image_file" accept="image/png,image/jpeg,image/webp" />
-              <input type="hidden" name="current_cover_image" value={item?.cover_image ?? ""} />
-              <ErrorBanner message={imageError} />
-            </Field>
-            <Field label="...ou URL da imagem" hint="Alternativa ao envio de arquivo acima — cole o link de uma imagem já publicada em outro lugar, para não usar espaço de armazenamento do site. Se os dois campos forem preenchidos, o arquivo enviado tem prioridade.">
-              <Input name="cover_image_url" placeholder="https://..." value={coverImageUrl} onChange={(e) => setCoverImageUrl(e.target.value)} />
-              {isEphemeralCoverImageUrl(coverImageUrl) && (
-                <p style={{ display: "flex", alignItems: "flex-start", gap: "0.375rem", marginTop: "0.5rem", padding: "0.625rem 0.75rem", borderRadius: "0.5rem", backgroundColor: "rgba(200,154,74,0.12)", border: "1px solid rgba(200,154,74,0.3)", color: "#8a6523", fontSize: "0.8125rem", lineHeight: 1.45 }}>
-                  <TriangleAlert size={15} style={{ flexShrink: 0, marginTop: "0.125rem" }} />
-                  Esse link é de uma imagem gerada por IA (OpenAI/ChatGPT) — esses links costumam expirar (às vezes em menos de 1 hora) e a foto pode parar de aparecer, inclusive na própria matéria. Baixe a imagem e envie o arquivo no campo acima pra ela ficar permanente.
-                </p>
-              )}
-            </Field>
-            <Field label="Legenda da imagem" hint="Descrição curta exibida junto da foto no início do artigo.">
-              <Input name="cover_image_caption" defaultValue={item?.cover_image_caption ?? ""} />
-            </Field>
-            <Field label="Crédito da imagem" hint="Fotógrafo ou fonte da imagem.">
-              <Input name="cover_image_credit" defaultValue={item?.cover_image_credit ?? ""} />
-            </Field>
-            <Field
-              label="Data desejada de publicação"
-              hint="Usada se você escolher 'Agendar' na barra lateral. A aprovação de um admin pode levar até 72h — escolha a data considerando essa margem."
-            >
-              <DateTimePicker name="scheduled_for" defaultValue={item?.scheduled_for} />
-            </Field>
+            </FormSection>
 
-            <div style={{ marginTop: "2rem", paddingTop: "1.5rem", borderTop: "1px solid var(--admin-border)" }}>
-              <div style={{ fontSize: "0.875rem", fontWeight: 700, color: "var(--admin-text)", marginBottom: "0.5rem" }}>
-                Inteligência artificial utilizada neste artigo? *
-              </div>
-              <p style={{ fontSize: "0.8125rem", color: "var(--admin-faint)", marginBottom: "0.75rem", lineHeight: 1.6 }}>
-                Se sim, o artigo recebe uma declaração de transparência ao final do texto, antes das fontes. Resposta obrigatória.
-              </p>
+            {otherColumnists && otherColumnists.length > 0 && (
+              <FormSection icon={<Users size={17} />} title="Autoria">
+                <Field label="Colaboradores" hint="Para textos escritos em conjunto — aparecem junto com você na assinatura do artigo.">
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem 1.25rem" }}>
+                    {otherColumnists.map((a) => (
+                      <label key={a.id} style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
+                        <input
+                          type="checkbox"
+                          name="coauthor_ids"
+                          value={a.id}
+                          checked={coauthors.includes(a.id)}
+                          onChange={() => toggleCoauthor(a.id)}
+                        />
+                        {a.name}
+                      </label>
+                    ))}
+                  </div>
+                </Field>
+              </FormSection>
+            )}
+
+            <FormSection icon={<ImageIcon size={17} />} title="Imagem de capa">
+              <Field label="Enviar arquivo" hint="PNG, JPG ou WEBP — convertida automaticamente para WebP e comprimida para menos de 1MB.">
+                {item?.cover_image && (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={item.cover_image}
+                    alt="Capa atual"
+                    style={{ maxHeight: "6rem", display: "block", marginBottom: "0.625rem", borderRadius: "0.375rem", border: "1px solid var(--admin-border)" }}
+                  />
+                )}
+                <input className="admin-file-input" type="file" name="cover_image_file" accept="image/png,image/jpeg,image/webp" />
+                <input type="hidden" name="current_cover_image" value={item?.cover_image ?? ""} />
+                <ErrorBanner message={imageError} />
+              </Field>
+              <Field label="...ou URL da imagem" hint="Alternativa ao envio de arquivo acima — cole o link de uma imagem já publicada em outro lugar, para não usar espaço de armazenamento do site. Se os dois campos forem preenchidos, o arquivo enviado tem prioridade.">
+                <Input name="cover_image_url" placeholder="https://..." value={coverImageUrl} onChange={(e) => setCoverImageUrl(e.target.value)} />
+                {isEphemeralCoverImageUrl(coverImageUrl) && (
+                  <p style={{ display: "flex", alignItems: "flex-start", gap: "0.375rem", marginTop: "0.5rem", padding: "0.625rem 0.75rem", borderRadius: "0.5rem", backgroundColor: "rgba(200,154,74,0.12)", border: "1px solid rgba(200,154,74,0.3)", color: "#8a6523", fontSize: "0.8125rem", lineHeight: 1.45 }}>
+                    <TriangleAlert size={15} style={{ flexShrink: 0, marginTop: "0.125rem" }} />
+                    Esse link é de uma imagem gerada por IA (OpenAI/ChatGPT) — esses links costumam expirar (às vezes em menos de 1 hora) e a foto pode parar de aparecer, inclusive na própria matéria. Baixe a imagem e envie o arquivo no campo acima pra ela ficar permanente.
+                  </p>
+                )}
+              </Field>
+              <FieldGrid>
+                <Field label="Legenda da imagem" hint="Descrição curta exibida junto da foto no início do artigo.">
+                  <Input name="cover_image_caption" defaultValue={item?.cover_image_caption ?? ""} />
+                </Field>
+                <Field label="Crédito da imagem" hint="Fotógrafo ou fonte da imagem.">
+                  <Input name="cover_image_credit" defaultValue={item?.cover_image_credit ?? ""} />
+                </Field>
+              </FieldGrid>
+            </FormSection>
+
+            <FormSection icon={<CalendarClock size={17} />} title="Agendamento">
+              <Field
+                label="Data desejada de publicação"
+                hint="Usada se você escolher 'Agendar' na barra lateral. A aprovação de um admin pode levar até 72h — escolha a data considerando essa margem."
+              >
+                <DateTimePicker name="scheduled_for" defaultValue={item?.scheduled_for} />
+              </Field>
+            </FormSection>
+
+            <FormSection
+              icon={<Bot size={17} />}
+              title="Inteligência artificial utilizada neste artigo? *"
+              hint="Se sim, o artigo recebe uma declaração de transparência ao final do texto, antes das fontes. Resposta obrigatória."
+              last
+            >
               <div style={{ display: "flex", gap: "1.25rem", marginBottom: "1rem", fontSize: "0.875rem", color: "var(--admin-text-secondary)" }}>
                 <label style={{ display: "flex", alignItems: "center", gap: "0.375rem", cursor: "pointer" }}>
                   <input type="radio" name="ai_used" value="no" checked={aiUsed === "no"} onChange={() => setAiUsed("no")} required />
@@ -501,7 +538,7 @@ export function ColumnistArticleForm({ item, categories, otherColumnists, extraC
                   </div>
                 </div>
               )}
-            </div>
+            </FormSection>
           </div>
           </div>
         </div>
