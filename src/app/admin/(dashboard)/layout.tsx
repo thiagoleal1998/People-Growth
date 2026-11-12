@@ -38,16 +38,23 @@ export default async function AdminDashboardLayout({ children }: { children: Rea
 
   let userName: string | undefined;
   let userPhoto: string | undefined;
+  let isFounder = false;
   if (profile?.columnist_id) {
-    const { data: columnist } = await client.from("columnists").select("name,photo_url").eq("id", profile.columnist_id).single();
+    const { data: columnist } = await client.from("columnists").select("name,photo_url,is_founder").eq("id", profile.columnist_id).single();
     userName = columnist?.name;
     userPhoto = columnist?.photo_url ?? undefined;
+    isFounder = Boolean(columnist?.is_founder);
   }
+  // The "Financeiro" group only ever reaches AdminSidebar for C-level —
+  // every /admin/financeiro page also re-checks this server-side via
+  // requireFounder(), this is just so a non-founder admin never even sees
+  // the link.
+  const visibleMenu = isFounder ? menu : menu.filter((item) => item.id !== "financeiro");
 
   return (
     <div className="admin-shell" style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       <AdminSidebar
-        menu={menu}
+        menu={visibleMenu}
         logoUrl={logoUrl}
         userName={userName ?? profile?.email}
         userPhoto={userPhoto}

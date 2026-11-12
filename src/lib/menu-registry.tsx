@@ -21,6 +21,9 @@ import {
   ListChecks,
   UserCircle,
   Landmark,
+  Wallet,
+  Receipt,
+  HandCoins,
 } from "lucide-react";
 
 export type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests" | "mensagens";
@@ -68,6 +71,19 @@ export const ADMIN_MENU_DEFAULTS: MenuEntry[] = [
       { id: "marketing-promocoes", href: "/admin/promocoes", label: "Promoções", icon: <Tag size={17} /> },
       { id: "marketing-depoimentos", href: "/admin/depoimentos", label: "Depoimentos", icon: <MessageSquare size={17} /> },
       { id: "marketing-midia", href: "/admin/midia", label: "Na Mídia", icon: <Monitor size={17} /> },
+    ],
+  },
+  // Only ever shown to C-level (see isCurrentUserFounder/requireFounder) —
+  // filtered out of the menu passed to AdminSidebar for anyone else, in
+  // admin/(dashboard)/layout.tsx, before this list ever reaches the client.
+  {
+    id: "financeiro",
+    label: "Financeiro",
+    icon: <Wallet size={17} />,
+    children: [
+      { id: "financeiro-dashboard", href: "/admin/financeiro", label: "Visão geral", icon: <Wallet size={17} /> },
+      { id: "financeiro-lancamentos", href: "/admin/financeiro/lancamentos", label: "Lançamentos", icon: <Receipt size={17} /> },
+      { id: "financeiro-clientes", href: "/admin/financeiro/clientes", label: "Clientes", icon: <HandCoins size={17} /> },
     ],
   },
   { id: "usuarios", href: "/admin/usuarios", label: "Usuários", icon: <KeyRound size={17} />, countKey: "resetRequests", activeMatch: ["/admin/colunistas"] },

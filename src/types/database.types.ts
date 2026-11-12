@@ -577,6 +577,33 @@ type SocialFollowerSnapshotRow = {
   created_at: string;
 };
 
+type FinanceClientRow = {
+  id: string;
+  name: string;
+  status: "active" | "paused" | "completed";
+  contract_value: number | null;
+  start_date: string | null;
+  end_date: string | null;
+  notes: string | null;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
+type FinanceEntryRow = {
+  id: string;
+  type: "income" | "expense";
+  amount: number;
+  description: string;
+  category: string | null;
+  client_id: string | null;
+  recurrence: "one_time" | "monthly";
+  entry_date: string;
+  created_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 type GoalRow = {
   id: string;
   title: string;
@@ -643,6 +670,8 @@ export type Database = {
       social_accounts: { Row: SocialAccountRow; Insert: Omit<SocialAccountRow, "id" | "created_at" | "updated_at" | "last_fetch_attempted_at" | "last_fetch_error">; Update: Partial<Omit<SocialAccountRow, "id" | "created_at">>; Relationships: [] };
       social_follower_snapshots: { Row: SocialFollowerSnapshotRow; Insert: Omit<SocialFollowerSnapshotRow, "id" | "created_at">; Update: Partial<Omit<SocialFollowerSnapshotRow, "id" | "created_at">>; Relationships: [] };
       goals: { Row: GoalRow; Insert: Omit<GoalRow, "id" | "created_at" | "updated_at" | "status">; Update: Partial<Omit<GoalRow, "id" | "created_at">>; Relationships: [] };
+      finance_clients: { Row: FinanceClientRow; Insert: Omit<FinanceClientRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<FinanceClientRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      finance_entries: { Row: FinanceEntryRow; Insert: Omit<FinanceEntryRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<FinanceEntryRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -696,3 +725,5 @@ export type Message = MessageRow;
 export type SocialAccount = SocialAccountRow;
 export type SocialFollowerSnapshot = SocialFollowerSnapshotRow;
 export type Goal = GoalRow;
+export type FinanceClient = FinanceClientRow;
+export type FinanceEntry = FinanceEntryRow;
