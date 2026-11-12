@@ -94,13 +94,21 @@ export default async function ColumnistDashboardLayout({ children }: { children:
   }
 
   return (
-    <div style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
+    <div className="admin-shell" style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
       <ColumnistSidebar menu={menu} logoUrl={logoUrl} pendingComments={pendingComments} unreadAnnouncements={unreadAnnouncements} unreadInstructions={unreadInstructions} unreadMessages={unreadMessages} />
-      <main className="admin-scroll" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%" }}>
+      <main className="admin-scroll admin-main" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%", minWidth: 0 }}>
         {termsGate}
         <PushReminderBanner />
         {children}
       </main>
+      <style>{`
+        @media (max-width: 900px) {
+          .admin-shell { display: block !important; height: auto !important; overflow: visible !important; }
+          .admin-main { height: auto !important; overflow: visible !important; padding: 4.5rem 1rem 2rem !important; }
+          /* Wide tables scroll sideways inside themselves instead of being cut off. */
+          .admin-main table { display: block; overflow-x: auto; max-width: 100%; }
+        }
+      `}</style>
     </div>
   );
 }
