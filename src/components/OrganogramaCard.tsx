@@ -92,11 +92,20 @@ function FounderBox({ columnist, index, compact }: { columnist: Columnist; index
           boxShadow: "0 0 0 1px var(--admin-border-strong)",
         }}
       />
-      {/* position/zIndex here too, same reasoning as the avatar above — this
-          sits in the same stacking context as a manager→report connector
-          line (see OrgChartConnectorLines), which should pass behind the
-          name and role same as it does the photo, not draw over them. */}
-      <div style={{ position: "relative", zIndex: 1, textAlign: "center" }}>
+      {/* A solid card behind the name/role — not just position/zIndex — so a
+          connector line's vertical drop (which runs at this exact X, straight
+          toward the report further down) never reads as "cutting through"
+          the text, even where it passes closest. */}
+      <div
+        style={{
+          position: "relative",
+          zIndex: 1,
+          textAlign: "center",
+          backgroundColor: "var(--admin-surface)",
+          borderRadius: "0.5rem",
+          padding: "0.1875rem 0.5rem",
+        }}
+      >
         <div className="og-name" style={{ fontWeight: 800, fontSize: "0.75rem", color: "var(--admin-text)", lineHeight: 1.25 }}>{columnist.name}</div>
         {role && (
           <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: compact ? "#A07B3B" : "#315E9C", letterSpacing: "0.03em", marginTop: "0.125rem" }}>{role}</div>
@@ -215,9 +224,8 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                 hanging off one of these people shares one relative-
                 positioned wrapper, so OrgChartConnectorLines (an absolutely
                 positioned overlay, see below) can draw a line from a
-                manager's avatar straight down to their report's — passing
-                behind both — no matter which of them sits inside the box
-                and which sits outside it. */}
+                manager's avatar down to their report's, no matter which of
+                them sits inside the box and which sits outside it. */}
             <div id={CLEVEL_WRAP_ID} style={{ position: "relative" }}>
               {/* The C-Level pyramid gets its own box (same treatment as the
                   Conselho boxes above/below, "C-Level" label included inside
@@ -226,7 +234,15 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                   of these people — rendered further down, outside this box —
                   reads as clearly NOT part of C-Level itself, just connected
                   to it. */}
-              <div style={{ backgroundColor: "rgba(49, 94, 156, 0.05)", border: "1px solid rgba(49, 94, 156, 0.15)", borderRadius: "0.875rem", padding: "1.5rem 1.25rem" }}>
+              {/* position+zIndex here (and on the reports row below) is what
+                  actually keeps the connector lines behind this box's content
+                  — both this div and the lines are direct children of
+                  CLEVEL_WRAP_ID, and an absolutely-positioned sibling (the
+                  lines) paints OVER a plain static sibling regardless of any
+                  z-index set further down inside it; only giving this
+                  wrapper itself a real position+z-index makes it compare as
+                  a stacking peer instead. */}
+              <div style={{ position: "relative", zIndex: 1, backgroundColor: "rgba(49, 94, 156, 0.05)", border: "1px solid rgba(49, 94, 156, 0.15)", borderRadius: "0.875rem", padding: "1.5rem 1.25rem" }}>
                 <div style={{ fontSize: "0.8125rem", fontWeight: 800, color: "var(--admin-text)", textTransform: "uppercase", letterSpacing: "0.04em", textAlign: "center", marginBottom: "1.25rem" }}>C-Level</div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                   <FounderBox columnist={ceoFounder} index={0} />
@@ -258,7 +274,7 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                 // to Gustavo), not a chain — stacking them in one column made
                 // their connector lines overlap end-to-end and read as
                 // "Bruno manages Caique manages Shay", which isn't true.
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "1.5rem", maxWidth: "36rem", margin: "0 auto", paddingTop: "1.5rem" }}>
+                <div style={{ position: "relative", zIndex: 1, display: "flex", justifyContent: "space-between", gap: "1.5rem", maxWidth: "36rem", margin: "0 auto", paddingTop: "1.5rem" }}>
                   <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.75rem 1.25rem" }}>
                     {leftReports.map((r, ri) => (
                       <FounderBox key={r.id} columnist={r} index={ri} compact />
