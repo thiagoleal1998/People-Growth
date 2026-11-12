@@ -253,13 +253,18 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                   crossed line. Each column stacks vertically if a side ever
                   picks up more than one report. */}
               {(leftReports.length > 0 || rightReports.length > 0) && (
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", maxWidth: "30rem", margin: "0 auto", paddingTop: "1.5rem" }}>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
+                // Each side is a ROW, not a column: two+ reports under the same
+                // manager are siblings (e.g. Bruno, Caique and Shay all report
+                // to Gustavo), not a chain — stacking them in one column made
+                // their connector lines overlap end-to-end and read as
+                // "Bruno manages Caique manages Shay", which isn't true.
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "1.5rem", maxWidth: "36rem", margin: "0 auto", paddingTop: "1.5rem" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.75rem 1.25rem" }}>
                     {leftReports.map((r, ri) => (
                       <FounderBox key={r.id} columnist={r} index={ri} compact />
                     ))}
                   </div>
-                  <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.75rem" }}>
+                  <div style={{ display: "flex", flexWrap: "wrap", justifyContent: "center", gap: "0.75rem 1.25rem" }}>
                     {rightReports.map((r, ri) => (
                       <FounderBox key={r.id} columnist={r} index={ri} compact />
                     ))}
