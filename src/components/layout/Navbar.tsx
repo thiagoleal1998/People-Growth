@@ -11,6 +11,11 @@ import { ThemeToggle } from "./ThemeToggle";
 const navLinks = [
   { key: "home", href: "/" as const },
   { key: "about", href: "/sobre" as const },
+  // Not a sub-brand like the ones in the "Marcas" group below — it's the
+  // company's own official communications, so it sits as a plain top-level
+  // link right next to "Sobre" instead, and only when there's actually a
+  // published post to show (see institucionalEnabled in the public layout).
+  { key: "institucional", href: "/institucional" as const },
   { key: "newsletter", href: "/conteudo" as const },
   { key: "contact", href: "/contato" as const },
 ];
@@ -22,7 +27,6 @@ const navGroups = [
       { key: "peopleGrowth", href: "/people-growth" as const },
       { key: "pontoDeReplica", href: "/ponto-de-replica" as const },
       { key: "meaSententia", href: "/mea-sententia" as const },
-      { key: "institucional", href: "/institucional" as const },
     ],
   },
   {
@@ -54,6 +58,7 @@ export function Navbar({
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
   const [openGroup, setOpenGroup] = useState<string | null>(null);
+  const visibleNavLinks = navLinks.filter((l) => institucionalEnabled || l.key !== "institucional");
   const visibleNavGroups = navGroups
     .map((g) => ({
       ...g,
@@ -61,8 +66,7 @@ export function Navbar({
         (l) =>
           (mediaEnabled || l.key !== "media") &&
           (portfolioEnabled || l.key !== "portfolio") &&
-          (coursesEnabled || l.key !== "courses") &&
-          (institucionalEnabled || l.key !== "institucional")
+          (coursesEnabled || l.key !== "courses")
       ),
     }))
     .filter((g) => g.items.length > 0);
@@ -126,7 +130,7 @@ export function Navbar({
 
         {/* Desktop nav */}
         <div style={{ display: "flex", alignItems: "center", gap: "0.25rem" }} className="hidden-mobile">
-          {navLinks.map(({ key, href }) => {
+          {visibleNavLinks.map(({ key, href }) => {
             const isActive = pathname === href || pathname.startsWith(href + "/");
             return (
               <Link
@@ -251,7 +255,7 @@ export function Navbar({
             padding: "1rem 1.5rem 1.5rem",
           }}
         >
-          {navLinks.map(({ key, href }) => (
+          {visibleNavLinks.map(({ key, href }) => (
             <Link
               key={key}
               href={href}

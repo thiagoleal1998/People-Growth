@@ -17,10 +17,13 @@ export default async function PublicLayout({
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const { data: configData } = await client
-    .from("site_config")
-    .select("key,value")
-    .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email", "instagram", "linkedin", "whatsapp", "youtube", "x", "media_enabled", "sports_widget_enabled", "portfolio_enabled", "courses_enabled", "institucional_enabled"]);
+  const [{ data: configData }, { count: institutionalPostCount }] = await Promise.all([
+    client
+      .from("site_config")
+      .select("key,value")
+      .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email", "instagram", "linkedin", "whatsapp", "youtube", "x", "media_enabled", "sports_widget_enabled", "portfolio_enabled", "courses_enabled", "institucional_enabled"]),
+    client.from("institutional_posts").select("id", { count: "exact", head: true }).eq("status", "published"),
+  ]);
 
   const config = Object.fromEntries(((configData ?? []) as { key: string; value: string | null }[]).map((c) => [c.key, c.value ?? ""]));
   const logoUrl = config.logo_url || undefined;
@@ -34,7 +37,11 @@ export default async function PublicLayout({
   const sportsEnabled = config.sports_widget_enabled !== "false";
   const portfolioEnabled = config.portfolio_enabled !== "false";
   const coursesEnabled = config.courses_enabled !== "false";
-  const institucionalEnabled = config.institucional_enabled !== "false";
+  // Not a feature toggle alone — this is the company's own official-comms
+  // feed, not a sub-brand, so the nav link (and footer link) only earn their
+  // place once there's actually something published in it to read, same
+  // reasoning as not pointing someone at an empty page.
+  const institucionalEnabled = config.institucional_enabled !== "false" && (institutionalPostCount ?? 0) > 0;
 
   return (
     <>

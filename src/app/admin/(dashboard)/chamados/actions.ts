@@ -159,29 +159,38 @@ export async function notifyTicketMember(id: string) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const { data: ticket } = await client.from("internal_tickets").select("ticket_number, title, assigned_to").eq("id", id).single();
-  if (!ticket?.assigned_to) return;
+  const { data: ticket } = await client.from("internal_tickets").select("ticket_number, title, created_by, assigned_to").eq("id", id).single();
+  if (!ticket) return;
+
+  // Always notifies whichever side of the ticket the clicking admin ISN'T —
+  // the creator if the assignee is the one notifying, or the assignee for
+  // anyone else (the creator included). Never notifies the actor themselves
+  // (clicking "Notificar" on your own ticket, as the assignee, used to
+  // always target assigned_to regardless of who clicked it — pointing it
+  // right back at yourself instead of at whoever actually created it).
+  const recipientId = actor.id === ticket.assigned_to ? ticket.created_by : ticket.assigned_to;
+  if (!recipientId || recipientId === actor.id) return;
 
   // Same reasoning as assignTicket above — needs the admin client.
   const admin = await createAdminClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const { data: assigneeProfile } = await (admin as any).from("user_profiles").select("*").eq("id", ticket.assigned_to).single();
-  if (!assigneeProfile) return;
-  const assigneeName = await resolveActorName(assigneeProfile);
+  const { data: recipientProfile } = await (admin as any).from("user_profiles").select("*").eq("id", recipientId).single();
+  if (!recipientProfile) return;
+  const recipientName = await resolveActorName(recipientProfile);
 
   const ticketCode = formatTicketId(ticket.ticket_number);
   await insertNotification(
     client,
-    ticket.assigned_to,
+    recipientId,
     "ticket_member_notified",
     { ticket_code: ticketCode, ticket_title: ticket.title },
-    assigneeProfile.role === "admin" ? "/admin/chamados" : "/colunista/chamados"
+    recipientProfile.role === "admin" ? "/admin/chamados" : "/colunista/chamados"
   );
   await client.from("ticket_events").insert({
     ticket_id: id,
     event_type: "notified",
     actor_name: actorName,
-    detail: `Notificou ${assigneeName}`,
+    detail: `Notificou ${recipientName}`,
   });
 
   revalidatePath("/admin/chamados");

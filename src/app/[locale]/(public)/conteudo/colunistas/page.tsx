@@ -50,7 +50,7 @@ export default async function ColunistasPage() {
           <p style={{ color: "rgba(255,255,255,0.7)", fontSize: "1.0625rem", lineHeight: 1.7 }}>
             {locale === "en"
               ? "Who writes Mea Sententia — perspectives on business, people and the issues shaping the world."
-              : "Quem escreve a Mea Sententia — perspectivas sobre negócios, pessoas e os temas que impactam o mundo."}
+              : "Quem escreve a Mea Sententia — perspectivas diversas sobre negócios, pessoas e os temas que impactam o mundo."}
           </p>
         </div>
       </section>

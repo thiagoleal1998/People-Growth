@@ -7,6 +7,7 @@ import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { FormatTag } from "@/components/FormatTag";
 import { PeopleGrowthBadge } from "@/components/PeopleGrowthBadge";
 import { PontoDeReplicaBadge } from "@/components/PontoDeReplicaBadge";
+import { ZoomableAvatar } from "@/components/ZoomableAvatar";
 import { createClient } from "@/lib/supabase/server";
 import { articleHref } from "@/lib/article-url";
 import { pickLocale } from "@/lib/locale-content";
@@ -141,15 +142,7 @@ export default async function ColumnistPage({
           </Link>
 
           <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", flexWrap: "wrap" }}>
-            <div
-              style={{
-                width: "6rem",
-                height: "6rem",
-                borderRadius: "50%",
-                flexShrink: 0,
-                background: columnist.photo_url ? `url("${columnist.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
-              }}
-            />
+            <ZoomableAvatar photoUrl={columnist.photo_url} name={columnist.name} />
             <div style={{ flex: 1, minWidth: "240px" }}>
               <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, marginBottom: "0.375rem" }}>
                 {columnist.name}
