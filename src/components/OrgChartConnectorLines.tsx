@@ -2,27 +2,29 @@
 
 import { useLayoutEffect, useState } from "react";
 
-type Pair = { managerId: string; reportId: string; side: "left" | "right" };
+type Pair = { managerId: string; reportId: string; side: "left" | "right" | "center" };
 type Segment = { left: number; top: number; width: number; height: number };
 
-// Draws the manager→report connector lines. Two shapes, picked per manager:
+// Draws the manager→report connector lines. Three shapes, picked per report:
 //
-// - Exactly one report (e.g. Raphael under the CEO): a simple L — horizontal
-//   out of the manager's own left/right edge (whichever side the report
-//   sits on) at the manager's vertical center, then straight down to the
-//   report. Unchanged from the original version of this component — a
-//   manager with a single report never had a crossing problem, so there's
-//   no reason for it to look different than it always has.
-// - Two or more reports under the same manager (e.g. Bruno, Caique and Shay
-//   all reporting to Gustavo): a "⊤" — the same shape as the static
-//   CEO→founders Connector just above this in OrganogramaCard. A stub
-//   straight down from the manager's own center, a horizontal bus roughly
-//   midway in the gap below, then one drop per report at their own X. A
-//   direct edge-to-report line per report (the single-report shape above)
-//   can end up running sideways straight through the manager's own circle
-//   once a report happens to sit near/under it — the bus only ever starts
-//   below the manager's bottom edge, so it never crosses back through the
-//   manager's own box.
+// - side "center" (e.g. Shay under Gustavo): a straight vertical line, no
+//   horizontal jog at all — this report is rendered directly under the
+//   manager's own column (see OrganogramaCard), so there's nothing to route
+//   around.
+// - Exactly one "left"/"right" report under a manager (e.g. Raphael under
+//   the CEO): a simple L — horizontal out of the manager's own left/right
+//   edge (whichever side the report sits on) at the manager's vertical
+//   center, then straight down to the report.
+// - Two or more "left"/"right" reports under the same manager (e.g. Bruno
+//   and Caique both fanning left off Gustavo): a "⊤" — the same shape as
+//   the static CEO→founders Connector just above this in OrganogramaCard. A
+//   stub straight down from the manager's own center, a horizontal bus
+//   roughly midway in the gap below, then one drop per report at their own
+//   X. A direct edge-to-report line per report (the single-report shape
+//   above) can end up running sideways straight through the manager's own
+//   circle once a report happens to sit near/under it — the bus only ever
+//   starts below the manager's bottom edge, so it never crosses back
+//   through the manager's own box.
 //
 // Positions are measured in the browser (by id, see org-avatar-<id> in
 // OrganogramaCard) rather than computed from fixed CSS offsets, because a
@@ -37,7 +39,7 @@ export function OrgChartConnectorLines({ pairs, containerId, color }: { pairs: P
       if (!container) return;
       const containerRect = container.getBoundingClientRect();
 
-      const groupsByManager = new Map<string, { reportId: string; side: "left" | "right" }[]>();
+      const groupsByManager = new Map<string, { reportId: string; side: "left" | "right" | "center" }[]>();
       for (const { managerId, reportId, side } of pairs) {
         const list = groupsByManager.get(managerId) ?? [];
         list.push({ reportId, side });
@@ -53,16 +55,25 @@ export function OrgChartConnectorLines({ pairs, containerId, color }: { pairs: P
         const managerCenterY = m.top + m.height / 2 - containerRect.top;
         const managerBottomY = m.bottom - containerRect.top;
 
+        const resolve = (reportId: string) => {
+          const el = document.getElementById(`org-avatar-${reportId}`);
+          if (!el) return null;
+          const r = el.getBoundingClientRect();
+          return { centerX: r.left + r.width / 2 - containerRect.left, topY: r.top - containerRect.top };
+        };
+
+        for (const { reportId, side } of reports) {
+          if (side !== "center") continue;
+          const r = resolve(reportId);
+          if (!r) continue;
+          next.push({ left: r.centerX - 1, top: managerCenterY, width: 2, height: Math.max(0, r.topY - managerCenterY) });
+        }
+
         const resolved = reports
+          .filter((r) => r.side !== "center")
           .map(({ reportId, side }) => {
-            const el = document.getElementById(`org-avatar-${reportId}`);
-            if (!el) return null;
-            const r = el.getBoundingClientRect();
-            return {
-              side,
-              centerX: r.left + r.width / 2 - containerRect.left,
-              topY: r.top - containerRect.top,
-            };
+            const r = resolve(reportId);
+            return r ? { side: side as "left" | "right", ...r } : null;
           })
           .filter((r): r is { side: "left" | "right"; centerX: number; topY: number } => r !== null);
         if (resolved.length === 0) continue;

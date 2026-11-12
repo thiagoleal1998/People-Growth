@@ -189,12 +189,25 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
   });
 
   const allManagers = ceoFounder ? [ceoFounder, ...otherFounders] : [];
-  const reportPairs: { managerId: string; reportId: string; side: "left" | "right" }[] = [];
+  const reportPairs: { managerId: string; reportId: string; side: "left" | "right" | "center" }[] = [];
   const leftReports: Columnist[] = [];
   const rightReports: Columnist[] = [];
+  // When a manager has 2+ reports, the alphabetically-last one renders
+  // directly under the manager's own column instead of fanning out to the
+  // side with the rest (e.g. Bruno and Caique fan left off Gustavo, but
+  // Shay sits centered right under him) — on request, for exactly this
+  // Gustavo/Bruno/Caique/Shay case.
+  const centeredReportByManager = new Map<string, Columnist>();
   for (const manager of allManagers) {
     const side = managerSide.get(manager.id) ?? "right";
-    for (const r of reportsByManager.get(manager.id) ?? []) {
+    const reports = reportsByManager.get(manager.id) ?? [];
+    const fanned = reports.length >= 2 ? reports.slice(0, -1) : reports;
+    const centered = reports.length >= 2 ? reports[reports.length - 1] : null;
+    if (centered) {
+      centeredReportByManager.set(manager.id, centered);
+      reportPairs.push({ managerId: manager.id, reportId: centered.id, side: "center" });
+    }
+    for (const r of fanned) {
       reportPairs.push({ managerId: manager.id, reportId: r.id, side });
       (side === "left" ? leftReports : rightReports).push(r);
     }
@@ -254,11 +267,24 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                   <FounderBox columnist={ceoFounder} index={0} />
                   <Connector />
                   <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center", flexWrap: "wrap" }}>
-                    {otherFounders.map((a, i) => (
-                      <div key={a.id} style={{ width: "5.5rem" }}>
-                        <FounderBox columnist={a} index={i + 1} />
-                      </div>
-                    ))}
+                    {otherFounders.map((a, i) => {
+                      const centered = centeredReportByManager.get(a.id);
+                      return (
+                        <div key={a.id} style={{ width: "5.5rem", position: "relative" }}>
+                          <FounderBox columnist={a} index={i + 1} />
+                          {/* Positioned relative to this founder's own column
+                              (not the reports row further below) so it's
+                              guaranteed centered under them exactly, rather
+                              than approximately via a separate flex layout —
+                              on request, for Shay under Gustavo specifically. */}
+                          {centered && (
+                            <div style={{ position: "absolute", top: "calc(100% + 3rem)", left: "50%", transform: "translateX(-50%)" }}>
+                              <FounderBox columnist={centered} index={0} compact />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
                   </div>
                 </div>
               </div>
