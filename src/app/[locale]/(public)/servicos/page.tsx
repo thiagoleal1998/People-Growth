@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { getTranslations, getLocale } from "next-intl/server";
 import { Link } from "@/i18n/navigation";
 import {
-  Target, TrendingUp, Rocket, BarChart3, Brain, Users, Sparkles, ArrowRight, CheckCircle2, Wrench,
+  Target, TrendingUp, Rocket, BarChart3, Brain, Users, Sparkles, Mic, ArrowRight, CheckCircle2, Wrench,
   type LucideIcon,
 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
@@ -13,7 +13,7 @@ import type { Service } from "@/types/database.types";
 export const revalidate = 300;
 
 const iconMap: Record<string, LucideIcon> = {
-  Target, TrendingUp, Rocket, BarChart3, Brain, Users, Sparkles,
+  Target, TrendingUp, Rocket, BarChart3, Brain, Users, Sparkles, Mic,
 };
 
 const palette = ["#315E9C", "#C89A4A", "#FFB703"];
