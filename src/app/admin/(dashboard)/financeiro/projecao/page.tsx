@@ -7,15 +7,19 @@ export default async function FinanceProjectionPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const [{ data: entriesData }, { data: clientsData }, { data: foundersData }] = await Promise.all([
+  const [{ data: entriesData }, { data: clientsData }, { data: foundersData }, { data: teamData }] = await Promise.all([
     client.from("finance_entries").select("*"),
     client.from("finance_clients").select("*"),
     client.from("columnists").select("*").eq("is_founder", true).order("name"),
+    // The same "Equipe" concept as the org chart (A empresa): anyone with a
+    // manager set there, not just founders/columnists in general.
+    client.from("columnists").select("*").not("org_chart_manager_id", "is", null).order("name"),
   ]);
 
   const entries = (entriesData ?? []) as FinanceEntry[];
   const clients = (clientsData ?? []) as FinanceClient[];
   const founders = (foundersData ?? []) as Columnist[];
+  const team = ((teamData ?? []) as Columnist[]).filter((c) => c.name?.trim());
 
   const mrr = clients.filter((c) => c.status === "active").reduce((sum, c) => sum + (c.contract_value ?? 0), 0);
 
@@ -32,5 +36,5 @@ export default async function FinanceProjectionPage() {
     if (e.recurrence === "monthly" || startKey === currentMonthKey) defaultExpense += e.amount;
   }
 
-  return <ProjectionCalculator founders={founders} defaultRevenue={mrr} defaultExpense={defaultExpense} />;
+  return <ProjectionCalculator founders={founders} team={team} defaultRevenue={mrr} defaultExpense={defaultExpense} />;
 }
