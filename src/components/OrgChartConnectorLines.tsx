@@ -10,21 +10,24 @@ type Segment = { left: number; top: number; width: number; height: number };
 // - side "center" (e.g. Shay under Gustavo): a straight vertical line, no
 //   horizontal jog at all — this report is rendered directly under the
 //   manager's own column (see OrganogramaCard), so there's nothing to route
-//   around.
+//   around. Only drawn when the manager has 2+ reports (so a manager's
+//   departure point is consistent — see managerStubY below).
 // - Exactly one "left"/"right" report under a manager (e.g. Raphael under
 //   the CEO): a simple L — horizontal out of the manager's own left/right
 //   edge (whichever side the report sits on) at the manager's vertical
-//   center, then straight down to the report.
+//   center, then straight down to the report. Unaffected by any of the
+//   below — a lone report never needed a shared departure point.
 // - Two or more "left"/"right" reports under the same manager (e.g. Bruno
-//   and Caique both fanning left off Gustavo): a "⊤" — the same shape as
-//   the static CEO→founders Connector just above this in OrganogramaCard. A
-//   stub straight down from the manager's own center, a horizontal bus
-//   roughly midway in the gap below, then one drop per report at their own
-//   X. A direct edge-to-report line per report (the single-report shape
-//   above) can end up running sideways straight through the manager's own
-//   circle once a report happens to sit near/under it — the bus only ever
-//   starts below the manager's bottom edge, so it never crosses back
-//   through the manager's own box.
+//   and Caique both fanning left off Gustavo): a "⊤". Both this and the
+//   "center" line above depart from managerStubY — the vertical middle of
+//   the manager's own name/role card, not their photo — so everyone fanning
+//   off one manager visibly shares one departure point. From there: a stub
+//   straight down, a horizontal bus roughly midway in the gap below, then
+//   one drop per report at their own X. A direct edge-to-report line per
+//   report (the single-report shape above) can end up running sideways
+//   straight through the manager's own circle once a report happens to sit
+//   near/under it — the bus only ever starts below managerStubY, so it
+//   never crosses back through the manager's own box.
 //
 // Positions are measured in the browser (by id, see org-avatar-<id> in
 // OrganogramaCard) rather than computed from fixed CSS offsets, because a
@@ -53,7 +56,14 @@ export function OrgChartConnectorLines({ pairs, containerId, color }: { pairs: P
         const m = managerEl.getBoundingClientRect();
         const managerCenterX = m.left + m.width / 2 - containerRect.left;
         const managerCenterY = m.top + m.height / 2 - containerRect.top;
-        const managerBottomY = m.bottom - containerRect.top;
+        // Where a manager with 2+ reports' connectors actually depart from:
+        // the vertical middle of their own name/role card (org-namebox-<id>,
+        // see FounderBox) — not the avatar's own center or bottom, which
+        // read as leaving from the photo rather than the person's box.
+        const nameboxEl = document.getElementById(`org-namebox-${managerId}`);
+        const managerStubY = nameboxEl
+          ? nameboxEl.getBoundingClientRect().top + nameboxEl.getBoundingClientRect().height / 2 - containerRect.top
+          : managerCenterY;
 
         const resolve = (reportId: string) => {
           const el = document.getElementById(`org-avatar-${reportId}`);
@@ -66,7 +76,7 @@ export function OrgChartConnectorLines({ pairs, containerId, color }: { pairs: P
           if (side !== "center") continue;
           const r = resolve(reportId);
           if (!r) continue;
-          next.push({ left: r.centerX - 1, top: managerCenterY, width: 2, height: Math.max(0, r.topY - managerCenterY) });
+          next.push({ left: r.centerX - 1, top: managerStubY, width: 2, height: Math.max(0, r.topY - managerStubY) });
         }
 
         const resolved = reports
@@ -96,13 +106,18 @@ export function OrgChartConnectorLines({ pairs, containerId, color }: { pairs: P
           continue;
         }
 
-        const minReportTopY = Math.min(...resolved.map((r) => r.topY));
-        const busY = managerBottomY + Math.max(8, (minReportTopY - managerBottomY) / 2);
+        // The bus itself sits right at managerStubY (the manager's own
+        // name/role card middle) rather than some gap below it — it's
+        // hidden behind that card (zIndex 0 vs. the card's zIndex 1) across
+        // the card's own width, and only becomes visible past its left/right
+        // edges, which is what actually makes it read as "departing from
+        // the middle of the card" instead of from a stub underneath it.
+        const busY = managerStubY;
         const xs = [managerCenterX, ...resolved.map((r) => r.centerX)];
         const busLeft = Math.min(...xs);
         const busRight = Math.max(...xs);
 
-        next.push({ left: managerCenterX - 1, top: managerBottomY, width: 2, height: Math.max(0, busY - managerBottomY) });
+        next.push({ left: managerCenterX - 1, top: managerStubY, width: 2, height: Math.max(0, busY - managerStubY) });
         next.push({ left: busLeft, top: busY - 1, width: Math.max(0, busRight - busLeft), height: 2 });
         for (const r of resolved) {
           next.push({ left: r.centerX - 1, top: busY, width: 2, height: Math.max(0, r.topY - busY) });

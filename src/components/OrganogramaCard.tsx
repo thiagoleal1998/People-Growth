@@ -11,6 +11,10 @@ const cardHeaderStyle = { padding: "1.25rem 1.5rem", borderBottom: "1px solid va
 // not as tiny as before.
 const FOUNDER_PHOTO_SIZE = "3rem";
 const FOUNDER_CHIP_PHOTO_SIZE = "2.25rem";
+// Horizontal distance (box width 5rem + gap 1.25rem) between each
+// consecutive pair of a manager's 2+ reports when they're stacked evenly
+// under that manager's own column — see stackedReportsByManager below.
+const STACKED_STEP_REM = 6.25;
 
 // org_chart_role is the manual override (set in the columnist's edit form,
 // "Organograma" field) — anyone can have one, not just founders. Falls back
@@ -97,6 +101,7 @@ function FounderBox({ columnist, index, compact }: { columnist: Columnist; index
           toward the report further down) never reads as "cutting through"
           the text, even where it passes closest. */}
       <div
+        id={`org-namebox-${columnist.id}`}
         style={{
           position: "relative",
           zIndex: 1,
@@ -192,24 +197,34 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
   const reportPairs: { managerId: string; reportId: string; side: "left" | "right" | "center" }[] = [];
   const leftReports: Columnist[] = [];
   const rightReports: Columnist[] = [];
-  // When a manager has 2+ reports, the alphabetically-last one renders
-  // directly under the manager's own column instead of fanning out to the
-  // side with the rest (e.g. Bruno and Caique fan left off Gustavo, but
-  // Shay sits centered right under him) — on request, for exactly this
-  // Gustavo/Bruno/Caique/Shay case.
-  const centeredReportByManager = new Map<string, Columnist>();
+  // When a manager has 2+ reports (e.g. Bruno, Caique and Shay all under
+  // Gustavo), they render as one evenly-spaced line anchored on the
+  // manager's own column instead of a loose flex row: the alphabetically
+  // last one sits at step 0 (centered right under the manager, like Shay),
+  // each earlier one steps one further box-width+gap toward the manager's
+  // side (left/right) — guaranteeing equal spacing between every
+  // consecutive pair, not just an approximate flex-wrap center. A manager
+  // with exactly one report (e.g. Raphael under the CEO) is unaffected,
+  // still rendered via the plain side-fan below.
+  const stackedReportsByManager = new Map<string, { columnist: Columnist; side: "left" | "right" | "center"; step: number }[]>();
   for (const manager of allManagers) {
     const side = managerSide.get(manager.id) ?? "right";
     const reports = reportsByManager.get(manager.id) ?? [];
-    const fanned = reports.length >= 2 ? reports.slice(0, -1) : reports;
-    const centered = reports.length >= 2 ? reports[reports.length - 1] : null;
-    if (centered) {
-      centeredReportByManager.set(manager.id, centered);
-      reportPairs.push({ managerId: manager.id, reportId: centered.id, side: "center" });
-    }
-    for (const r of fanned) {
+    if (reports.length === 0) continue;
+    if (reports.length === 1) {
+      const r = reports[0];
       reportPairs.push({ managerId: manager.id, reportId: r.id, side });
       (side === "left" ? leftReports : rightReports).push(r);
+      continue;
+    }
+    const stacked = reports.map((r, i) => ({
+      columnist: r,
+      side: (i === reports.length - 1 ? "center" : side) as "left" | "right" | "center",
+      step: reports.length - 1 - i,
+    }));
+    stackedReportsByManager.set(manager.id, stacked);
+    for (const { columnist, side: s } of stacked) {
+      reportPairs.push({ managerId: manager.id, reportId: columnist.id, side: s });
     }
   }
 
@@ -268,20 +283,32 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                   <Connector />
                   <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center", flexWrap: "wrap" }}>
                     {otherFounders.map((a, i) => {
-                      const centered = centeredReportByManager.get(a.id);
+                      const stacked = stackedReportsByManager.get(a.id) ?? [];
                       return (
                         <div key={a.id} style={{ width: "5.5rem", position: "relative" }}>
                           <FounderBox columnist={a} index={i + 1} />
                           {/* Positioned relative to this founder's own column
-                              (not the reports row further below) so it's
-                              guaranteed centered under them exactly, rather
-                              than approximately via a separate flex layout —
-                              on request, for Shay under Gustavo specifically. */}
-                          {centered && (
-                            <div style={{ position: "absolute", top: "calc(100% + 3rem)", left: "50%", transform: "translateX(-50%)" }}>
-                              <FounderBox columnist={centered} index={0} compact />
-                            </div>
-                          )}
+                              (not the reports row further below), each one
+                              stepped STEP_PX further than the last toward
+                              `side` — so every consecutive pair ends up
+                              exactly STEP_PX apart (box width + gap), not
+                              approximately via a separate flex layout. */}
+                          {stacked.map(({ columnist, side, step }) => {
+                            const signedRem = (side === "left" ? -1 : 1) * step * STACKED_STEP_REM;
+                            return (
+                              <div
+                                key={columnist.id}
+                                style={{
+                                  position: "absolute",
+                                  top: "calc(100% + 3rem)",
+                                  left: "50%",
+                                  transform: `translateX(calc(-50% + ${signedRem}rem))`,
+                                }}
+                              >
+                                <FounderBox columnist={columnist} index={0} compact />
+                              </div>
+                            );
+                          })}
                         </div>
                       );
                     })}
