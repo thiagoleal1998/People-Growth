@@ -260,7 +260,19 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                 positioned overlay, see below) can draw a line from a
                 manager's avatar down to their report's, no matter which of
                 them sits inside the box and which sits outside it. */}
-            <div id={CLEVEL_WRAP_ID} style={{ position: "relative" }}>
+            {/* The stacked reports below are absolutely positioned relative
+                to their manager's own column, stepping further out by a
+                fixed rem amount each — on a narrow phone screen there isn't
+                enough width left of/right of that column for them, and
+                they'd otherwise get clipped by this card's own
+                overflow:hidden (see cardStyle) instead of just wrapping.
+                A horizontally scrollable outer wrapper plus a floor on the
+                inner width means mobile swipes to see the rest instead of
+                losing it — same "wide content scrolls sideways inside
+                itself" approach already used for wide tables elsewhere in
+                the admin. */}
+            <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+            <div id={CLEVEL_WRAP_ID} style={{ position: "relative", minWidth: "36rem" }}>
               {/* The C-Level pyramid gets its own box (same treatment as the
                   Conselho boxes above/below, "C-Level" label included inside
                   it same as "Conselho Administrativo"/"Conselho Editorial"
@@ -350,6 +362,7 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
               {reportPairs.length > 0 && (
                 <OrgChartConnectorLines pairs={reportPairs} containerId={CLEVEL_WRAP_ID} color="rgba(49, 94, 156, 0.4)" />
               )}
+            </div>
             </div>
           </div>
         )}

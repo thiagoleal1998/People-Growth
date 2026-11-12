@@ -24,6 +24,7 @@ import {
   Wallet,
   Receipt,
   HandCoins,
+  TrendingUp,
 } from "lucide-react";
 
 export type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests" | "mensagens";
@@ -84,6 +85,7 @@ export const ADMIN_MENU_DEFAULTS: MenuEntry[] = [
       { id: "financeiro-dashboard", href: "/admin/financeiro", label: "Visão geral", icon: <Wallet size={17} /> },
       { id: "financeiro-lancamentos", href: "/admin/financeiro/lancamentos", label: "Lançamentos", icon: <Receipt size={17} /> },
       { id: "financeiro-clientes", href: "/admin/financeiro/clientes", label: "Clientes", icon: <HandCoins size={17} /> },
+      { id: "financeiro-projecao", href: "/admin/financeiro/projecao", label: "Projeção", icon: <TrendingUp size={17} /> },
     ],
   },
   { id: "usuarios", href: "/admin/usuarios", label: "Usuários", icon: <KeyRound size={17} />, countKey: "resetRequests", activeMatch: ["/admin/colunistas"] },
