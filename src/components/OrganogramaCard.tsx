@@ -116,15 +116,21 @@ function FounderBox({ columnist, index, compact }: { columnist: Columnist; index
 }
 
 // Pure-CSS "⊤" connector between the CEO box above and the two boxes below
-// it: a short vertical drop, then a bar split in half where each half's
-// inner border turns the corner down into its own box — no SVG needed.
+// it: a short vertical drop, then a bar split in half, each half with its
+// own tick down its own midpoint — which is where that half's founder box
+// actually sits below (each half is exactly as wide as the gap+founder
+// column it sits over) — no SVG needed.
 function Connector() {
   return (
     <>
       <div style={{ width: "2px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)" }} />
       <div style={{ display: "flex", width: "100%", maxWidth: "260px" }}>
-        <div style={{ flex: 1, height: "1.25rem", borderTop: "2px solid var(--admin-border-strong)", borderRight: "2px solid var(--admin-border-strong)" }} />
-        <div style={{ flex: 1, height: "1.25rem", borderTop: "2px solid var(--admin-border-strong)", borderLeft: "2px solid var(--admin-border-strong)" }} />
+        <div style={{ flex: 1, height: "1.25rem", position: "relative", borderTop: "2px solid var(--admin-border-strong)" }}>
+          <div style={{ position: "absolute", left: "50%", top: 0, width: "2px", height: "100%", backgroundColor: "var(--admin-border-strong)", transform: "translateX(-50%)" }} />
+        </div>
+        <div style={{ flex: 1, height: "1.25rem", position: "relative", borderTop: "2px solid var(--admin-border-strong)" }}>
+          <div style={{ position: "absolute", left: "50%", top: 0, width: "2px", height: "100%", backgroundColor: "var(--admin-border-strong)", transform: "translateX(-50%)" }} />
+        </div>
       </div>
     </>
   );
