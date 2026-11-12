@@ -115,21 +115,6 @@ function FounderBox({ columnist, index, compact }: { columnist: Columnist; index
   );
 }
 
-// Pure-CSS "⊤" connector between the CEO box above and the two boxes below
-// it: a short vertical drop, then a bar split in half where each half's
-// inner border turns the corner down into its own box — no SVG needed.
-function Connector() {
-  return (
-    <>
-      <div style={{ width: "2px", height: "1.25rem", backgroundColor: "var(--admin-border-strong)" }} />
-      <div style={{ display: "flex", width: "100%", maxWidth: "260px" }}>
-        <div style={{ flex: 1, height: "1.25rem", borderTop: "2px solid var(--admin-border-strong)", borderRight: "2px solid var(--admin-border-strong)" }} />
-        <div style={{ flex: 1, height: "1.25rem", borderTop: "2px solid var(--admin-border-strong)", borderLeft: "2px solid var(--admin-border-strong)" }} />
-      </div>
-    </>
-  );
-}
-
 export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
   const founders = columnists.filter((a) => a.is_founder);
   // Only meaningful for exactly 3 founders (CEO + two others) — otherwise
@@ -194,6 +179,17 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
     }
   }
 
+  // The CEO→founders link used to be a fixed-width CSS shape (a hard-coded
+  // "⊤"), which only ever drew a single tick at its own fixed center — never
+  // actually landing on Gustavo's or Raul's real position below. Feeding it
+  // through the same measured-from-the-DOM connector as every other
+  // manager→report pair (below) means it's always exactly right, however
+  // many otherFounders there are.
+  const topPairs = ceoFounder
+    ? otherFounders.map((a) => ({ managerId: ceoFounder.id, reportId: a.id, side: managerSide.get(a.id) ?? "right" }))
+    : [];
+  const allPairs = [...topPairs, ...reportPairs];
+
   if (!ceoFounder && founders.length === 0 && otherColumnists.length === 0) return null;
 
   return (
@@ -246,7 +242,10 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                 <div style={{ fontSize: "0.8125rem", fontWeight: 800, color: "var(--admin-text)", textTransform: "uppercase", letterSpacing: "0.04em", textAlign: "center", marginBottom: "1.25rem" }}>C-Level</div>
                 <div style={{ display: "flex", flexDirection: "column", alignItems: "center" }}>
                   <FounderBox columnist={ceoFounder} index={0} />
-                  <Connector />
+                  {/* Just breathing room — the actual connector lines into
+                      Gustavo/Raul are the measured overlay below (topPairs),
+                      not drawn here. */}
+                  <div style={{ height: "2.5rem" }} />
                   <div style={{ display: "flex", gap: "2.5rem", justifyContent: "center", flexWrap: "wrap" }}>
                     {otherFounders.map((a, i) => (
                       <div key={a.id} style={{ width: "5.5rem" }}>
@@ -264,10 +263,8 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                   "launched into the corners" at anything wider than a
                   phone). Wide enough that each report's vertical drop clears
                   the *other* side's FounderBox column — otherwise it cuts
-                  straight through the CEO-to-founders Connector's own
-                  horizontal bar on its way down, the two reading as one
-                  crossed line. Each column stacks vertically if a side ever
-                  picks up more than one report. */}
+                  straight through the CEO→founders connector line on its way
+                  down, the two reading as one crossed line. */}
               {(leftReports.length > 0 || rightReports.length > 0) && (
                 // Each side is a ROW, not a column: two+ reports under the same
                 // manager are siblings (e.g. Bruno, Caique and Shay all report
@@ -288,8 +285,8 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                 </div>
               )}
 
-              {reportPairs.length > 0 && (
-                <OrgChartConnectorLines pairs={reportPairs} containerId={CLEVEL_WRAP_ID} color="rgba(49, 94, 156, 0.4)" />
+              {allPairs.length > 0 && (
+                <OrgChartConnectorLines pairs={allPairs} containerId={CLEVEL_WRAP_ID} color="rgba(49, 94, 156, 0.4)" />
               )}
             </div>
           </div>
