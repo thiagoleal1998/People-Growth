@@ -4,7 +4,7 @@ import { useState, useTransition } from "react";
 import { Bell } from "lucide-react";
 import { Field, Textarea } from "@/components/admin/ui";
 import { updateNotificationTemplate, resetNotificationTemplate } from "./notification-template-actions";
-import { renderTemplateText, NOTIFICATION_TEMPLATE_PREVIEW_VARS, type NotificationTemplateKey } from "@/lib/notification-template-text";
+import { renderTemplateText, NOTIFICATION_TEMPLATE_PREVIEW_VARS, NOTIFICATION_TEMPLATE_AUDIENCE, type NotificationTemplateKey } from "@/lib/notification-template-text";
 import type { NotificationTemplate } from "@/types/database.types";
 
 const titleInputStyle = { width: "100%", padding: "0.625rem 0.75rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.9rem", boxSizing: "border-box" as const, fontFamily: "inherit", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)" };
@@ -44,8 +44,26 @@ function TemplateCard({ template }: { template: NotificationTemplate }) {
     });
   }
 
+  const audience = NOTIFICATION_TEMPLATE_AUDIENCE[template.key as NotificationTemplateKey];
+  const audienceLabel = audience === "ambos" ? "Depende de quem recebe" : audience === "admin" ? "Admin" : "Colunista";
+  const audienceColor = audience === "ambos" ? "#8a6d3b" : audience === "admin" ? "#315E9C" : "#C89A4A";
+
   return (
     <div style={{ border: "1px solid var(--admin-border)", borderRadius: "0.75rem", padding: "1.25rem", marginBottom: "1rem" }}>
+      <span
+        style={{
+          display: "inline-block",
+          fontSize: "0.6875rem",
+          fontWeight: 700,
+          color: audienceColor,
+          backgroundColor: `${audienceColor}18`,
+          padding: "0.1875rem 0.5rem",
+          borderRadius: "9999px",
+          marginBottom: "0.625rem",
+        }}
+      >
+        {audienceLabel}
+      </span>
       {template.description && (
         <p style={{ fontSize: "0.75rem", color: "var(--admin-muted)", marginBottom: "0.875rem" }}>{template.description}</p>
       )}
@@ -101,15 +119,41 @@ function TemplateCard({ template }: { template: NotificationTemplate }) {
 }
 
 export function NotificationTemplatesManager({ templates }: { templates: NotificationTemplate[] }) {
+  if (templates.length === 0) {
+    return (
+      <p style={{ fontSize: "0.875rem", color: "var(--admin-faint)" }}>
+        Nenhum modelo cadastrado ainda — rode a migration 067_notification_templates.sql no Supabase.
+      </p>
+    );
+  }
+
+  // "Ambos" (ticket_member_notified, message_received) can land in either
+  // inbox depending on who's on the other side of that specific ticket/DM —
+  // shown in both columns, with the badge making that conditionality clear,
+  // rather than forcing them into a single column that would misrepresent
+  // who actually gets notified.
+  const colunistaTemplates = templates.filter((t) => NOTIFICATION_TEMPLATE_AUDIENCE[t.key as NotificationTemplateKey] !== "admin");
+  const adminTemplates = templates.filter((t) => NOTIFICATION_TEMPLATE_AUDIENCE[t.key as NotificationTemplateKey] !== "colunista");
+
   return (
-    <div>
-      {templates.length === 0 ? (
-        <p style={{ fontSize: "0.875rem", color: "var(--admin-faint)" }}>
-          Nenhum modelo cadastrado ainda — rode a migration 067_notification_templates.sql no Supabase.
-        </p>
-      ) : (
-        templates.map((template) => <TemplateCard key={template.key} template={template} />)
-      )}
+    <div className="notif-template-columns" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1.5rem", alignItems: "start" }}>
+      <div>
+        <h3 style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.875rem" }}>Colunista</h3>
+        {colunistaTemplates.map((template) => (
+          <TemplateCard key={template.key} template={template} />
+        ))}
+      </div>
+      <div>
+        <h3 style={{ fontSize: "0.9375rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "0.875rem" }}>Admin</h3>
+        {adminTemplates.map((template) => (
+          <TemplateCard key={template.key} template={template} />
+        ))}
+      </div>
+      <style>{`
+        @media (max-width: 768px) {
+          .notif-template-columns { grid-template-columns: 1fr !important; }
+        }
+      `}</style>
     </div>
   );
 }
