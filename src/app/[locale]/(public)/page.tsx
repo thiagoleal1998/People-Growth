@@ -345,62 +345,14 @@ export default async function HomePage() {
       : [];
 
   const consultingPillars = [
-    { icon: Target, color: "#C89A4A", label: locale === "en" ? "Strategic Consulting" : "Consultoria Estratégica" },
-    { icon: TrendingUp, color: "#C89A4A", label: locale === "en" ? "Growth & Digital Marketing" : "Growth & Marketing Digital" },
-    { icon: BarChart3, color: "#C89A4A", label: "Business Intelligence" },
-    { icon: Brain, color: "#C89A4A", label: locale === "en" ? "Artificial Intelligence" : "Inteligência Artificial" },
+    { icon: Target, color: "#315E9C", label: locale === "en" ? "Strategic Consulting" : "Consultoria Estratégica" },
+    { icon: TrendingUp, color: "#315E9C", label: locale === "en" ? "Growth & Digital Marketing" : "Growth & Marketing Digital" },
+    { icon: BarChart3, color: "#315E9C", label: "Business Intelligence" },
+    { icon: Brain, color: "#315E9C", label: locale === "en" ? "Artificial Intelligence" : "Inteligência Artificial" },
   ];
 
   return (
     <>
-      {/* Consulting hero — introduces the People & Growth consultoria itself
-          (not an article/news item) right at the top of the home, above
-          even the self-promo strip below, since that one's just a thin CTA
-          link and doesn't actually say what the consultoria does. */}
-      <section style={{ background: "linear-gradient(135deg, #0d1b2a 0%, #1a1f3e 100%)", padding: "3rem 0 2.5rem", color: "white" }}>
-        <div className="container-xl" style={{ maxWidth: "960px", margin: "0 auto", textAlign: "center" }}>
-          <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "#C89A4A", letterSpacing: "0.1em", marginBottom: "0.75rem" }}>
-            {locale === "en" ? "OUR CONSULTING" : "NOSSA CONSULTORIA"}
-          </div>
-          <h2 style={{ fontSize: "clamp(1.625rem, 4.5vw, 2.5rem)", fontWeight: 800, lineHeight: 1.18, marginBottom: "1rem" }}>
-            {locale === "en"
-              ? "Strategy, data and AI for businesses that want to grow"
-              : "Estratégia, dados e IA para negócios que querem crescer"}
-          </h2>
-          <p style={{ fontSize: "1.0625rem", color: "rgba(255,255,255,0.75)", lineHeight: 1.65, maxWidth: "620px", margin: "0 auto 2rem" }}>
-            {locale === "en"
-              ? "Diagnosis, growth, Business Intelligence and AI-driven automation — measurable results for companies that want to scale."
-              : "Diagnóstico, growth, Business Intelligence e automação com inteligência artificial — resultado mensurável para quem quer escalar."}
-          </p>
-
-          <div style={{ display: "flex", justifyContent: "center", gap: "0.75rem", flexWrap: "wrap", marginBottom: "2.5rem" }}>
-            <Link
-              href="/servicos"
-              style={{ backgroundColor: "#C89A4A", color: "#0d1b2a", padding: "0.75rem 1.5rem", borderRadius: "0.5rem", fontWeight: 700, fontSize: "0.9375rem", textDecoration: "none" }}
-            >
-              {locale === "en" ? "See our consulting" : "Conhecer a consultoria"}
-            </Link>
-            <Link
-              href="/contato"
-              style={{ border: "1px solid rgba(255,255,255,0.3)", color: "white", padding: "0.75rem 1.5rem", borderRadius: "0.5rem", fontWeight: 700, fontSize: "0.9375rem", textDecoration: "none" }}
-            >
-              {locale === "en" ? "Book a call" : "Agendar conversa"}
-            </Link>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(150px, 100%), 1fr))", gap: "1rem" }}>
-            {consultingPillars.map(({ icon: Icon, label, color }) => (
-              <div key={label} style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.5rem", padding: "0.5rem" }}>
-                <div style={{ width: "2.75rem", height: "2.75rem", borderRadius: "0.75rem", backgroundColor: `${color}25`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                  <Icon size={20} color={color} />
-                </div>
-                <span style={{ fontSize: "0.8125rem", fontWeight: 600, color: "rgba(255,255,255,0.85)", textAlign: "center" }}>{label}</span>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       {/* Self-promo banner (in place of an ad slot) */}
       <Link
         href="/contato"
@@ -800,6 +752,44 @@ export default async function HomePage() {
                       </div>
                     )}
                     </div>
+                  </div>
+                </div>
+
+                {/* Consulting teaser — compact card matching the width/weight
+                    of the other sidebar widgets above (live box, featured
+                    video, standings, shorts) rather than a full-width hero;
+                    placed right after Shorts per explicit request. */}
+                <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
+                  <div style={{ backgroundColor: "#0d1b2a", color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>
+                    {locale === "en" ? "OUR CONSULTING" : "NOSSA CONSULTORIA"}
+                  </div>
+                  <div style={{ padding: "1rem", backgroundColor: "var(--site-card)" }}>
+                    <p style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", marginBottom: "0.5rem", lineHeight: 1.35 }}>
+                      {locale === "en"
+                        ? "Strategy, data and AI for businesses that want to grow"
+                        : "Estratégia, dados e IA para negócios que querem crescer"}
+                    </p>
+                    <p style={{ fontSize: "0.8125rem", color: "var(--site-muted)", lineHeight: 1.5, marginBottom: "0.875rem" }}>
+                      {locale === "en"
+                        ? "Diagnosis, growth, Business Intelligence and AI-driven automation."
+                        : "Diagnóstico, growth, Business Intelligence e automação com inteligência artificial."}
+                    </p>
+                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "0.625rem", marginBottom: "1rem" }}>
+                      {consultingPillars.map(({ icon: Icon, label, color }) => (
+                        <div key={label} style={{ display: "flex", alignItems: "center", gap: "0.4375rem" }}>
+                          <div style={{ width: "1.625rem", height: "1.625rem", flexShrink: 0, borderRadius: "0.4375rem", backgroundColor: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+                            <Icon size={13} color={color} />
+                          </div>
+                          <span style={{ fontSize: "0.6875rem", fontWeight: 600, color: "var(--site-muted)", lineHeight: 1.25 }}>{label}</span>
+                        </div>
+                      ))}
+                    </div>
+                    <Link
+                      href="/servicos"
+                      style={{ display: "block", textAlign: "center", backgroundColor: "#C89A4A", color: "#0d1b2a", padding: "0.5rem 1rem", borderRadius: "0.5rem", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
+                    >
+                      {locale === "en" ? "See our consulting" : "Conhecer a consultoria"}
+                    </Link>
                   </div>
                 </div>
 
