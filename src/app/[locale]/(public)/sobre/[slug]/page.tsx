@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { Link } from "@/i18n/navigation";
 import { ArrowLeft, ArrowRight, Award, Linkedin, Instagram, Mail, Globe } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
+import { ZoomableAvatar } from "@/components/ZoomableAvatar";
 import { createClient } from "@/lib/supabase/server";
 import { pickLocale } from "@/lib/locale-content";
 import type { Columnist } from "@/types/database.types";
@@ -134,15 +135,7 @@ export default async function FounderPage({
           </Link>
 
           <div style={{ display: "flex", gap: "1.5rem", alignItems: "flex-start", flexWrap: "wrap" }}>
-            <div
-              style={{
-                width: "6rem",
-                height: "6rem",
-                borderRadius: "50%",
-                flexShrink: 0,
-                background: columnist.photo_url ? `url("${columnist.photo_url}") center/cover` : "linear-gradient(135deg, #315E9C, #C89A4A)",
-              }}
-            />
+            <ZoomableAvatar photoUrl={columnist.photo_url} name={columnist.name} />
             <div style={{ flex: 1, minWidth: "240px" }}>
               <h1 style={{ fontSize: "clamp(1.75rem, 4vw, 2.5rem)", fontWeight: 800, marginBottom: "0.375rem" }}>
                 {columnist.name}
