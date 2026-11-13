@@ -84,7 +84,14 @@ export function ClampedNewsList({
         const measured = rows[i].getBoundingClientRect().height;
         if (measured > 0) rowHeightsRef.current[i] = measured;
         const rowHeight = rowHeightsRef.current[i] ?? measured;
-        if (count > 0 && used + rowHeight > target) break;
+        // Never slicing a row in half means there's almost always some
+        // leftover slack either way — stopping strictly before the target
+        // (the old rule) can leave a visibly large gap under the list
+        // whenever the next row doesn't happen to fit neatly. Taking
+        // whichever is actually closer to the target — even a few dozen
+        // pixels of overshoot past it — reads as a much tighter match than
+        // a tall empty gap on the shorter side.
+        if (count > 0 && Math.abs(target - (used + rowHeight)) > Math.abs(target - used)) break;
         used += rowHeight;
         count += 1;
       }

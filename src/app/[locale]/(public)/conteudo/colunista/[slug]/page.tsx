@@ -198,13 +198,13 @@ export default async function ColumnistPage({
       </section>
 
       <section className="section-padding" style={{ backgroundColor: "var(--site-surface-alt)" }}>
-        <div className="container-xl" style={{ maxWidth: "800px" }}>
+        <div className="container-xl" style={{ maxWidth: "1100px" }}>
           {articles.length === 0 ? (
             <div style={{ textAlign: "center", padding: "3rem 1rem", color: "var(--site-faint)" }}>
               {locale === "en" ? `${columnist.name} hasn't published any articles yet.` : `${columnist.name} ainda não publicou nenhum artigo.`}
             </div>
           ) : (
-            <div style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(280px, 100%), 1fr))", gap: "1.5rem" }}>
               {articles.map((article) => {
                 const cat = article.category_id ? categoryById.get(article.category_id) : null;
                 return (
@@ -218,19 +218,17 @@ export default async function ColumnistPage({
                       style={{
                         backgroundColor: "var(--site-card)",
                         borderRadius: "1rem",
-                        padding: "1.5rem",
+                        overflow: "hidden",
                         border: "1px solid var(--site-border)",
+                        height: "100%",
                         display: "flex",
-                        gap: "1.25rem",
-                        alignItems: "flex-start",
+                        flexDirection: "column",
                       }}
                     >
                       <div
                         style={{
-                          width: "5rem",
-                          height: "5rem",
+                          height: "170px",
                           flexShrink: 0,
-                          borderRadius: "0.75rem",
                           background: article.cover_image
                             ? `url("${article.cover_image}") center/cover`
                             : "linear-gradient(135deg, #0d1b2a, #1a1f3e)",
@@ -244,9 +242,9 @@ export default async function ColumnistPage({
                             style={{
                               backgroundColor: `${cat.color ?? "#315E9C"}25`,
                               color: cat.color ?? "#315E9C",
-                              padding: "0.2rem 0.5rem",
+                              padding: "0.25rem 0.625rem",
                               borderRadius: "0.25rem",
-                              fontSize: "0.625rem",
+                              fontSize: "0.6875rem",
                               fontWeight: 700,
                             }}
                           >
@@ -254,8 +252,8 @@ export default async function ColumnistPage({
                           </span>
                         )}
                       </div>
-                      <div style={{ flex: 1 }}>
-                        <div style={{ marginBottom: "0.375rem" }}>
+                      <div style={{ padding: "1.25rem", flex: 1, display: "flex", flexDirection: "column" }}>
+                        <div style={{ marginBottom: "0.5rem" }}>
                           <FormatTag format={article.format} locale={locale} />
                           {cat?.is_people_growth && <PeopleGrowthBadge />}
                           {cat?.is_ponto_de_replica && <PontoDeReplicaBadge />}
@@ -268,7 +266,7 @@ export default async function ColumnistPage({
                             {pickLocale(locale, article.excerpt_pt, article.excerpt_en)}
                           </p>
                         )}
-                        <span style={{ fontSize: "0.8125rem", color: "var(--site-faint)", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+                        <span style={{ marginTop: "auto", fontSize: "0.8125rem", color: "var(--site-faint)", display: "flex", alignItems: "center", gap: "0.25rem" }}>
                           {article.published_at && new Date(article.published_at).toLocaleDateString(locale === "en" ? "en-US" : "pt-BR", { day: "2-digit", month: "short", year: "numeric" })}
                           <ChevronRight size={13} />
                         </span>
