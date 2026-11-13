@@ -28,6 +28,21 @@ import type { ArticleWithCategory } from "@/app/[locale]/(public)/page";
 // as "free" (0 tall) to the packing loop, which then kept counting rows
 // all the way to the end and set visibleCount to the full list — the
 // *opposite* of safer, and a strictly worse failure mode than this one.
+//
+// That same zero-height trap can also bite on a LATER call, once a
+// previous recompute() has already hidden some rows: the "load" event, the
+// 800ms recheck and the sidebar's own ResizeObserver can all fire more than
+// once, and a second pass that re-measures an already-hidden row again
+// reads it as free and balloons the count right back up. rowHeightsRef
+// caches each row's real height the first time it's measured with one
+// (i.e. while visible) and that cached value is what the packing loop
+// uses from then on, so a row being hidden never erases what's already
+// known about it. (An earlier attempt fixed this by force-setting
+// row.style.display = "flex" via raw DOM just before measuring — but
+// React tracks the style it last rendered, not the live DOM, so when the
+// next setVisibleCount() call lands on the *same* count as before, React
+// bails out of re-rendering entirely and that force-unhide never gets
+// reverted, leaving every row stuck visible.)
 export function ClampedNewsList({
   articles,
   columnistNames,
@@ -42,6 +57,7 @@ export function ClampedNewsList({
   sidebarId: string;
 }) {
   const listRef = useRef<HTMLDivElement>(null);
+  const rowHeightsRef = useRef<number[]>([]);
   const [visibleCount, setVisibleCount] = useState(articles.length);
 
   useLayoutEffect(() => {
@@ -64,8 +80,10 @@ export function ClampedNewsList({
       const rows = Array.from(list.children) as HTMLElement[];
       let used = 0;
       let count = 0;
-      for (const row of rows) {
-        const rowHeight = row.getBoundingClientRect().height;
+      for (let i = 0; i < rows.length; i++) {
+        const measured = rows[i].getBoundingClientRect().height;
+        if (measured > 0) rowHeightsRef.current[i] = measured;
+        const rowHeight = rowHeightsRef.current[i] ?? measured;
         if (count > 0 && used + rowHeight > target) break;
         used += rowHeight;
         count += 1;
