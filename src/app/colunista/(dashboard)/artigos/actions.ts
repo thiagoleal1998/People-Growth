@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { getCurrentProfile } from "@/lib/auth/profile";
+import { getCurrentProfile, resolveActorName } from "@/lib/auth/profile";
 import { uploadPublicImage } from "@/lib/supabase/storage";
 import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
 import { calculateReadTime } from "@/lib/markdown-lite";
@@ -213,9 +213,10 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
   const wasPending = oldArticle?.status === "pending";
   if (status === "pending" && !wasPending) {
     const cameFromChangesRequested = Boolean(oldArticle?.review_feedback);
+    const authorName = await resolveActorName(profile);
     await notifyAdmins(
       cameFromChangesRequested ? "article_resubmitted_for_approval" : "article_submitted_for_approval",
-      { title: title_pt },
+      { title: title_pt, author: authorName },
       `/admin/artigos/${articleId}/revisar`
     );
   }

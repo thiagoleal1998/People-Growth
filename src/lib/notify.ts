@@ -12,8 +12,8 @@ export const DEFAULT_TEMPLATES: Record<NotificationTemplateKey, { title: string;
   article_approved_scheduled: { title: '"{{title}}" foi aprovado e agendado', body: "Vai ao ar em {{scheduled_for}}." },
   article_changes_requested: { title: 'Alterações solicitadas em "{{title}}"', body: "{{feedback}}" },
   ticket_member_notified: { title: "Você foi notificado no chamado {{ticket_code}}", body: "{{ticket_title}}" },
-  article_submitted_for_approval: { title: '"{{title}}" foi enviado para aprovação', body: null },
-  article_resubmitted_for_approval: { title: '"{{title}}" foi revisado e reenviado para aprovação', body: null },
+  article_submitted_for_approval: { title: '"{{title}}" de {{author}} foi enviado para aprovação', body: null },
+  article_resubmitted_for_approval: { title: '"{{title}}" de {{author}} foi revisado e reenviado para aprovação', body: null },
   instruction_item_created: { title: 'Nova instrução: "{{title}}"', body: "Confira no Canal de Instruções." },
   message_received: { title: "{{sender}} te enviou uma mensagem", body: "{{preview}}" },
 };
