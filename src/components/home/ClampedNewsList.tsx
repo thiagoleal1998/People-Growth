@@ -43,6 +43,23 @@ import type { ArticleWithCategory } from "@/app/[locale]/(public)/page";
 // next setVisibleCount() call lands on the *same* count as before, React
 // bails out of re-rendering entirely and that force-unhide never gets
 // reverted, leaving every row stuck visible.)
+//
+// `sidebarId` is the WHOLE sidebar, consulting card included. After
+// deciding how many rows fit, recompute() below also stretches that card
+// (DOM id "home-consulting-card") to close whatever's left of the gap
+// under "Mais notícias" — directly, as a plain style write, not through
+// a second component with its own ResizeObserver watching this list back.
+// An earlier version split that into ConsultingSidebarCard's own effect,
+// watching this list's wrapper the way this effect watches the sidebar;
+// the two components' first layout-effect passes run back to back but
+// each only sees the OTHER's pre-update DOM (React queues state updates,
+// it doesn't apply them mid-pass), so the card's very first measurement
+// read this list's still-unclamped (all 28 rows) height, stretched itself
+// to match that, which re-triggered this list's own observer with a now-
+// enormous target — and the two settled into a permanent back-and-forth,
+// never converging. Doing both steps in this one function means the
+// "needed" card height is always computed from the `used` this SAME pass
+// just decided, never a stale cross-component read.
 export function ClampedNewsList({
   articles,
   columnistNames,
@@ -69,6 +86,8 @@ export function ClampedNewsList({
       // that the columns stack, so there's nothing to line up against.
       if (window.innerWidth <= 900) {
         setVisibleCount(articles.length);
+        const consultingCard = document.getElementById("home-consulting-card");
+        if (consultingCard) consultingCard.style.minHeight = "";
         return;
       }
       // Not just the sidebar's own height: this list sits lower in its own
@@ -85,17 +104,35 @@ export function ClampedNewsList({
         if (measured > 0) rowHeightsRef.current[i] = measured;
         const rowHeight = rowHeightsRef.current[i] ?? measured;
         // Never slicing a row in half means there's almost always some
-        // leftover slack either way — stopping strictly before the target
-        // (the old rule) can leave a visibly large gap under the list
-        // whenever the next row doesn't happen to fit neatly. Taking
-        // whichever is actually closer to the target — even a few dozen
-        // pixels of overshoot past it — reads as a much tighter match than
-        // a tall empty gap on the shorter side.
+        // leftover slack either way — taking whichever is actually closer
+        // to the target (even overshooting it a bit) reads as a tighter
+        // match than stopping short and leaving a gap; the consulting card
+        // below closes whatever's left of that gap on its own.
         if (count > 0 && Math.abs(target - (used + rowHeight)) > Math.abs(target - used)) break;
         used += rowHeight;
         count += 1;
       }
       setVisibleCount(Math.max(1, count));
+
+      const consultingCard = document.getElementById("home-consulting-card");
+      // "Ver todas as notícias" (the list wrapper's fixed next sibling, see
+      // the JSX below) is the actual bottom of this whole block — `used`
+      // alone is only the rows, missing that trailing CTA's own margin and
+      // height, which left a consistent gap uncovered here before. Reading
+      // its own height/margin (not its absolute position) matters: its
+      // position reflects whichever `visibleCount` React last painted,
+      // which on this very call is still the PREVIOUS one — the
+      // setVisibleCount above only takes effect on the next render — but
+      // its height and margin don't depend on how many rows sit above it,
+      // so those stay correct to read right away.
+      const trailingCta = list.nextElementSibling as HTMLElement | null;
+      if (consultingCard && trailingCta) {
+        const ctaMarginTop = parseFloat(getComputedStyle(trailingCta).marginTop) || 0;
+        const ctaExtent = ctaMarginTop + trailingCta.getBoundingClientRect().height;
+        const listBottom = list.getBoundingClientRect().top + used + ctaExtent;
+        const needed = listBottom - consultingCard.getBoundingClientRect().top;
+        consultingCard.style.minHeight = `${Math.max(0, Math.round(needed))}px`;
+      }
     }
     recompute();
     // The sidebar's own iframes/images (YouTube embeds, the sports crest)

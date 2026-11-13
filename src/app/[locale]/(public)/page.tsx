@@ -51,6 +51,7 @@ import { ColumnistCarousel } from "@/components/ColumnistCarousel";
 import { SportsStandingsSnippet } from "@/components/SportsStandingsSnippet";
 import { articleHref, articlePath } from "@/lib/article-url";
 import { ClampedNewsList } from "@/components/home/ClampedNewsList";
+import { ConsultingSidebarCard } from "@/components/home/ConsultingSidebarCard";
 import { isColumnistPubliclyVisible } from "@/lib/founder-data";
 import type { Article, Columnist, Testimonial, MediaItem, Category } from "@/types/database.types";
 
@@ -344,11 +345,12 @@ export default async function HomePage() {
         [...extractH2Headings(pickLocale(locale, featured.content_pt, featured.content_en))].sort(() => Math.random() - 0.5).slice(0, 4)
       : [];
 
+  const consultingPillarColor = "#315E9C";
   const consultingPillars = [
-    { icon: Target, color: "#315E9C", label: locale === "en" ? "Strategic Consulting" : "Consultoria Estratégica" },
-    { icon: TrendingUp, color: "#315E9C", label: locale === "en" ? "Growth & Digital Marketing" : "Growth & Marketing Digital" },
-    { icon: BarChart3, color: "#315E9C", label: "Business Intelligence" },
-    { icon: Brain, color: "#315E9C", label: locale === "en" ? "Artificial Intelligence" : "Inteligência Artificial" },
+    { icon: <Target size={13} color={consultingPillarColor} />, color: consultingPillarColor, label: locale === "en" ? "Strategic Consulting" : "Consultoria Estratégica" },
+    { icon: <TrendingUp size={13} color={consultingPillarColor} />, color: consultingPillarColor, label: locale === "en" ? "Growth & Digital Marketing" : "Growth & Marketing Digital" },
+    { icon: <BarChart3 size={13} color={consultingPillarColor} />, color: consultingPillarColor, label: "Business Intelligence" },
+    { icon: <Brain size={13} color={consultingPillarColor} />, color: consultingPillarColor, label: locale === "en" ? "Artificial Intelligence" : "Inteligência Artificial" },
   ];
 
   return (
@@ -758,40 +760,11 @@ export default async function HomePage() {
                 {/* Consulting teaser — compact card matching the width/weight
                     of the other sidebar widgets above (live box, featured
                     video, standings, shorts) rather than a full-width hero;
-                    placed right after Shorts per explicit request. */}
-                <div style={{ marginTop: "0.875rem", borderRadius: "0.75rem", overflow: "hidden", border: "1px solid var(--site-border)" }}>
-                  <div style={{ backgroundColor: "#0d1b2a", color: "white", padding: "0.625rem 1rem", fontWeight: 800, fontSize: "0.8125rem", letterSpacing: "0.04em" }}>
-                    {locale === "en" ? "OUR CONSULTING" : "NOSSA CONSULTORIA"}
-                  </div>
-                  <div style={{ padding: "1rem", backgroundColor: "var(--site-card)" }}>
-                    <p style={{ fontWeight: 700, fontSize: "0.9375rem", color: "var(--site-text)", marginBottom: "0.5rem", lineHeight: 1.35 }}>
-                      {locale === "en"
-                        ? "Strategy, data and AI for businesses that want to grow"
-                        : "Estratégia, dados e IA para negócios que querem crescer"}
-                    </p>
-                    <p style={{ fontSize: "0.8125rem", color: "var(--site-muted)", lineHeight: 1.5, marginBottom: "0.875rem" }}>
-                      {locale === "en"
-                        ? "Diagnosis, growth, Business Intelligence and AI-driven automation."
-                        : "Diagnóstico, growth, Business Intelligence e automação com inteligência artificial."}
-                    </p>
-                    <div style={{ display: "grid", gridTemplateColumns: "repeat(2, 1fr)", gap: "0.625rem", marginBottom: "1rem" }}>
-                      {consultingPillars.map(({ icon: Icon, label, color }) => (
-                        <div key={label} style={{ display: "flex", alignItems: "center", gap: "0.4375rem" }}>
-                          <div style={{ width: "1.625rem", height: "1.625rem", flexShrink: 0, borderRadius: "0.4375rem", backgroundColor: `${color}18`, display: "flex", alignItems: "center", justifyContent: "center" }}>
-                            <Icon size={13} color={color} />
-                          </div>
-                          <span style={{ fontSize: "0.6875rem", fontWeight: 600, color: "var(--site-muted)", lineHeight: 1.25 }}>{label}</span>
-                        </div>
-                      ))}
-                    </div>
-                    <Link
-                      href="/servicos"
-                      style={{ display: "block", textAlign: "center", backgroundColor: "#C89A4A", color: "#0d1b2a", padding: "0.5rem 1rem", borderRadius: "0.5rem", fontWeight: 700, fontSize: "0.8125rem", textDecoration: "none" }}
-                    >
-                      {locale === "en" ? "See our consulting" : "Conhecer a consultoria"}
-                    </Link>
-                  </div>
-                </div>
+                    placed right after Shorts per explicit request. Its own
+                    extra height (closing whatever gap is left under "Mais
+                    notícias") is set directly on this DOM node by
+                    ClampedNewsList, see the comment there. */}
+                <ConsultingSidebarCard locale={locale} pillars={consultingPillars} />
 
               </aside>
             </div>
