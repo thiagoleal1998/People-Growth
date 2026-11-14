@@ -173,6 +173,27 @@ function BucketCard({ icon, label, pct, amount, color }: { icon: React.ReactNode
   );
 }
 
+// Resumo rápido's per-person breakdown — unlike the detailed tab's
+// "Divisão entre os sócios" (custom % per founder), this one is always a
+// plain equal split, per the request: the point of the quick tab is a
+// faster back-of-envelope number, not another set of %s to maintain.
+function EqualSplitList({ title, people, totalAmount, color }: { title: string; people: Columnist[]; totalAmount: number; color: string }) {
+  const perPerson = people.length > 0 ? totalAmount / people.length : 0;
+  return (
+    <div style={{ backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "0.875rem", padding: "1.25rem" }}>
+      <div style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-text)", marginBottom: "0.875rem" }}>{title}</div>
+      <div style={{ display: "flex", flexDirection: "column", gap: "0.625rem" }}>
+        {people.map((p) => (
+          <div key={p.id} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem" }}>
+            <span style={{ fontSize: "0.875rem", color: "var(--admin-text)" }}>{p.name}</span>
+            <span style={{ fontSize: "0.9375rem", fontWeight: 800, color }}>{formatBRL(perPerson)}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 const TABS = [
   { id: "detalhada", label: "Projeção detalhada" },
   { id: "rapida", label: "Resumo rápido" },
@@ -513,10 +534,21 @@ export function ProjectionCalculator({
             )}
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1rem", marginBottom: founders.length > 0 || team.length > 0 ? "1.25rem" : 0 }}>
             <BucketCard icon={<HandCoins size={16} />} label="Sócios" pct={quickPartnersPct} amount={quickPartnersAmount} color="#16A34A" />
             <BucketCard icon={<Users size={16} />} label="Equipe" pct={quickTeamPct} amount={quickTeamAmount} color="#A07B3B" />
           </div>
+
+          {(founders.length > 0 || team.length > 0) && (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))", gap: "1rem" }}>
+              {founders.length > 0 && (
+                <EqualSplitList title="Sócios — dividido igualmente" people={founders} totalAmount={quickPartnersAmount} color="#16A34A" />
+              )}
+              {team.length > 0 && (
+                <EqualSplitList title="Equipe — dividido igualmente" people={team} totalAmount={quickTeamAmount} color="#A07B3B" />
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>
