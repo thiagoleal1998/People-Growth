@@ -59,6 +59,7 @@ function formatDate(iso: string) {
 export function FinanceDashboard({
   monthIncome,
   monthExpense,
+  columnistPayoutTotal,
   mrr,
   months,
   recentEntries,
@@ -66,6 +67,7 @@ export function FinanceDashboard({
 }: {
   monthIncome: number;
   monthExpense: number;
+  columnistPayoutTotal: number;
   mrr: number;
   months: { label: string; income: number; expense: number }[];
   recentEntries: FinanceEntry[];
@@ -85,6 +87,13 @@ export function FinanceDashboard({
         <Tile label="Margem" value={`${margin.toFixed(1)}%`} tone={margin >= 0 ? "positive" : "negative"} />
         <Tile label="MRR (clientes ativos)" value={formatBRL(mrr)} />
       </div>
+
+      {columnistPayoutTotal > 0 && (
+        <div style={{ fontSize: "0.8125rem", color: "var(--admin-muted)", marginTop: "-0.75rem", marginBottom: "1.5rem" }}>
+          &quot;Despesa do mês&quot; já inclui {formatBRL(columnistPayoutTotal)} de remuneração de colunistas (calculada automaticamente em{" "}
+          <Link href="/admin/financeiro/parametros" style={{ color: "#315E9C", fontWeight: 700, textDecoration: "none" }}>Parâmetros</Link>).
+        </div>
+      )}
 
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(420px, 100%), 1fr))", gap: "1.25rem", alignItems: "start" }}>
         <div style={{ backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "1rem", padding: "1.5rem" }}>

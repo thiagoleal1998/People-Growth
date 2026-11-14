@@ -625,6 +625,15 @@ type FinanceProjectionRow = {
   updated_at: string;
 };
 
+type FinancePayoutParamsRow = {
+  id: string;
+  per_article_rate: number;
+  weekly_rank_bonuses: number[];
+  updated_by: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 type GoalRow = {
   id: string;
   title: string;
@@ -694,6 +703,7 @@ export type Database = {
       finance_clients: { Row: FinanceClientRow; Insert: Omit<FinanceClientRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<FinanceClientRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       finance_entries: { Row: FinanceEntryRow; Insert: Omit<FinanceEntryRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<FinanceEntryRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       finance_projections: { Row: FinanceProjectionRow; Insert: Partial<Omit<FinanceProjectionRow, "created_at" | "updated_at">>; Update: Partial<Omit<FinanceProjectionRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      finance_payout_params: { Row: FinancePayoutParamsRow; Insert: Partial<Omit<FinancePayoutParamsRow, "created_at" | "updated_at">>; Update: Partial<Omit<FinancePayoutParamsRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -750,3 +760,4 @@ export type Goal = GoalRow;
 export type FinanceClient = FinanceClientRow;
 export type FinanceEntry = FinanceEntryRow;
 export type FinanceProjection = FinanceProjectionRow;
+export type FinancePayoutParams = FinancePayoutParamsRow;
