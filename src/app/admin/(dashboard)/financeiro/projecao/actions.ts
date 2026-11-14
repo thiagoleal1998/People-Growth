@@ -17,6 +17,10 @@ export async function saveProjection(data: {
   payrollTaxPct: number;
   salaries: Record<string, number>;
   partnerShares: Record<string, number>;
+  quickProfit: number;
+  quickCosts: number;
+  quickPartnersPct: number;
+  quickTeamPct: number;
 }) {
   const supabase = await createClient();
   const actor = await getCurrentProfile();
@@ -32,6 +36,10 @@ export async function saveProjection(data: {
     payroll_tax_pct: data.payrollTaxPct,
     salaries: data.salaries,
     partner_shares: data.partnerShares,
+    quick_profit: data.quickProfit,
+    quick_costs: data.quickCosts,
+    quick_partners_pct: data.quickPartnersPct,
+    quick_team_pct: data.quickTeamPct,
     updated_by: actor?.id ?? null,
     updated_at: new Date().toISOString(),
   });
