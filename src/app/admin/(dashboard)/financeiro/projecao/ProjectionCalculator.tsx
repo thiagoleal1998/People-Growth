@@ -253,6 +253,7 @@ export function ProjectionCalculator({
   // scenario.
   const [quickProfit, setQuickProfit] = useState(saved?.quick_profit ?? 0);
   const [quickCosts, setQuickCosts] = useState(saved?.quick_costs ?? 0);
+  const [quickCompanyPct, setQuickCompanyPct] = useState(saved?.quick_company_pct ?? 0);
   const [quickPartnersPct, setQuickPartnersPct] = useState(saved?.quick_partners_pct ?? 50);
   const [quickTeamPct, setQuickTeamPct] = useState(saved?.quick_team_pct ?? 50);
 
@@ -262,7 +263,7 @@ export function ProjectionCalculator({
   async function handleSave() {
     setSaving(true);
     try {
-      await saveProjection({ revenue, expense, companyPct, partnersPct, payrollTaxPct, salaries, partnerShares, quickProfit, quickCosts, quickPartnersPct, quickTeamPct });
+      await saveProjection({ revenue, expense, companyPct, partnersPct, payrollTaxPct, salaries, partnerShares, quickProfit, quickCosts, quickCompanyPct, quickPartnersPct, quickTeamPct });
       setSavedAt(new Date());
     } finally {
       setSaving(false);
@@ -282,7 +283,8 @@ export function ProjectionCalculator({
 
   const quickMargin = quickProfit - quickCosts;
   const quickMarginPct = quickProfit > 0 ? (quickMargin / quickProfit) * 100 : 0;
-  const quickSplitTotal = Math.round((quickPartnersPct + quickTeamPct) * 10) / 10;
+  const quickSplitTotal = Math.round((quickCompanyPct + quickPartnersPct + quickTeamPct) * 10) / 10;
+  const quickCompanyAmount = (quickMargin * quickCompanyPct) / 100;
   const quickPartnersAmount = (quickMargin * quickPartnersPct) / 100;
   const quickTeamAmount = (quickMargin * quickTeamPct) / 100;
 
@@ -523,18 +525,20 @@ export function ProjectionCalculator({
 
           <div style={{ backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border)", borderRadius: "1rem", padding: "1.5rem", marginBottom: "1.25rem" }}>
             <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)", marginBottom: "1.125rem" }}>Divisão da margem</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(260px, 100%), 1fr))", gap: "1.25rem" }}>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1.25rem" }}>
+              <NumberField label="Empresa (%)" value={quickCompanyPct} onChange={setQuickCompanyPct} suffix="%" />
               <NumberField label="Sócios (%)" value={quickPartnersPct} onChange={setQuickPartnersPct} suffix="%" />
               <NumberField label="Equipe (%)" value={quickTeamPct} onChange={setQuickTeamPct} suffix="%" />
             </div>
             {quickSplitTotal !== 100 && (
               <div style={{ fontSize: "0.8125rem", color: "#b45309", backgroundColor: "rgba(217,119,6,0.1)", padding: "0.625rem 0.875rem", borderRadius: "0.5rem" }}>
-                As duas porcentagens somam {quickSplitTotal}%, não 100% — os valores abaixo refletem exatamente o que foi digitado mesmo assim.
+                As três porcentagens somam {quickSplitTotal}%, não 100% — os valores abaixo refletem exatamente o que foi digitado mesmo assim.
               </div>
             )}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(220px, 100%), 1fr))", gap: "1rem", marginBottom: founders.length > 0 || team.length > 0 ? "1.25rem" : 0 }}>
+            <BucketCard icon={<Building2 size={16} />} label="Empresa" pct={quickCompanyPct} amount={quickCompanyAmount} color="#315E9C" />
             <BucketCard icon={<HandCoins size={16} />} label="Sócios" pct={quickPartnersPct} amount={quickPartnersAmount} color="#16A34A" />
             <BucketCard icon={<Users size={16} />} label="Equipe" pct={quickTeamPct} amount={quickTeamAmount} color="#A07B3B" />
           </div>

@@ -19,6 +19,7 @@ export async function saveProjection(data: {
   partnerShares: Record<string, number>;
   quickProfit: number;
   quickCosts: number;
+  quickCompanyPct: number;
   quickPartnersPct: number;
   quickTeamPct: number;
 }) {
@@ -38,6 +39,7 @@ export async function saveProjection(data: {
     partner_shares: data.partnerShares,
     quick_profit: data.quickProfit,
     quick_costs: data.quickCosts,
+    quick_company_pct: data.quickCompanyPct,
     quick_partners_pct: data.quickPartnersPct,
     quick_team_pct: data.quickTeamPct,
     updated_by: actor?.id ?? null,

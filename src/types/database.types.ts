@@ -614,9 +614,10 @@ type FinanceProjectionRow = {
   salaries: Record<string, number>;
   partner_shares: Record<string, number>;
   // Second, simpler tab: a standalone Lucro - Gastos = Margem split between
-  // sócios and equipe, independent of the detailed payroll table above.
+  // empresa, sócios and equipe, independent of the detailed payroll table above.
   quick_profit: number;
   quick_costs: number;
+  quick_company_pct: number;
   quick_partners_pct: number;
   quick_team_pct: number;
   updated_by: string | null;
