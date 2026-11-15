@@ -1,12 +1,13 @@
 import Link from "next/link";
 import { diffWords } from "diff";
-import { Eye, Users, MousePointerClick, Percent, X, ThumbsUp, MessageCircle, Flag, MoveDown, Ticket, Bug } from "lucide-react";
+import { Eye, Users, MousePointerClick, Percent, X, ThumbsUp, MessageCircle, Flag, MoveDown, Ticket, Bug, Search, Target } from "lucide-react";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { PageHeader, Card, EmptyState } from "@/components/admin/ui";
 import { AD_SLOT_DEFS } from "../publicidade/ad-slots";
 import { ExportReportButton } from "./ExportReportButton";
 import { PlanosClient, type GoalWithProgress, type AccountWithHistory } from "./PlanosClient";
 import { computeGoalProgress } from "@/lib/goal-metrics";
+import { getSearchConsoleSummary } from "@/lib/search-console";
 import type { Article, Ad, Columnist, Comment, ActivityLog, InternalTicket, ErrorReport, Goal, SocialAccount, SocialFollowerSnapshot } from "@/types/database.types";
 
 const PERIODS = [
@@ -238,6 +239,12 @@ export default async function RelatoriosPage({
   const ctr = totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(1) : "0";
   const scrollSamples = views.map((v) => v.scroll_depth).filter((d): d is number => d != null);
   const avgScrollDepth = scrollSamples.length > 0 ? Math.round(scrollSamples.reduce((sum, d) => sum + d, 0) / scrollSamples.length) : null;
+
+  // Gated to this one tab, unlike the page_views/ad_events queries above —
+  // those are cheap local Postgres reads regardless of which tab ends up
+  // rendering, but this is a real external API call to Google, so it's
+  // only worth making when "Visão geral" is actually what's being shown.
+  const searchConsole = tab === "geral" ? await getSearchConsoleSummary() : null;
 
   const byPath = new Map<string, { views: number; visitors: Set<string>; title: string }>();
   for (const v of views) {
@@ -1119,6 +1126,66 @@ export default async function RelatoriosPage({
           </div>
         </Card>
       </div>
+
+      <Card>
+        <div style={{ padding: "1.5rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1.25rem" }}>
+            <div>
+              <h2 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)" }}>Google Search Console</h2>
+              <p style={{ fontSize: "0.75rem", color: "var(--admin-faint)", marginTop: "0.25rem" }}>
+                Busca orgânica do Google — número diferente do tráfego acima, que é todo o site (direto, redes, anúncios etc).
+              </p>
+            </div>
+            {searchConsole?.status === "ok" && (
+              <span style={{ fontSize: "0.75rem", color: "var(--admin-faint)", whiteSpace: "nowrap" }}>
+                {new Date(`${searchConsole.dateRange.startDate}T00:00:00`).toLocaleDateString("pt-BR")} – {new Date(`${searchConsole.dateRange.endDate}T00:00:00`).toLocaleDateString("pt-BR")}
+              </span>
+            )}
+          </div>
+
+          {!searchConsole || searchConsole.status === "unconfigured" ? (
+            <p style={{ color: "var(--admin-faint)", fontSize: "0.875rem" }}>
+              Integração não configurada — faltam as variáveis de ambiente GOOGLE_SEARCH_CONSOLE_CLIENT_EMAIL, GOOGLE_SEARCH_CONSOLE_PRIVATE_KEY e GOOGLE_SEARCH_CONSOLE_SITE_URL.
+            </p>
+          ) : searchConsole.status === "error" ? (
+            <p style={{ color: "#dc2626", fontSize: "0.875rem" }}>Erro ao buscar dados do Search Console: {searchConsole.message}</p>
+          ) : (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(180px, 100%), 1fr))", gap: "1.25rem", marginBottom: "1.5rem" }}>
+                <StatCard icon={MousePointerClick} label="Cliques (busca orgânica)" value={searchConsole.totals.clicks.toLocaleString("pt-BR")} color="#315E9C" />
+                <StatCard icon={Eye} label="Impressões" value={searchConsole.totals.impressions.toLocaleString("pt-BR")} color="#C89A4A" />
+                <StatCard icon={Percent} label="CTR" value={`${(searchConsole.totals.ctr * 100).toFixed(1)}%`} color="#FFB703" />
+                <StatCard icon={Target} label="Posição média" value={searchConsole.totals.position.toFixed(1)} color="#315E9C" />
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(300px, 100%), 1fr))", gap: "1.5rem" }}>
+                <div>
+                  <h3 style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "0.875rem" }}>
+                    <Search size={13} style={{ verticalAlign: "-2px", marginRight: "0.375rem" }} /> Consultas mais buscadas
+                  </h3>
+                  {searchConsole.topQueries.length === 0 ? (
+                    <p style={{ color: "var(--admin-faint)", fontSize: "0.875rem" }}>Sem dados neste período.</p>
+                  ) : (
+                    searchConsole.topQueries.map((q) => (
+                      <Bar key={q.keys[0]} label={q.keys[0]} value={q.clicks} max={searchConsole.topQueries[0].clicks} sub={`${q.impressions.toLocaleString("pt-BR")} impr.`} />
+                    ))
+                  )}
+                </div>
+                <div>
+                  <h3 style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "0.875rem" }}>Páginas mais buscadas</h3>
+                  {searchConsole.topPages.length === 0 ? (
+                    <p style={{ color: "var(--admin-faint)", fontSize: "0.875rem" }}>Sem dados neste período.</p>
+                  ) : (
+                    searchConsole.topPages.map((p) => (
+                      <Bar key={p.keys[0]} label={p.keys[0].replace(/^https?:\/\/[^/]+/, "")} value={p.clicks} max={searchConsole.topPages[0].clicks} sub={`${p.impressions.toLocaleString("pt-BR")} impr.`} />
+                    ))
+                  )}
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </Card>
 
       {adDetail && (
         <Card>
