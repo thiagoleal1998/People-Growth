@@ -244,7 +244,20 @@ export default async function RelatoriosPage({
   // those are cheap local Postgres reads regardless of which tab ends up
   // rendering, but this is a real external API call to Google, so it's
   // only worth making when "Visão geral" is actually what's being shown.
-  const searchConsole = tab === "geral" ? await getSearchConsoleSummary() : null;
+  // Mirrors the SAME period/date-range the rest of this tab is using — so
+  // the two "despite coming from different places" numbers are at least
+  // never silently talking about different windows of time. Search
+  // Console only keeps ~16 months of history, so that's the fallback for
+  // "Tudo" (no lower bound at all, unlike the internal numbers).
+  const sixteenMonthsAgo = new Date();
+  sixteenMonthsAgo.setMonth(sixteenMonthsAgo.getMonth() - 16);
+  const searchConsole =
+    tab === "geral"
+      ? await getSearchConsoleSummary({
+          startDate: since ? new Date(since) : sixteenMonthsAgo,
+          endDate: until ? new Date(until) : new Date(),
+        })
+      : null;
 
   const byPath = new Map<string, { views: number; visitors: Set<string>; title: string }>();
   for (const v of views) {
@@ -285,6 +298,40 @@ export default async function RelatoriosPage({
     .sort((a, b) => b.views - a.views)
     .slice(0, 8);
   const maxSourceViews = topSources[0]?.views ?? 0;
+
+  // The one apples-to-apples sanity check against Search Console: total
+  // page_views and GSC's organic-search clicks aren't the same thing (ours
+  // counts every visit from anywhere — direct, social, ads — theirs counts
+  // only Google search clicks), so there's no single "accuracy %" between
+  // them. But page_views arriving with no utm_source (rules out a tracked
+  // Google Ads click) and a referrer hostname under google.* IS measuring
+  // the same real-world event GSC's "clicks" counts — someone clicking a
+  // Google organic search result — just from our side of it. A gap
+  // between the two is expected (ad blockers and JS-disabled browsers
+  // never fire our own tracker at all, "referrer stripping" in some
+  // browsers/extensions hides the referrer entirely — read as "Direto"
+  // here instead of Google — and GSC's own click count already excludes
+  // traffic it classifies as automated); a gap that's small and stable
+  // over time is the actual signal that our tracking is credible, not a
+  // single ratio treated as "percent accurate".
+  let googleOrganicViews = 0;
+  const googleOrganicVisitors = new Set<string>();
+  for (const v of views) {
+    if (v.utm_source) continue;
+    if (!v.referrer) continue;
+    try {
+      // The bare "google.<tld>" host only — a real search-results-page
+      // referrer never has a subdomain. Deliberately excludes a product
+      // subdomain like mail./translate./accounts.google.com, which would
+      // otherwise count an email or translated-page click as a search one.
+      if (/^google\.[a-z.]+$/.test(new URL(v.referrer).hostname.replace(/^www\./, ""))) {
+        googleOrganicViews++;
+        googleOrganicVisitors.add(v.visitor_id);
+      }
+    } catch {
+      // Malformed referrer — not Google either way.
+    }
+  }
 
   function locationLabel(v: { visitor_city: string | null; visitor_country: string | null }): string {
     if (v.visitor_city && v.visitor_country) return `${v.visitor_city}, ${v.visitor_country}`;
@@ -1181,6 +1228,19 @@ export default async function RelatoriosPage({
                     ))
                   )}
                 </div>
+              </div>
+
+              <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: "1px solid var(--admin-border)" }}>
+                <h3 style={{ fontSize: "0.8125rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", marginBottom: "0.75rem" }}>
+                  Credibilidade do nosso rastreamento (mesmo período)
+                </h3>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(240px, 100%), 1fr))", gap: "1.25rem", marginBottom: "0.875rem" }}>
+                  <StatCard icon={MousePointerClick} label="Cliques Google (Search Console)" value={searchConsole.totals.clicks.toLocaleString("pt-BR")} color="#315E9C" />
+                  <StatCard icon={Eye} label="Visitas via Google (nosso rastreamento)" value={googleOrganicViews.toLocaleString("pt-BR")} color="#C89A4A" />
+                </div>
+                <p style={{ fontSize: "0.75rem", color: "var(--admin-faint)", lineHeight: 1.5 }}>
+                  Não existe uma &quot;taxa de assertividade&quot; única entre os dois — são coisas diferentes medidas de dois lados: o Search Console conta cliques no resultado de busca antes de chegar aqui, o nosso conta a visita depois que ela chega. Uma diferença entre os dois números é esperada (bloqueadores de anúncio e navegador com JavaScript desligado nunca disparam nosso rastreamento; alguns navegadores escondem de onde o clique veio, o que aparece como &quot;Direto&quot; em vez de Google aqui) — o que importa é esse gap ficar estável mês a mês, não ser zero. Um gap que cresce de repente é o sinal real de que algo quebrou no rastreamento.
+                </p>
               </div>
             </>
           )}

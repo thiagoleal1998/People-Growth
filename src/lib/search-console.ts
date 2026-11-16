@@ -52,18 +52,24 @@ function fmt(d: Date): string {
   return d.toISOString().slice(0, 10);
 }
 
-export async function getSearchConsoleSummary(days = 28): Promise<SearchConsoleSummary> {
+// Default window when the caller has no period of its own in mind —
+// matches Search Console's own default report range.
+const DEFAULT_DAYS = 28;
+
+export async function getSearchConsoleSummary(range?: { startDate: Date; endDate: Date }): Promise<SearchConsoleSummary> {
   const client = getClient();
   const siteUrl = process.env.GOOGLE_SEARCH_CONSOLE_SITE_URL;
   if (!client || !siteUrl) return { status: "unconfigured" };
 
   // Search Console's own data has a ~2-3 day processing lag — asking for
-  // "today" always comes back empty/partial, reading as a bug rather than
-  // normal latency, so the window ends a few days back instead.
-  const endDate = new Date();
-  endDate.setDate(endDate.getDate() - 3);
-  const startDate = new Date(endDate);
-  startDate.setDate(startDate.getDate() - days);
+  // "today" (or whatever the caller's requested end date is, if it's more
+  // recent than that) always comes back empty/partial, reading as a bug
+  // rather than normal latency, so the window's end is always clamped back
+  // a few days regardless of what was asked for.
+  const maxEndDate = new Date();
+  maxEndDate.setDate(maxEndDate.getDate() - 3);
+  const endDate = range && range.endDate < maxEndDate ? range.endDate : maxEndDate;
+  const startDate = range ? range.startDate : new Date(endDate.getTime() - DEFAULT_DAYS * 24 * 60 * 60 * 1000);
 
   const endpoint = `https://www.googleapis.com/webmasters/v3/sites/${encodeURIComponent(siteUrl)}/searchAnalytics/query`;
 
