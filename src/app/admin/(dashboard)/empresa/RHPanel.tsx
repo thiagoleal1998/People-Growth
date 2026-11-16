@@ -34,13 +34,19 @@ function StatCard({ label, value, sub }: { label: string; value: string | number
 
 export function RHPanel({ columnists, roleProfiles, careerPlans }: { columnists: Columnist[]; roleProfiles: RoleProfile[]; careerPlans: CareerPlan[] }) {
   const active = columnists.filter((c) => c.status === "active");
+  const hasRole = new Set(roleProfiles.filter((r) => r.columnist_id).map((r) => r.columnist_id as string));
+
   const founders = active.filter((c) => c.is_founder);
-  const team = active.filter((c) => !c.is_founder);
+  // "Equipe" is only people who actually have a cargo in Cargos e Funções —
+  // a columnist who just writes articles, with no role_profiles row, isn't
+  // part of the company's staff count and is tracked separately below.
+  const team = active.filter((c) => !c.is_founder && hasRole.has(c.id));
+  const pureColumnists = active.filter((c) => !c.is_founder && !hasRole.has(c.id));
 
   const genderCounts = new Map<string, number>();
   for (const c of active) genderCounts.set(c.gender, (genderCounts.get(c.gender) ?? 0) + 1);
 
-  const titleByColumnist = new Map(roleProfiles.filter((r) => r.columnist_id).map((r) => [r.columnist_id as string, r.title_pt ?? r.acronym ?? "—"]));
+  const titleByColumnist = new Map(roleProfiles.filter((r) => r.columnist_id).map((r) => [r.columnist_id as string, r.title_pt ?? r.title_en ?? r.acronym ?? "—"]));
   const planByColumnist = new Map(careerPlans.map((p) => [p.columnist_id, p]));
 
   return (
@@ -48,7 +54,8 @@ export function RHPanel({ columnists, roleProfiles, careerPlans }: { columnists:
       <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", marginBottom: "1.75rem" }}>
         <StatCard label="Pessoas ativas" value={active.length} />
         <StatCard label="Fundadores" value={founders.length} />
-        <StatCard label="Equipe" value={team.length} />
+        <StatCard label="Equipe (com cargo)" value={team.length} />
+        <StatCard label="Colunistas (sem cargo)" value={pureColumnists.length} />
         {[...genderCounts.entries()].map(([gender, count]) => (
           <StatCard key={gender} label={GENDER_LABEL[gender] ?? gender} value={count} sub={active.length > 0 ? `${Math.round((count / active.length) * 100)}% do total` : undefined} />
         ))}
@@ -62,7 +69,7 @@ export function RHPanel({ columnists, roleProfiles, careerPlans }: { columnists:
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                  {["Nome", "Cargo", "Gênero", "Plano de carreira", "Próxima revisão", ""].map((h) => (
+                  {["Nome", "Tipo", "Cargo", "Gênero", "Plano de carreira", "Próxima revisão", ""].map((h) => (
                     <th key={h} style={HEADER_STYLE}>{h}</th>
                   ))}
                 </tr>
@@ -70,9 +77,11 @@ export function RHPanel({ columnists, roleProfiles, careerPlans }: { columnists:
               <tbody>
                 {active.map((c) => {
                   const plan = planByColumnist.get(c.id);
+                  const tipo = c.is_founder ? "Fundador" : hasRole.has(c.id) ? "Equipe" : "Colunista";
                   return (
                     <tr key={c.id} style={{ borderTop: "1px solid var(--admin-border)" }}>
                       <td style={{ ...CELL_STYLE, fontWeight: 800, color: "var(--admin-text)" }}>{c.name}</td>
+                      <td style={CELL_STYLE}>{tipo}</td>
                       <td style={CELL_STYLE}>{titleByColumnist.get(c.id) ?? "—"}</td>
                       <td style={CELL_STYLE}>{GENDER_LABEL[c.gender] ?? c.gender}</td>
                       <td style={CELL_STYLE}>{plan?.current_summary ? "Definido" : "Não definido"}</td>
