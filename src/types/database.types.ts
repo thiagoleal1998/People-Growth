@@ -472,6 +472,8 @@ type ContentCalendarItemRow = {
 type RoleProfileRow = {
   id: string;
   columnist_id: string | null;
+  // Which sub-menu tab this role is filed under — see src/lib/role-levels.ts.
+  level: "c_level" | "diretoria" | "heads" | "gerentes" | "coordenadores" | "supervisores" | "analistas" | "assistentes";
   acronym: string | null;
   title: string | null;
   function_summary: string | null;

@@ -20,6 +20,7 @@ export async function upsertRoleProfile(id: string | null, formData: FormData) {
 
   const payload: Partial<RoleProfileInsert> = {
     columnist_id: columnistId,
+    level: String(formData.get("level") ?? "c_level") as RoleProfileInsert["level"],
     acronym: String(formData.get("acronym") ?? "").trim() || null,
     title: String(formData.get("title") ?? "").trim() || null,
     function_summary: String(formData.get("function_summary") ?? "").trim() || null,

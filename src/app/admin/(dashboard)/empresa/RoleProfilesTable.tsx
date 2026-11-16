@@ -20,17 +20,17 @@ function MarkdownCell({ text }: { text: string | null }) {
   return <div className="role-profile-cell" dangerouslySetInnerHTML={{ __html: renderMarkdownLite(text) }} />;
 }
 
-export function RoleProfilesTable({ profiles, columnistNameById }: { profiles: RoleProfile[]; columnistNameById: Map<string, string> }) {
+export function RoleProfilesTable({ profiles, columnistNameById, defaultLevel }: { profiles: RoleProfile[]; columnistNameById: Map<string, string>; defaultLevel?: string }) {
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
-        <PrimaryLinkButton href="/admin/empresa/cargos/novo">
+        <PrimaryLinkButton href={`/admin/empresa/cargos/novo${defaultLevel ? `?level=${defaultLevel}` : ""}`}>
           <Plus size={16} /> Novo cargo
         </PrimaryLinkButton>
       </div>
       <Card>
         {profiles.length === 0 ? (
-          <EmptyState text="Nenhum cargo cadastrado ainda." />
+          <EmptyState text="Nenhum cargo cadastrado ainda nesse nível." />
         ) : (
           <div style={{ overflowX: "auto" }}>
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
