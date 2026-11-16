@@ -18,9 +18,9 @@ export function RoleProfileForm({ item, columnists }: { item?: RoleProfile; colu
       action={item && <ConfirmDeleteButton confirmText="Excluir este cargo e função?" onDelete={deleteRoleProfile.bind(null, item.id)} />}
     >
       <form action={action}>
-        <Field label="Sócio" hint="Quem esse cargo descreve.">
-          <Select name="columnist_id" defaultValue={item?.columnist_id ?? ""} required>
-            <option value="" disabled>Selecione...</option>
+        <Field label="Sócio" hint="Quem esse cargo descreve — pode ficar em branco enquanto o cargo ainda não tem alguém designado.">
+          <Select name="columnist_id" defaultValue={item?.columnist_id ?? ""}>
+            <option value="">— Vago (sem sócio ainda) —</option>
             {columnists.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
