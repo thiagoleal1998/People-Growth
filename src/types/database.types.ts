@@ -487,6 +487,18 @@ type RoleProfileRow = {
   updated_at: string;
 };
 
+// Plano de carreira — founders-only, one row per columnist. See
+// 096_career_plans.sql.
+type CareerPlanRow = {
+  id: string;
+  columnist_id: string;
+  current_summary: string | null;
+  goals: string | null;
+  next_review_at: string | null;
+  created_at: string;
+  updated_at: string;
+};
+
 type InstitutionalPostRow = {
   id: string;
   title_pt: string;
@@ -707,6 +719,7 @@ export type Database = {
       finance_entries: { Row: FinanceEntryRow; Insert: Omit<FinanceEntryRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<FinanceEntryRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       finance_projections: { Row: FinanceProjectionRow; Insert: Partial<Omit<FinanceProjectionRow, "created_at" | "updated_at">>; Update: Partial<Omit<FinanceProjectionRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       finance_payout_params: { Row: FinancePayoutParamsRow; Insert: Partial<Omit<FinancePayoutParamsRow, "created_at" | "updated_at">>; Update: Partial<Omit<FinancePayoutParamsRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      career_plans: { Row: CareerPlanRow; Insert: Omit<CareerPlanRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<CareerPlanRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -729,6 +742,7 @@ export type Resource = ResourceRow;
 export type MediaItem = MediaItemRow;
 export type Columnist = ColumnistRow;
 export type RoleProfile = RoleProfileRow;
+export type CareerPlan = CareerPlanRow;
 export type InstitutionalPost = InstitutionalPostRow;
 export type InstitutionalPostAuthor = InstitutionalPostAuthorRow;
 export type ErrorReport = ErrorReportRow;

@@ -3,26 +3,32 @@
 import { useState } from "react";
 import { OrganogramaCard } from "@/components/OrganogramaCard";
 import { RoleProfilesTable } from "./RoleProfilesTable";
+import { RHPanel } from "./RHPanel";
 import { ROLE_LEVELS, type RoleLevel } from "@/lib/role-levels";
-import type { Columnist, RoleProfile } from "@/types/database.types";
+import type { Columnist, RoleProfile, CareerPlan } from "@/types/database.types";
 
-const tabs = [
+const BASE_TABS = [
   { id: "organograma", label: "Organograma" },
   { id: "cargos", label: "Cargos e Funções" },
 ] as const;
 
-type TabId = (typeof tabs)[number]["id"];
+type TabId = (typeof BASE_TABS)[number]["id"] | "rh";
 
 export function EmpresaTabs({
   columnists,
   roleProfiles,
+  careerPlans,
+  canViewRH,
   initialTab,
 }: {
   columnists: Columnist[];
   roleProfiles: RoleProfile[];
+  careerPlans: CareerPlan[];
+  canViewRH: boolean;
   initialTab?: string;
 }) {
-  const [active, setActive] = useState<TabId>(initialTab === "cargos" ? "cargos" : "organograma");
+  const tabs = canViewRH ? [...BASE_TABS, { id: "rh" as const, label: "RH" }] : BASE_TABS;
+  const [active, setActive] = useState<TabId>(tabs.some((t) => t.id === initialTab) ? (initialTab as TabId) : "organograma");
   const [level, setLevel] = useState<RoleLevel>("c_level");
   // Built client-side rather than passed down as a prop — a Map isn't
   // serializable across the server/client boundary, only plain data is.
@@ -55,9 +61,9 @@ export function EmpresaTabs({
         ))}
       </div>
 
-      {active === "organograma" ? (
-        <OrganogramaCard columnists={columnists} />
-      ) : (
+      {active === "organograma" && <OrganogramaCard columnists={columnists} />}
+
+      {active === "cargos" && (
         <div>
           <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "1.25rem" }}>
             {ROLE_LEVELS.map((l) => (
@@ -100,6 +106,8 @@ export function EmpresaTabs({
           <RoleProfilesTable profiles={roleProfiles.filter((p) => p.level === level)} columnistNameById={columnistNameById} defaultLevel={level} />
         </div>
       )}
+
+      {active === "rh" && canViewRH && <RHPanel columnists={columnists} roleProfiles={roleProfiles} careerPlans={careerPlans} />}
     </div>
   );
 }
