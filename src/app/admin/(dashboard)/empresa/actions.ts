@@ -22,7 +22,8 @@ export async function upsertRoleProfile(id: string | null, formData: FormData) {
     columnist_id: columnistId,
     level: String(formData.get("level") ?? "c_level") as RoleProfileInsert["level"],
     acronym: String(formData.get("acronym") ?? "").trim() || null,
-    title: String(formData.get("title") ?? "").trim() || null,
+    title_en: String(formData.get("title_en") ?? "").trim() || null,
+    title_pt: String(formData.get("title_pt") ?? "").trim() || null,
     function_summary: String(formData.get("function_summary") ?? "").trim() || null,
     general_responsibilities: String(formData.get("general_responsibilities") ?? "").trim() || null,
     primary_responsibilities: String(formData.get("primary_responsibilities") ?? "").trim() || null,
@@ -39,7 +40,7 @@ export async function upsertRoleProfile(id: string | null, formData: FormData) {
   }
 
   if (actor) {
-    await logActivity({ userId: actor.id, userEmail: actor.email, action: isNew ? "create" : "update", entityType: "cargo e função", entityLabel: columnist?.name ?? payload.title ?? "" });
+    await logActivity({ userId: actor.id, userEmail: actor.email, action: isNew ? "create" : "update", entityType: "cargo e função", entityLabel: columnist?.name ?? payload.title_pt ?? "" });
   }
 
   revalidatePath("/admin/empresa");
@@ -79,10 +80,10 @@ export async function deleteRoleProfile(id: string) {
   const actor = await getCurrentProfile();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const { data: item } = await client.from("role_profiles").select("title, columnist_id").eq("id", id).single();
+  const { data: item } = await client.from("role_profiles").select("title_pt, columnist_id").eq("id", id).single();
   await client.from("role_profiles").delete().eq("id", id);
   if (actor) {
-    await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "cargo e função", entityLabel: item?.title ?? "" });
+    await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "cargo e função", entityLabel: item?.title_pt ?? "" });
   }
   revalidatePath("/admin/empresa");
   redirect("/admin/empresa?tab=cargos");

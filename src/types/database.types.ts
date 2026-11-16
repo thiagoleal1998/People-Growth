@@ -475,7 +475,8 @@ type RoleProfileRow = {
   // Which sub-menu tab this role is filed under — see src/lib/role-levels.ts.
   level: "c_level" | "diretoria" | "heads" | "gerentes" | "coordenadores" | "supervisores" | "analistas" | "assistentes";
   acronym: string | null;
-  title: string | null;
+  title_pt: string | null;
+  title_en: string | null;
   function_summary: string | null;
   general_responsibilities: string | null;
   primary_responsibilities: string | null;

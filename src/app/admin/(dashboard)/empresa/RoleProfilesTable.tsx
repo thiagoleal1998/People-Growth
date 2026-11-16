@@ -36,7 +36,7 @@ export function RoleProfilesTable({ profiles, columnistNameById, defaultLevel }:
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
-                  {["Sócio", "Sigla", "Significado", "Função", "Resp. Geral", "Resp. Primárias", "Resp. Secundárias", "Resp. Terciárias", ""].map((h) => (
+                  {["Responsável", "Sigla", "Nome (EN)", "Significado (PT)", "Função", "Resp. Geral", "Resp. Primárias", "Resp. Secundárias", "Resp. Terciárias", ""].map((h) => (
                     <th key={h} style={HEADER_STYLE}>{h}</th>
                   ))}
                 </tr>
@@ -65,7 +65,8 @@ export function RoleProfilesTable({ profiles, columnistNameById, defaultLevel }:
                       </div>
                     </td>
                     <td style={{ ...CELL_STYLE, fontWeight: 700, color: "#315E9C", minWidth: "80px" }}>{p.acronym || "—"}</td>
-                    <td style={{ ...CELL_STYLE, minWidth: "180px" }}>{p.title || "—"}</td>
+                    <td style={{ ...CELL_STYLE, minWidth: "180px" }}>{p.title_en || "—"}</td>
+                    <td style={{ ...CELL_STYLE, minWidth: "180px" }}>{p.title_pt || "—"}</td>
                     <td style={CELL_STYLE}>{p.function_summary || "—"}</td>
                     <td style={CELL_STYLE}><MarkdownCell text={p.general_responsibilities} /></td>
                     <td style={CELL_STYLE}><MarkdownCell text={p.primary_responsibilities} /></td>

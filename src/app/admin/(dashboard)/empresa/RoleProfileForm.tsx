@@ -27,21 +27,24 @@ export function RoleProfileForm({ item, columnists, defaultLevel }: { item?: Rol
           </Select>
         </Field>
 
-        <Field label="Sócio" hint="Quem esse cargo descreve — pode ficar em branco enquanto o cargo ainda não tem alguém designado.">
+        <Field label="Responsável" hint="Quem esse cargo descreve — pode ficar em branco enquanto o cargo ainda não tem alguém designado.">
           <Select name="columnist_id" defaultValue={item?.columnist_id ?? ""}>
-            <option value="">— Vago (sem sócio ainda) —</option>
+            <option value="">— Vago (sem responsável ainda) —</option>
             {columnists.map((c) => (
               <option key={c.id} value={c.id}>{c.name}</option>
             ))}
           </Select>
         </Field>
 
-        <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "0 1.5rem" }}>
+        <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr 2fr", gap: "0 1.5rem" }}>
           <Field label="Sigla" hint='Ex: "CMO"'>
             <Input name="acronym" defaultValue={item?.acronym ?? ""} />
           </Field>
-          <Field label="Significado" hint='Ex: "Chief Marketing Officer"'>
-            <Input name="title" defaultValue={item?.title ?? ""} />
+          <Field label="Nome (inglês)" hint='Ex: "Chief Marketing Officer"'>
+            <Input name="title_en" defaultValue={item?.title_en ?? ""} />
+          </Field>
+          <Field label="Significado (português)" hint='Ex: "Diretor(a) de Marketing"'>
+            <Input name="title_pt" defaultValue={item?.title_pt ?? ""} />
           </Field>
         </div>
 
