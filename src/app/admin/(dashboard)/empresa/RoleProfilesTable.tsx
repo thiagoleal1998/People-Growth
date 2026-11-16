@@ -1,5 +1,8 @@
+"use client";
+
 import Link from "next/link";
-import type { CSSProperties } from "react";
+import { useRef, useState } from "react";
+import type { CSSProperties, MouseEvent as ReactMouseEvent } from "react";
 import { Plus, Edit, ChevronUp, ChevronDown } from "lucide-react";
 import { Card, EmptyState, PrimaryLinkButton, ConfirmDeleteButton } from "@/components/admin/ui";
 import { renderMarkdownLite } from "@/lib/markdown-lite";
@@ -21,6 +24,44 @@ function MarkdownCell({ text }: { text: string | null }) {
 }
 
 export function RoleProfilesTable({ profiles, columnistNameById, defaultLevel }: { profiles: RoleProfile[]; columnistNameById: Map<string, string>; defaultLevel?: string }) {
+  // Click-and-drag horizontal scrolling for this wide table — the native
+  // scrollbar still works too, this just adds a "grab the table itself"
+  // alternative. Drag state lives in a ref (not re-rendered on every
+  // mousemove); `dragging` is the only piece that needs a render, to swap
+  // the cursor and suppress text selection while dragging.
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const dragState = useRef({ down: false, startX: 0, startScrollLeft: 0, moved: false });
+  const [dragging, setDragging] = useState(false);
+
+  function onMouseDown(e: ReactMouseEvent<HTMLDivElement>) {
+    const el = scrollRef.current;
+    if (!el) return;
+    dragState.current = { down: true, startX: e.pageX, startScrollLeft: el.scrollLeft, moved: false };
+    setDragging(true);
+  }
+  function onMouseMove(e: ReactMouseEvent<HTMLDivElement>) {
+    const state = dragState.current;
+    const el = scrollRef.current;
+    if (!state.down || !el) return;
+    const dx = e.pageX - state.startX;
+    if (Math.abs(dx) > 3) state.moved = true;
+    el.scrollLeft = state.startScrollLeft - dx;
+  }
+  function endDrag() {
+    dragState.current.down = false;
+    setDragging(false);
+  }
+  // Dragging ends up firing a click on whatever's under the cursor (a link,
+  // a reorder button) once the mouse is released — swallow that single
+  // click only when the pointer actually moved, so a plain click through
+  // still works.
+  function onClickCapture(e: ReactMouseEvent<HTMLDivElement>) {
+    if (dragState.current.moved) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+  }
+
   return (
     <div>
       <div style={{ display: "flex", justifyContent: "flex-end", marginBottom: "1rem" }}>
@@ -32,7 +73,15 @@ export function RoleProfilesTable({ profiles, columnistNameById, defaultLevel }:
         {profiles.length === 0 ? (
           <EmptyState text="Nenhum cargo cadastrado ainda nesse nível." />
         ) : (
-          <div style={{ overflowX: "auto" }}>
+          <div
+            ref={scrollRef}
+            onMouseDown={onMouseDown}
+            onMouseMove={onMouseMove}
+            onMouseUp={endDrag}
+            onMouseLeave={endDrag}
+            onClickCapture={onClickCapture}
+            style={{ overflowX: "auto", cursor: dragging ? "grabbing" : "grab", userSelect: dragging ? "none" : undefined }}
+          >
             <table style={{ width: "100%", borderCollapse: "collapse" }}>
               <thead>
                 <tr style={{ backgroundColor: "var(--admin-surface-alt)" }}>
