@@ -64,7 +64,7 @@ export function EventForm({ item, defaultState }: { item?: Event; defaultState?:
         </Field>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "0 1.5rem" }}>
-          <Field label="Preço base (ingresso)">
+          <Field label="Preço do ingresso" hint="Valor total somando todas as pessoas em 'Quem vai' — não é o preço por pessoa.">
             <Input type="number" step="0.01" name="base_price" defaultValue={item?.base_price ?? ""} />
           </Field>
           <Field label="Observação sobre o preço" hint="Ex: preço de referência da edição anterior, a confirmar.">

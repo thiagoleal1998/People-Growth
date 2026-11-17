@@ -74,7 +74,7 @@ function EventCard({ event }: { event: Event }) {
       )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", padding: "0.875rem", backgroundColor: "var(--admin-surface-alt)", borderRadius: "0.625rem" }}>
-        <CostRow icon={<Ticket size={15} />} label="Ingresso" value={event.base_price} notes={event.price_notes} />
+        <CostRow icon={<Ticket size={15} />} label="Ingresso (total p/ quem vai)" value={event.base_price} notes={event.price_notes} />
         <CostRow icon={<Car size={15} />} label="Deslocamento" value={event.travel_cost} notes={event.travel_notes} />
         <CostRow icon={<UtensilsCrossed size={15} />} label="Alimentação" value={event.food_cost} />
         <CostRow icon={<CircleDollarSign size={15} />} label="Outros" value={event.other_cost} notes={event.other_cost_notes} />
