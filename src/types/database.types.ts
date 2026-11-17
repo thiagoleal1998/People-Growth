@@ -208,7 +208,7 @@ type ErrorReportRow = {
 type UserProfileRow = {
   id: string;
   email: string;
-  role: "admin" | "columnist";
+  role: "admin" | "columnist" | "equipe";
   columnist_id: string | null;
   last_seen_at: string | null;
   display_id: number;
@@ -239,7 +239,7 @@ type InternalTicketRow = {
   ticket_number: number;
   created_by: string | null;
   created_by_name: string;
-  created_by_role: "admin" | "columnist";
+  created_by_role: "admin" | "columnist" | "equipe";
   type: "bug" | "suggestion";
   title: string;
   description: string;

@@ -41,3 +41,12 @@ export async function isCurrentUserFounder(profile: UserProfile | null): Promise
 export async function requireFounder(profile: UserProfile | null): Promise<void> {
   if (!(await isCurrentUserFounder(profile))) notFound();
 }
+
+// Where a given login role's panel lives — used by proxy.ts, and by every
+// colunista/equipe page/action that used to hardcode "/colunista" (those
+// two panels share the same pages/components; only this prefix differs).
+export function panelBasePath(role: string): "/admin" | "/equipe" | "/colunista" {
+  if (role === "admin") return "/admin";
+  if (role === "equipe") return "/equipe";
+  return "/colunista";
+}

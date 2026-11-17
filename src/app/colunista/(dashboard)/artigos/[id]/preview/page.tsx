@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile } from "@/lib/auth/profile";
+import { getCurrentProfile, panelBasePath } from "@/lib/auth/profile";
 import { ArticlePreviewFrame } from "@/components/ArticlePreviewFrame";
 import type { Article, Columnist, Category } from "@/types/database.types";
 
@@ -27,7 +27,7 @@ export default async function ColumnistArticlePreviewPage({ params }: { params: 
 
   return (
     <div style={{ maxWidth: "900px" }}>
-      <Link href={`/colunista/artigos/${id}`} style={{ color: "#64748b", fontSize: "0.875rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.375rem", marginBottom: "1.25rem" }}>
+      <Link href={`${panelBasePath(profile?.role ?? "columnist")}/artigos/${id}`} style={{ color: "#64748b", fontSize: "0.875rem", textDecoration: "none", display: "inline-flex", alignItems: "center", gap: "0.375rem", marginBottom: "1.25rem" }}>
         <ArrowLeft size={14} /> Voltar para edição
       </Link>
       <ArticlePreviewFrame article={article as Article} columnist={(columnist as Columnist) ?? null} coauthors={coauthors} category={(category as Category) ?? null} />

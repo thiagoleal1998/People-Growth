@@ -221,7 +221,7 @@ export function RHPanel({ columnists, roleProfiles, careerPlans }: { columnists:
                       <td style={CELL_STYLE}>{titleByColumnist.get(c.id) ?? "—"}</td>
                       <td style={CELL_STYLE}>{GENDER_LABEL[c.gender] ?? c.gender}</td>
                       <td style={CELL_STYLE}>{plan?.current_summary ? "Definido" : "Não definido"}</td>
-                      <td style={CELL_STYLE}>{plan?.next_review_at ? new Date(plan.next_review_at).toLocaleDateString("pt-BR") : "—"}</td>
+                      <td style={CELL_STYLE}>{plan?.next_review_at ? new Date(`${plan.next_review_at}T00:00:00`).toLocaleDateString("pt-BR") : "—"}</td>
                       <td style={{ ...CELL_STYLE, minWidth: "auto" }}>
                         <Link href={`/admin/empresa/rh/${c.id}`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem", display: "inline-flex" }} title="Editar plano de carreira">
                           <Edit size={15} />

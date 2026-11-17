@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { Plus, Edit, BarChart3 } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile } from "@/lib/auth/profile";
+import { getCurrentProfile, panelBasePath } from "@/lib/auth/profile";
 import { PageHeader, PrimaryLinkButton, Card, EmptyState, Badge, ConfirmDeleteButton } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
 import { deleteOwnArticle } from "./actions";
@@ -27,6 +27,7 @@ function formatDate(iso: string) {
 export default async function MeusArtigosPage({ searchParams }: { searchParams: Promise<{ saved?: string; error?: string }> }) {
   const { saved, error } = await searchParams;
   const profile = await getCurrentProfile();
+  const basePath = panelBasePath(profile?.role ?? "columnist");
 
   if (!profile?.columnist_id) {
     return (
@@ -72,7 +73,7 @@ export default async function MeusArtigosPage({ searchParams }: { searchParams: 
       <PageHeader
         title="Meus artigos"
         subtitle={`${articles.length} artigo${articles.length === 1 ? "" : "s"}`}
-        action={<PrimaryLinkButton href="/colunista/artigos/novo"><Plus size={16} /> Novo artigo</PrimaryLinkButton>}
+        action={<PrimaryLinkButton href={`${basePath}/artigos/novo`}><Plus size={16} /> Novo artigo</PrimaryLinkButton>}
       />
 
       <Card>
@@ -110,8 +111,8 @@ export default async function MeusArtigosPage({ searchParams }: { searchParams: 
                   <td style={{ padding: "0.875rem 1.25rem", color: "#94a3b8", fontSize: "0.8125rem" }}>{formatDate(a.created_at)}</td>
                   <td style={{ padding: "0.875rem 1.25rem" }}>
                     <div style={{ display: "flex", gap: "0.5rem" }}>
-                      <Link href={`/colunista/artigos/${a.id}/estatisticas`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Estatísticas"><BarChart3 size={15} /></Link>
-                      <Link href={`/colunista/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
+                      <Link href={`${basePath}/artigos/${a.id}/estatisticas`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Estatísticas"><BarChart3 size={15} /></Link>
+                      <Link href={`${basePath}/artigos/${a.id}`} style={{ padding: "0.375rem", color: "#315E9C", borderRadius: "0.375rem" }} title="Editar"><Edit size={15} /></Link>
                       {a.status !== "published" && a.status !== "scheduled" && (
                         <ConfirmDeleteButton confirmText={`Excluir o artigo "${a.title_pt}"?`} onDelete={deleteOwnArticle.bind(null, a.id)} />
                       )}

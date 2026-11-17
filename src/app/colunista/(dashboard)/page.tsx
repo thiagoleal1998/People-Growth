@@ -3,7 +3,7 @@ import { FileText, Eye, Clock, MessageCircle, Megaphone, Newspaper, Share2, Vide
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { XIcon } from "@/components/icons/XIcon";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile } from "@/lib/auth/profile";
+import { getCurrentProfile, panelBasePath } from "@/lib/auth/profile";
 import { toYouTubeEmbedUrl } from "@/lib/youtube";
 import { articlePath } from "@/lib/article-url";
 import type { Announcement, Article, Columnist, Category } from "@/types/database.types";
@@ -17,6 +17,7 @@ const cardHeaderStyle = { padding: "1.25rem 1.5rem", borderBottom: "1px solid va
 
 export default async function ColumnistHomePage() {
   const profile = await getCurrentProfile();
+  const basePath = panelBasePath(profile?.role ?? "columnist");
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
@@ -100,7 +101,7 @@ export default async function ColumnistHomePage() {
         }}
       >
         <h1 style={{ fontSize: "1.75rem", fontWeight: 800, color: "white", marginBottom: "0.375rem" }}>
-          {ownName ? `Olá, ${ownName.split(" ")[0]}!` : "Painel do colunista"}
+          {ownName ? `Olá, ${ownName.split(" ")[0]}!` : basePath === "/equipe" ? "Painel de Equipe" : "Painel do colunista"}
         </h1>
         <p style={{ color: "rgba(255,255,255,0.8)", fontSize: "0.9375rem" }}>O resumo do seu trabalho e as novidades do Festina.</p>
       </div>
@@ -149,7 +150,7 @@ export default async function ColumnistHomePage() {
                 </span>
               )}
             </h2>
-            <Link href="/colunista/comunicados" style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Ver todos →</Link>
+            <Link href={`${basePath}/comunicados`} style={{ color: "#315E9C", fontWeight: 600, fontSize: "0.875rem", textDecoration: "none" }}>Ver todos →</Link>
           </div>
           {announcements.length === 0 ? (
             <div style={{ padding: "2.5rem", textAlign: "center", color: "var(--admin-faint)", fontSize: "0.875rem" }}>Nenhum comunicado por enquanto.</div>

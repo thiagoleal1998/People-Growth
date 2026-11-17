@@ -25,6 +25,11 @@ export function ColumnistSidebar({
   unreadMessages?: number;
 }) {
   const pathname = usePathname();
+  // This same component serves both the colunista and equipe panels —
+  // they share every page, just under a different URL prefix — so the
+  // handful of hardcoded "/colunista" comparisons below derive their
+  // prefix from the current URL instead.
+  const basePath = pathname.startsWith("/equipe") ? "/equipe" : "/colunista";
   const [loggingOut, setLoggingOut] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -90,20 +95,20 @@ export function ColumnistSidebar({
             Festina
           </div>
         )}
-        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.375rem" }}>Painel do Colunista</div>
+        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.375rem" }}>{basePath === "/equipe" ? "Painel de Equipe" : "Painel do Colunista"}</div>
       </div>
 
       <nav className="admin-sidebar-scroll" style={{ padding: "1rem 0.75rem", flex: 1, display: "flex", flexDirection: "column", gap: "0.25rem", overflowY: "auto" }}>
         {menu.map(({ href, label, icon }) => {
-          const isActive = pathname === href || (href !== "/colunista" && pathname.startsWith(href));
+          const isActive = pathname === href || (href !== basePath && pathname.startsWith(href));
           const badge =
-            href === "/colunista/comentarios"
+            href === `${basePath}/comentarios`
               ? pendingComments
-              : href === "/colunista/comunicados"
+              : href === `${basePath}/comunicados`
                 ? unreadAnnouncements
-                : href === "/colunista/instrucoes"
+                : href === `${basePath}/instrucoes`
                   ? unreadInstructions
-                  : href === "/colunista/mensagens"
+                  : href === `${basePath}/mensagens`
                     ? unreadMessages
                     : 0;
           return (

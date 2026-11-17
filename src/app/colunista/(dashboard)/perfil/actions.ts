@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile } from "@/lib/auth/profile";
+import { getCurrentProfile, panelBasePath } from "@/lib/auth/profile";
 import { uploadPublicImage } from "@/lib/supabase/storage";
 import { logActivity } from "@/lib/activity-log";
 
@@ -22,8 +22,9 @@ export async function changeOwnPassword(newPassword: string) {
 
 export async function updateOwnColumnistProfile(formData: FormData) {
   const profile = await getCurrentProfile();
+  const basePath = panelBasePath(profile?.role ?? "columnist");
   if (!profile?.columnist_id) {
-    redirect("/colunista/perfil?error=" + encodeURIComponent("Seu login ainda não está vinculado a um perfil de colunista."));
+    redirect(`${basePath}/perfil?error=` + encodeURIComponent("Seu login ainda não está vinculado a um perfil de colunista."));
   }
 
   const supabase = await createClient();
@@ -54,11 +55,12 @@ export async function updateOwnColumnistProfile(formData: FormData) {
   await client.from("columnists").update(payload).eq("id", profile.columnist_id);
 
   revalidatePath("/colunista/perfil");
+  revalidatePath("/equipe/perfil");
   revalidatePath("/[locale]/conteudo", "page");
   revalidatePath("/[locale]/sobre", "page");
   revalidatePath("/[locale]/sobre/[slug]", "page");
   revalidatePath("/[locale]", "page");
-  redirect(`/colunista/perfil?saved=1${photoError ? `&photoError=${encodeURIComponent(photoError)}` : ""}`);
+  redirect(`${basePath}/perfil?saved=1${photoError ? `&photoError=${encodeURIComponent(photoError)}` : ""}`);
 }
 
 // Common revalidation after terms_accepted_at/terms_declined_at changes: the
@@ -68,6 +70,7 @@ export async function updateOwnColumnistProfile(formData: FormData) {
 // public pages' own ISR window expires.
 function revalidateAfterTermsChange() {
   revalidatePath("/colunista", "layout");
+  revalidatePath("/equipe", "layout");
   revalidatePath("/[locale]/conteudo", "page");
   revalidatePath("/[locale]/conteudo/colunistas", "page");
   revalidatePath("/[locale]/conteudo/colunista/[slug]", "page");

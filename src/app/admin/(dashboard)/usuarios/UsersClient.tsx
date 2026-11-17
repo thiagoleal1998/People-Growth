@@ -42,8 +42,8 @@ export function UsersClient({ users, columnists, pushSubscriptionCounts }: { use
                         startTransition(() => updateUserRole(u.id, role));
                       }}
                       style={{
-                        backgroundColor: u.role === "admin" ? "rgba(49, 94, 156,0.1)" : "rgba(200, 154, 74,0.1)",
-                        color: u.role === "admin" ? "#315E9C" : "#A07B3B",
+                        backgroundColor: u.role === "admin" ? "rgba(49, 94, 156,0.1)" : u.role === "equipe" ? "rgba(22, 163, 74,0.1)" : "rgba(200, 154, 74,0.1)",
+                        color: u.role === "admin" ? "#315E9C" : u.role === "equipe" ? "#16A34A" : "#A07B3B",
                         padding: "0.2rem 0.5rem",
                         borderRadius: "0.375rem",
                         fontSize: "0.75rem",
@@ -53,6 +53,7 @@ export function UsersClient({ users, columnists, pushSubscriptionCounts }: { use
                       }}
                     >
                       <option value="admin">Admin</option>
+                      <option value="equipe">Equipe</option>
                       <option value="columnist">Colunista</option>
                     </select>
                   </td>

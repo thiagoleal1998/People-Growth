@@ -84,10 +84,11 @@ export function UsuariosColunistasTabs({
               <Field label="Papel">
                 <Select name="role" defaultValue="columnist">
                   <option value="columnist">Colunista — escreve conteúdo</option>
+                  <option value="equipe">Equipe — tem cargo na empresa</option>
                   <option value="admin">Admin — acesso total</option>
                 </Select>
               </Field>
-              <Field label="Vincular ao colunista (perfil público)" hint="Liga esse login a um colunista já cadastrado, para editar o próprio perfil e assinar os próprios artigos.">
+              <Field label="Vincular ao colunista (perfil público)" hint="Liga esse login a um colunista já cadastrado, para editar o próprio perfil e assinar os próprios artigos. Obrigatório para o papel Equipe (é o que liga o login ao cargo e ao plano de carreira da pessoa).">
                 <Select name="columnist_id" defaultValue="">
                   <option value="">— nenhum por enquanto —</option>
                   {columnists.map((a) => (

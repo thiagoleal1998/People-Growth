@@ -38,7 +38,11 @@ export async function proxy(request: NextRequest) {
     url.pathname = url.pathname.replace(/^\/autor/, "/colunista");
     return NextResponse.redirect(url, 308);
   }
-  if (request.nextUrl.pathname.startsWith("/admin") || request.nextUrl.pathname.startsWith("/colunista")) {
+  if (
+    request.nextUrl.pathname.startsWith("/admin") ||
+    request.nextUrl.pathname.startsWith("/colunista") ||
+    request.nextUrl.pathname.startsWith("/equipe")
+  ) {
     return handlePanelAuth(request);
   }
   return intlMiddleware(request);
@@ -86,7 +90,7 @@ async function handlePanelAuth(request: NextRequest) {
     .select("role")
     .eq("id", user.id)
     .single();
-  const role = profile?.role as "admin" | "columnist" | undefined;
+  const role = profile?.role as "admin" | "columnist" | "equipe" | undefined;
 
   // Authenticated but no profile row at all (shouldn't happen in normal
   // operation) — sign out instead of bouncing between routes forever.
@@ -98,7 +102,7 @@ async function handlePanelAuth(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  const home = role === "admin" ? "/admin" : "/colunista";
+  const home = role === "admin" ? "/admin" : role === "equipe" ? "/equipe" : "/colunista";
 
   if (isLoginPage) {
     const url = request.nextUrl.clone();
@@ -107,6 +111,16 @@ async function handlePanelAuth(request: NextRequest) {
   }
 
   if (pathname.startsWith("/admin") && role !== "admin") {
+    const url = request.nextUrl.clone();
+    url.pathname = home;
+    return NextResponse.redirect(url);
+  }
+
+  // Symmetric with the /admin guard above — a columnist wandering into
+  // /equipe (or vice versa) bounces back to their own home instead of
+  // seeing a panel meant for a different role. Admin passes through to
+  // every panel unrestricted, same as it already does for /colunista.
+  if (pathname.startsWith("/equipe") && role !== "equipe" && role !== "admin") {
     const url = request.nextUrl.clone();
     url.pathname = home;
     return NextResponse.redirect(url);

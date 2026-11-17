@@ -13,7 +13,7 @@ export async function createUser(formData: FormData) {
   }
   const email = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
-  const role = (String(formData.get("role") ?? "columnist")) as "admin" | "columnist";
+  const role = (String(formData.get("role") ?? "columnist")) as "admin" | "columnist" | "equipe";
   const columnistId = String(formData.get("columnist_id") ?? "") || null;
 
   if (!email || !password) {
@@ -21,6 +21,9 @@ export async function createUser(formData: FormData) {
   }
   if (password.length < 6) {
     redirect(`/admin/usuarios?userError=${encodeURIComponent("A senha precisa ter pelo menos 6 caracteres.")}`);
+  }
+  if (role === "equipe" && !columnistId) {
+    redirect(`/admin/usuarios?userError=${encodeURIComponent("Papel Equipe precisa estar vinculado a um colunista (é o que conecta o login ao cargo e ao plano de carreira).")}`);
   }
 
   const admin = await createAdminClient();
@@ -46,7 +49,7 @@ export async function createUser(formData: FormData) {
   redirect("/admin/usuarios?saved=1");
 }
 
-export async function updateUserRole(id: string, role: "admin" | "columnist") {
+export async function updateUserRole(id: string, role: "admin" | "columnist" | "equipe") {
   const actor = await getCurrentProfile();
   if (actor?.role !== "admin") throw new Error("Não autorizado.");
   const admin = await createAdminClient();

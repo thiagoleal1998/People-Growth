@@ -32,6 +32,7 @@ export async function createInternalTicket(data: { type: InternalTicket["type"];
   if (error) throw error;
 
   revalidatePath("/colunista/chamados");
+  revalidatePath("/equipe/chamados");
   revalidatePath("/admin/chamados");
   return created as InternalTicket;
 }
@@ -51,5 +52,6 @@ export async function addTicketComment(id: string, body: string) {
     body,
   });
   revalidatePath("/colunista/chamados");
+  revalidatePath("/equipe/chamados");
   revalidatePath("/admin/chamados");
 }

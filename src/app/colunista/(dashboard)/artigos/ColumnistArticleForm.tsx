@@ -2,6 +2,7 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Eye, Languages, Sparkles, Loader2, TriangleAlert, Type, AlignLeft, FileText, Video, Link2, Bot, Tags, Users, Image as ImageIcon, CalendarClock, Search, Rocket } from "lucide-react";
 import { Field, Input, Textarea, Select, SubmitButton, Badge, FieldGrid, FormSection } from "@/components/admin/ui";
 import { MarkdownEditor, type MarkdownEditorHandle } from "@/components/admin/MarkdownEditor";
@@ -62,6 +63,9 @@ function slugifyPreview(text: string): string {
 
 export function ColumnistArticleForm({ item, categories, otherColumnists, extraCategoryIds, coauthorIds, imageError, saveError, saved, initialTab }: { item?: Article; categories: Category[]; otherColumnists?: Columnist[]; extraCategoryIds?: string[]; coauthorIds?: string[]; imageError?: string; saveError?: string; saved?: boolean; initialTab?: string }) {
   const action = upsertOwnArticle.bind(null, item?.id ?? null);
+  // Shared verbatim between the colunista and equipe panels — the only
+  // difference between them is this URL prefix.
+  const basePath = usePathname().startsWith("/equipe") ? "/equipe" : "/colunista";
   // Seeded from the URL (actions.ts's redirects echo it back) rather than
   // always "conteudo" — see the matching comment in the admin ArticleForm
   // for why a plain useState alone always lost this on save.
@@ -183,7 +187,7 @@ export function ColumnistArticleForm({ item, categories, otherColumnists, extraC
       <SavedToast show={Boolean(saved)} />
       <div style={{ marginBottom: "1.5rem", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
         <div>
-          <Link href="/colunista/artigos" style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>
+          <Link href={`${basePath}/artigos`} style={{ color: "var(--admin-muted)", fontSize: "0.875rem", textDecoration: "none" }}>
             &larr; Voltar
           </Link>
           <h1 style={{ fontSize: "1.5rem", fontWeight: 800, color: "var(--admin-text)", marginTop: "0.5rem" }}>
@@ -192,7 +196,7 @@ export function ColumnistArticleForm({ item, categories, otherColumnists, extraC
         </div>
         {item && (
           <Link
-            href={`/colunista/artigos/${item.id}/preview`}
+            href={`${basePath}/artigos/${item.id}/preview`}
             target="_blank"
             style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", backgroundColor: "var(--admin-surface)", border: "1px solid var(--admin-border-strong)", color: "var(--admin-text)", padding: "0.625rem 1.125rem", borderRadius: "0.625rem", fontWeight: 700, fontSize: "0.875rem", textDecoration: "none", flexShrink: 0 }}
           >

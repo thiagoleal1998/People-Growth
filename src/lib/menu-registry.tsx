@@ -109,6 +109,22 @@ export const COLUMNIST_MENU_DEFAULTS: MenuLink[] = [
   { id: "perfil", href: "/colunista/perfil", label: "Meu perfil", icon: <UserCircle size={17} /> },
 ];
 
+// Everything the colunista panel has, plus the two cargo/career-plan pages
+// that only make sense for someone with a formal role_profiles entry.
+export const EQUIPE_MENU_DEFAULTS: MenuLink[] = [
+  { id: "inicio", href: "/equipe", label: "Início", icon: <Home size={17} /> },
+  { id: "artigos", href: "/equipe/artigos", label: "Meus artigos", icon: <FileText size={17} /> },
+  { id: "comentarios", href: "/equipe/comentarios", label: "Comentários", icon: <MessageCircle size={17} /> },
+  { id: "comunicados", href: "/equipe/comunicados", label: "Comunicados", icon: <Megaphone size={17} /> },
+  { id: "instrucoes", href: "/equipe/instrucoes", label: "Canal de Instruções", icon: <ListChecks size={17} /> },
+  { id: "mensagens", href: "/equipe/mensagens", label: "Mensagens", icon: <MessageSquare size={17} /> },
+  { id: "chamados", href: "/equipe/chamados", label: "Chamados", icon: <LifeBuoy size={17} /> },
+  { id: "empresa", href: "/equipe/empresa", label: "A empresa", icon: <Building2 size={17} /> },
+  { id: "cargo", href: "/equipe/cargo", label: "Meu cargo", icon: <Briefcase size={17} /> },
+  { id: "plano-carreira", href: "/equipe/plano-de-carreira", label: "Meu plano de carreira", icon: <TrendingUp size={17} /> },
+  { id: "perfil", href: "/equipe/perfil", label: "Meu perfil", icon: <UserCircle size={17} /> },
+];
+
 export type MenuOverride = { id: string; label: string; sort_order: number };
 
 // No saved rows for a panel = untouched, so the defaults' own order stands.

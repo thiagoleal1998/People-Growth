@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import slugify from "slugify";
 import { createClient, createAdminClient } from "@/lib/supabase/server";
-import { getCurrentProfile, resolveActorName } from "@/lib/auth/profile";
+import { getCurrentProfile, resolveActorName, panelBasePath } from "@/lib/auth/profile";
 import { uploadPublicImage } from "@/lib/supabase/storage";
 import { logActivity, diffFields, ARTICLE_TRACKED_FIELDS } from "@/lib/activity-log";
 import { calculateReadTime } from "@/lib/markdown-lite";
@@ -51,7 +51,8 @@ export async function upsertOwnArticle(id: string | null, formData: FormData) {
     if (isRedirectError(err)) throw err; // redirect() itself throws — let it through
     const message = err instanceof Error ? err.message : String(err);
     console.error("upsertOwnArticle failed:", err);
-    redirect(`/colunista/artigos/${id ?? "novo"}?saveError=${encodeURIComponent(message)}${tabQueryParam(formData)}`);
+    const profile = await getCurrentProfile();
+    redirect(`${panelBasePath(profile?.role ?? "columnist")}/artigos/${id ?? "novo"}?saveError=${encodeURIComponent(message)}${tabQueryParam(formData)}`);
   }
 }
 
@@ -61,8 +62,9 @@ function isRedirectError(err: unknown): boolean {
 
 async function upsertOwnArticleInner(id: string | null, formData: FormData) {
   const profile = await getCurrentProfile();
+  const basePath = panelBasePath(profile?.role ?? "columnist");
   if (!profile?.columnist_id) {
-    redirect("/colunista?error=" + encodeURIComponent("Seu login ainda não está vinculado a um perfil de colunista. Peça a um admin para vincular."));
+    redirect(`${basePath}?error=` + encodeURIComponent("Seu login ainda não está vinculado a um perfil de colunista. Peça a um admin para vincular."));
   }
 
   const supabase = await createClient();
@@ -72,7 +74,7 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const { data: columnistRow } = await (supabase as any).from("columnists").select("terms_accepted_at").eq("id", profile.columnist_id).single();
   if (!columnistRow?.terms_accepted_at) {
-    redirect("/colunista?error=" + encodeURIComponent("Você precisa aceitar o Termo de Aceite para criar ou editar conteúdo."));
+    redirect(`${basePath}?error=` + encodeURIComponent("Você precisa aceitar o Termo de Aceite para criar ou editar conteúdo."));
   }
 
   const { url: coverImageUrl, error: imageError } = await uploadPublicImage(formData.get("cover_image_file"), "articles");
@@ -195,7 +197,7 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
   // A failed write (e.g. a duplicate slug) must never look like a success —
   // this used to redirect to ?saved=1 unconditionally regardless of error.
   if (saveError) {
-    redirect(`/colunista/artigos/${articleId ?? "novo"}?saveError=${encodeURIComponent(saveError)}${tabQueryParam(formData)}`);
+    redirect(`${basePath}/artigos/${articleId ?? "novo"}?saveError=${encodeURIComponent(saveError)}${tabQueryParam(formData)}`);
   }
 
   await logActivity({
@@ -223,14 +225,16 @@ async function upsertOwnArticleInner(id: string | null, formData: FormData) {
 
   revalidatePath("/colunista");
   revalidatePath("/colunista/artigos");
+  revalidatePath("/equipe");
+  revalidatePath("/equipe/artigos");
   revalidatePath("/admin/artigos");
 
   if (imageError && articleId) {
-    redirect(`/colunista/artigos/${articleId}?imageError=${encodeURIComponent(imageError)}${tabQueryParam(formData)}`);
+    redirect(`${basePath}/artigos/${articleId}?imageError=${encodeURIComponent(imageError)}${tabQueryParam(formData)}`);
   }
   // Stay on the article being edited instead of bouncing back to the list —
   // the person decides when they're done, not the save action.
-  redirect(`/colunista/artigos/${articleId}?saved=1${tabQueryParam(formData)}`);
+  redirect(`${basePath}/artigos/${articleId}?saved=1${tabQueryParam(formData)}`);
 }
 
 export async function deleteOwnArticle(id: string) {
@@ -245,4 +249,6 @@ export async function deleteOwnArticle(id: string) {
   await logActivity({ userId: profile.id, userEmail: profile.email, action: "delete", entityType: "artigo", entityLabel: article?.title_pt });
   revalidatePath("/colunista");
   revalidatePath("/colunista/artigos");
+  revalidatePath("/equipe");
+  revalidatePath("/equipe/artigos");
 }
