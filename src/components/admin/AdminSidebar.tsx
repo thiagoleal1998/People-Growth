@@ -112,7 +112,7 @@ export function AdminSidebar({
           )}
           <ThemeToggle compact />
         </div>
-        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.375rem" }}>Painel Admin</div>
+        <div style={{ color: "rgba(255,255,255,0.4)", fontSize: "0.75rem", marginTop: "0.375rem" }}>Painel do Administrador</div>
       </div>
 
       {/* Nav */}
@@ -189,6 +189,14 @@ export function AdminSidebar({
           style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0.875rem", borderRadius: "0.5rem", fontSize: "0.875rem", color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
         >
           <Eye size={17} /> Ver painel do colaborador
+        </Link>
+        <Link
+          href="/equipe"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{ display: "flex", alignItems: "center", gap: "0.75rem", padding: "0.625rem 0.875rem", borderRadius: "0.5rem", fontSize: "0.875rem", color: "rgba(255,255,255,0.4)", textDecoration: "none" }}
+        >
+          <Eye size={17} /> Ver painel de Equipe
         </Link>
         <Link
           href="/"
