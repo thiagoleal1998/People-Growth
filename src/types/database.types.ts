@@ -527,6 +527,51 @@ type EventRow = {
   updated_at: string;
 };
 
+// Kanban de tarefas (admin + equipe) — see 100_tasks.sql.
+type TaskColumnRow = {
+  id: string;
+  label: string;
+  order: number;
+  created_at: string;
+};
+
+type TaskRow = {
+  id: string;
+  column_id: string;
+  title: string;
+  description: string | null;
+  priority: "baixa" | "media" | "alta";
+  due_date: string | null;
+  created_by: string;
+  order: number;
+  created_at: string;
+  updated_at: string;
+};
+
+type TaskAssigneeRow = {
+  task_id: string;
+  user_profile_id: string;
+  created_at: string;
+};
+
+type TaskChecklistItemRow = {
+  id: string;
+  task_id: string;
+  label: string;
+  done: boolean;
+  order: number;
+  created_at: string;
+};
+
+type TaskCommentRow = {
+  id: string;
+  task_id: string;
+  author_id: string | null;
+  author_name: string;
+  body: string;
+  created_at: string;
+};
+
 type InstitutionalPostRow = {
   id: string;
   title_pt: string;
@@ -749,6 +794,11 @@ export type Database = {
       finance_payout_params: { Row: FinancePayoutParamsRow; Insert: Partial<Omit<FinancePayoutParamsRow, "created_at" | "updated_at">>; Update: Partial<Omit<FinancePayoutParamsRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       career_plans: { Row: CareerPlanRow; Insert: Omit<CareerPlanRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<CareerPlanRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       events: { Row: EventRow; Insert: Omit<EventRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<EventRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      task_columns: { Row: TaskColumnRow; Insert: Omit<TaskColumnRow, "id" | "created_at">; Update: Partial<Omit<TaskColumnRow, "id" | "created_at">>; Relationships: [] };
+      tasks: { Row: TaskRow; Insert: Omit<TaskRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<TaskRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      task_assignees: { Row: TaskAssigneeRow; Insert: Omit<TaskAssigneeRow, "created_at">; Update: Partial<TaskAssigneeRow>; Relationships: [] };
+      task_checklist_items: { Row: TaskChecklistItemRow; Insert: Omit<TaskChecklistItemRow, "id" | "created_at">; Update: Partial<Omit<TaskChecklistItemRow, "id" | "created_at">>; Relationships: [] };
+      task_comments: { Row: TaskCommentRow; Insert: Omit<TaskCommentRow, "id" | "created_at">; Update: Partial<Omit<TaskCommentRow, "id" | "created_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -773,6 +823,11 @@ export type Columnist = ColumnistRow;
 export type RoleProfile = RoleProfileRow;
 export type CareerPlan = CareerPlanRow;
 export type Event = EventRow;
+export type TaskColumn = TaskColumnRow;
+export type Task = TaskRow;
+export type TaskAssignee = TaskAssigneeRow;
+export type TaskChecklistItem = TaskChecklistItemRow;
+export type TaskComment = TaskCommentRow;
 export type InstitutionalPost = InstitutionalPostRow;
 export type InstitutionalPostAuthor = InstitutionalPostAuthorRow;
 export type ErrorReport = ErrorReportRow;

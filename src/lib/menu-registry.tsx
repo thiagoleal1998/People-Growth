@@ -27,6 +27,7 @@ import {
   TrendingUp,
   SlidersHorizontal,
   Ticket,
+  Kanban,
 } from "lucide-react";
 
 export type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests" | "mensagens";
@@ -64,6 +65,7 @@ export const ADMIN_MENU_DEFAULTS: MenuEntry[] = [
   { id: "comunicados", href: "/admin/comunicados", label: "Comunicados", icon: <Megaphone size={17} /> },
   { id: "instrucoes", href: "/admin/instrucoes", label: "Canal de Instruções", icon: <ListChecks size={17} /> },
   { id: "mensagens", href: "/admin/mensagens", label: "Mensagens", icon: <MessageSquare size={17} />, countKey: "mensagens" },
+  { id: "tarefas", href: "/admin/tarefas", label: "Tarefas", icon: <Kanban size={17} /> },
   {
     id: "marketing",
     label: "Marketing",
@@ -121,6 +123,7 @@ export const EQUIPE_MENU_DEFAULTS: MenuLink[] = [
   { id: "instrucoes", href: "/equipe/instrucoes", label: "Canal de Instruções", icon: <ListChecks size={17} /> },
   { id: "mensagens", href: "/equipe/mensagens", label: "Mensagens", icon: <MessageSquare size={17} /> },
   { id: "chamados", href: "/equipe/chamados", label: "Chamados", icon: <LifeBuoy size={17} /> },
+  { id: "tarefas", href: "/equipe/tarefas", label: "Tarefas", icon: <Kanban size={17} /> },
   { id: "empresa", href: "/equipe/empresa", label: "A empresa", icon: <Building2 size={17} /> },
   { id: "cargo", href: "/equipe/cargo", label: "Meu cargo", icon: <Briefcase size={17} /> },
   { id: "plano-carreira", href: "/equipe/plano-de-carreira", label: "Meu plano de carreira", icon: <TrendingUp size={17} /> },
