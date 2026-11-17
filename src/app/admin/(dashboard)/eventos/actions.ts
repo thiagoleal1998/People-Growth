@@ -25,6 +25,7 @@ export async function upsertEvent(id: string | null, formData: FormData) {
   const state = String(formData.get("state") ?? "RJ") as EventInsert["state"];
   const payload: Partial<EventInsert> = {
     name: String(formData.get("name") ?? "").trim(),
+    cover_image: String(formData.get("cover_image") ?? "").trim() || null,
     state,
     city: String(formData.get("city") ?? "").trim() || null,
     date_start: String(formData.get("date_start") ?? "").trim() || null,

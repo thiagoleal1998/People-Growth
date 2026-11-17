@@ -54,7 +54,21 @@ function EventCard({ event }: { event: Event }) {
   const sources = (event.source_urls ?? "").split(/\n+/).map((s) => s.trim()).filter(Boolean);
 
   return (
-    <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", padding: "1.5rem", display: "flex", flexDirection: "column", gap: "0.875rem" }}>
+    <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden", display: "flex", flexDirection: "column" }}>
+      <div style={{ height: "150px", flexShrink: 0, background: "linear-gradient(135deg, #315E9C, #0d1b2a)", position: "relative" }}>
+        {event.cover_image && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={event.cover_image}
+            alt={event.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+            }}
+          />
+        )}
+      </div>
+      <div style={{ padding: "1.5rem", display: "flex", flexDirection: "column", gap: "0.875rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.75rem" }}>
         <div>
           <h3 style={{ fontSize: "1rem", fontWeight: 800, color: "var(--admin-text)" }}>{event.name}</h3>
@@ -65,13 +79,14 @@ function EventCard({ event }: { event: Event }) {
         <Badge tone={decision.tone}>{decision.label}</Badge>
       </div>
 
-      {event.interest_description && <p style={{ fontSize: "0.8125rem", color: "var(--admin-text-secondary)", margin: 0, lineHeight: 1.5 }}>{event.interest_description}</p>}
-
       {event.attendees && (
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", fontSize: "0.8125rem", color: "var(--admin-text-secondary)" }}>
-          <Users size={15} color="var(--admin-muted)" /> {event.attendees}
+        <div style={{ display: "inline-flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.875rem", backgroundColor: "rgba(49,94,156,0.12)", borderRadius: "0.625rem", alignSelf: "flex-start" }}>
+          <Users size={16} color="#315E9C" />
+          <span style={{ fontSize: "0.875rem", fontWeight: 800, color: "#315E9C" }}>{event.attendees}</span>
         </div>
       )}
+
+      {event.interest_description && <p style={{ fontSize: "0.8125rem", color: "var(--admin-text-secondary)", margin: 0, lineHeight: 1.5 }}>{event.interest_description}</p>}
 
       <div style={{ display: "flex", flexDirection: "column", gap: "0.5rem", padding: "0.875rem", backgroundColor: "var(--admin-surface-alt)", borderRadius: "0.625rem" }}>
         <CostRow icon={<Ticket size={15} />} label="Ingresso (total p/ quem vai)" value={event.base_price} notes={event.price_notes} />
@@ -106,6 +121,7 @@ function EventCard({ event }: { event: Event }) {
           <Edit size={14} /> Editar
         </Link>
         <ConfirmDeleteButton confirmText={`Excluir o evento "${event.name}"?`} onDelete={deleteEvent.bind(null, event.id)} />
+      </div>
       </div>
     </div>
   );

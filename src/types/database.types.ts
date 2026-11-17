@@ -508,6 +508,7 @@ type EventRow = {
   venue: string | null;
   date_start: string | null;
   date_end: string | null;
+  cover_image: string | null;
   interest_description: string | null;
   decision: "sim" | "nao" | "a_decidir";
   attendees: string | null;

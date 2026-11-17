@@ -20,6 +20,10 @@ export function EventForm({ item, defaultState }: { item?: Event; defaultState?:
           <Input name="name" defaultValue={item?.name ?? ""} required />
         </Field>
 
+        <Field label="Imagem de capa (URL)" hint="Link da foto oficial do evento (site oficial, assessoria de imprensa, etc).">
+          <Input type="url" name="cover_image" defaultValue={item?.cover_image ?? ""} placeholder="https://..." />
+        </Field>
+
         <div style={{ display: "grid", gridTemplateColumns: "1fr 2fr", gap: "0 1.5rem" }}>
           <Field label="Estado">
             <Select name="state" defaultValue={item?.state ?? defaultState ?? "RJ"}>
