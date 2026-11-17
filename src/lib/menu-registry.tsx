@@ -26,6 +26,7 @@ import {
   HandCoins,
   TrendingUp,
   SlidersHorizontal,
+  Ticket,
 } from "lucide-react";
 
 export type CountKey = "comentarios" | "leads" | "chamados" | "resetRequests" | "mensagens";
@@ -92,6 +93,7 @@ export const ADMIN_MENU_DEFAULTS: MenuEntry[] = [
   },
   { id: "usuarios", href: "/admin/usuarios", label: "Usuários", icon: <KeyRound size={17} />, countKey: "resetRequests", activeMatch: ["/admin/colunistas"] },
   { id: "empresa", href: "/admin/empresa", label: "A empresa", icon: <Building2 size={17} /> },
+  { id: "eventos", href: "/admin/eventos", label: "Feiras e Eventos", icon: <Ticket size={17} /> },
   { id: "institucional", href: "/admin/institucional", label: "Institucional", icon: <Landmark size={17} /> },
   { id: "paginas", href: "/admin/paginas", label: "Páginas Legais", icon: <ScrollText size={17} /> },
   { id: "configuracoes", href: "/admin/configuracoes", label: "Configurações", icon: <Settings size={17} />, activeMatch: ["/admin/seo"] },

@@ -499,6 +499,33 @@ type CareerPlanRow = {
   updated_at: string;
 };
 
+// "Feiras e Eventos" — see 098_events.sql.
+type EventRow = {
+  id: string;
+  name: string;
+  state: "RJ" | "SP" | "MG";
+  city: string | null;
+  venue: string | null;
+  date_start: string | null;
+  date_end: string | null;
+  interest_description: string | null;
+  decision: "sim" | "nao" | "a_decidir";
+  attendees: string | null;
+  ticket_url: string | null;
+  base_price: number | null;
+  price_notes: string | null;
+  travel_cost: number | null;
+  travel_notes: string | null;
+  food_cost: number | null;
+  other_cost: number | null;
+  other_cost_notes: string | null;
+  source_urls: string | null;
+  notes: string | null;
+  order: number;
+  created_at: string;
+  updated_at: string;
+};
+
 type InstitutionalPostRow = {
   id: string;
   title_pt: string;
@@ -720,6 +747,7 @@ export type Database = {
       finance_projections: { Row: FinanceProjectionRow; Insert: Partial<Omit<FinanceProjectionRow, "created_at" | "updated_at">>; Update: Partial<Omit<FinanceProjectionRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       finance_payout_params: { Row: FinancePayoutParamsRow; Insert: Partial<Omit<FinancePayoutParamsRow, "created_at" | "updated_at">>; Update: Partial<Omit<FinancePayoutParamsRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
       career_plans: { Row: CareerPlanRow; Insert: Omit<CareerPlanRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<CareerPlanRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
+      events: { Row: EventRow; Insert: Omit<EventRow, "id" | "created_at" | "updated_at">; Update: Partial<Omit<EventRow, "id" | "created_at" | "updated_at">>; Relationships: [] };
     };
     Views: Record<string, never>;
     Functions: Record<string, never>;
@@ -743,6 +771,7 @@ export type MediaItem = MediaItemRow;
 export type Columnist = ColumnistRow;
 export type RoleProfile = RoleProfileRow;
 export type CareerPlan = CareerPlanRow;
+export type Event = EventRow;
 export type InstitutionalPost = InstitutionalPostRow;
 export type InstitutionalPostAuthor = InstitutionalPostAuthorRow;
 export type ErrorReport = ErrorReportRow;
