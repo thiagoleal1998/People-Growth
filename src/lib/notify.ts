@@ -16,6 +16,8 @@ export const DEFAULT_TEMPLATES: Record<NotificationTemplateKey, { title: string;
   article_resubmitted_for_approval: { title: '"{{title}}" de {{author}} foi revisado e reenviado para aprovação', body: null },
   instruction_item_created: { title: 'Nova instrução: "{{title}}"', body: "Confira no Canal de Instruções." },
   message_received: { title: "{{sender}} te enviou uma mensagem", body: "{{preview}}" },
+  task_assigned: { title: "{{assigner}} te adicionou numa tarefa", body: '{{task_code}} — "{{title}}"' },
+  task_comment_added: { title: "{{author}} comentou em {{task_code}}", body: "{{preview}}" },
 };
 
 export async function renderNotificationTemplate(

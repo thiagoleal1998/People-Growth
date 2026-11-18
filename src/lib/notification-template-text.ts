@@ -11,7 +11,9 @@ export type NotificationTemplateKey =
   | "article_submitted_for_approval"
   | "article_resubmitted_for_approval"
   | "instruction_item_created"
-  | "message_received";
+  | "message_received"
+  | "task_assigned"
+  | "task_comment_added";
 
 export function renderTemplateText(template: string, vars: Record<string, string>): string {
   return template.replace(/\{\{\s*(\w+)\s*\}\}/g, (_match, key: string) => vars[key] ?? "");
@@ -33,6 +35,8 @@ export const NOTIFICATION_TEMPLATE_AUDIENCE: Record<NotificationTemplateKey, Not
   article_resubmitted_for_approval: "admin",
   instruction_item_created: "colunista",
   message_received: "ambos",
+  task_assigned: "ambos",
+  task_comment_added: "ambos",
 };
 
 // Not real data — just plausible stand-ins so the admin's live preview
@@ -46,4 +50,6 @@ export const NOTIFICATION_TEMPLATE_PREVIEW_VARS: Record<NotificationTemplateKey,
   article_resubmitted_for_approval: { title: "Como a liderança remota mudou em 2026", author: "Gustavo Monken" },
   instruction_item_created: { title: "Como enviar uma pauta para aprovação" },
   message_received: { sender: "Gustavo Monken", preview: "Oi, dúvida rápida sobre essa instrução..." },
+  task_assigned: { assigner: "Gustavo Monken", task_code: "CGF-0012 | 2026", title: "Revisar contrato do evento" },
+  task_comment_added: { author: "Gustavo Monken", task_code: "CGF-0012 | 2026", title: "Revisar contrato do evento", preview: "Já revisei, só falta a cláusula 4." },
 };

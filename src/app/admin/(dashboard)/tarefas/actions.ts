@@ -1,8 +1,10 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile } from "@/lib/auth/profile";
+import { createClient, createAdminClient } from "@/lib/supabase/server";
+import { getCurrentProfile, resolveActorName } from "@/lib/auth/profile";
+import { insertNotification } from "@/lib/notify";
+import { formatTaskId } from "@/lib/display-id";
 
 function revalidateTarefas() {
   revalidatePath("/admin/tarefas");
@@ -85,9 +87,28 @@ export async function deleteTask(id: string) {
 // ===== Assignees =====
 
 export async function addAssignee(taskId: string, userProfileId: string) {
+  const profile = await getCurrentProfile();
   const supabase = await createClient();
-  await (supabase as any).from("task_assignees").insert({ task_id: taskId, user_profile_id: userProfileId }); // eslint-disable-line @typescript-eslint/no-explicit-any
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const client = supabase as any;
+  await client.from("task_assignees").insert({ task_id: taskId, user_profile_id: userProfileId });
   revalidateTarefas();
+
+  // Notify the person being asked — not when adding yourself.
+  if (profile && userProfileId !== profile.id) {
+    const { data: task } = await client.from("tasks").select("title, task_number, created_at").eq("id", taskId).single();
+    if (task) {
+      const admin = await createAdminClient();
+      const assignerName = await resolveActorName(profile);
+      await insertNotification(
+        admin,
+        userProfileId,
+        "task_assigned",
+        { assigner: assignerName, task_code: formatTaskId(task.task_number, task.created_at), title: task.title },
+        `/tarefas/${taskId}`
+      );
+    }
+  }
 }
 
 export async function removeAssignee(taskId: string, userProfileId: string) {
@@ -129,9 +150,23 @@ export async function addComment(taskId: string, body: string) {
   const supabase = await createClient();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
-  const { data: columnist } = profile.columnist_id ? await client.from("columnists").select("name").eq("id", profile.columnist_id).single() : { data: null };
-  await client.from("task_comments").insert({ task_id: taskId, author_id: profile.id, author_name: columnist?.name ?? profile.email, body });
+  const authorName = await resolveActorName(profile);
+  await client.from("task_comments").insert({ task_id: taskId, author_id: profile.id, author_name: authorName, body });
   revalidateTarefas();
+
+  // Only the card's own participants (creator + assignees) hear about a new
+  // comment — never a broadcast to everyone, and never back to its own author.
+  const { data: task } = await client.from("tasks").select("title, task_number, created_at, created_by").eq("id", taskId).single();
+  const { data: assigneeRows } = await client.from("task_assignees").select("user_profile_id").eq("task_id", taskId);
+  if (task) {
+    const participantIds = new Set<string>([task.created_by, ...((assigneeRows ?? []) as { user_profile_id: string }[]).map((a) => a.user_profile_id)]);
+    participantIds.delete(profile.id);
+    if (participantIds.size > 0) {
+      const admin = await createAdminClient();
+      const vars = { author: authorName, task_code: formatTaskId(task.task_number, task.created_at), title: task.title, preview: body.slice(0, 80) };
+      await Promise.all([...participantIds].map((userId) => insertNotification(admin, userId, "task_comment_added", vars, `/tarefas/${taskId}`)));
+    }
+  }
 }
 
 export async function deleteComment(id: string) {
