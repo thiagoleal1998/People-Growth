@@ -61,6 +61,7 @@ export function TarefasBoard({
   canManageColumns: boolean;
 }) {
   const [items, setItems] = useState(tasks);
+  const peopleById = new Map(people.map((p) => [p.id, p]));
   const router = useRouter();
   const searchParams = useSearchParams();
 
@@ -190,17 +191,23 @@ export function TarefasBoard({
                   </span>
                 )}
               </div>
+              <div style={{ fontSize: "0.6875rem", color: "var(--admin-faint)", marginTop: "0.625rem" }}>
+                Solicitante: <span style={{ fontWeight: 700, color: "var(--admin-text-secondary)" }}>{peopleById.get(t.created_by)?.name ?? "—"}</span>
+              </div>
               {t.assignees.length > 0 && (
-                <div style={{ display: "flex", gap: "0.25rem", marginTop: "0.625rem" }}>
-                  {t.assignees.map((p) => (
-                    <span
-                      key={p.id}
-                      title={p.name}
-                      style={{ width: "1.5rem", height: "1.5rem", borderRadius: "9999px", backgroundColor: "#315E9C18", color: "#315E9C", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.625rem", fontWeight: 800 }}
-                    >
-                      {initials(p.name)}
-                    </span>
-                  ))}
+                <div style={{ display: "flex", alignItems: "center", gap: "0.375rem", marginTop: "0.375rem" }}>
+                  <span style={{ fontSize: "0.6875rem", color: "var(--admin-faint)" }}>Solicitado:</span>
+                  <div style={{ display: "flex", gap: "0.25rem" }}>
+                    {t.assignees.map((p) => (
+                      <span
+                        key={p.id}
+                        title={p.name}
+                        style={{ width: "1.5rem", height: "1.5rem", borderRadius: "9999px", backgroundColor: "#315E9C18", color: "#315E9C", display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.625rem", fontWeight: 800 }}
+                      >
+                        {initials(p.name)}
+                      </span>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>

@@ -53,6 +53,7 @@ export function TaskModal({
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [, startTransition] = useTransition();
   const canDelete = task.created_by === currentUserId;
+  const requester = people.find((p) => p.id === task.created_by);
 
   function commit(patch: Partial<TaskWithDetails>) {
     onChange({ ...task, ...patch });
@@ -181,7 +182,10 @@ export function TaskModal({
       >
         <div style={{ padding: "1.25rem 1.5rem 1rem", borderBottom: "1px solid var(--admin-border)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
           <div style={{ flex: 1, minWidth: 0 }}>
-            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-faint)", marginBottom: "0.25rem" }}>{formatTaskId(task.task_number, task.created_at)}</div>
+            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-faint)", marginBottom: "0.25rem" }}>
+              {formatTaskId(task.task_number, task.created_at)}
+              <span style={{ fontWeight: 500 }}> · Solicitante: {requester?.name ?? "—"}</span>
+            </div>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -238,7 +242,7 @@ export function TaskModal({
           </div>
 
           <div>
-            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-faint)", letterSpacing: "0.04em", marginBottom: "0.625rem" }}>RESPONSÁVEIS</div>
+            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-faint)", letterSpacing: "0.04em", marginBottom: "0.625rem" }}>SOLICITADO(S)</div>
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem" }}>
               {people.map((p) => {
                 const checked = task.assignees.some((a) => a.id === p.id);
