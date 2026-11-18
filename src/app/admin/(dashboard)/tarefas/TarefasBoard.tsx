@@ -1,12 +1,14 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Plus, X, Check, Calendar } from "lucide-react";
 import { KanbanBoard, type KanbanColumn } from "@/components/admin/KanbanBoard";
 import { promptDialog, confirmDialog, alertDialog } from "@/components/admin/dialog-store";
+import { formatTaskId } from "@/lib/display-id";
 import { TaskModal } from "./TaskModal";
-import { createColumn, renameColumn, deleteColumn, createTask, moveTask } from "./actions";
-import type { TaskColumn, TaskChecklistItem, TaskComment } from "@/types/database.types";
+import { createColumn, renameColumn, deleteColumn, createTask, moveTask, markTaskSeen } from "./actions";
+import type { TaskColumn, TaskChecklistItem, TaskComment, TaskAttachment } from "@/types/database.types";
 
 export type Person = { id: string; name: string };
 export type TaskWithDetails = {
@@ -18,11 +20,13 @@ export type TaskWithDetails = {
   due_date: string | null;
   created_by: string;
   order: number;
+  task_number: number;
   created_at: string;
   updated_at: string;
   assignees: Person[];
   checklist: TaskChecklistItem[];
   comments: TaskComment[];
+  attachments: TaskAttachment[];
 };
 
 const PRIORITY_CONFIG: Record<TaskWithDetails["priority"], { label: string; color: string }> = {
@@ -57,8 +61,26 @@ export function TarefasBoard({
   canManageColumns: boolean;
 }) {
   const [items, setItems] = useState(tasks);
-  const [openTaskId, setOpenTaskId] = useState<string | null>(null);
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
+  // Shareable per-card link (/tarefas/[id]) lands here with ?task=ID — open
+  // it right away if that task is in the visible set (RLS already decided
+  // whether it belongs there).
+  const taskParam = searchParams.get("task");
+  const initialTaskFromUrl = taskParam && tasks.some((t) => t.id === taskParam) ? taskParam : null;
+  const [openTaskId, setOpenTaskId] = useState<string | null>(initialTaskFromUrl);
   const openTask = items.find((t) => t.id === openTaskId) ?? null;
+
+  useEffect(() => {
+    if (initialTaskFromUrl) markTaskSeen(initialTaskFromUrl).then(() => router.refresh());
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  function handleCardClick(task: TaskWithDetails) {
+    setOpenTaskId(task.id);
+    markTaskSeen(task.id).then(() => router.refresh());
+  }
 
   const kanbanColumns: KanbanColumn<string>[] = columns.map((c, i) => ({ id: c.id, label: c.label, color: COLUMN_COLORS[i % COLUMN_COLORS.length] }));
 
@@ -78,7 +100,7 @@ export function TarefasBoard({
     const title = await promptDialog("Título da nova tarefa");
     if (!title) return;
     const created = await createTask(columns[0].id, title);
-    setItems((cur) => [...cur, { ...created, assignees: people.filter((p) => p.id === currentUserId), checklist: [], comments: [] }]);
+    setItems((cur) => [...cur, { ...created, assignees: people.filter((p) => p.id === currentUserId), checklist: [], comments: [], attachments: [] }]);
   }
 
   async function handleNewColumn() {
@@ -144,12 +166,13 @@ export function TarefasBoard({
         getId={(t) => t.id}
         getStatus={(t) => t.column_id}
         onMove={handleMove}
-        onCardClick={(t) => setOpenTaskId(t.id)}
+        onCardClick={handleCardClick}
         emptyLabel="Nenhuma tarefa aqui."
         renderCard={(t) => {
           const doneCount = t.checklist.filter((c) => c.done).length;
           return (
             <div>
+              <div style={{ fontSize: "0.6875rem", fontWeight: 700, color: "var(--admin-faint)", marginBottom: "0.25rem" }}>{formatTaskId(t.task_number, t.created_at)}</div>
               <div style={{ fontWeight: 700, fontSize: "0.875rem", color: "var(--admin-text)", marginBottom: "0.5rem" }}>{t.title}</div>
               <div style={{ display: "flex", alignItems: "center", gap: "0.625rem", flexWrap: "wrap" }}>
                 <span style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem", fontSize: "0.6875rem", fontWeight: 700, color: PRIORITY_CONFIG[t.priority].color }}>

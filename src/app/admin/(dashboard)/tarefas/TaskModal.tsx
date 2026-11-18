@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
-import { X, Plus, Trash2, Send } from "lucide-react";
-import { confirmDialog } from "@/components/admin/dialog-store";
+import { useRef, useState, useTransition } from "react";
+import { X, Plus, Trash2, Send, Link2, Check, Paperclip, FileText } from "lucide-react";
+import { confirmDialog, alertDialog } from "@/components/admin/dialog-store";
+import { formatTaskId } from "@/lib/display-id";
 import {
   updateTask,
   deleteTask,
@@ -13,6 +14,8 @@ import {
   deleteChecklistItem,
   addComment,
   deleteComment,
+  addAttachment,
+  deleteAttachment,
 } from "./actions";
 import type { TaskWithDetails, Person } from "./TarefasBoard";
 
@@ -45,11 +48,52 @@ export function TaskModal({
   const [description, setDescription] = useState(task.description ?? "");
   const [newChecklistLabel, setNewChecklistLabel] = useState("");
   const [newComment, setNewComment] = useState("");
+  const [copied, setCopied] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [, startTransition] = useTransition();
   const canDelete = task.created_by === currentUserId;
 
   function commit(patch: Partial<TaskWithDetails>) {
     onChange({ ...task, ...patch });
+  }
+
+  async function handleCopyLink() {
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}/tarefas/${task.id}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard unavailable, no-op
+    }
+  }
+
+  async function handleUploadAttachment(file: File) {
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/tasks/upload-attachment", { method: "POST", body: formData });
+      const data = await res.json();
+      if (!res.ok || !data.url) {
+        await alertDialog(data.error ?? "Falha no upload.");
+        return;
+      }
+      await addAttachment(task.id, data.url, file.name, file.type || null);
+      commit({
+        attachments: [
+          ...task.attachments,
+          { id: `temp-${Date.now()}`, task_id: task.id, url: data.url, name: file.name, content_type: file.type || null, uploaded_by: currentUserId, created_at: new Date().toISOString() },
+        ],
+      });
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function handleDeleteAttachment(id: string) {
+    commit({ attachments: task.attachments.filter((a) => a.id !== id) });
+    startTransition(() => deleteAttachment(id));
   }
 
   function handleTitleBlur() {
@@ -136,12 +180,24 @@ export function TaskModal({
         style={{ backgroundColor: "var(--admin-surface)", color: "var(--admin-text)", borderRadius: "1rem", maxWidth: "640px", width: "100%", maxHeight: "90vh", display: "flex", flexDirection: "column", overflow: "hidden" }}
       >
         <div style={{ padding: "1.25rem 1.5rem 1rem", borderBottom: "1px solid var(--admin-border)", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: "1rem" }}>
-          <input
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            onBlur={handleTitleBlur}
-            style={{ fontSize: "1.0625rem", fontWeight: 800, border: "none", background: "none", color: "var(--admin-text)", flex: 1, outline: "none" }}
-          />
+          <div style={{ flex: 1, minWidth: 0 }}>
+            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-faint)", marginBottom: "0.25rem" }}>{formatTaskId(task.task_number, task.created_at)}</div>
+            <input
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              onBlur={handleTitleBlur}
+              style={{ fontSize: "1.0625rem", fontWeight: 800, border: "none", background: "none", color: "var(--admin-text)", width: "100%", outline: "none" }}
+            />
+          </div>
+          <button
+            type="button"
+            onClick={handleCopyLink}
+            title="Copiar link da tarefa"
+            style={{ display: "flex", alignItems: "center", gap: "0.3rem", background: "none", border: "none", cursor: "pointer", color: copied ? "#16A34A" : "var(--admin-faint)", flexShrink: 0, fontSize: "0.75rem", fontWeight: 700 }}
+          >
+            {copied ? <Check size={16} /> : <Link2 size={16} />}
+            {copied ? "Copiado!" : "Copiar link"}
+          </button>
           <button type="button" onClick={onClose} aria-label="Fechar" style={{ background: "none", border: "none", cursor: "pointer", color: "var(--admin-faint)", flexShrink: 0 }}>
             <X size={20} />
           </button>
@@ -239,6 +295,57 @@ export function TaskModal({
                   <Plus size={15} />
                 </button>
               </div>
+            </div>
+          </div>
+
+          <div>
+            <div style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-faint)", letterSpacing: "0.04em", marginBottom: "0.625rem" }}>ANEXOS</div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.625rem" }}>
+              {task.attachments.map((a) => {
+                const isImage = a.content_type?.startsWith("image/");
+                return (
+                  <div key={a.id} style={{ position: "relative" }}>
+                    <a href={a.url} target="_blank" rel="noopener noreferrer" style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: "0.25rem", textDecoration: "none" }}>
+                      {isImage ? (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={a.url} alt={a.name} style={{ width: "4.5rem", height: "4.5rem", objectFit: "cover", borderRadius: "0.5rem", border: "1px solid var(--admin-border)" }} />
+                      ) : (
+                        <div style={{ width: "4.5rem", height: "4.5rem", display: "flex", alignItems: "center", justifyContent: "center", borderRadius: "0.5rem", border: "1px solid var(--admin-border)", backgroundColor: "var(--admin-surface-alt)" }}>
+                          <FileText size={24} color="var(--admin-faint)" />
+                        </div>
+                      )}
+                      <span style={{ fontSize: "0.6875rem", color: "var(--admin-text-secondary)", maxWidth: "4.5rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{a.name}</span>
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteAttachment(a.id)}
+                      title="Remover anexo"
+                      style={{ position: "absolute", top: "-0.375rem", right: "-0.375rem", width: "1.25rem", height: "1.25rem", borderRadius: "9999px", border: "none", backgroundColor: "#dc2626", color: "white", display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
+                    >
+                      <X size={11} />
+                    </button>
+                  </div>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploading}
+                style={{ width: "4.5rem", height: "4.5rem", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", gap: "0.25rem", borderRadius: "0.5rem", border: "1px dashed var(--admin-border-strong)", background: "none", cursor: uploading ? "default" : "pointer", color: "var(--admin-faint)" }}
+              >
+                <Paperclip size={18} />
+                <span style={{ fontSize: "0.625rem" }}>{uploading ? "Enviando..." : "Adicionar"}</span>
+              </button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                hidden
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  e.target.value = "";
+                  if (file) handleUploadAttachment(file);
+                }}
+              />
             </div>
           </div>
 

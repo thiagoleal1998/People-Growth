@@ -56,8 +56,9 @@ export async function createTask(columnId: string, title: string) {
 
   // Auto-assign the creator — a card someone just made should never
   // disappear on them, which the visibility rule would otherwise do if
-  // nobody (including them) is on it yet.
-  await client.from("task_assignees").insert({ task_id: created.id, user_profile_id: profile.id });
+  // nobody (including them) is on it yet. seen_at is set immediately:
+  // they just made it, so it shouldn't count against their own unread badge.
+  await client.from("task_assignees").insert({ task_id: created.id, user_profile_id: profile.id, seen_at: new Date().toISOString() });
 
   revalidateTarefas();
   return created;
@@ -136,5 +137,38 @@ export async function addComment(taskId: string, body: string) {
 export async function deleteComment(id: string) {
   const supabase = await createClient();
   await (supabase as any).from("task_comments").delete().eq("id", id); // eslint-disable-line @typescript-eslint/no-explicit-any
+  revalidateTarefas();
+}
+
+// ===== Seen tracking (Equipe's unread badge) =====
+
+export async function markTaskSeen(taskId: string) {
+  const profile = await getCurrentProfile();
+  if (!profile) return;
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase as any)
+    .from("task_assignees")
+    .update({ seen_at: new Date().toISOString() })
+    .eq("task_id", taskId)
+    .eq("user_profile_id", profile.id)
+    .is("seen_at", null);
+  revalidateTarefas();
+}
+
+// ===== Attachments =====
+
+export async function addAttachment(taskId: string, url: string, name: string, contentType: string | null) {
+  const profile = await getCurrentProfile();
+  if (!profile) throw new Error("Não autenticado.");
+  const supabase = await createClient();
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  await (supabase as any).from("task_attachments").insert({ task_id: taskId, url, name, content_type: contentType, uploaded_by: profile.id });
+  revalidateTarefas();
+}
+
+export async function deleteAttachment(id: string) {
+  const supabase = await createClient();
+  await (supabase as any).from("task_attachments").delete().eq("id", id); // eslint-disable-line @typescript-eslint/no-explicit-any
   revalidateTarefas();
 }

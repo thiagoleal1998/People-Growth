@@ -117,3 +117,34 @@ export async function uploadPublicAudio(
   const { data } = admin.storage.from(BUCKET).getPublicUrl(path);
   return { url: data.publicUrl, error: null };
 }
+
+// Generic attachments (task cards: PDFs, docs, etc.) — no conversion, just
+// the browser-declared type trusted as-is, same trust level as
+// uploadPublicImage's incoming file.type.
+export async function uploadPublicFile(
+  file: FormDataEntryValue | null,
+  folder: string,
+  { maxBytes }: { maxBytes: number }
+): Promise<{ url: string | null; error: string | null }> {
+  if (!(file instanceof File) || file.size === 0) return { url: null, error: null };
+  if (file.size > maxBytes) return { url: null, error: `Arquivo muito grande (máximo ${Math.round(maxBytes / (1024 * 1024))}MB).` };
+
+  const admin = await createAdminClient();
+  const buffer = Buffer.from(await file.arrayBuffer());
+  const ext = file.name.split(".").pop()?.toLowerCase() || "bin";
+  const path = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}.${ext}`;
+
+  const { error: uploadError } = await admin.storage.from(BUCKET).upload(path, buffer, {
+    cacheControl: "31536000",
+    upsert: false,
+    contentType: file.type || undefined,
+  });
+
+  if (uploadError) {
+    console.error("File upload failed:", uploadError.message);
+    return { url: null, error: uploadError.message };
+  }
+
+  const { data: publicData } = admin.storage.from(BUCKET).getPublicUrl(path);
+  return { url: publicData.publicUrl, error: null };
+}

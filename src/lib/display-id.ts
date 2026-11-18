@@ -8,3 +8,7 @@ export function formatTicketId(ticketNumber: number): string {
 export function formatUserId(displayId: number): string {
   return `IDPG-${String(displayId).padStart(4, "0")}`;
 }
+
+export function formatTaskId(taskNumber: number, createdAt: string): string {
+  return `CGF-${String(taskNumber).padStart(4, "0")} | ${new Date(createdAt).getFullYear()}`;
+}

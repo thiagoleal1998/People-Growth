@@ -71,6 +71,14 @@ export async function PanelDashboardLayout({ panel, children }: { panel: "coluni
     unreadMessages = count ?? 0;
   }
 
+  // Tarefas is an equipe-only menu item — colunista has no task_assignees
+  // rows anyway, but skip the query for them regardless.
+  let unreadTasks = 0;
+  if (profile?.id && panel === "equipe") {
+    const { count } = await client.from("task_assignees").select("task_id", { count: "exact", head: true }).eq("user_profile_id", profile.id).is("seen_at", null);
+    unreadTasks = count ?? 0;
+  }
+
   // Applies to any login linked to a columnists row, admin or not — a
   // founder writing columns is still a columnist for this purpose. This
   // only ever gates the columnist/equipe panel's self-service write path
@@ -98,7 +106,7 @@ export async function PanelDashboardLayout({ panel, children }: { panel: "coluni
 
   return (
     <div className="admin-shell" style={{ display: "flex", height: "100vh", overflow: "hidden" }}>
-      <ColumnistSidebar menu={menu} logoUrl={logoUrl} pendingComments={pendingComments} unreadAnnouncements={unreadAnnouncements} unreadInstructions={unreadInstructions} unreadMessages={unreadMessages} />
+      <ColumnistSidebar menu={menu} logoUrl={logoUrl} pendingComments={pendingComments} unreadAnnouncements={unreadAnnouncements} unreadInstructions={unreadInstructions} unreadMessages={unreadMessages} unreadTasks={unreadTasks} />
       <main className="admin-scroll admin-main" style={{ flex: 1, padding: "2rem", overflowY: "auto", height: "100%", minWidth: 0 }}>
         {termsGate}
         <PushReminderBanner />

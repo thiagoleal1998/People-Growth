@@ -16,6 +16,7 @@ export function ColumnistSidebar({
   unreadAnnouncements = 0,
   unreadInstructions = 0,
   unreadMessages = 0,
+  unreadTasks = 0,
 }: {
   menu: MenuLink[];
   logoUrl?: string;
@@ -23,6 +24,7 @@ export function ColumnistSidebar({
   unreadAnnouncements?: number;
   unreadInstructions?: number;
   unreadMessages?: number;
+  unreadTasks?: number;
 }) {
   const pathname = usePathname();
   // This same component serves both the colunista and equipe panels —
@@ -110,7 +112,9 @@ export function ColumnistSidebar({
                   ? unreadInstructions
                   : href === `${basePath}/mensagens`
                     ? unreadMessages
-                    : 0;
+                    : href === `${basePath}/tarefas`
+                      ? unreadTasks
+                      : 0;
           return (
             <Link
               key={href}

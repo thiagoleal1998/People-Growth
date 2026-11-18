@@ -2,7 +2,7 @@ import { createClient, createAdminClient } from "@/lib/supabase/server";
 import { getCurrentProfile } from "@/lib/auth/profile";
 import { PageHeader } from "@/components/admin/ui";
 import { TarefasBoard, type TaskWithDetails, type Person } from "./TarefasBoard";
-import type { TaskColumn, Task, TaskAssignee, TaskChecklistItem, TaskComment, Columnist } from "@/types/database.types";
+import type { TaskColumn, Task, TaskAssignee, TaskChecklistItem, TaskComment, TaskAttachment, Columnist } from "@/types/database.types";
 
 export default async function TarefasAdminPage() {
   const profile = await getCurrentProfile();
@@ -10,12 +10,13 @@ export default async function TarefasAdminPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const client = supabase as any;
 
-  const [{ data: columnsData }, { data: tasksData }, { data: assigneesData }, { data: checklistData }, { data: commentsData }] = await Promise.all([
+  const [{ data: columnsData }, { data: tasksData }, { data: assigneesData }, { data: checklistData }, { data: commentsData }, { data: attachmentsData }] = await Promise.all([
     client.from("task_columns").select("*").order("order"),
     client.from("tasks").select("*").order("order"),
     client.from("task_assignees").select("*"),
     client.from("task_checklist_items").select("*").order("order"),
     client.from("task_comments").select("*").order("created_at"),
+    client.from("task_attachments").select("*").order("created_at"),
   ]);
 
   const columns = (columnsData ?? []) as TaskColumn[];
@@ -23,6 +24,7 @@ export default async function TarefasAdminPage() {
   const assignees = (assigneesData ?? []) as TaskAssignee[];
   const checklist = (checklistData ?? []) as TaskChecklistItem[];
   const comments = (commentsData ?? []) as TaskComment[];
+  const attachments = (attachmentsData ?? []) as TaskAttachment[];
 
   // "Pessoas atribuíveis": every admin/equipe login, named via their
   // columnist profile when linked. RLS on user_profiles only lets each
@@ -50,12 +52,15 @@ export default async function TarefasAdminPage() {
   for (const c of checklist) checklistByTask.set(c.task_id, [...(checklistByTask.get(c.task_id) ?? []), c]);
   const commentsByTask = new Map<string, TaskComment[]>();
   for (const c of comments) commentsByTask.set(c.task_id, [...(commentsByTask.get(c.task_id) ?? []), c]);
+  const attachmentsByTask = new Map<string, TaskAttachment[]>();
+  for (const a of attachments) attachmentsByTask.set(a.task_id, [...(attachmentsByTask.get(a.task_id) ?? []), a]);
 
   const tasksWithDetails: TaskWithDetails[] = tasks.map((t) => ({
     ...t,
     assignees: assigneesByTask.get(t.id) ?? [],
     checklist: checklistByTask.get(t.id) ?? [],
     comments: commentsByTask.get(t.id) ?? [],
+    attachments: attachmentsByTask.get(t.id) ?? [],
   }));
 
   return (

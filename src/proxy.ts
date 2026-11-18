@@ -45,6 +45,13 @@ export async function proxy(request: NextRequest) {
   ) {
     return handlePanelAuth(request);
   }
+  // Shareable per-task link (/tarefas/[id]) — its own page.tsx does the
+  // auth check and role-based redirect; it isn't a locale-prefixed public
+  // page, so it must bypass next-intl's middleware entirely (otherwise it
+  // 307s to /pt/tarefas/[id] before the page ever runs).
+  if (request.nextUrl.pathname.startsWith("/tarefas")) {
+    return NextResponse.next();
+  }
   return intlMiddleware(request);
 }
 
