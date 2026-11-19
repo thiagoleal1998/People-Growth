@@ -56,6 +56,14 @@ export function CalendarGrid({
   const articlesBasePath = usePathname().startsWith("/equipe") ? "/equipe" : "/admin";
   return (
     <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
+      {/* 7 equal columns squeeze below readable width on a phone (each day
+          cell has links/badges that don't wrap, the classic "grid item
+          doesn't shrink below its content" case — see CLAUDE.md) — rather
+          than let every cell get crushed, this scrolls horizontally with a
+          floor on the real width, same "swipe to see the rest" pattern
+          already used for the org chart in OrganogramaCard.tsx. */}
+      <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+      <div style={{ minWidth: "42rem" }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
         {WEEKDAYS_PT.map((w) => (
           <div key={w} style={{ padding: "0.625rem", textAlign: "center", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)", textTransform: "uppercase", letterSpacing: "0.04em", borderBottom: "1px solid var(--admin-border)" }}>
@@ -186,6 +194,8 @@ export function CalendarGrid({
             </div>
           );
         })}
+      </div>
+      </div>
       </div>
     </div>
   );
