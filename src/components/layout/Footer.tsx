@@ -6,6 +6,7 @@ import { ErrorReportButton } from "@/components/ErrorReportButton";
 import { FooterSection } from "@/components/layout/FooterSection";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { XIcon } from "@/components/icons/XIcon";
+import { TikTokIcon } from "@/components/icons/TikTokIcon";
 import { WhatsAppChannelFooterBox } from "@/components/WhatsAppChannelCTA";
 
 type FooterProps = {
@@ -15,6 +16,7 @@ type FooterProps = {
   instagram?: string;
   whatsapp?: string;
   youtube?: string;
+  tiktok?: string;
   x?: string;
   mediaEnabled?: boolean;
   sportsEnabled?: boolean;
@@ -23,7 +25,7 @@ type FooterProps = {
   institucionalEnabled?: boolean;
 };
 
-export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, youtube, x, mediaEnabled = true, sportsEnabled = true, portfolioEnabled = true, coursesEnabled = true, institucionalEnabled = true }: FooterProps) {
+export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, youtube, tiktok, x, mediaEnabled = true, sportsEnabled = true, portfolioEnabled = true, coursesEnabled = true, institucionalEnabled = true }: FooterProps) {
   const t = useTranslations("footer");
   const nav = useTranslations("nav");
   const year = new Date().getFullYear();
@@ -147,6 +149,11 @@ export function Footer({ logoUrl, contactEmail, linkedin, instagram, whatsapp, y
               {youtube && (
                 <a href={youtube} target="_blank" rel="noopener noreferrer" aria-label="YouTube" style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}>
                   <Youtube size={20} />
+                </a>
+              )}
+              {tiktok && (
+                <a href={tiktok} target="_blank" rel="noopener noreferrer" aria-label="TikTok" style={{ color: "rgba(255,255,255,0.6)", transition: "color 0.2s" }}>
+                  <TikTokIcon size={20} />
                 </a>
               )}
               {x && (

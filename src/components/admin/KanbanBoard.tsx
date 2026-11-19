@@ -32,13 +32,14 @@ export function KanbanBoard<T, S extends string>({
   const byId = new Map(items.map((it) => [getId(it), it]));
 
   return (
-    <div style={{ display: "flex", gap: "1rem", overflowX: "auto", alignItems: "flex-start", paddingBottom: "0.5rem" }}>
+    <div className="kanban-board" style={{ display: "flex", gap: "1rem", overflowX: "auto", alignItems: "flex-start", paddingBottom: "0.5rem" }}>
       {columns.map((col, i) => {
         const colItems = items.filter((it) => getStatus(it) === col.id);
         const isOver = overColumn === col.id;
         return (
           <div
             key={col.id}
+            className="kanban-col"
             onDragOver={(e) => {
               e.preventDefault();
               setOverColumn(col.id);
@@ -101,10 +102,17 @@ export function KanbanBoard<T, S extends string>({
           </div>
         );
       }).reduce<ReactNode[]>((acc, col, i) => {
-        if (i > 0) acc.push(<div key={`sep-${i}`} style={{ width: "1px", alignSelf: "stretch", backgroundColor: "var(--admin-border)", flexShrink: 0 }} />);
+        if (i > 0) acc.push(<div key={`sep-${i}`} className="kanban-sep" style={{ width: "1px", alignSelf: "stretch", backgroundColor: "var(--admin-border)", flexShrink: 0 }} />);
         acc.push(col);
         return acc;
       }, [])}
+      <style>{`
+        @media (max-width: 680px) {
+          .kanban-board { flex-direction: column !important; overflow-x: visible !important; }
+          .kanban-col { min-width: 0 !important; width: 100% !important; }
+          .kanban-sep { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 }

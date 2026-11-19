@@ -21,7 +21,7 @@ export default async function PublicLayout({
     client
       .from("site_config")
       .select("key,value")
-      .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email", "instagram", "linkedin", "whatsapp", "youtube", "x", "media_enabled", "sports_widget_enabled", "portfolio_enabled", "courses_enabled", "institucional_enabled"]),
+      .in("key", ["logo_url", "weather_city_name", "weather_lat", "weather_lon", "contact_email", "instagram", "linkedin", "whatsapp", "youtube", "tiktok", "x", "media_enabled", "sports_widget_enabled", "portfolio_enabled", "courses_enabled", "institucional_enabled"]),
     client.from("institutional_posts").select("id", { count: "exact", head: true }).eq("status", "published"),
   ]);
 
@@ -58,6 +58,7 @@ export default async function PublicLayout({
         instagram={config.instagram || undefined}
         whatsapp={config.whatsapp || undefined}
         youtube={config.youtube || undefined}
+        tiktok={config.tiktok || undefined}
         x={config.x || undefined}
         mediaEnabled={mediaEnabled}
         sportsEnabled={sportsEnabled}
@@ -70,6 +71,7 @@ export default async function PublicLayout({
         linkedin={config.linkedin || undefined}
         whatsapp={config.whatsapp || undefined}
         youtube={config.youtube || undefined}
+        tiktok={config.tiktok || undefined}
         x={config.x || undefined}
       />
       <WhatsAppChannelFloatingButton />

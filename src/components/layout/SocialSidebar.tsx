@@ -1,12 +1,14 @@
 import { Instagram, Linkedin, Youtube } from "lucide-react";
 import { WhatsAppIcon } from "@/components/icons/WhatsAppIcon";
 import { XIcon } from "@/components/icons/XIcon";
+import { TikTokIcon } from "@/components/icons/TikTokIcon";
 
 type Props = {
   instagram?: string;
   linkedin?: string;
   whatsapp?: string;
   youtube?: string;
+  tiktok?: string;
   x?: string;
 };
 
@@ -16,12 +18,13 @@ type Props = {
  * breakpoint as the other fixed chrome (UtilityBar, CategoryNav) since a
  * floating edge strip has nowhere to go on a narrow screen without
  * covering real content. */
-export function SocialSidebar({ instagram, linkedin, whatsapp, youtube, x }: Props) {
+export function SocialSidebar({ instagram, linkedin, whatsapp, youtube, tiktok, x }: Props) {
   const links = [
     instagram && { label: "Instagram", href: instagram, Icon: Instagram },
     linkedin && { label: "LinkedIn", href: linkedin, Icon: Linkedin },
     whatsapp && { label: "WhatsApp", href: `https://wa.me/${whatsapp.replace(/\D/g, "")}`, Icon: WhatsAppIcon },
     youtube && { label: "YouTube", href: youtube, Icon: Youtube },
+    tiktok && { label: "TikTok", href: tiktok, Icon: TikTokIcon },
     x && { label: "X", href: x, Icon: XIcon },
   ].filter((l): l is { label: string; href: string; Icon: typeof Instagram } => Boolean(l));
 

@@ -6,6 +6,7 @@ import { confirmDialog, alertDialog } from "@/components/admin/dialog-store";
 import { formatTaskId } from "@/lib/display-id";
 import {
   updateTask,
+  moveTask,
   deleteTask,
   addAssignee,
   removeAssignee,
@@ -18,6 +19,7 @@ import {
   deleteAttachment,
 } from "./actions";
 import type { TaskWithDetails, Person } from "./TarefasBoard";
+import type { TaskColumn } from "@/types/database.types";
 
 const PRIORITY_OPTIONS: { value: TaskWithDetails["priority"]; label: string }[] = [
   { value: "baixa", label: "Baixa" },
@@ -32,6 +34,7 @@ function formatDateTime(iso: string) {
 export function TaskModal({
   task,
   people,
+  columns,
   currentUserId,
   onClose,
   onChange,
@@ -39,6 +42,7 @@ export function TaskModal({
 }: {
   task: TaskWithDetails;
   people: Person[];
+  columns: TaskColumn[];
   currentUserId: string;
   onClose: () => void;
   onChange: (task: TaskWithDetails) => void;
@@ -121,6 +125,14 @@ export function TaskModal({
   function handleDueDateChange(due_date: string) {
     commit({ due_date: due_date || null });
     startTransition(() => updateTask(task.id, { due_date: due_date || null }));
+  }
+
+  // Lets a card move between columns without dragging — native HTML5
+  // drag-and-drop (how the board itself does it) doesn't work via touch on
+  // mobile browsers, so this is the only way to move a card on a phone.
+  function handleColumnChange(column_id: string) {
+    commit({ column_id });
+    startTransition(() => moveTask(task.id, column_id));
   }
 
   function toggleAssignee(person: Person) {
@@ -213,11 +225,27 @@ export function TaskModal({
             onChange={(e) => setDescription(e.target.value)}
             onBlur={handleDescriptionBlur}
             placeholder="Descrição..."
-            rows={3}
-            style={{ width: "100%", border: "1px solid var(--admin-border)", borderRadius: "0.625rem", padding: "0.75rem", fontSize: "0.875rem", color: "var(--admin-text)", backgroundColor: "var(--admin-surface-alt)", resize: "vertical", fontFamily: "inherit" }}
+            rows={6}
+            // minHeight in px, not just `rows` — `rows` alone renders at a
+            // different actual height depending on the browser/monitor's
+            // font metrics, which is exactly what made this box look fine
+            // on some screens and tiny on others.
+            style={{ width: "100%", minHeight: "9rem", border: "1px solid var(--admin-border)", borderRadius: "0.625rem", padding: "0.75rem", fontSize: "0.875rem", color: "var(--admin-text)", backgroundColor: "var(--admin-surface-alt)", resize: "vertical", fontFamily: "inherit", boxSizing: "border-box" }}
           />
 
           <div style={{ display: "flex", gap: "1.5rem", flexWrap: "wrap" }}>
+            <label style={{ display: "flex", flexDirection: "column", gap: "0.375rem", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)" }}>
+              Coluna
+              <select
+                value={task.column_id}
+                onChange={(e) => handleColumnChange(e.target.value)}
+                style={{ padding: "0.375rem 0.625rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", fontSize: "0.8125rem", backgroundColor: "var(--admin-surface)", color: "var(--admin-text)", cursor: "pointer" }}
+              >
+                {columns.map((c) => (
+                  <option key={c.id} value={c.id}>{c.label}</option>
+                ))}
+              </select>
+            </label>
             <label style={{ display: "flex", flexDirection: "column", gap: "0.375rem", fontSize: "0.75rem", fontWeight: 700, color: "var(--admin-muted)" }}>
               Prioridade
               <select

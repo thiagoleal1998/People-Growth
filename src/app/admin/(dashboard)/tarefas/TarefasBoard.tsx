@@ -204,6 +204,7 @@ export function TarefasBoard({
         <TaskModal
           task={openTask}
           people={people}
+          columns={columns}
           currentUserId={currentUserId}
           onClose={() => setOpenTaskId(null)}
           onChange={(updated) => setItems((cur) => cur.map((t) => (t.id === updated.id ? updated : t)))}

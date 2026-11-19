@@ -146,15 +146,15 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
   // Only meaningful for exactly 3 founders (CEO + two others) — otherwise
   // there's no clean pyramid to draw, so the card just doesn't render one.
   const ceoFounder = founders.length === 3 ? (founders.find((a) => shortRole(a) === "CEO") ?? null) : null;
-  const otherFounders = ceoFounder ? founders.filter((a) => a.id !== ceoFounder.id) : [];
+  const byName = (a: Columnist, b: Columnist) => a.name.localeCompare(b.name, "pt");
+  // Alphabetical left-to-right, same rule as every other section — the
+  // query's own row order isn't a reliable position (it shifts whenever a
+  // columnist row is touched), so left/right must come from something
+  // stable instead.
+  const otherFounders = ceoFounder ? founders.filter((a) => a.id !== ceoFounder.id).sort(byName) : [];
   // Placeholder entries (no photo yet, or an empty name) don't belong in a
   // chart whose whole point is putting a face to each person.
   const otherColumnists = columnists.filter((a) => !a.is_founder && a.status === "active" && a.photo_url && a.name?.trim());
-
-  // Alphabetical by request, for every section except the C-Level pyramid
-  // below (which keeps the hierarchy order the unsorted `founders`/
-  // `otherFounders` above already encode — CEO on top, the others under it).
-  const byName = (a: Columnist, b: Columnist) => a.name.localeCompare(b.name, "pt");
   const foundersAlpha = [...founders].sort(byName);
   const otherColumnistsAlpha = [...otherColumnists].sort(byName);
 
