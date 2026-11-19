@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
+import { getCurrentProfile, panelBasePath } from "@/lib/auth/profile";
 import { PageHeader } from "@/components/admin/ui";
 import { SavedToast } from "@/components/admin/SavedToast";
 import { CalendarPageClient } from "./CalendarPageClient";
@@ -13,6 +14,8 @@ export default async function CalendarioPage({
   searchParams: Promise<{ month?: string; saved?: string }>;
 }) {
   const { month: monthParam, saved } = await searchParams;
+  const profile = await getCurrentProfile();
+  const basePath = panelBasePath(profile?.role ?? "admin");
   const { year, month } = parseMonthParam(monthParam);
   const monthKey = monthParamKey(year, month);
   const grid = buildMonthGrid(year, month);
@@ -60,10 +63,10 @@ export default async function CalendarioPage({
         subtitle={`${MONTH_NAMES_PT[month]} de ${year}`}
         action={
           <div style={{ display: "flex", gap: "0.5rem" }}>
-            <Link href={`/admin/calendario?month=${monthParamKey(prev.year, prev.month)}`} style={{ padding: "0.5rem 0.875rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", color: "var(--admin-text)", fontSize: "0.875rem", textDecoration: "none" }}>
+            <Link href={`${basePath}/calendario?month=${monthParamKey(prev.year, prev.month)}`} style={{ padding: "0.5rem 0.875rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", color: "var(--admin-text)", fontSize: "0.875rem", textDecoration: "none" }}>
               ← Anterior
             </Link>
-            <Link href={`/admin/calendario?month=${monthParamKey(next.year, next.month)}`} style={{ padding: "0.5rem 0.875rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", color: "var(--admin-text)", fontSize: "0.875rem", textDecoration: "none" }}>
+            <Link href={`${basePath}/calendario?month=${monthParamKey(next.year, next.month)}`} style={{ padding: "0.5rem 0.875rem", borderRadius: "0.5rem", border: "1px solid var(--admin-border-strong)", color: "var(--admin-text)", fontSize: "0.875rem", textDecoration: "none" }}>
               Próximo →
             </Link>
           </div>

@@ -118,6 +118,7 @@ export const COLUMNIST_MENU_DEFAULTS: MenuLink[] = [
 export const EQUIPE_MENU_DEFAULTS: MenuLink[] = [
   { id: "inicio", href: "/equipe", label: "Início", icon: <Home size={17} /> },
   { id: "artigos", href: "/equipe/artigos", label: "Meus artigos", icon: <FileText size={17} /> },
+  { id: "calendario", href: "/equipe/calendario", label: "Calendário de Divulgação", icon: <Calendar size={17} /> },
   { id: "comentarios", href: "/equipe/comentarios", label: "Comentários", icon: <MessageCircle size={17} /> },
   { id: "comunicados", href: "/equipe/comunicados", label: "Comunicados", icon: <Megaphone size={17} /> },
   { id: "instrucoes", href: "/equipe/instrucoes", label: "Canal de Instruções", icon: <ListChecks size={17} /> },

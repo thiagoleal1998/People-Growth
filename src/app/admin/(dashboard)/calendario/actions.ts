@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { getCurrentProfile } from "@/lib/auth/profile";
+import { getCurrentProfile, panelBasePath } from "@/lib/auth/profile";
 import { logActivity } from "@/lib/activity-log";
 import { monthParamKey, parseMonthParam } from "@/lib/calendar-grid";
 import type { Database } from "@/types/database.types";
@@ -48,12 +48,14 @@ async function saveCalendarItem(id: string | null, formData: FormData) {
   }
 
   revalidatePath("/admin/calendario");
+  revalidatePath("/equipe/calendario");
   return { monthKey };
 }
 
 export async function upsertCalendarItem(id: string | null, formData: FormData) {
+  const actor = await getCurrentProfile();
   const { monthKey } = await saveCalendarItem(id, formData);
-  redirect(`/admin/calendario?month=${monthKey}&saved=1`);
+  redirect(`${panelBasePath(actor?.role ?? "admin")}/calendario?month=${monthKey}&saved=1`);
 }
 
 export async function upsertCalendarItemInline(id: string | null, formData: FormData) {
@@ -72,12 +74,14 @@ async function removeCalendarItem(id: string) {
     await logActivity({ userId: actor.id, userEmail: actor.email, action: "delete", entityType: "item do calendário", entityLabel: item?.title });
   }
   revalidatePath("/admin/calendario");
+  revalidatePath("/equipe/calendario");
 }
 
 export async function deleteCalendarItem(id: string, month: string) {
+  const actor = await getCurrentProfile();
   await removeCalendarItem(id);
   const { year, month: m } = parseMonthParam(month);
-  redirect(`/admin/calendario?month=${monthParamKey(year, m)}`);
+  redirect(`${panelBasePath(actor?.role ?? "admin")}/calendario?month=${monthParamKey(year, m)}`);
 }
 
 export async function deleteCalendarItemInline(id: string) {

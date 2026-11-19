@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePathname } from "next/navigation";
 import { FormShell, Field, Input, Textarea, Select, SubmitButton, ConfirmDeleteButton } from "@/components/admin/ui";
 import { upsertCalendarItem, deleteCalendarItem } from "./actions";
 import type { ContentCalendarItem } from "@/types/database.types";
@@ -42,7 +43,8 @@ export function CalendarItemForm({
 }) {
   const [type, setType] = useState<ContentCalendarItem["type"]>(item?.type ?? "article_topic");
   const action = upsertCalendarItem.bind(null, item?.id ?? null);
-  const backHref = `/admin/calendario?month=${month}`;
+  const basePath = usePathname().startsWith("/equipe") ? "/equipe" : "/admin";
+  const backHref = `${basePath}/calendario?month=${month}`;
 
   return (
     <FormShell

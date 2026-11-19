@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { Plus, Instagram, Linkedin, MessageCircle, Music2, Youtube, X as XIcon, Radio, Share2 } from "lucide-react";
 import { WEEKDAYS_PT, type CalendarCell } from "@/lib/calendar-grid";
 import type { Article, ContentCalendarItem } from "@/types/database.types";
@@ -52,6 +53,7 @@ export function CalendarGrid({
   onOpenItem: (id: string) => void;
   onOpenNew: (dateKey: string) => void;
 }) {
+  const articlesBasePath = usePathname().startsWith("/equipe") ? "/equipe" : "/admin";
   return (
     <div style={{ backgroundColor: "var(--admin-surface)", borderRadius: "1rem", border: "1px solid var(--admin-border)", overflow: "hidden" }}>
       <div style={{ display: "grid", gridTemplateColumns: "repeat(7, 1fr)" }}>
@@ -102,7 +104,12 @@ export function CalendarGrid({
                     return (
                       <Link
                         key={`a-${a.id}`}
-                        href={pending ? `/admin/artigos/${a.id}/revisar` : `/admin/artigos/${a.id}`}
+                        // "/revisar" (the approve/request-changes screen) is
+                        // admin-only — equipe only ever sees its own pending
+                        // articles here (RLS already scopes articlesByDate
+                        // to columnist_id = current_user_columnist_id()), so
+                        // it goes straight to the regular editor instead.
+                        href={pending && articlesBasePath === "/admin" ? `${articlesBasePath}/artigos/${a.id}/revisar` : `${articlesBasePath}/artigos/${a.id}`}
                         title={`${a.title_pt}${a.columnistName ? ` — ${a.columnistName}` : ""}`}
                         style={{
                           display: "block",

@@ -277,10 +277,13 @@ export function OrganogramaCard({ columnists }: { columnists: Columnist[] }) {
                 the stacked reports below — absolutely positioned, so they
                 don't add to CLEVEL_WRAP_ID's own normal-flow height — into
                 scrollable *vertical* overflow too, showing an unwanted
-                scrollbar. The paddingBottom below makes that div's own
-                flow height already reach past the deepest stacked report,
-                so there's nothing left to vertically scroll. */}
-            <div style={{ overflowX: "auto", WebkitOverflowScrolling: "touch" }}>
+                scrollbar whenever the padding-bottom compensation below
+                falls even slightly short. overflowY: hidden sidesteps the
+                whole fragile calculation: horizontal scroll (for mobile)
+                stays, a vertical scrollbar can never appear, and the
+                paddingBottom still keeps the deepest stacked report from
+                being clipped by it. */}
+            <div style={{ overflowX: "auto", overflowY: "hidden", WebkitOverflowScrolling: "touch" }}>
             <div id={CLEVEL_WRAP_ID} style={{ position: "relative", minWidth: "36rem", paddingBottom: stackedReportsByManager.size > 0 ? "1.5rem" : undefined }}>
               {/* The C-Level pyramid gets its own box (same treatment as the
                   Conselho boxes above/below, "C-Level" label included inside
